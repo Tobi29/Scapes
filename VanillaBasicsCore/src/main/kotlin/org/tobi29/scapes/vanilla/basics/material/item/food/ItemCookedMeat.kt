@@ -18,33 +18,29 @@ package org.tobi29.scapes.vanilla.basics.material.item.food
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.utils.math.floor
-import org.tobi29.scapes.engine.utils.tag.syncMapMut
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
 import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
-import kotlin.collections.set
 
 class ItemCookedMeat(type: VanillaMaterialType) : ItemSimpleData(
         type), ItemDefaultHeatable {
     override fun click(entity: MobPlayerServer,
                        item: ItemStack) {
-        entity.metaData("Vanilla").syncMapMut("Condition") { conditionTag ->
-            val stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
-            val hunger = conditionTag["Hunger"]?.toDouble() ?: 0.0
-            val thirst = conditionTag["Thirst"]?.toDouble() ?: 0.0
-            if (temperature(item) >= 30) {
-                conditionTag["Stamina"] = (stamina - 0.04).toTag()
-                conditionTag["Hunger"] = (hunger + 0.4).toTag()
-                conditionTag["Thirst"] = (thirst - 0.1).toTag()
-            } else {
-                conditionTag["Stamina"] = (stamina - 0.4).toTag()
-                conditionTag["Hunger"] = (hunger + 0.2).toTag()
-                conditionTag["Thirst"] = (thirst - 0.2).toTag()
+        entity.getOrNull(ComponentMobLivingServerCondition.COMPONENT)?.run {
+            synchronized(this) {
+                if (temperature(item) >= 30) {
+                    stamina -= 0.04
+                    hunger += 0.4
+                    thirst -= 0.1
+                } else {
+                    stamina -= 0.4
+                    hunger += 0.2
+                    thirst -= 0.2
+                }
             }
         }
         item.setAmount(item.amount() - 1)

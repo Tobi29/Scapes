@@ -74,35 +74,35 @@ abstract class GuiControls(state: GameState,
     protected fun addButton(name: String,
                             id: String,
                             tagMap: MutableTagMap,
-                            controller: ControllerBasic) {
-        val button = row(scrollPane) {
+                            controller: ControllerBasic): GuiComponentControlsButton {
+        return row(scrollPane) {
+            it.selectable = true
             GuiComponentControlsButton(it, 18, name, id, tagMap, controller)
         }
-        selection(button)
     }
 
     protected fun addAxis(name: String,
                           id: String,
                           tagMap: MutableTagMap,
-                          controller: ControllerJoystick) {
-        val axis = row(scrollPane) {
+                          controller: ControllerJoystick): GuiComponentControlsAxis {
+        return row(scrollPane) {
+            it.selectable = true
             GuiComponentControlsAxis(it, 18, name, id, tagMap, controller)
         }
-        selection(axis)
     }
 
     protected fun addSlider(name: String,
                             id: String,
-                            tagMap: MutableTagMap) {
+                            tagMap: MutableTagMap): GuiComponentSlider {
         val slider = row(scrollPane) {
             slider(it, name, reverseSensitivity(
                     tagMap[id]?.toDouble() ?: 0.0)) { text, value ->
                 text + ": " + round(sensitivity(value) * 100.0) + '%'
             }
         }
-        selection(slider)
         slider.on(GuiEvent.CHANGE) { event ->
             tagMap[id] = sensitivity(slider.value()).toTag()
         }
+        return slider
     }
 }

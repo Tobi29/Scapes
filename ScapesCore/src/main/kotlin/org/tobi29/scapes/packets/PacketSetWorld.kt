@@ -21,12 +21,12 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient
 import org.tobi29.scapes.client.connection.ClientConnection
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
-import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.connection.PlayerConnection
@@ -44,7 +44,7 @@ class PacketSetWorld : PacketAbstract, PacketClient {
                 player: MobPlayerServer) : super(type) {
         tag = TagMap { player.write(this) }
         seed = world.seed
-        uuid = player.getUUID()
+        uuid = player.uuid
         environment = world.environment.type.id
     }
 

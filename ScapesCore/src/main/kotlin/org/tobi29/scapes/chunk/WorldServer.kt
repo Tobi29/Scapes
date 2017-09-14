@@ -15,6 +15,7 @@
  */
 package org.tobi29.scapes.chunk
 
+import kotlinx.coroutines.experimental.Job
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.connection.PlayConnection
@@ -26,10 +27,8 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.*
-import org.tobi29.scapes.engine.utils.task.Joiner
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.engine.utils.task.Timer
-import org.tobi29.scapes.engine.utils.task.UpdateLoop
+import org.tobi29.scapes.engine.utils.task.launchThread
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobLivingServer
@@ -42,23 +41,24 @@ import org.tobi29.scapes.packets.PacketSoundEffect
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.server.connection.ServerConnection
 import org.tobi29.scapes.server.format.WorldFormat
+import kotlin.coroutines.experimental.CoroutineContext
 
 class WorldServer(worldFormat: WorldFormat,
                   val id: String,
                   seed: Long,
                   val connection: ServerConnection,
-                  taskExecutor: TaskExecutor,
+                  taskExecutor: CoroutineContext,
                   terrainSupplier: (WorldServer) -> TerrainServer,
                   environmentSupplier: (WorldServer) -> EnvironmentServer) : World<EntityServer>(
-        worldFormat.plugins, UpdateLoop(taskExecutor, null),
-        taskExecutor, worldFormat.plugins.registry,
+        worldFormat.plugins, taskExecutor,
+        worldFormat.plugins.registry,
         seed), TagMapWrite, PlayConnection<PacketClient> {
+    private var updateJob: Pair<Job, AtomicBoolean>? = null
     private val entityListeners = ConcurrentHashSet<(EntityServer) -> Unit>()
     private val spawners = ConcurrentHashSet<MobSpawner>()
     val terrain: TerrainServer
     val environment: EnvironmentServer
     private val players = ConcurrentHashMap<String, MobPlayerServer>()
-    private var joiner: Joiner? = null
     private val entityCounts: Map<CreatureType, AtomicInteger> = EnumMap<CreatureType, AtomicInteger>().apply {
         CreatureType.values().forEach { put(it, AtomicInteger()) }
     }
@@ -87,9 +87,9 @@ class WorldServer(worldFormat: WorldFormat,
         spawn = environment.calculateSpawn(terrain)
     }
 
-    override fun addEntity(entity: EntityServer): Boolean {
-        initEntity(entity)
-        return terrain.addEntity(entity)
+    override fun addEntity(entity: EntityServer,
+                           spawn: Boolean): Boolean {
+        return terrain.addEntity(entity, spawn)
     }
 
     override fun removeEntity(entity: EntityServer): Boolean {
@@ -97,12 +97,12 @@ class WorldServer(worldFormat: WorldFormat,
     }
 
     override fun hasEntity(entity: EntityServer): Boolean {
-        return getEntity(entity.getUUID()) != null || terrain.hasEntity(entity)
+        return getEntity(entity.uuid) != null || terrain.hasEntity(entity)
     }
 
     override fun getEntity(uuid: UUID): EntityServer? {
         return players.values.asSequence()
-                .filter { entity -> entity.getUUID() == uuid }
+                .filter { entity -> entity.uuid == uuid }
                 .firstOrNull() ?: terrain.getEntity(uuid)
     }
 
@@ -130,25 +130,31 @@ class WorldServer(worldFormat: WorldFormat,
                 maxZ) + players.values.asSequence()
     }
 
-    override fun entityAdded(entity: EntityServer) {
+    override fun entityAdded(entity: EntityServer,
+                             spawn: Boolean) {
         initEntity(entity)
+        if (spawn) {
+            entity.spawn()
+        }
+        entity.addedToWorld()
         if (entity is MobLivingServer) {
-            entityCounts[entity.creatureType()]?.andIncrement
+            entity.getOrNull(CreatureType.COMPONENT)
+                    ?.let { entityCounts[it] }?.getAndIncrement()
         }
         send(PacketEntityAdd(plugins.registry, entity))
     }
 
     override fun entityRemoved(entity: EntityServer) {
+        entity.removedFromWorld()
         if (entity is MobLivingServer) {
-            entityCounts[entity.creatureType()]?.andDecrement
+            entity.getOrNull(CreatureType.COMPONENT)
+                    ?.let { entityCounts[it] }?.getAndDecrement()
         }
         send(PacketEntityDespawn(plugins.registry, entity))
     }
 
     fun addEntityNew(entity: EntityServer) {
-        initEntity(entity)
-        entity.onSpawn()
-        terrain.addEntity(entity)
+        terrain.addEntity(entity, true)
     }
 
     fun initEntity(entity: EntityServer) {
@@ -161,12 +167,8 @@ class WorldServer(worldFormat: WorldFormat,
 
     fun addPlayer(player: MobPlayerServer,
                   isNew: Boolean) {
-        initEntity(player)
-        if (isNew) {
-            player.onSpawn()
-        }
+        entityAdded(player, isNew)
         players.put(player.nickname(), player)
-        entityAdded(player)
     }
 
     @Synchronized
@@ -190,14 +192,16 @@ class WorldServer(worldFormat: WorldFormat,
                     player.updateListeners(delta)
                     player.move(delta)
                     if (player.isDead) {
-                        player.onDeath()
+                        player.death()
                     }
                 }
             }
             profilerSection("Environment") {
                 environment.tick(delta)
             }
-            profilerSection("Tasks") { loop.tick() }
+            profilerSection("Tasks") {
+                process()
+            }
             tick++
         }
     }
@@ -279,7 +283,7 @@ class WorldServer(worldFormat: WorldFormat,
         entityListeners.add(listener)
     }
 
-    fun stop(dropWorld: WorldServer?) {
+    suspend fun stop(dropWorld: WorldServer?) {
         if (dropWorld != null && dropWorld != this) {
             while (!players.isEmpty()) {
                 players.values.forEach { player ->
@@ -293,18 +297,23 @@ class WorldServer(worldFormat: WorldFormat,
                 }
             }
         }
-        joiner?.join()
+        updateJob?.let { (job, stop) ->
+            stop.set(true)
+            job.join()
+        }
         terrain.dispose()
-        taskExecutor.shutdown()
+        clearComponents()
+        taskExecutor[Job]?.cancel()
     }
 
     fun start() {
-        joiner = taskExecutor.runThread({ joiner ->
+        val stop = AtomicBoolean(false)
+        updateJob = launchThread("State", taskExecutor[Job]) {
             thread = Thread.currentThread()
             val timer = Timer()
             val maxDiff = Timer.toDiff(20.0)
             timer.init()
-            while (!joiner.marked) {
+            while (!stop.get()) {
                 val freewheel = if (!players.isEmpty()) {
                     profilerSection("Tick") { update(0.05) }
                     !players.values.asSequence().filter { it.isActive() }.any()
@@ -321,7 +330,7 @@ class WorldServer(worldFormat: WorldFormat,
                 }
             }
             thread = null
-        }, "Tick", TaskExecutor.Priority.MEDIUM)
+        } to stop
     }
 
     override fun send(packet: PacketClient) {

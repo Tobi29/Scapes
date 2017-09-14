@@ -91,8 +91,6 @@ class GuiPlugins(state: GameState,
                 button(it, "Delete")
             }
 
-            selection(delete)
-
             if (plugin.file() != null) {
                 delete.on(GuiEvent.CLICK_LEFT) {
                     try {

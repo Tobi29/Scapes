@@ -19,7 +19,6 @@ package org.tobi29.scapes.entity.skin
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Texture
-import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
@@ -27,15 +26,15 @@ import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.packets.PacketSkin
 
 class ClientSkinStorage(private val engine: ScapesEngine,
-                        private val defaultTexture: Resource<Texture>) {
+                        private val defaultTexture: Texture) {
     private val skins = ConcurrentHashMap<Checksum, ClientSkin>()
     private val skinRequests = ConcurrentLinkedQueue<Checksum>()
-    private val defaultSkin = defaultTexture.get().buffer(0)
+    private val defaultSkin = defaultTexture.buffer(0)
             ?: throw IllegalArgumentException("Default skin texture is empty")
 
     fun update(connection: ClientConnection) {
         val oldSkins = skins.values.filter { it.increaseTicks() > 1200 }
-        oldSkins.forEach { skin -> skins.remove(skin.checksum()) }
+        oldSkins.forEach { skin -> skins.remove(skin.checksum) }
         while (!skinRequests.isEmpty()) {
             skinRequests.poll()?.let { request ->
                 connection.send(
@@ -50,7 +49,7 @@ class ClientSkinStorage(private val engine: ScapesEngine,
         skin?.setImage(image.buffer)
     }
 
-    operator fun get(checksum: Checksum?): Resource<Texture> {
+    operator fun get(checksum: Checksum?): Texture {
         if (checksum == null) {
             return defaultTexture
         }
@@ -60,6 +59,6 @@ class ClientSkinStorage(private val engine: ScapesEngine,
             skins.put(checksum, skin)
             skinRequests.add(checksum)
         }
-        return skin.texture()
+        return skin.texture
     }
 }

@@ -16,8 +16,18 @@
 
 package org.tobi29.scapes.tools.controlpanel.extensions
 
+import org.eclipse.swt.widgets.Widget
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
+import org.tobi29.scapes.engine.utils.ComponentRegisteredHolder
+import org.tobi29.scapes.tools.controlpanel.ControlPanelDocument
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 
-abstract class Extension(protected val composite: ControlPanelConnection,
-                         protected val connection: ControlPanelProtocol)
+abstract class Extension(
+        protected val connection: ControlPanelProtocol
+) : ComponentRegisteredHolder<ControlPanelDocument>, ComponentUIControlPanel
+
+interface ComponentUIControlPanel : ComponentUI<ControlPanelConnection>
+
+interface ComponentUI<in C : Widget> {
+    fun populate(composite: C) {}
+}

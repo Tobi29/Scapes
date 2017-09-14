@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobLivingClient
+import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.model.MobLivingModelPig
 
@@ -29,18 +30,17 @@ class MobPigClient(type: EntityType<*, *>,
                    world: WorldClient) : MobLivingClient(
         type, world, Vector3d.ZERO, Vector3d.ZERO,
         AABB(-0.45, -0.45, -0.6875, 0.45, 0.45, 0.375), 20.0, 30.0) {
-
-    override fun creatureType(): CreatureType {
-        return CreatureType.CREATURE
+    init {
+        val texture = world.game.engine.graphics.textures.getNow(
+                "VanillaBasics:image/entity/mob/Pig")
+        val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
+        registerComponent(CreatureType.COMPONENT, CreatureType.CREATURE)
+        attachModel {
+            MobLivingModelPig(plugin.modelPigShared(), this, texture)
+        }
     }
 
     override fun viewOffset(): Vector3d {
         return Vector3d(0.0, 0.0, 0.2)
-    }
-
-    override fun createModel(): MobLivingModelPig? {
-        val texture = world.game.engine.graphics.textures["VanillaBasics:image/entity/mob/Pig"]
-        val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
-        return MobLivingModelPig(plugin.modelPigShared(), this, texture)
     }
 }

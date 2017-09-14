@@ -42,9 +42,11 @@ abstract class ParticleEmitterInstanced<P : ParticleInstance>(system: ParticleSy
     override fun addToPipeline(gl: GL,
                                width: Int,
                                height: Int,
-                               cam: Cam): () -> Unit {
+                               cam: Cam): suspend () -> (Double) -> Unit {
         val shader = prepareShader(gl, width, height, cam)
-        return render@ {
+        return {
+            val s = shader()
+            ;render@ {
             if (!hasAlive) {
                 return@render
             }
@@ -55,15 +57,16 @@ abstract class ParticleEmitterInstanced<P : ParticleInstance>(system: ParticleSy
             if (count > 0) {
                 buffer.flip()
                 vao.bufferStream(gl, buffer)
-                shader { vao.renderInstanced(gl, it, 6, count) }
+                s { vao.renderInstanced(gl, it, 6, count) }
             }
+        }
         }
     }
 
     protected abstract fun prepareShader(gl: GL,
                                          width: Int,
                                          height: Int,
-                                         cam: Cam): ((Shader) -> Unit) -> Unit
+                                         cam: Cam): suspend () -> ((Shader) -> Unit) -> Unit
 
     protected abstract fun prepareBuffer(cam: Cam): Int
 }

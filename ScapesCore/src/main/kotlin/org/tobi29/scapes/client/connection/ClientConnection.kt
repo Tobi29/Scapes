@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.client.connection
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.connection.PlayConnection
@@ -53,7 +55,7 @@ abstract class ClientConnection(val game: GameStateGameMP,
 
     fun mob(consumer: (MobPlayerClientMain) -> Unit) {
         entity?.let {
-            it.world.loop.addTaskOnce({ consumer(it) }, "Player-Mob", 0, false)
+            launch(it.world + CoroutineName("Player-Mob")) { consumer(it) }
         }
     }
 

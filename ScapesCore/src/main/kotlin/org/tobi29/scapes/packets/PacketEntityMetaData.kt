@@ -39,7 +39,7 @@ class PacketEntityMetaData : PacketAbstract, PacketClient {
     constructor(type: PacketType,
                 entity: EntityServer,
                 category: String) : super(type, entity.getCurrentPos()) {
-        uuid = entity.getUUID()
+        uuid = entity.uuid
         this.category = category
         tag = entity.metaData(category).toTag()
     }

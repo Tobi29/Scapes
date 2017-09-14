@@ -94,7 +94,6 @@ class GuiSaveSelect(state: GameState,
             val delete = addHori(5.0, 20.0, 80.0, -1.0) {
                 button(it, "Delete")
             }
-            selection(label, delete)
 
             label.on(GuiEvent.CLICK_LEFT) { event ->
                 try {

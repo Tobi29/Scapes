@@ -38,6 +38,6 @@ class PacketPlayerJump : PacketAbstract, PacketServer {
     }
 
     override fun runServer(player: PlayerConnection) {
-        player.mob(MobPlayerServer::onJump)
+        player.mob(MobPlayerServer::jump)
     }
 }

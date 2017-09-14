@@ -26,12 +26,15 @@ import org.tobi29.scapes.engine.resource.Resource
 class GuiScreenshot(state: GameState,
                     previous: Gui,
                     texture: Resource<Texture>,
-                    style: GuiStyle) : GuiMenuSingle(state, "Screenshots", previous,
+                    style: GuiStyle) : GuiMenuSingle(state, "Screenshots",
+        previous,
         style) {
     init {
-        val tex = texture.get()
-        pane.add(16.0, 5.0, 368.0,
-                (tex.height().toDouble() / tex.width() * 368).toInt().toDouble()
-        ) { GuiComponentImage(it, texture) }
+        texture.onLoaded { tex ->
+            pane.add(16.0, 5.0, 368.0,
+                    (tex.height().toDouble() / tex.width() * 368).toInt().toDouble()) {
+                GuiComponentImage(it, texture)
+            }
+        }
     }
 }

@@ -16,6 +16,9 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
@@ -26,34 +29,42 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBaseChunk
 import org.tobi29.scapes.terrain.infinite.chunk
 
-class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
-    private val terrain: TerrainInfiniteServer
+class TerrainInfiniteChunkServer(
+        pos: Vector2i,
+        private val terrain: TerrainInfiniteServer,
+        zSize: Int
+) : TerrainInfiniteChunk<EntityServer>(pos, terrain, zSize) {
     private val delayedUpdates = ArrayList<Update>()
+    private var initJob: Job? = null
 
-    constructor(pos: Vector2i,
-                terrain: TerrainInfiniteServer,
-                zSize: Int,
-                map: TagMap) : super(pos, terrain, zSize) {
-        this.terrain = terrain
-        profilerSection("Load") { read(map) }
-        profilerSection("HeightMap") { initHeightMap() }
+    fun load(map: TagMap) {
+        initJob = launch(
+                terrain.world.taskExecutor + CoroutineName("Chunk-Load")) {
+            profilerSection("Load") { read(map) }
+            profilerSection("HeightMap") { initHeightMap() }
+        }
     }
 
-    constructor(pos: Vector2i,
-                terrain: TerrainInfiniteServer,
-                zSize: Int,
-                generator: ChunkGenerator,
-                output: GeneratorOutput) : super(pos, terrain, zSize) {
-        this.terrain = terrain
-        profilerSection("Generate") { generate(generator, output) }
-        profilerSection("Sunlight") { initSunLight() }
-        profilerSection("HeightMap") { initHeightMap() }
+    fun generate(generator: ChunkGenerator) {
+        initJob = launch(
+                terrain.world.taskExecutor + CoroutineName("Chunk-Generate")) {
+            profilerSection("Generate") { generateBlocks(generator) }
+            profilerSection("Sunlight") { initSunLight() }
+            profilerSection("HeightMap") { initHeightMap() }
+        }
+    }
+
+    override val isInitialized: Boolean get() = initJob?.isCompleted == true
+
+    override suspend fun awaitInitialized() {
+        initJob?.join()
     }
 
     fun updateServer(delta: Double) {
@@ -65,10 +76,11 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
             }
             if (entity is MobLivingServer) {
                 if (entity.isDead) {
-                    entity.onDeath()
+                    entity.death()
                     removeEntity(entity)
                     return@forEach
-                } else if (entity.creatureType().doesDespawn()) {
+                } else if (entity.getOrNull(
+                        CreatureType.COMPONENT)?.doesDespawn() == true) {
                     val player = terrain.world.nearestPlayer(
                             entity.getCurrentPos())
                     if (player != null) {
@@ -256,7 +268,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
                 map["Entities"] = TagList {
                     entitiesMut.values.forEach { entity ->
                         add(TagMap {
-                            this["UUID"] = entity.getUUID().toTag()
+                            this["UUID"] = entity.uuid.toTag()
                             this["ID"] = entity.type.id.toTag()
                             this["Data"] = TagMap { entity.write(this) }
                         })
@@ -281,9 +293,9 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
         }
     }
 
-    private fun generate(generator: ChunkGenerator,
-                         output: GeneratorOutput) {
-        generator.seed(posBlock.x, posBlock.y)
+    private fun generateBlocks(generator: ChunkGenerator) {
+        val output = GeneratorOutput.current()
+        output.height = zSize
         // We do not need to lock here as the chunk is not added anywhere
         // yet and this might get triggered in a locked context causing
         // a crash
@@ -345,6 +357,7 @@ class TerrainInfiniteChunkServer : TerrainInfiniteChunk<EntityServer> {
     }
 
     fun updateAdjacent() {
+        if (!isInitialized) return
         if (terrain.checkBorder(this, 1)) {
             if (state == TerrainInfiniteBaseChunk.State.BORDER) {
                 state = TerrainInfiniteBaseChunk.State.LOADED

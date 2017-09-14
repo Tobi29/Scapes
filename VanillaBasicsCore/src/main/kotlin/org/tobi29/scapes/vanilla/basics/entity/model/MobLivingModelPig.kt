@@ -30,8 +30,8 @@ import org.tobi29.scapes.entity.model.Box
 import org.tobi29.scapes.entity.model.MobLivingModel
 
 class MobLivingModelPig(shared: MobLivingModelPigShared,
-                        private val entity: MobLivingClient,
-                        private val texture: Resource<Texture>) : MobLivingModel {
+                        override val entity: MobLivingClient,
+                        private val texture: Texture) : MobLivingModel {
     private val pos: MutableVector3d
     private val body: Box
     private val head: Box
@@ -54,8 +54,10 @@ class MobLivingModelPig(shared: MobLivingModelPigShared,
         legBackRight = shared.legBackRight
     }
 
-    override fun pos(): Vector3d {
-        return pos.now()
+    override fun pos() = pos.now()
+
+    override fun setPos(pos: Vector3d) {
+        this.pos.set(pos)
     }
 
     override fun shapeAABB(aabb: AABB) {
@@ -96,7 +98,7 @@ class MobLivingModelPig(shared: MobLivingModelPigShared,
                         pos.intZ()) / 15.0f,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
-        texture.get().bind(gl)
+        texture.bind(gl)
         gl.matrixStack.push { matrix ->
             matrix.translate(posRenderX, posRenderY, posRenderZ)
             matrix.rotate(yaw - 90, 0f, 0f, 1f)

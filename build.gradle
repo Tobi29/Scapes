@@ -15,8 +15,8 @@
  */
 
 buildscript {
-    def kotlinVersion = "1.1.4"
-    def scapesEngineBuildVersion = "0.0.1"
+    def kotlinVersion = "1.1.4-3"
+    def scapesEngineBuildVersion = "0.0.3"
     def dokkaVersion = "0.9.14"
     def junitPlatformVersion = "1.0.0-M4"
     def shadowVersion = "2.0.0"
@@ -70,19 +70,19 @@ allprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "4.0.2"
+    gradleVersion = "4.1"
     distributionUrl =
             "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
 ext {
     slf4jVersion = "1.7.25"
-    spekVersion = "1.1.2"
+    spekVersion = "1.1.4"
     swtVersion = "4.6"
     lwjglVersion = "3.1.2"
     log4jVersion = "2.8.1"
     jnaVersion = "4.4.0"
-    scapesEngineVersion = "0.0.3"
+    scapesEngineVersion = "0.0.4"
 
     slf4jSimple = "org.slf4j:slf4j-simple:$slf4jVersion"
     lwjgl = "org.lwjgl:lwjgl:$lwjglVersion"

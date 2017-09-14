@@ -249,7 +249,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
         sendQueueSize.incrementAndGet()
         sendQueue.add(packet)
         if (packet.isImmediate) {
-            worker.joiner.wake()
+            worker.wake()
         }
     }
 

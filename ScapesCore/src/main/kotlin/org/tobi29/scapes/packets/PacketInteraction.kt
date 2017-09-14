@@ -18,9 +18,9 @@ package org.tobi29.scapes.packets
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.entity.client.MobPlayerClient
 import org.tobi29.scapes.server.connection.PlayerConnection
 
@@ -106,7 +106,7 @@ class PacketInteraction : PacketAbstract, PacketBoth {
                                 "Invalid slot change data!")
                     }
                     mob.inventorySelectLeft = data.toInt()
-                    mob.world.send(PacketInteraction(type, mob.getUUID(),
+                    mob.world.send(PacketInteraction(type, mob.uuid,
                             INVENTORY_SLOT_LEFT, data))
                 }
                 INVENTORY_SLOT_RIGHT -> {
@@ -115,7 +115,7 @@ class PacketInteraction : PacketAbstract, PacketBoth {
                                 "Invalid slot change data!")
                     }
                     mob.inventorySelectRight = data.toInt()
-                    mob.world.send(PacketInteraction(type, mob.getUUID(),
+                    mob.world.send(PacketInteraction(type, mob.uuid,
                             INVENTORY_SLOT_RIGHT, data))
                 }
                 OPEN_INVENTORY -> {

@@ -124,7 +124,7 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                             return@addConnection
                         }
                         try {
-                            channel.register(worker.joiner.selector,
+                            channel.register(worker.selector,
                                     SelectionKey.OP_READ)
                             gui?.setProgress("Logging in...", 0.6)
                             val ssl = SSLHandle.insecure()

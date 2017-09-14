@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.Registries
@@ -20,42 +21,45 @@ import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.entity.client.EntityContainerClient
-import org.tobi29.scapes.entity.server.EntityContainerServer
+import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
+import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.server.connection.PlayerConnection
 
-class PacketOpenGui : PacketAbstract, PacketClient {
+class PacketEntityComponentData : PacketAbstract, PacketClient {
     private lateinit var uuid: UUID
+    lateinit var tag: TagMap
+        private set
 
     constructor(type: PacketType) : super(type)
 
     constructor(type: PacketType,
-                entity: EntityContainerServer) : super(type) {
+                entity: EntityServer) : super(type, entity.getCurrentPos()) {
         uuid = entity.uuid
+        tag = entity.componentData()
     }
 
     constructor(registry: Registries,
-                entity: EntityContainerServer) : this(
-            Packet.make(registry, "core.packet.OpenGui"), entity)
+                entity: EntityServer) : this(
+            Packet.make(registry, "core.packet.EntityComponentData"), entity)
 
+    // TODO: @Throws(IOException::class)
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
         stream.putLong(uuid.mostSignificantBits)
         stream.putLong(uuid.leastSignificantBits)
+        tag.writeBinary(stream)
     }
 
+    // TODO: @Throws(IOException::class)
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
         uuid = UUID(stream.getLong(), stream.getLong())
+        tag = readBinary(stream)
     }
 
     override fun runClient(client: ClientConnection) {
-        client.mob { mob ->
-            client.getEntity(uuid) { entity ->
-                if (entity is EntityContainerClient) {
-                    entity.gui(mob)?.let { mob.openGui(it) }
-                }
-            }
-        }
+        client.getEntity(uuid) { it.processPacket(this) }
     }
 }

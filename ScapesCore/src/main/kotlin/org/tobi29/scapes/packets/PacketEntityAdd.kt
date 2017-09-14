@@ -17,11 +17,11 @@ package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
-import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.server.EntityServer
@@ -36,7 +36,7 @@ class PacketEntityAdd : PacketAbstract, PacketClient {
 
     constructor(type: PacketType,
                 entity: EntityServer) : super(type, entity.getCurrentPos()) {
-        uuid = entity.getUUID()
+        uuid = entity.uuid
         id = entity.type.id
         tag = TagMap { entity.write(this) }
     }
@@ -69,7 +69,7 @@ class PacketEntityAdd : PacketAbstract, PacketClient {
                 val newEntity = EntityClient.make(id, mob.world)
                 newEntity.setEntityID(uuid)
                 newEntity.read(tag)
-                mob.world.terrain.addEntity(newEntity)
+                mob.world.terrain.addEntity(newEntity, false)
             }
         }
     }

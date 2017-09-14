@@ -21,5 +21,5 @@ interface LightingEngine {
                     y: Int,
                     z: Int)
 
-    fun dispose()
+    suspend fun dispose()
 }

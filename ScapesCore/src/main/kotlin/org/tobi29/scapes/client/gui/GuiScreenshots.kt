@@ -77,7 +77,6 @@ class GuiScreenshots(state: GameState,
             val delete = addHori(5.0, 20.0, 100.0, -1.0) {
                 button(it, "Delete")
             }
-            selection(save, delete)
 
             icon.on(GuiEvent.CLICK_LEFT) {
                 icon.texture?.let { texture ->

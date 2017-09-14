@@ -18,12 +18,8 @@ package org.tobi29.scapes.vanilla.basics.entity.particle
 
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.utils.math.cosTable
-import org.tobi29.scapes.engine.utils.math.sinTable
-import org.tobi29.scapes.engine.utils.math.toRad
+import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
@@ -97,7 +93,7 @@ class ParticleEmitterTornado(system: ParticleSystem) : ParticleEmitter<ParticleI
     override fun addToPipeline(gl: GL,
                                width: Int,
                                height: Int,
-                               cam: Cam): () -> Unit {
-        return {}
+                               cam: Cam): suspend () -> (Double) -> Unit {
+        return { {} }
     }
 }

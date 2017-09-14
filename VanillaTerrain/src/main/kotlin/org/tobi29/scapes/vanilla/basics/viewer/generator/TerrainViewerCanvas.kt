@@ -16,6 +16,9 @@
 
 package org.tobi29.scapes.vanilla.basics.viewer.generator
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.eclipse.swt.SWT
 import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.graphics.ImageData
@@ -23,6 +26,7 @@ import org.eclipse.swt.graphics.PaletteData
 import org.eclipse.swt.widgets.Canvas
 import org.eclipse.swt.widgets.Composite
 import org.tobi29.scapes.engine.swt.util.framework.Application
+import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
 import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.AtomicInteger
 import org.tobi29.scapes.engine.utils.AtomicLong
@@ -34,6 +38,7 @@ import org.tobi29.scapes.engine.utils.math.min
 import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
+import java.util.concurrent.TimeUnit
 
 class TerrainViewerCanvas(parent: Composite,
                           style: Int,
@@ -77,10 +82,10 @@ class TerrainViewerCanvas(parent: Composite,
 
     private fun render(pos: Vector2i) {
         val scale = this.scale
-        val cache = this.cache.get()
+        val currentCache = this.cache.get()
         renders.incrementAndGet()
-        application.taskExecutor.runThread({
-            if (cache == this.cache.get()) {
+        launch(application.taskExecutor + CoroutineName("Render-Tile")) {
+            if (currentCache == cache.get()) {
                 val data = ByteArray(3 shl CHUNK_BITS shl CHUNK_BITS)
                 val output = Output()
                 val supplier = colorSupplier()
@@ -104,13 +109,13 @@ class TerrainViewerCanvas(parent: Composite,
                     }
                 }
                 application.accessAsync {
-                    if (cache == this.cache.get()) {
+                    if (currentCache == cache.get()) {
                         putImage(pos, image(data))
                     }
                 }
             }
             renders.decrementAndGet()
-        }, "Render-Tile")
+        }
     }
 
     private fun image(data: ByteArray): Image {
@@ -150,8 +155,10 @@ class TerrainViewerCanvas(parent: Composite,
 
     private fun queueDraw() {
         if (!drawQueued.getAndSet(true)) {
-            application.loop.addTaskOnce({ redraw() }, "Viewer-Redraw", 100,
-                    false)
+            launch(application + CoroutineName("Viewer-Redraw")) {
+                delay(100L, TimeUnit.MILLISECONDS)
+                ifPresent { redraw() }
+            }
         }
     }
 

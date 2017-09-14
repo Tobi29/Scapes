@@ -199,6 +199,9 @@ class Plugins(files: List<PluginFile>,
                 reg("core.packet.EntityChange") {
                     PacketType(it, ::PacketEntityChange)
                 }
+                reg("core.packet.EntityComponentData") {
+                    PacketType(it, ::PacketEntityComponentData)
+                }
                 reg("core.packet.EntityMetaData") {
                     PacketType(it, ::PacketEntityMetaData)
                 }

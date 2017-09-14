@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.client.gui
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
@@ -29,9 +31,9 @@ class GuiGenerateAccount(state: GameState,
         state, style) {
     init {
         setLabel("Creating account...")
-        state.engine.taskExecutor.runThread({ joiner ->
+        launch(state.engine.taskExecutor + CoroutineName("Generate-Account")) {
             val account = Account.generate(path)
-            state.engine.guiStack.swap(this, next(account))
-        }, "Generate-Account")
+            state.engine.guiStack.swap(this@GuiGenerateAccount, next(account))
+        }
     }
 }

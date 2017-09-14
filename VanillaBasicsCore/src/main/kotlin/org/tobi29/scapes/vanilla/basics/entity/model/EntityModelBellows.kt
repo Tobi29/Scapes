@@ -34,14 +34,17 @@ import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBellowsClient
 
 class EntityModelBellows(shared: EntityModelBellowsShared,
-                         private val entity: EntityBellowsClient) : EntityModel {
+                         override val entity: EntityBellowsClient) : EntityModel {
     private val pos: MutableVector3d
     private val side: Box
     private val middle: Box
     private val pipe: Box
-    private val textureSide = entity.world.game.engine.graphics.textures["VanillaBasics:image/terrain/tree/oak/Planks"]
-    private val textureMiddle = entity.world.game.engine.graphics.textures["VanillaBasics:image/terrain/tree/birch/Planks"]
-    private val texturePipe = entity.world.game.engine.graphics.textures["VanillaBasics:image/terrain/device/Anvil"]
+    private val textureSide = entity.world.game.engine.graphics.textures.getNow(
+            "VanillaBasics:image/terrain/tree/oak/Planks")
+    private val textureMiddle = entity.world.game.engine.graphics.textures.getNow(
+            "VanillaBasics:image/terrain/tree/birch/Planks")
+    private val texturePipe = entity.world.game.engine.graphics.textures.getNow(
+            "VanillaBasics:image/terrain/device/Anvil")
     private var scale = 0.0
 
     init {
@@ -51,8 +54,10 @@ class EntityModelBellows(shared: EntityModelBellowsShared,
         pipe = shared.pipe
     }
 
-    override fun pos(): Vector3d {
-        return pos.now()
+    override fun pos() = pos.now()
+
+    override fun setPos(pos: Vector3d) {
+        this.pos.set(pos)
     }
 
     override fun shapeAABB(aabb: AABB) {
@@ -90,11 +95,11 @@ class EntityModelBellows(shared: EntityModelBellowsShared,
             matrix.translate(posRenderX, posRenderY, posRenderZ)
             gl.matrixStack.push { matrix ->
                 matrix.scale(1.0f, 1.0f, scale.toFloat())
-                textureMiddle.get().bind(gl)
+                textureMiddle.bind(gl)
                 middle.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
             }
             gl.matrixStack.push { matrix ->
-                textureSide.get().bind(gl)
+                textureSide.bind(gl)
                 matrix.translate(0.0f, 0.0f, scale.toFloat() * 0.5f)
                 side.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
             }
@@ -113,7 +118,7 @@ class EntityModelBellows(shared: EntityModelBellowsShared,
                     Face.UP, Face.NONE -> {
                     }
                 }
-                texturePipe.get().bind(gl)
+                texturePipe.bind(gl)
                 pipe.render(1.0f, 1.0f, 1.0f, 1.0f, gl, shader)
             }
         }

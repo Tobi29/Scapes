@@ -16,8 +16,9 @@
 
 package org.tobi29.scapes.server.shell
 
-import org.tobi29.scapes.engine.utils.io.IOException
+import kotlinx.coroutines.experimental.CoroutineDispatcher
 import org.tobi29.scapes.engine.utils.ListenerRegistrar
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.server.MessageLevel
@@ -27,7 +28,10 @@ import org.tobi29.scapes.server.extension.event.MessageEvent
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-class ScapesServerHeadless(path: FilePath) : ScapesStandaloneServer(path) {
+class ScapesServerHeadless(
+        taskExecutor: CoroutineDispatcher,
+        path: FilePath
+) : ScapesStandaloneServer(taskExecutor, path) {
     override fun ListenerRegistrar.listeners() {
         listen<MessageEvent> { event ->
             when (event.level) {

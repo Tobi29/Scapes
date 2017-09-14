@@ -33,8 +33,6 @@ class GuiPause(state: GameStateGameMP,
     init {
         val options = row(pane) { button(it, "Options") }
 
-        selection(options)
-
         options.on(GuiEvent.CLICK_LEFT) {
             player.openGui(GuiOptionsInGame(state, style))
         }

@@ -93,9 +93,9 @@ class GuiControllerTouch(engine: ScapesEngine,
         return clicks.asSequence()
     }
 
-    override fun captureCursor(): Boolean {
-        return false
-    }
+    override fun activeCursor() = false
+
+    override fun captureCursor() = false
 
     private fun handleFinger(finger: Finger) {
         finger.cursor.set(finger.tracker.now())

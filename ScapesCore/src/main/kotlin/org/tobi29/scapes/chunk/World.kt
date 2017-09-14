@@ -15,20 +15,26 @@
  */
 package org.tobi29.scapes.chunk
 
+import kotlinx.coroutines.experimental.CancellationException
+import kotlinx.coroutines.experimental.CoroutineDispatcher
 import org.tobi29.scapes.block.Registries
+import org.tobi29.scapes.engine.utils.*
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
-import org.tobi29.scapes.engine.utils.task.UpdateLoop
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.entity.EntityContainer
 import org.tobi29.scapes.plugins.Plugins
+import kotlin.coroutines.experimental.CoroutineContext
 
-abstract class World<E : Entity>(val plugins: Plugins,
-                                 val loop: UpdateLoop,
-                                 val taskExecutor: TaskExecutor,
-                                 val registry: Registries,
-                                 val seed: Long) : EntityContainer<E> {
+abstract class World<E : Entity>(
+        val plugins: Plugins,
+        val taskExecutor: CoroutineContext,
+        val registry: Registries,
+        val seed: Long
+) : CoroutineDispatcher(), ComponentHolder<Any>, EntityContainer<E> {
+    override val componentStorage = ComponentStorage<Any>()
     val air = plugins.air
+    private val queue = TaskQueue<() -> Unit>()
     protected var thread: Thread? = null
     var spawn = Vector3i.ZERO
         protected set
@@ -37,7 +43,24 @@ abstract class World<E : Entity>(val plugins: Plugins,
     var gravity = 9.8
         protected set
 
+    protected fun process() {
+        queue.processCurrent()
+    }
+
+    override fun dispatch(context: CoroutineContext,
+                          block: Runnable) {
+        queue.add {
+            try {
+                block.run()
+            } catch (e: CancellationException) {
+                logger.warn { "Job cancelled: ${e.message}" }
+            }
+        }
+    }
+
     fun checkThread(): Boolean {
         return Thread.currentThread() === thread
     }
+
+    companion object : KLogging()
 }

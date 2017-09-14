@@ -55,12 +55,14 @@ open class GuiDesktop(state: GameState,
     protected fun button(parent: GuiLayoutData,
                          textSize: Int,
                          text: String): GuiComponentTextButton {
+        parent.selectable = true
         return GuiComponentTextButton(parent, textSize, text)
     }
 
     protected fun slider(parent: GuiLayoutData,
                          text: String,
                          value: Double): GuiComponentSlider {
+        parent.selectable = true
         return GuiComponentSlider(parent, 18, text, value)
     }
 
@@ -68,6 +70,7 @@ open class GuiDesktop(state: GameState,
                          text: String,
                          value: Double,
                          filter: (String, Double) -> String): GuiComponentSlider {
+        parent.selectable = true
         return GuiComponentSlider(parent, 18, text, value, filter)
     }
 }

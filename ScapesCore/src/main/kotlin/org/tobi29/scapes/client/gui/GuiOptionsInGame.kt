@@ -44,10 +44,6 @@ class GuiOptionsInGame(state: GameStateGameMP,
             fullscreen = row(pane) { button(it, "Fullscreen: OFF") }
         }
 
-        selection(musicVolume)
-        selection(soundVolume)
-        selection(fullscreen)
-
         musicVolume.on(GuiEvent.CHANGE) { event ->
             config.setVolume("music", musicVolume.value())
         }

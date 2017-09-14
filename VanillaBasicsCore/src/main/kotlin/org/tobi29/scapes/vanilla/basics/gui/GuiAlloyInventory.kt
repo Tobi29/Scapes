@@ -17,6 +17,8 @@ package org.tobi29.scapes.vanilla.basics.gui
 
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.gui.GuiComponentGroup
+import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.utils.math.round
@@ -32,11 +34,20 @@ class GuiAlloyInventory(container: EntityAlloyClient,
     private val infoText: GuiComponentText
 
     init {
-        selection(buttonContainer(16, 120, 30, 30, 0))
-        selection(buttonContainer(16, 160, 30, 30, 1))
-        infoText = pane.add(60.0, 80.0, -1.0, 24.0) {
+        topPane.spacer()
+        val bar = topPane.addVert(32.0, 0.0, -1.0, 80.0, ::GuiComponentGroupSlab)
+        bar.addHori(0.0, 0.0, 40.0, -1.0, ::GuiComponentGroup).apply {
+            addVert(5.0, 5.0, 30.0, 30.0) {
+                buttonContainer(it, "Container", 0)
+            }
+            addVert(5.0, 5.0, 30.0, 30.0) {
+                buttonContainer(it, "Container", 1)
+            }
+        }
+        infoText = bar.addHori(16.0, 5.0, -1.0, 16.0) {
             GuiComponentText(it, "")
         }
+        topPane.spacer()
         updateInfoText()
     }
 

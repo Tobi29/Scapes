@@ -23,9 +23,9 @@ import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.server.MobLivingEquippedServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 
@@ -40,12 +40,13 @@ class MobSkeletonServer(type: EntityType<*, *>,
 
     init {
         val random = threadLocalRandom()
-        onNotice("Local") { mob ->
+        registerComponent(CreatureType.COMPONENT, CreatureType.MONSTER)
+        onNotice[SKELETON_LISTENER_TOKEN] = { mob ->
             if (mob is MobPlayerServer && !ai.hasMobTarget()) {
                 ai.setMobTarget(mob, 10.0)
             }
         }
-        onDamage("Local") { damage ->
+        onDamage[SKELETON_LISTENER_TOKEN] = { damage ->
             world.playSound(
                     "VanillaBasics:sound/entity/mob/skeleton/Hurt${random.nextInt(
                             3) + 1}.ogg", this)
@@ -69,10 +70,6 @@ class MobSkeletonServer(type: EntityType<*, *>,
             return true
         }
         return false
-    }
-
-    override fun creatureType(): CreatureType {
-        return CreatureType.MONSTER
     }
 
     override fun viewOffset(): Vector3d {
@@ -144,3 +141,5 @@ class MobSkeletonServer(type: EntityType<*, *>,
         return null
     }
 }
+
+private val SKELETON_LISTENER_TOKEN = ListenerToken("VanillaBasics:Skeleton")

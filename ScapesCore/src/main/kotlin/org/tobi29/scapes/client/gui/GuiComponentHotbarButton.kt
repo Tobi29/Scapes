@@ -54,11 +54,15 @@ class GuiComponentHotbarButton(parent: GuiLayoutData,
                                         pixelSize: Vector2d,
                                         delta: Double) {
         if (player.inventorySelectLeft() == slot) {
-            textureHotbarLeft.get().bind(gl)
-            model?.render(gl, shader)
+            textureHotbarLeft.tryGet()?.let {
+                it.bind(gl)
+                model?.render(gl, shader)
+            }
         } else if (player.inventorySelectRight() == slot) {
-            textureHotbarRight.get().bind(gl)
-            model?.render(gl, shader)
+            textureHotbarRight.tryGet()?.let {
+                it.bind(gl)
+                model?.render(gl, shader)
+            }
         }
     }
 

@@ -21,7 +21,8 @@ import java.security.*
 
 object Sandbox {
     private val whitelist = packageAccess("java.**", "kotlin.**",
-            "org.tobi29.scapes.**", "scapes.plugin.**", "org.slf4j.**")
+            "kotlinx.**", "org.tobi29.scapes.**", "scapes.plugin.**",
+            "org.slf4j.**")
     private val permission = RuntimePermission("scapes.restrictedPkg")
     private var sandboxed = false
 

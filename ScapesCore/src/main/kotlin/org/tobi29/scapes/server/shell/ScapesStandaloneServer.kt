@@ -15,37 +15,31 @@
  */
 package org.tobi29.scapes.server.shell
 
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.format.DateTimeFormatter
+import kotlinx.coroutines.experimental.CoroutineDispatcher
 import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.engine.server.SSLHandle
-import org.tobi29.scapes.engine.utils.Crashable
-import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.ListenerRegistrar
-import org.tobi29.scapes.engine.utils.io.*
+import org.tobi29.scapes.engine.utils.*
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.filesystem.write
 import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
 import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
+import org.tobi29.scapes.engine.utils.io.use
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.*
-import org.tobi29.scapes.engine.utils.task.BasicJoinable
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.spi.WorldSourceProvider
 import org.tobi29.scapes.server.ssl.spi.KeyManagerProvider
 import java.util.*
-import kotlin.system.exitProcess
 
-abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashable {
-    protected val taskExecutor = TaskExecutor(this, "Server-Shell")
-    private val joinable = BasicJoinable()
-    private val shutdownHook = Thread { joinable.joiner.join() }
+abstract class ScapesStandaloneServer(
+        protected val taskExecutor: CoroutineDispatcher,
+        protected val config: FilePath
+) {
     protected lateinit var server: ScapesServer
 
     protected abstract fun ListenerRegistrar.listeners()
@@ -54,9 +48,15 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
 
     // TODO: @Throws(IOException::class)
     fun run(path: FilePath) {
+        val stopped = AtomicBoolean(true)
+        val shutdownHook = Thread {
+            while (!stopped.get()) {
+                sleepNanos(1000L)
+            }
+        }
         RUNTIME.addShutdownHook(shutdownHook)
         try {
-            while (!joinable.marked) {
+            while (true) {
                 val configMap = loadConfig(config.resolve("Server.json"))
                 val keyManagerConfig = configMap["KeyManager"]?.toMap() ?: TagMap()
                 val keyManagerProvider = loadKeyManager(
@@ -70,26 +70,19 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
                     val loop = start(source, configMap, ssl)
                     while (!server.shouldStop()) {
                         loop()
-                        joinable.sleep(100)
-                        if (joinable.marked) {
-                            server.scheduleStop(
-                                    ScapesServer.ShutdownReason.STOP)
-                        }
+                        sleep(100L)
                     }
                     server.stop()
                 }
-                if (server.shutdownReason() !== ScapesServer.ShutdownReason.RELOAD) {
+                if (server.shutdownReason() != ScapesServer.ShutdownReason.RELOAD) {
                     break
                 }
             }
-            taskExecutor.shutdown()
         } finally {
             try {
                 RUNTIME.removeShutdownHook(shutdownHook)
             } catch (e: IllegalStateException) {
             }
-
-            joinable.join()
         }
     }
 
@@ -154,16 +147,6 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
         return map
     }
 
-    override fun crash(e: Throwable): Nothing {
-        logger.error(e) { "Stopping due to a crash" }
-        try {
-            crashReport(config, e)
-        } catch (e1: IOException) {
-            logger.warn { "Failed to write crash report: $e1" }
-        }
-        exitProcess(1)
-    }
-
     companion object : KLogging() {
         private val RUNTIME = Runtime.getRuntime()
 
@@ -200,23 +183,5 @@ abstract class ScapesStandaloneServer(protected val config: FilePath) : Crashabl
             }
             throw IOException("No key manager found for: $id")
         }
-    }
-}
-
-private val FORMATTER = DateTimeFormatter.ISO_DATE_TIME
-private val FILE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
-
-private fun crashReport(path: FilePath,
-                        e: Throwable) {
-    val time = OffsetDateTime.now()
-    val crashReportFile = path.resolve(
-            crashReportName(time.format(FILE_FORMATTER)))
-    write(crashReportFile) {
-        it.writeCrashReport(e, "Scapes Server",
-                crashReportSectionStacktrace(e),
-                crashReportSectionActiveThreads(),
-                crashReportSectionSystemProperties(),
-                crashReportSectionTime(
-                        LocalDateTime.from(time).format(FORMATTER)))
     }
 }

@@ -18,9 +18,9 @@ package org.tobi29.scapes.server.format.sqljet
 
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.spi.WorldSourceProvider
+import kotlin.coroutines.experimental.CoroutineContext
 
 class SQLJetWorldSourceProvider : WorldSourceProvider {
     override fun available(): Boolean {
@@ -34,7 +34,7 @@ class SQLJetWorldSourceProvider : WorldSourceProvider {
     // TODO: @Throws(IOException::class)
     override fun get(path: FilePath,
                      configMap: TagMap,
-                     taskExecutor: TaskExecutor): WorldSource {
+                     taskExecutor: CoroutineContext): WorldSource {
         return SQLJetWorldSource(path)
     }
 }

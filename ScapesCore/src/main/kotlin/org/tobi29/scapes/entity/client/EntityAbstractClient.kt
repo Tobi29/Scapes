@@ -17,26 +17,31 @@
 package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
+import org.tobi29.scapes.engine.utils.ComponentStorage
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.scapes.entity.ComponentEntity
+import org.tobi29.scapes.entity.ComponentSerializable
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.model.EntityModel
+import org.tobi29.scapes.packets.PacketEntityComponentData
 import org.tobi29.scapes.packets.PacketEntityMetaData
 
-open class EntityAbstractClient(override val type: EntityType<*, *>,
-                                override val world: WorldClient,
+open class EntityAbstractClient(override final val type: EntityType<*, *>,
+                                override final val world: WorldClient,
                                 pos: Vector3d) : EntityClient {
-    override val registry = world.registry
+    override final val registry = world.registry
+    override val componentStorage = ComponentStorage<ComponentEntity>()
     protected val pos = MutableVector3d(pos)
-    override var uuid: UUID = UUID.randomUUID()
+    override final var uuid: UUID = UUID.randomUUID()
         protected set
     protected var metaData = MutableTagMap()
-
-    override fun getUUID(): UUID {
-        return uuid
-    }
+    override final val onAddedToWorld = ConcurrentHashMap<ListenerToken, () -> Unit>()
+    override final val onRemovedFromWorld = ConcurrentHashMap<ListenerToken, () -> Unit>()
 
     override fun getCurrentPos(): Vector3d {
         return pos.now()
@@ -47,8 +52,20 @@ open class EntityAbstractClient(override val type: EntityType<*, *>,
     }
 
     override fun read(map: TagMap) {
-        map["Pos"]?.toMap()?.let { pos.set(it) }
+        map["Pos"]?.toMap()?.let {
+            pos.set(it)
+            getOrNull(EntityModel.COMPONENT)?.setPos(pos.now())
+        }
         map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
+        map["Components"]?.toMap()?.let { componentData ->
+            for (component in components) {
+                if (component is ComponentSerializable) {
+                    componentData[component.id]?.toMap()?.let {
+                        component.read(it)
+                    }
+                }
+            }
+        }
     }
 
     override fun metaData(category: String) = metaData.mapMut(category)
@@ -56,8 +73,15 @@ open class EntityAbstractClient(override val type: EntityType<*, *>,
     override fun update(delta: Double) {
     }
 
-    override fun createModel(): EntityModel? {
-        return null
+    override fun processPacket(packet: PacketEntityComponentData) {
+        val componentData = packet.tag
+        for (component in components) {
+            if (component is ComponentSerializable) {
+                componentData[component.id]?.toMap()?.let {
+                    component.read(it)
+                }
+            }
+        }
     }
 
     override fun processPacket(packet: PacketEntityMetaData) {

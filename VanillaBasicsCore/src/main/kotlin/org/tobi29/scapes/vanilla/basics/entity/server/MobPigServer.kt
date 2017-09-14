@@ -23,9 +23,9 @@ import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.util.dropItem
@@ -43,12 +43,13 @@ class MobPigServer(type: EntityType<*, *>,
         val random = threadLocalRandom()
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        onDamage("Local") { damage ->
+        registerComponent(CreatureType.COMPONENT, CreatureType.CREATURE)
+        onDamage[PIG_LISTENER_TOKEN] = { damage ->
             world.playSound(
                     "VanillaBasics:sound/entity/mob/pig/Hurt${random.nextInt(
                             2) + 1}.ogg", this)
         }
-        onDeath("Local") {
+        onDeath[PIG_LISTENER_TOKEN] = {
             world.dropItem(ItemStack(materials.meat, 0, random.nextInt(7) + 10),
                     this.pos.now())
         }
@@ -68,10 +69,6 @@ class MobPigServer(type: EntityType<*, *>,
             return true
         }
         return false
-    }
-
-    override fun creatureType(): CreatureType {
-        return CreatureType.CREATURE
     }
 
     override fun viewOffset(): Vector3d {
@@ -135,3 +132,5 @@ class MobPigServer(type: EntityType<*, *>,
         return null
     }
 }
+
+private val PIG_LISTENER_TOKEN = ListenerToken("VanillaBasics:Pig")

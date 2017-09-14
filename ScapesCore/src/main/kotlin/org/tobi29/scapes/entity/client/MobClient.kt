@@ -17,23 +17,20 @@
 package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.floor
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.entity.EntityPhysics
-import org.tobi29.scapes.entity.EntityType
-import org.tobi29.scapes.entity.MobPositionReceiver
-import org.tobi29.scapes.entity.model.MobModel
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.toMap
+import org.tobi29.scapes.entity.*
 
 abstract class MobClient(type: EntityType<*, *>,
                          world: WorldClient,
                          pos: Vector3d,
                          speed: Vector3d,
                          protected val collision: AABB) : EntityAbstractClient(
-        type, world, pos), MobileEntityClient {
+        type, world, pos), Mob, MobileEntityClient {
     protected val speed: MutableVector3d
     protected val rot = MutableVector3d()
     override val positionReceiver: MobPositionReceiver
@@ -73,10 +70,6 @@ abstract class MobClient(type: EntityType<*, *>,
                 pos.doubleZ())
         map["Speed"]?.toMap()?.let { speed.set(it) }
         map["Rot"]?.toMap()?.let { rot.set(it) }
-    }
-
-    override fun createModel(): MobModel? {
-        return null
     }
 
     fun speed(): Vector3d {

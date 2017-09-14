@@ -16,50 +16,57 @@
 
 package org.tobi29.scapes.tools.controlpanel.extensions
 
+import kotlinx.coroutines.experimental.launch
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Group
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.swt.util.framework.Application
+import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
+import org.tobi29.scapes.engine.utils.ComponentTypeRegistered
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.scapes.tools.controlpanel.ControlPanelDocument
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConsole
 
-class ExtensionConsole(application: Application,
-                       composite: ControlPanelConnection,
-                       connection: ControlPanelProtocol) : Extension(
-        composite, connection) {
-    val console: ControlPanelConsole
+class ExtensionConsole(
+        application: Application,
+        connection: ControlPanelProtocol
+) : Extension(connection) {
+    private var console: ControlPanelConsole? = null
 
     init {
-        val group = Group(composite.server, SWT.NONE)
-        group.layout = FillLayout()
-        group.text = "Console"
-        console = ControlPanelConsole(group)
         connection.addCommand("Message") { payload ->
-            application.accessAsync {
-                if (console.isDisposed) {
-                    return@accessAsync
-                }
-                payload["Message"]?.toString()?.let {
-                    console.console.append(it)
+            launch(application) {
+                console.ifPresent { console ->
+                    payload["Message"]?.toString()?.let {
+                        console.console.append(it)
+                    }
                 }
             }
         }
-        console.input.addListener(SWT.DefaultSelection) {
-            consoleCommandLineReturn()
-        }
     }
 
-    fun consoleCommandLineReturn() {
-        connection.send("Command", TagMap {
-            this["Command"] = console.input.text.toTag()
-        })
-        console.input.text = ""
+    override fun populate(composite: ControlPanelConnection) {
+        val group = Group(composite.server, SWT.NONE)
+        group.layout = FillLayout()
+        group.text = "Console"
+        val console = ControlPanelConsole(group)
+
+        console.input.addListener(SWT.DefaultSelection) {
+            connection.send("Command", TagMap {
+                this["Command"] = console.input.text.toTag()
+            })
+            console.input.text = ""
+        }
+
+        this.console = console
     }
 
     companion object {
+        val COMPONENT = ComponentTypeRegistered<ControlPanelDocument, ExtensionConsole, Any>()
+
         fun available(commands: Set<String>): Boolean {
             return commands.contains("Command")
         }

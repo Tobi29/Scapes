@@ -47,13 +47,6 @@ class GuiOptions(state: GameState,
         val account = row(pane) { button(it, "Account") }
         val plugins = row(pane) { button(it, "Plugins") }
 
-        selection(musicVolume)
-        selection(soundVolume)
-        selection(controls)
-        selection(graphics)
-        selection(account)
-        selection(plugins)
-
         musicVolume.on(GuiEvent.CHANGE) { event ->
             config.setVolume("music", musicVolume.value())
         }

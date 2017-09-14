@@ -46,24 +46,20 @@ class GuiCreateWorld(state: GameState,
     init {
         val scapes = engine[ScapesClient.COMPONENT]
         val saves = scapes.saves
-        pane.addVert(16.0, 5.0, -1.0, 18.0) {
-            GuiComponentText(it, "Name:")
+        pane.addVert(16.0, 5.0, -1.0, 18.0) { GuiComponentText(it, "Name:") }
+        val name = row(pane) {
+            it.selectable = true
+            GuiComponentTextField(it, 18, "New World")
         }
-        val name = row(pane) { GuiComponentTextField(it, 18, "New World") }
-        pane.addVert(16.0, 5.0, -1.0, 18.0) {
-            GuiComponentText(it, "Seed:")
+        pane.addVert(16.0, 5.0, -1.0, 18.0) { GuiComponentText(it, "Seed:") }
+        val seed = row(pane) {
+            it.selectable = true
+            GuiComponentTextField(it, 18, "")
         }
-        val seed = row(pane) { GuiComponentTextField(it, 18, "") }
         val environment = row(pane) {
-            button(it,
-                    "Generator: " + worldTypes[environmentID].name())
+            button(it, "Generator: " + worldTypes[environmentID].name())
         }
         val addonsButton = row(pane) { button(it, "Addons") }
-
-        selection(name)
-        selection(seed)
-        selection(environment)
-        selection(addonsButton)
 
         environment.on(GuiEvent.CLICK_LEFT) { event ->
             environmentID++

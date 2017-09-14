@@ -67,8 +67,8 @@ class ParticleEmitterBlock(system: ParticleSystem,
     override fun prepareShader(gl: GL,
                                width: Int,
                                height: Int,
-                               cam: Cam): ((Shader) -> Unit) -> Unit {
-        val shader = gl.engine.graphics.loadShader(
+                               cam: Cam): suspend () -> ((Shader) -> Unit) -> Unit {
+        val shader = gl.loadShader(
                 "Scapes:shader/ParticleBlock", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
@@ -77,7 +77,9 @@ class ParticleEmitterBlock(system: ParticleSystem,
         val scene = world.scene
         val player = world.player
         val environment = world.environment
-        return { render ->
+        return {
+            val s = shader.getAsync()
+            ;{ render ->
             val sunLightReduction = environment.sunLightReduction(
                     cam.position.doubleX(),
                     cam.position.doubleY()) / 15.0f
@@ -86,13 +88,13 @@ class ParticleEmitterBlock(system: ParticleSystem,
                             player.leftWeapon()),
                     player.rightWeapon().material().playerLight(
                             player.rightWeapon()))
-            val s = shader.get()
             s.setUniform3f(gl, 4, scene.fogR(), scene.fogG(), scene.fogB())
             s.setUniform1f(gl, 5, scene.fogDistance() * scene.renderDistance())
             s.setUniform1i(gl, 6, 1)
             s.setUniform1f(gl, 7, sunLightReduction)
             s.setUniform1f(gl, 8, playerLight)
             render(s)
+        }
         }
     }
 

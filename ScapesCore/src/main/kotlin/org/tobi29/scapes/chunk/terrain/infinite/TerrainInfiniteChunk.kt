@@ -36,9 +36,10 @@ abstract class TerrainInfiniteChunk<E : Entity>(pos: Vector2i,
     protected val entitiesMut = ConcurrentHashMap<UUID, E>()
     val entities = entitiesMut.readOnly()
 
-    fun addEntity(entity: E) {
+    fun addEntity(entity: E,
+                  spawn: Boolean = false) {
+        entityTerrain.entityAdded(entity, spawn)
         mapEntity(entity)
-        entityTerrain.entityAdded(entity)
     }
 
     fun removeEntity(entity: E): Boolean {
@@ -50,14 +51,14 @@ abstract class TerrainInfiniteChunk<E : Entity>(pos: Vector2i,
     }
 
     internal fun mapEntity(entity: E) {
-        val removed = entitiesMut.put(entity.getUUID(), entity)
+        val removed = entitiesMut.put(entity.uuid, entity)
         if (removed != null) {
             throw IllegalStateException(
-                    "Duplicate entity in chunk: ${removed.getUUID()}")
+                    "Duplicate entity in chunk: ${removed.uuid}")
         }
     }
 
     internal fun unmapEntity(entity: E): Boolean {
-        return entitiesMut.remove(entity.getUUID()) != null
+        return entitiesMut.remove(entity.uuid) != null
     }
 }

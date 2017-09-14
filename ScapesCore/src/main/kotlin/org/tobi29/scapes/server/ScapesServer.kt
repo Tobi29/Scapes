@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.server
 
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.runBlocking
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.connection.ServerInfo
@@ -29,7 +31,6 @@ import org.tobi29.scapes.engine.utils.newEventDispatcher
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toInt
 import org.tobi29.scapes.engine.utils.tag.toMap
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.plugins.Dimension
 import org.tobi29.scapes.plugins.Plugins
@@ -39,13 +40,14 @@ import org.tobi29.scapes.server.extension.ServerExtensions
 import org.tobi29.scapes.server.format.PlayerData
 import org.tobi29.scapes.server.format.WorldFormat
 import org.tobi29.scapes.server.format.WorldSource
+import kotlin.coroutines.experimental.CoroutineContext
 
 class ScapesServer(source: WorldSource,
                    configMap: TagMap,
                    val serverInfo: ServerInfo,
                    ssl: SSLHandle,
-                   taskExecutor: TaskExecutor) {
-    val taskExecutor = TaskExecutor(taskExecutor, "Server")
+                   taskExecutor: CoroutineContext) {
+    val taskExecutor = taskExecutor + Job(taskExecutor[Job])
     val connections: ConnectionManager
     val connection: ServerConnection
     val plugins: Plugins
@@ -89,7 +91,7 @@ class ScapesServer(source: WorldSource,
         return maxLoadingRadius
     }
 
-    fun taskExecutor(): TaskExecutor {
+    fun taskExecutor(): CoroutineContext {
         return taskExecutor
     }
 
@@ -111,7 +113,8 @@ class ScapesServer(source: WorldSource,
         }, dimension.id(), seed)
     }
 
-    @Synchronized fun registerWorld(
+    @Synchronized
+    fun registerWorld(
             environmentSupplier: (WorldServer) -> EnvironmentServer,
             name: String,
             seed: Long): WorldServer? {
@@ -130,13 +133,15 @@ class ScapesServer(source: WorldSource,
         return world
     }
 
-    @Synchronized fun removeWorld(name: String): Boolean {
+    @Synchronized
+    fun removeWorld(name: String): Boolean {
         val world = worlds.remove(name) ?: return false
-        stopWorld(world)
+        runBlocking { stopWorld(world) }
         return true
     }
 
-    @Synchronized fun deleteWorld(name: String): Boolean {
+    @Synchronized
+    fun deleteWorld(name: String): Boolean {
         logger.info { "Deleting world: $name" }
         removeWorld(name)
         return format.deleteWorld(name)
@@ -173,23 +178,26 @@ class ScapesServer(source: WorldSource,
         stop()
     }
 
-    @Synchronized fun stop() {
+    @Synchronized
+    fun stop() {
         if (stopped) {
             return
         }
         assert { shutdownReason != ShutdownReason.RUNNING }
         stopped = true
-        worlds.values.forEach { this.stopWorld(it) }
-        connections.dispose()
-        taskExecutor.shutdown()
-        format.dispose()
+        runBlocking {
+            worlds.values.forEach { this@ScapesServer.stopWorld(it) }
+            connections.dispose()
+            taskExecutor[Job]?.cancel()
+            format.dispose()
+        }
     }
 
     fun shouldStop(): Boolean {
         return shutdownReason != ShutdownReason.RUNNING
     }
 
-    private fun stopWorld(world: WorldServer) {
+    private suspend fun stopWorld(world: WorldServer) {
         logger.info { "Removing world: ${world.id}" }
         world.stop(defaultWorld())
         format.removeWorld(world)

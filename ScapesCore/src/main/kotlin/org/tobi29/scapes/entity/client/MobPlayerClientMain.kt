@@ -31,6 +31,7 @@ import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.length
 import org.tobi29.scapes.entity.EntityPhysics
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.particle.ParticleEmitterBlock
 import org.tobi29.scapes.packets.PacketInteraction
@@ -58,17 +59,16 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
             this.pos.now()) { world.connection.send(it) }
     private var inputEventDispatcherwner: EventDispatcher? = null
 
+    init {
+        onDamage[PLAYER_LISTENER_TOKEN] = { damage ->
+            world.scene.damageShake(damage)
+        }
+    }
+
     fun updatePosition() {
         sendPositionHandler.submitUpdate(uuid, pos.now(), speed.now(),
                 rot.now(), physicsState.isOnGround, physicsState.slidingWall,
                 physicsState.isInWater, physicsState.isSwimming, true)
-    }
-
-    open fun onNotice(notice: MobClient) {
-    }
-
-    override fun onDamage(damage: Double) {
-        world.scene.damageShake(damage)
     }
 
     override fun move(delta: Double) {
@@ -115,7 +115,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
             if (!world.checkBlocked(pos.intX(), pos.intY(),
                     pos.intZ(), pos2.intX(), pos2.intY(),
                     pos2.intZ())) {
-                onNotice(entity)
+                notice(entity)
             }
         }
         footStep -= delta
@@ -194,7 +194,8 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
         }
     }
 
-    @Synchronized fun openGui(gui: Gui) {
+    @Synchronized
+    fun openGui(gui: Gui) {
         game.engine.guiStack.add("10-Menu", gui)
         game.setHudVisible(false)
     }
@@ -207,7 +208,8 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
         return game.engine.guiStack.has("10-Menu")
     }
 
-    @Synchronized fun closeGui(): Boolean {
+    @Synchronized
+    fun closeGui(): Boolean {
         if (game.engine.guiStack.remove("10-Menu") != null) {
             game.setHudVisible(true)
             world.send(PacketInteraction(world.plugins.registry,
@@ -234,12 +236,12 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
             return
         }
         input.createInGameGUI(game.inputGui, world)
-        val inputEventDispatcherwner = EventDispatcher(game.engine.events){
+        val inputEventDispatcher = EventDispatcher(game.engine.events) {
             inputMode(input)
         }
         this.input = input
-        this.inputEventDispatcherwner = inputEventDispatcherwner
-        inputEventDispatcherwner.enable()
+        this.inputEventDispatcherwner = inputEventDispatcher
+        inputEventDispatcher.enable()
     }
 
     protected abstract fun ListenerRegistrar.inputMode(input: InputModeScapes)
@@ -278,3 +280,5 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
         private val AABBS = ThreadLocal { Pool { AABBElement() } }
     }
 }
+
+private val PLAYER_LISTENER_TOKEN = ListenerToken("Scapes:Player")

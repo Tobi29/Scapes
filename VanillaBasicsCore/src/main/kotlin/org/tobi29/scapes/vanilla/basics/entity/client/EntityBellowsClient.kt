@@ -17,12 +17,12 @@
 package org.tobi29.scapes.vanilla.basics.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
+import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.EntityAbstractClient
-import org.tobi29.scapes.entity.model.EntityModel
+import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.model.EntityModelBellows
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityBellowsServer
@@ -31,10 +31,16 @@ class EntityBellowsClient(type: EntityType<*, *>,
                           world: WorldClient) : EntityAbstractClient(
         type, world, Vector3d.ZERO) {
     private val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
-    val face get() = EntityBellowsServer.parseFace(world.terrain, pos.intX(),
-            pos.intY(), pos.intZ(), plugin.materials.bellows)
+    val face
+        get() = EntityBellowsServer.parseFace(world.terrain, pos.intX(),
+                pos.intY(), pos.intZ(), plugin.materials.bellows)
     var scale = 0.0
         private set
+
+    init {
+        val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
+        attachModel { EntityModelBellows(plugin.modelBellowsShared(), this) }
+    }
 
     override fun read(map: TagMap) {
         super.read(map)
@@ -43,10 +49,5 @@ class EntityBellowsClient(type: EntityType<*, *>,
 
     override fun update(delta: Double) {
         scale = (scale + 0.4 * delta) % 2.0
-    }
-
-    override fun createModel(): EntityModel? {
-        val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
-        return EntityModelBellows(plugin.modelBellowsShared(), this)
     }
 }

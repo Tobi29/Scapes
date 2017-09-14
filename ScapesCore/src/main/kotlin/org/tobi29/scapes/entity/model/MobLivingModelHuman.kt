@@ -22,19 +22,17 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.graphics.push
-import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.client.MobLivingEquippedClient
 import org.tobi29.scapes.entity.particle.ParticleEmitterFallenBodyPart
 import org.tobi29.scapes.entity.particle.ParticleSystem
 
 class MobLivingModelHuman(shared: MobLivingModelHumanShared,
-                          private val entity: MobLivingEquippedClient,
-                          private val texture: Resource<Texture>,
+                          override val entity: MobLivingEquippedClient,
+                          private val texture: Texture,
                           thin: Boolean = false,
                           culling: Boolean = true,
                           private val smoothing: (() -> RotationSmoothing)? = null) : MobLivingModel {
@@ -90,8 +88,10 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         }
     }
 
-    override fun pos(): Vector3d {
-        return pos.now()
+    override fun pos() = pos.now()
+
+    override fun setPos(pos: Vector3d) {
+        this.pos.set(pos)
     }
 
     override fun shapeAABB(aabb: AABB) {
@@ -203,7 +203,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 pos.intZ()) / 15.0f,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
-        texture.get().bind(gl)
+        texture.bind(gl)
         gl.matrixStack.push { matrix ->
             matrix.translate(posRenderX, posRenderY, posRenderZ)
             matrix.rotate(yaw - 90.0, 0.0f, 0.0f, 1.0f)
@@ -364,7 +364,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                     }
                 }
                 rot = min(rot * 2, 1.0)
-                texture.get().bind(gl)
+                texture.bind(gl)
                 armRight.render(1.0f, damageColor, damageColor, 1.0f, gl,
                         shader)
                 if (wieldMode !== WieldMode.LEFT) {

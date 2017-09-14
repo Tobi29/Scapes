@@ -19,7 +19,8 @@ package org.tobi29.scapes.entity
 import org.tobi29.scapes.engine.utils.UUID
 
 interface EntityContainer<E : Entity> {
-    fun addEntity(entity: E): Boolean
+    fun addEntity(entity: E,
+                  spawn: Boolean = false): Boolean
 
     fun removeEntity(entity: E): Boolean
 
@@ -44,7 +45,8 @@ interface EntityContainer<E : Entity> {
                            maxY: Int,
                            maxZ: Int): Sequence<E>
 
-    fun entityAdded(entity: E)
+    fun entityAdded(entity: E,
+                    spawn: Boolean = false)
 
     fun entityRemoved(entity: E)
 

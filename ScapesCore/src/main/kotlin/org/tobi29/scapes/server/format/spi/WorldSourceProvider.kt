@@ -18,8 +18,8 @@ package org.tobi29.scapes.server.format.spi
 
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.server.format.WorldSource
+import kotlin.coroutines.experimental.CoroutineContext
 
 interface WorldSourceProvider {
     fun available(): Boolean
@@ -29,5 +29,5 @@ interface WorldSourceProvider {
     // TODO: @Throws(IOException::class)
     operator fun get(path: FilePath,
                      configMap: TagMap,
-                     taskExecutor: TaskExecutor): WorldSource
+                     taskExecutor: CoroutineContext): WorldSource
 }

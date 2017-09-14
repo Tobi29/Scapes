@@ -44,7 +44,6 @@ import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.model.EntityModel
-import org.tobi29.scapes.entity.model.MobModel
 import org.tobi29.scapes.packets.PacketServer
 
 class WorldClient(val connection: ClientConnection,
@@ -54,9 +53,8 @@ class WorldClient(val connection: ClientConnection,
                   environmentSupplier: (WorldClient) -> EnvironmentClient,
                   playerTag: TagMap,
                   playerID: UUID) : World<EntityClient>(
-        connection.plugins, connection.game.engine.loop,
-        connection.game.engine.taskExecutor, connection.plugins.registry,
-        seed), PlayConnection<PacketServer> {
+        connection.plugins, connection.game.engine.taskExecutor,
+        connection.plugins.registry, seed), PlayConnection<PacketServer> {
     val game = connection.game
     val events = EventDispatcher(game.engine.events) {
         listen<InputModeChangeEvent> { event ->
@@ -67,39 +65,39 @@ class WorldClient(val connection: ClientConnection,
     val player: MobPlayerClientMain
     val terrain: TerrainClient
     val environment: EnvironmentClient
-    val playerModel: MobModel?
     private val infoLayers = ConcurrentHashMap<String, () -> TerrainRenderInfo.InfoLayer>()
     private val entityModels = ConcurrentHashMap<UUID, EntityModel>()
     private var disposed = false
 
     init {
         environment = environmentSupplier(this)
+        terrain = terrainSupplier(this)
+        scene = SceneScapesVoxelWorld(this, cam)
+        connection.plugins.plugins.forEach { it.worldInit(this) }
+
         player = connection.plugins.worldType.newPlayer(this)
         player.setEntityID(playerID)
         player.read(playerTag)
-        terrain = terrainSupplier(this)
-        scene = SceneScapesVoxelWorld(this, cam)
-        playerModel = player.createModel()
-        connection.plugins.plugins.forEach { it.worldInit(this) }
-
         player.setInputMode(game.engine[InputManagerScapes.COMPONENT].inputMode)
+        entityAdded(player, false)
 
         logger.info { "Received player entity: $player with id: $playerID" }
+
+        scene.skybox().init()
+        terrain.init()
     }
 
-    fun addEntityModel(entity: EntityClient) {
-        val model = entity.createModel()
-        if (model != null) {
-            entityModels.put(entity.getUUID(), model)
-        }
+    fun addEntityModel(model: EntityModel) {
+        entityModels.put(model.entity.uuid, model)
     }
 
-    fun removeEntityModel(entity: EntityClient) {
-        entityModels.remove(entity.getUUID())
+    fun removeEntityModel(model: EntityModel) {
+        entityModels.remove(model.entity.uuid)
     }
 
-    override fun addEntity(entity: EntityClient): Boolean {
-        return terrain.addEntity(entity)
+    override fun addEntity(entity: EntityClient,
+                           spawn: Boolean): Boolean {
+        return terrain.addEntity(entity, spawn)
     }
 
     override fun removeEntity(entity: EntityClient): Boolean {
@@ -111,7 +109,7 @@ class WorldClient(val connection: ClientConnection,
     }
 
     override fun getEntity(uuid: UUID): EntityClient? {
-        if (player.getUUID() == uuid) {
+        if (player.uuid == uuid) {
             return player
         }
         return terrain.getEntity(uuid)
@@ -142,12 +140,13 @@ class WorldClient(val connection: ClientConnection,
                 maxZ) + player
     }
 
-    override fun entityAdded(entity: EntityClient) {
-        addEntityModel(entity)
+    override fun entityAdded(entity: EntityClient,
+                             spawn: Boolean) {
+        entity.addedToWorld()
     }
 
     override fun entityRemoved(entity: EntityClient) {
-        removeEntityModel(entity)
+        entity.removedFromWorld()
     }
 
     fun update(delta: Double) {
@@ -170,12 +169,14 @@ class WorldClient(val connection: ClientConnection,
         profilerSection("Skybox") {
             scene.skybox().update(delta)
         }
+        profilerSection("Tasks") {
+            process()
+        }
         spawn = Vector3i(player.getCurrentPos())
     }
 
     fun updateRender(cam: Cam,
                      delta: Double) {
-        playerModel?.renderUpdate(delta)
         entityModels.values.forEach { it.renderUpdate(delta) }
         terrain.renderer.renderUpdate(cam)
     }
@@ -189,7 +190,7 @@ class WorldClient(val connection: ClientConnection,
         val height = round(gl.contentHeight * resolutionMultiplier)
         val animations = scapes.animations
 
-        val shaderTerrain1 = gl.engine.graphics.loadShader(
+        val shaderTerrain1 = gl.loadShader(
                 "Scapes:shader/Terrain", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height),
@@ -197,7 +198,7 @@ class WorldClient(val connection: ClientConnection,
                 "LOD_LOW" to BooleanExpression(false),
                 "LOD_HIGH" to BooleanExpression(true)
         ))
-        val shaderTerrain2 = gl.engine.graphics.loadShader(
+        val shaderTerrain2 = gl.loadShader(
                 "Scapes:shader/Terrain", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height),
@@ -205,69 +206,64 @@ class WorldClient(val connection: ClientConnection,
                 "LOD_LOW" to BooleanExpression(true),
                 "LOD_HIGH" to BooleanExpression(false)
         ))
-        val shaderEntity = gl.engine.graphics.loadShader(
+        val shaderEntity = gl.loadShader(
                 "Scapes:shader/Entity", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
         ))
 
-        val renderParticles = scene.particles().addToPipeline(gl, width, height,
-                cam)
+        val particles = scene.particles().addToPipeline(gl, width, height, cam)
 
         return {
             val sTerrain1 = shaderTerrain1.getAsync()
             val sTerrain2 = shaderTerrain2.getAsync()
             val sEntity = shaderEntity.getAsync()
-            ;{
-            val time = System.currentTimeMillis() % 10000000 / 1000.0f
-            val sunLightReduction = environment.sunLightReduction(
-                    cam.position.doubleX(),
-                    cam.position.doubleY()) / 15.0f
+            val renderParticles = particles()
+            ;{ delta ->
+            val cx = cam.position.x
+            val cy = cam.position.y
+            val cz = cam.position.z
+            val time = gl.timer.toFloat()
+            val sunLightReduction =
+                    environment.sunLightReduction(cx, cy) / 15.0f
             val playerLight = max(
                     player.leftWeapon().material().playerLight(
                             player.leftWeapon()),
                     player.rightWeapon().material().playerLight(
                             player.rightWeapon()))
-            val sunlightNormal = environment.sunLightNormal(
-                    cam.position.doubleX(),
-                    cam.position.doubleY())
-            sTerrain1.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
-                    scene.fogB())
-            sTerrain1.setUniform1f(gl, 5,
-                    scene.fogDistance() * scene.renderDistance())
+            val sunlightNormal = environment.sunLightNormal(cx, cy)
+            val snx = sunlightNormal.floatX()
+            val sny = sunlightNormal.floatY()
+            val snz = sunlightNormal.floatZ()
+            val fr = scene.fogR()
+            val fg = scene.fogG()
+            val fb = scene.fogB()
+            val d = scene.fogDistance() * scene.renderDistance()
+            sTerrain1.setUniform3f(gl, 4, fr, fg, fb)
+            sTerrain1.setUniform1f(gl, 5, d)
             sTerrain1.setUniform1i(gl, 6, 1)
             sTerrain1.setUniform1f(gl, 7, time)
             sTerrain1.setUniform1f(gl, 8, sunLightReduction)
-            sTerrain1.setUniform3f(gl, 9, sunlightNormal.floatX(),
-                    sunlightNormal.floatY(), sunlightNormal.floatZ())
+            sTerrain1.setUniform3f(gl, 9, snx, sny, snz)
             sTerrain1.setUniform1f(gl, 10, playerLight)
-            sTerrain2.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
-                    scene.fogB())
-            sTerrain2.setUniform1f(gl, 5,
-                    scene.fogDistance() * scene.renderDistance())
+            sTerrain2.setUniform3f(gl, 4, fr, fg, fb)
+            sTerrain2.setUniform1f(gl, 5, d)
             sTerrain2.setUniform1i(gl, 6, 1)
             sTerrain2.setUniform1f(gl, 7, time)
             sTerrain2.setUniform1f(gl, 8, sunLightReduction)
-            sTerrain2.setUniform3f(gl, 9, sunlightNormal.floatX(),
-                    sunlightNormal.floatY(), sunlightNormal.floatZ())
+            sTerrain2.setUniform3f(gl, 9, snx, sny, snz)
             sTerrain2.setUniform1f(gl, 10, playerLight)
-            sEntity.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
-                    scene.fogB())
-            sEntity.setUniform1f(gl, 5,
-                    scene.fogDistance() * scene.renderDistance())
+            sEntity.setUniform3f(gl, 4, fr, fg, fb)
+            sEntity.setUniform1f(gl, 5, d)
             sEntity.setUniform1i(gl, 6, 1)
             sEntity.setUniform1f(gl, 7, time)
             sEntity.setUniform1f(gl, 8, sunLightReduction)
-            sEntity.setUniform3f(gl, 9, sunlightNormal.floatX(),
-                    sunlightNormal.floatY(), sunlightNormal.floatZ())
+            sEntity.setUniform3f(gl, 9, snx, sny, snz)
             sEntity.setUniform1f(gl, 10, playerLight)
             gl.setBlending(BlendingMode.NONE)
             scene.terrainTextureRegistry().texture.bind(gl)
             terrain.renderer.render(gl, sTerrain1, sTerrain2, cam, debug)
             gl.setBlending(BlendingMode.NORMAL)
-            if (game.hud.visible) {
-                playerModel?.render(gl, this, cam, sEntity)
-            }
             val aabb = AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
             entityModels.values.asSequence().filter {
                 it.shapeAABB(aabb)
@@ -277,7 +273,7 @@ class WorldClient(val connection: ClientConnection,
             }
             scene.terrainTextureRegistry().texture.bind(gl)
             terrain.renderer.renderAlpha(gl, sTerrain1, sTerrain2, cam)
-            renderParticles()
+            renderParticles(delta)
         }
         }
     }
@@ -342,9 +338,10 @@ class WorldClient(val connection: ClientConnection,
         return disposed
     }
 
-    fun dispose() {
+    suspend fun dispose() {
         events.disable()
         terrain.dispose()
+        entityRemoved(player)
         player.setInputMode(null)
         disposed = true
     }

@@ -20,18 +20,18 @@ import org.tobi29.scapes.client.gui.GuiComponentBar
 import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.GuiLayoutData
-import org.tobi29.scapes.engine.utils.tag.map
-import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
 
 class GuiComponentCondition(parent: GuiLayoutData,
                             private val player: MobPlayerClientMain) : GuiComponentGroup(
         parent) {
 
     init {
+        val condition = player[ComponentMobLivingServerCondition.COMPONENT]
         addVert(0.0, 0.0, -1.0, -1.0) {
             GuiComponentBar(it, 0.0f, 1.0f, 0.0f, 0.6f, 1.0) {
-                value("Stamina")
+                condition.stamina
             }
         }
         val bottom = addVert(0.0, 0.0, -1.0, -2.0,
@@ -43,15 +43,14 @@ class GuiComponentCondition(parent: GuiLayoutData,
         val bottomRight = bottom.addHori(0.0, 0.0, -1.0,
                 -1.0, ::GuiComponentGroup)
         bottomRight.addVert(0.0, 0.0, -1.0, -1.0) {
-            GuiComponentBar(it, 1.0f, 0.5f, 0.0f, 0.6f, 1.0) { value("Hunger") }
+            GuiComponentBar(it, 1.0f, 0.5f, 0.0f, 0.6f, 1.0) {
+                condition.hunger
+            }
         }
         bottomRight.addVert(0.0, 0.0, -1.0, -1.0) {
-            GuiComponentBar(it, 0.0f, 0.2f, 1.0f, 0.6f, 1.0) { value("Thirst") }
+            GuiComponentBar(it, 0.0f, 0.2f, 1.0f, 0.6f, 1.0) {
+                condition.thirst
+            }
         }
-    }
-
-    private fun value(name: String): Double {
-        val conditionTag = player.metaData("Vanilla").map("Condition")
-        return conditionTag?.get(name)?.toDouble() ?: 0.0
     }
 }

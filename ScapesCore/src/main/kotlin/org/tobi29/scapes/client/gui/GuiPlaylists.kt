@@ -39,7 +39,6 @@ class GuiPlaylists(state: GameState,
         val day = slab.addHori(5.0, 5.0, -1.0, -1.0) { button(it, "Day") }
         val night = slab.addHori(5.0, 5.0, -1.0, -1.0) { button(it, "Night") }
         val battle = slab.addHori(5.0, 5.0, -1.0, -1.0) { button(it, "Battle") }
-        selection(day, night, battle)
         scrollPane = pane.addVert(16.0, 5.0, -1.0, -1.0) {
             GuiComponentScrollPane(it, 70)
         }.viewport
@@ -100,8 +99,6 @@ class GuiPlaylists(state: GameState,
             val delete = addHori(2.0, 2.0, 60.0, 15.0) {
                 button(it, 12, "Delete")
             }
-            selection(play, delete)
-
             play.on(GuiEvent.CLICK_LEFT) {
                 state.engine.notifications.add {
                     GuiNotificationSimple(it,

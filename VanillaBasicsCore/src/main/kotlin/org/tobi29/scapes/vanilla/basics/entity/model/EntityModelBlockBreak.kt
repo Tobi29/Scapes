@@ -33,12 +33,13 @@ import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBlockBreakClient
 
 class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
-                            private val entity: EntityBlockBreakClient) : EntityModel {
+                            override val entity: EntityBlockBreakClient) : EntityModel {
     private val pos: MutableVector3d
     private val pointerPanes = Pool { PointerPane() }
     private val model: Model
     private val texture = Array(9) {
-        entity.world.game.engine.graphics.textures["Scapes:image/entity/Break${it + 1}"]
+        entity.world.game.engine.graphics.textures.getNow(
+                "Scapes:image/entity/Break${it + 1}")
     }
 
     init {
@@ -46,8 +47,10 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
         model = shared.model
     }
 
-    override fun pos(): Vector3d {
-        return pos.now()
+    override fun pos() = pos.now()
+
+    override fun setPos(pos: Vector3d) {
+        this.pos.set(pos)
     }
 
     override fun shapeAABB(aabb: AABB) {
@@ -85,7 +88,7 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
                         pos.intZ()) / 15.0f,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
-        texture[i - 1].get().bind(gl)
+        texture[i - 1].bind(gl)
         for (pane in pointerPanes) {
             gl.matrixStack.push { matrix ->
                 matrix.translate(

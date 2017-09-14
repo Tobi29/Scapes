@@ -15,32 +15,38 @@
  */
 package org.tobi29.scapes.entity.particle
 
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
+import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.sleepNanos
-import org.tobi29.scapes.engine.utils.task.Joiner
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.engine.utils.task.Timer
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.scapes.engine.utils.task.launchThread
+import org.tobi29.scapes.engine.utils.task.loop
+import java.util.concurrent.TimeUnit
 
 class ParticleSystem(val world: WorldClient,
                      tps: Double) {
     private val emitters = ConcurrentHashMap<Class<out ParticleEmitter<*>>, ParticleEmitter<*>>()
-    private val joiner: Joiner
+    private var updateJob: Pair<Job, AtomicBoolean>? = null
 
     init {
-        joiner = world.game.engine.taskExecutor.runThread({ joiner ->
-            val timer = Timer()
-            val maxDiff = Timer.toDiff(tps)
-            timer.init()
-            while (!joiner.marked) {
-                val tickDiff = timer.cap(maxDiff, ::sleepNanos)
-                update(Timer.toDelta(tickDiff).coerceIn(0.0001, 0.1))
+        // TODO: Make init method
+        val stop = AtomicBoolean(false)
+        updateJob = launchThread("Particles",
+                world.game.engine.taskExecutor[Job]) {
+            Timer().apply { init() }.loop(Timer.toDiff(tps),
+                    { delay(it, TimeUnit.NANOSECONDS) }) { delta ->
+                if (stop.get()) return@loop false
+
+                update(delta.coerceIn(0.0001, 0.1))
+
+                true
             }
-        }, "Particles", TaskExecutor.Priority.MEDIUM)
+        } to stop
     }
 
     fun <P : ParticleEmitter<*>> register(emitter: P) {
@@ -64,21 +70,25 @@ class ParticleSystem(val world: WorldClient,
     fun addToPipeline(gl: GL,
                       width: Int,
                       height: Int,
-                      cam: Cam): () -> Unit {
-        return chain(*emitters.values.asSequence().map {
-            val render = it.addToPipeline(gl, width, height, cam);
-            {
-                it.pollRender()
-                render()
+                      cam: Cam): suspend () -> (Double) -> Unit {
+        val emitters = emitters.values.map {
+            it to it.addToPipeline(gl, width, height, cam)
+        }
+        return {
+            chain(*emitters.map { (emitter, render) ->
+                val r = render()
+                ;{ delta: Double ->
+                emitter.pollRender()
+                r(delta)
             }
-        }.toArray())
+            }.toTypedArray())
+        }
     }
 
-    fun world(): WorldClient {
-        return world
-    }
-
-    fun dispose() {
-        joiner.join()
+    suspend fun dispose() {
+        updateJob?.let { (job, stop) ->
+            stop.set(true)
+            job.join()
+        }
     }
 }

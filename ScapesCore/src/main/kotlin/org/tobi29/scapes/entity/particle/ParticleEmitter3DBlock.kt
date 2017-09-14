@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
+import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.times
 import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 
@@ -65,19 +66,50 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
     override fun addToPipeline(gl: GL,
                                width: Int,
                                height: Int,
-                               cam: Cam): () -> Unit {
-        val shader = gl.engine.graphics.loadShader(
+                               cam: Cam): suspend () -> (Double) -> Unit {
+        val shader = gl.loadShader(
                 "Scapes:shader/Entity", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
         ))
-        return render@ {
+        return {
+            val s = shader.getAsync()
+            ;render@ {
             if (!hasAlive) {
                 return@render
             }
             val world = system.world
             val terrain = world.terrain
-            val s = shader.get()
+            val scene = world.scene
+            val environment = world.environment
+            val player = world.player
+            val cx = cam.position.x
+            val cy = cam.position.y
+            val cz = cam.position.z
+            val time = gl.timer.toFloat()
+            val sunLightReduction =
+                    environment.sunLightReduction(cx, cy) / 15.0f
+            val playerLight = max(
+                    player.leftWeapon().material().playerLight(
+                            player.leftWeapon()),
+                    player.rightWeapon().material().playerLight(
+                            player.rightWeapon()))
+            val sunlightNormal = environment.sunLightNormal(cx, cy)
+            val snx = sunlightNormal.floatX()
+            val sny = sunlightNormal.floatY()
+            val snz = sunlightNormal.floatZ()
+            val fr = scene.fogR()
+            val fg = scene.fogG()
+            val fb = scene.fogB()
+            val d = scene.fogDistance() * scene.renderDistance()
+            s.setUniform3f(gl, 4, fr, fg, fb)
+            s.setUniform1f(gl, 5, d)
+            s.setUniform1i(gl, 6, 1)
+            s.setUniform1f(gl, 7, time)
+            s.setUniform1f(gl, 8, sunLightReduction)
+            s.setUniform3f(gl, 9, snx, sny, snz)
+            s.setUniform1f(gl, 10, playerLight)
+            gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
             for (instance in instances) {
                 if (instance.state != ParticleInstance.State.ALIVE) {
                     continue
@@ -88,9 +120,9 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
                 if (terrain.block(x, y, z) {
                     !isSolid(it) || isTransparent(it)
                 }) {
-                    val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
-                    val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
-                    val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
+                    val posRenderX = (instance.pos.doubleX() - cx).toFloat()
+                    val posRenderY = (instance.pos.doubleY() - cy).toFloat()
+                    val posRenderZ = (instance.pos.doubleZ() - cz).toFloat()
                     gl.matrixStack.push { matrix ->
                         matrix.translate(posRenderX, posRenderY, posRenderZ)
                         matrix.rotate(instance.rotation.floatZ(), 0f, 0f, 1f)
@@ -102,6 +134,7 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
                     }
                 }
             }
+        }
         }
     }
 

@@ -17,29 +17,31 @@
 package org.tobi29.scapes.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
+import org.tobi29.scapes.engine.utils.ComponentStorage
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.assert
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.scapes.entity.ComponentEntity
+import org.tobi29.scapes.entity.ComponentSerializable
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.ListenerToken
 
-open class EntityAbstractServer(override val type: EntityType<*, *>,
-                                override val world: WorldServer,
+open class EntityAbstractServer(override final val type: EntityType<*, *>,
+                                override final val world: WorldServer,
                                 pos: Vector3d) : EntityServer {
-    protected val spawnListeners: MutableMap<String, () -> Unit> = ConcurrentHashMap()
-    protected val updateListeners: MutableMap<String, (Double) -> Unit> = ConcurrentHashMap()
-    override val registry = world.registry
+    override final val registry = world.registry
+    override val componentStorage = ComponentStorage<ComponentEntity>()
     protected val pos = MutableVector3d(pos)
-    override var uuid: UUID = UUID.randomUUID()
+    override final var uuid: UUID = UUID.randomUUID()
         protected set
     protected var metaData = MutableTagMap()
-
-    override fun getUUID(): UUID {
-        return uuid
-    }
-
+    override final val onAddedToWorld = ConcurrentHashMap<ListenerToken, () -> Unit>()
+    override final val onRemovedFromWorld = ConcurrentHashMap<ListenerToken, () -> Unit>()
+    override final val onSpawn = ConcurrentHashMap<ListenerToken, () -> Unit>()
+    override final val onUpdate = ConcurrentHashMap<ListenerToken, (Double) -> Unit>()
 
     override fun setEntityID(uuid: UUID) {
         this.uuid = uuid
@@ -59,31 +61,39 @@ open class EntityAbstractServer(override val type: EntityType<*, *>,
     override fun write(map: ReadWriteTagMap) {
         map["Pos"] = pos.now().toTag()
         map["MetaData"] = metaData.toTag()
+        map["Components"] = componentData()
     }
 
     override fun read(map: TagMap) {
         map["Pos"]?.toMap()?.let { pos.set(it) }
         map["MetaData"]?.toMap()?.let { metaData = it.toMutTag() }
+        map["Components"]?.toMap()?.let { componentData ->
+            for (component in components) {
+                if (component is ComponentSerializable) {
+                    componentData[component.id]?.toMap()?.let {
+                        component.read(it)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun componentData() = TagMap {
+        for (component in components) {
+            if (component is ComponentSerializable) {
+                this[component.id] = component.toTag()
+            }
+        }
     }
 
     override fun metaData(category: String) = metaData.mapMut(category)
 
-    override fun updateListeners(delta: Double) {
-        updateListeners.values.forEach { it(delta) }
+    override final fun updateListeners(delta: Double) {
+        onUpdate.values.forEach { it(delta) }
     }
 
-    override fun onSpawn(id: String,
-                         listener: () -> Unit) {
-        spawnListeners[id] = listener
-    }
-
-    override fun onSpawn() {
-        spawnListeners.values.forEach { it() }
-    }
-
-    override fun onUpdate(id: String,
-                          listener: (Double) -> Unit) {
-        updateListeners[id] = listener
+    override final fun spawn() {
+        onSpawn.values.forEach { it() }
     }
 
     companion object {

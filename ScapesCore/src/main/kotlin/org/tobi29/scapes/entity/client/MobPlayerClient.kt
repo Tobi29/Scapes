@@ -38,6 +38,10 @@ abstract class MobPlayerClient(type: EntityType<*, *>,
     var inventorySelectRight = 9
     protected var skin: Checksum? = null
 
+    init {
+        registerComponent(CreatureType.COMPONENT, CreatureType.CREATURE)
+    }
+
     fun inventorySelectLeft(): Int {
         return inventorySelectLeft
     }
@@ -48,10 +52,6 @@ abstract class MobPlayerClient(type: EntityType<*, *>,
 
     fun nickname(): String {
         return nickname
-    }
-
-    override fun creatureType(): CreatureType {
-        return CreatureType.CREATURE
     }
 
     override fun read(map: TagMap) {

@@ -57,13 +57,6 @@ class GuiMainMenu(state: GameState,
             GuiComponentFlowText(it, "v$VERSION")
         }
 
-        selection(singlePlayer)
-        selection(multiPlayer)
-        selection(options)
-        selection(playlists)
-        selection(screenshots)
-        selection(quit)
-
         singlePlayer.on(GuiEvent.CLICK_LEFT) { event ->
             state.engine.guiStack.swap(this,
                     GuiSaveSelect(state, this, scene, style))

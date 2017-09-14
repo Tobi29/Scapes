@@ -31,12 +31,10 @@ import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.plus
 import org.tobi29.scapes.engine.utils.math.vector.times
-import org.tobi29.scapes.engine.utils.tag.map
-import org.tobi29.scapes.engine.utils.tag.toBoolean
-import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterRain
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterSnow
+import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.gui.GuiComponentCondition
@@ -114,7 +112,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 dir += 22.5f
             }
         }
-        this.cloudMesh = cloudMesh.finish(world.game.engine)
+        this.cloudMesh = cloudMesh.finish(world.game.engine.graphics)
         lastX = 1.0
         lastY = 0.0
         val skyboxMesh = Mesh(true)
@@ -137,7 +135,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 dir += 22.5f
             }
         }
-        this.skyboxMesh = skyboxMesh.finish(world.game.engine)
+        this.skyboxMesh = skyboxMesh.finish(world.game.engine.graphics)
         lastX = 1.0
         lastY = 0.0
         val skyboxBottomMesh = Mesh(true)
@@ -162,7 +160,8 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             lastY = y
             dir += 22.5f
         }
-        this.skyboxBottomMesh = skyboxBottomMesh.finish(world.game.engine)
+        this.skyboxBottomMesh = skyboxBottomMesh.finish(
+                world.game.engine.graphics)
         val starMesh = Mesh()
         val random = Random(seed)
         for (i in 0..1999) {
@@ -174,7 +173,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             addStar(0.01 + random.nextDouble() * 0.02, 0,
                     sqr(random.nextDouble()), starMesh, random)
         }
-        this.starMesh = starMesh.finish(world.game.engine)
+        this.starMesh = starMesh.finish(world.game.engine.graphics)
     }
 
     override fun update(delta: Double) {
@@ -246,24 +245,13 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                         pos.intZ()))
         weatherDebug?.setValue(weather)
         biomeDebug?.setValue(biomeGenerator.get(pos.x, pos.y))
-        val conditionTag = player.metaData("Vanilla").map("Condition")
-        conditionTag?.get("Stamina")?.toDouble()?.let {
-            staminaDebug?.setValue(it)
-        }
-        conditionTag?.get("Wake")?.toDouble()?.let {
-            wakeDebug?.setValue(it)
-        }
-        conditionTag?.get("Hunger")?.toDouble()?.let {
-            hungerDebug?.setValue(it)
-        }
-        conditionTag?.get("Thirst")?.toDouble()?.let {
-            thirstDebug?.setValue(it)
-        }
-        conditionTag?.get("BodyTemperature")?.toDouble()?.let {
-            bodyTemperatureDebug?.setValue(it)
-        }
-        conditionTag?.get("Sleeping")?.toBoolean()?.let {
-            sleepingDebug?.setValue(it)
+        player.getOrNull(ComponentMobLivingServerCondition.COMPONENT)?.let {
+            staminaDebug?.setValue(it.stamina)
+            wakeDebug?.setValue(it.wake)
+            hungerDebug?.setValue(it.hunger)
+            thirstDebug?.setValue(it.thirst)
+            bodyTemperatureDebug?.setValue(it.bodyTemperature)
+            sleepingDebug?.setValue(it.sleeping)
         }
         exposureDebug?.setValue(exposure)
     }
@@ -339,24 +327,23 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
             fogB = mix(0.2f, 0.9f * skyLight * fogBrightness, sunsetLight)
             fogDistance = 1.0f
         }
-        val conditionTag = world.player.metaData("Vanilla").map("Condition")
-        val temperature = conditionTag?.get(
-                "BodyTemperature")?.toDouble() ?: 0.0
-        val heatstroke = max((temperature - 37.1) * 7.5, 0.0) + 1.0
-        exposure += (heatstroke * 0.3 - exposure) * factor
+        player.getOrNull(ComponentMobLivingServerCondition.COMPONENT)?.let {
+            val heatstroke = max((it.bodyTemperature - 37.1) * 7.5, 0.0) + 1.0
+            exposure += (heatstroke * 0.3 - exposure) * factor
+        }
     }
 
     override fun appendToPipeline(gl: GL,
                                   cam: Cam): suspend () -> (Double) -> Unit {
         val scene = world.scene
         val player = world.player
-        val shaderSkybox = gl.engine.graphics.loadShader(
+        val shaderSkybox = gl.loadShader(
                 "VanillaBasics:shader/Skybox")
-        val shaderGlow = gl.engine.graphics.loadShader(
+        val shaderGlow = gl.loadShader(
                 "VanillaBasics:shader/Glow")
-        val shaderClouds = gl.engine.graphics.loadShader(
+        val shaderClouds = gl.loadShader(
                 "VanillaBasics:shader/Clouds")
-        val shaderTextured = gl.engine.graphics.loadShader(SHADER_TEXTURED)
+        val shaderTextured = gl.loadShader(SHADER_TEXTURED)
         return {
             val sSkybox = shaderSkybox.getAsync()
             val sGlow = shaderGlow.getAsync()
@@ -374,7 +361,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                         1.0).toFloat()
                 val skyboxLight = skyLight * fogBrightness
                 // Sky
-                gl.engine.graphics.textureEmpty().bind(gl)
+                gl.graphics.textureEmpty().bind(gl)
                 gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
                 sSkybox.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
                         scene.fogB())
@@ -426,7 +413,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 // Clouds
                 fbo.texturesColor[0].bind(gl)
                 cloudMesh.render(gl, sSkybox)
-                gl.engine.graphics.textureEmpty().bind(gl)
+                gl.graphics.textureEmpty().bind(gl)
                 // Bottom
                 skyboxBottomMesh.render(gl, sSkybox)
             }

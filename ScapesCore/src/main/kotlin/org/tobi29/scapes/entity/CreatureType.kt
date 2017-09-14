@@ -16,11 +16,15 @@
 
 package org.tobi29.scapes.entity
 
-enum class CreatureType(private val despawn: Boolean) {
+enum class CreatureType(private val despawn: Boolean) : ComponentEntity {
     CREATURE(false),
     MONSTER(true);
 
     fun doesDespawn(): Boolean {
         return despawn
+    }
+
+    companion object {
+        val COMPONENT = ComponentTypeRegisteredEntity<MobLiving, CreatureType>()
     }
 }

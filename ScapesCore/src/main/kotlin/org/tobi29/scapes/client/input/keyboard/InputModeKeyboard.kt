@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.client.input.keyboard
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.gui.GuiControlsDefault
@@ -23,7 +25,6 @@ import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
-import org.tobi29.scapes.engine.graphics.GraphicsSystem
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiController
 import org.tobi29.scapes.engine.gui.GuiControllerMouse
@@ -36,6 +37,7 @@ import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.graphics.encodePNG
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.write
+import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.times
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
@@ -272,7 +274,8 @@ class InputModeKeyboard(engine: ScapesEngine,
                 }
                 if (event.key == ControllerKey.KEY_F2) {
                     engine.graphics.requestScreenshot { image ->
-                        engine.taskExecutor.runTask({
+                        launch(engine.taskExecutor + CoroutineName(
+                                "Write-Screenshot")) {
                             val scapes = engine[ScapesClient.COMPONENT]
                             val path = scapes.home.resolve(
                                     "screenshots").resolve(
@@ -280,9 +283,9 @@ class InputModeKeyboard(engine: ScapesEngine,
                             try {
                                 write(path) { encodePNG(image, it, 9, false) }
                             } catch (e: IOException) {
-                                GraphicsSystem.logger.error { "Error saving screenshot: $e" }
+                                logger.error { "Error saving screenshot: $e" }
                             }
-                        }, "Write-Screenshot")
+                        }
                     }
                     event.muted = true
                     return@listen
@@ -292,11 +295,7 @@ class InputModeKeyboard(engine: ScapesEngine,
                     val control = controller.isDown(
                             ControllerKey.KEY_CONTROL_LEFT)
                     if (shift && control) {
-                        // TODO: Implement
-                        //ScapesEngine.crashReport(path("."), { engine },
-                        //        Throwable("Debug report"))
-                        event.muted = true
-                        return@listen
+                        throw DebugCrashException()
                     } else if (Debug.enabled()) {
                         if (shift) {
                             engine.profiler.visible = !engine.profiler.visible
@@ -463,9 +462,11 @@ class InputModeKeyboard(engine: ScapesEngine,
         return "Keyboard + Mouse"
     }
 
-    companion object {
+    companion object : KLogging() {
         private fun numberKey(i: Int) = ControllerKey.valueOf(
                 "KEY_$i") ?: throw IllegalArgumentException(
                 "Invalid number key: $i")
     }
+
+    private class DebugCrashException : Exception("Debug crash report")
 }

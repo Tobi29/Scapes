@@ -24,15 +24,15 @@ import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.math.PointerPane
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBase
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManager
+import kotlin.coroutines.experimental.CoroutineContext
 
 abstract class TerrainInfinite<E : Entity, C : TerrainInfiniteChunk<E>>(
         zSize: Int,
-        taskExecutor: TaskExecutor,
+        taskExecutor: CoroutineContext,
         air: BlockType,
         registry: Registries,
         chunkManager: TerrainInfiniteChunkManager<C>,
@@ -128,15 +128,15 @@ abstract class TerrainInfinite<E : Entity, C : TerrainInfiniteChunk<E>>(
         return s
     }
 
-    override fun entityAdded(entity: E) {
-        val removed = entityMap.put(entity.getUUID(), entity)
+    override fun entityAdded(entity: E,
+                             spawn: Boolean) {
+        val removed = entityMap.put(entity.uuid, entity)
         if (removed != null) {
-            throw IllegalStateException(
-                    "Duplicate entity: " + removed.getUUID())
+            throw IllegalStateException("Duplicate entity: ${removed.uuid}")
         }
     }
 
     override fun entityRemoved(entity: E) {
-        entityMap.remove(entity.getUUID())
+        entityMap.remove(entity.uuid)
     }
 }

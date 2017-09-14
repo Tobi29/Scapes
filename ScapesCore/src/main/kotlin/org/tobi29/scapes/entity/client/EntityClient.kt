@@ -22,13 +22,14 @@ import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.model.EntityModel
+import org.tobi29.scapes.packets.PacketEntityComponentData
 import org.tobi29.scapes.packets.PacketEntityMetaData
 
 interface EntityClient : Entity {
     val registry: Registries
     val world: WorldClient
-    val uuid: UUID
 
     fun setEntityID(uuid: UUID)
 
@@ -36,12 +37,9 @@ interface EntityClient : Entity {
 
     fun metaData(category: String): MutableTagMap
 
-    fun update(delta: Double) {
-    }
+    fun update(delta: Double) {}
 
-    fun createModel(): EntityModel? {
-        return null
-    }
+    fun processPacket(packet: PacketEntityComponentData)
 
     fun processPacket(packet: PacketEntityMetaData)
 
@@ -51,5 +49,15 @@ interface EntityClient : Entity {
             return world.registry.get<EntityType<*, *>>("Core",
                     "Entity")[id].createClient(world)
         }
+    }
+}
+
+private val ATTACH_MODEL_LISTENER_TOKEN = ListenerToken("Scapes:EntityModel")
+fun EntityClient.attachModel(supplier: () -> EntityModel) {
+    onAddedToWorld[ATTACH_MODEL_LISTENER_TOKEN] = {
+        registerComponent(EntityModel.COMPONENT, supplier())
+    }
+    onRemovedFromWorld[ATTACH_MODEL_LISTENER_TOKEN] = {
+        unregisterComponent(EntityModel.COMPONENT)
     }
 }

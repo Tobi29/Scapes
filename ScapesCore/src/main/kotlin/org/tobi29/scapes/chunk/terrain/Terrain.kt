@@ -46,7 +46,13 @@ interface TerrainClient : TerrainEntity<EntityClient> {
 
     fun process(packet: PacketBlockChange)
 
-    fun dispose()
+    fun init() {
+        throw UnsupportedOperationException("Terrain not disposable")
+    }
+
+    suspend fun dispose() {
+        throw UnsupportedOperationException("Terrain not disposable")
+    }
 }
 
 interface TerrainServer : TerrainEntity<EntityServer> {
@@ -83,7 +89,7 @@ interface TerrainServer : TerrainEntity<EntityServer> {
 
     fun chunks(consumer: (TerrainChunk) -> Unit)
 
-    fun dispose()
+    suspend fun dispose()
 }
 
 interface TerrainMutable : Terrain {

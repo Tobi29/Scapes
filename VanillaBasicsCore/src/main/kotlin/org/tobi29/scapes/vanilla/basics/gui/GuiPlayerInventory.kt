@@ -26,8 +26,6 @@ class GuiPlayerInventory(player: MobPlayerClientMainVB,
     init {
         val crafting = row(topPane) { button(it, "Crafting") }
 
-        selection(crafting)
-
         crafting.on(GuiEvent.CLICK_LEFT) {
             player.openGui(
                     GuiCrafting(false, player, player.game.engine.guiStyle))

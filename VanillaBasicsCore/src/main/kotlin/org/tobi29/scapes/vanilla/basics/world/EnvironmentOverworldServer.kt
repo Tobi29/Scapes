@@ -25,14 +25,16 @@ import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.math.vector.Vector3i
+import org.tobi29.scapes.engine.utils.math.vector.normalizeSafe
+import org.tobi29.scapes.engine.utils.math.vector.times
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.CreatureType
-import org.tobi29.scapes.entity.WieldMode
+import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.server.EntityContainerServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
-import org.tobi29.scapes.packets.PacketEntityMetaData
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.terrain.TerrainChunk
@@ -57,7 +59,6 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
     private val biomeGenerator: BiomeGenerator
     private var simulationCount = 0L
     private var syncWait = 2.0
-    private var playerUpdateWait = 0.25
     private var tickWait = 0.05
 
     init {
@@ -215,7 +216,7 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
         world.entityListener({ entity ->
             if (entity is EntityContainerServer) {
                 var itemUpdateWait = 1.0
-                entity.onUpdate("VanillaBasics:Items", { delta ->
+                entity.onUpdate[ITEMS_LISTENER_TOKEN] = { delta ->
                     itemUpdateWait -= delta
                     while (itemUpdateWait <= 0.0) {
                         itemUpdateWait += 1.0
@@ -235,14 +236,14 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                             flag
                         }
                     }
-                })
+                }
             }
             if (entity is MobItemServer) {
                 var itemUpdateWait = 1.0
                 val pos = entity.getCurrentPos()
                 val temperature = climateGenerator.temperature(
                         pos.intX(), pos.intY(), pos.intZ())
-                entity.onUpdate("VanillaBasics:Items", { delta ->
+                entity.onUpdate[ITEMS_LISTENER_TOKEN] = { delta ->
                     itemUpdateWait -= delta
                     while (itemUpdateWait <= 0.0) {
                         itemUpdateWait += 1.0
@@ -251,49 +252,17 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                             type.heat(entity.item, temperature, 20.0)
                         }
                     }
-                })
+                }
             }
         })
         world.entityListener({ entity ->
             if (entity is MobPlayerServer) {
-                entity.onSpawn("VanillaBasics:Condition", {
-                    entity.metaData("Vanilla").syncMapMut(
-                            "Condition") { conditionTag ->
-                        conditionTag["Stamina"] = 1.0.toTag()
-                        conditionTag["Wake"] = 1.0.toTag()
-                        conditionTag["Hunger"] = 1.0.toTag()
-                        conditionTag["Thirst"] = 1.0.toTag()
-                        conditionTag["BodyTemperature"] = 37.0.toTag()
-                    }
-                })
-                entity.onJump("VanillaBasics:Condition", {
-                    entity.metaData("Vanilla").syncMapMut(
-                            "Condition") { conditionTag ->
-                        val stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
-                        val bodyTemperature = conditionTag["BodyTemperature"]?.toDouble() ?: 0.0
-                        conditionTag["Stamina"] = (stamina - 0.15).toTag()
-                        conditionTag["BodyTemperature"] = (bodyTemperature + 0.1).toTag()
-                    }
-                })
-                entity.onPunch("VanillaBasics:Condition", { strength ->
-                    var attackStrength = strength
-                    if (entity.wieldMode() != WieldMode.DUAL) {
-                        attackStrength *= 1.7
-                    }
-                    entity.metaData("Vanilla").syncMapMut(
-                            "Condition") { conditionTag ->
-                        val stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
-                        val bodyTemperature = conditionTag["BodyTemperature"]?.toDouble() ?: 0.0
-                        conditionTag["Stamina"] = (stamina - 0.04 * attackStrength).toTag()
-                        conditionTag["BodyTemperature"] = (bodyTemperature + 0.03 * attackStrength).toTag()
-                    }
-                })
-                entity.onDeath("VanillaBasics:DeathMessage", {
+                entity.onDeath[DEATH_MESSAGE_TOKEN] = {
                     world.connection.server.events.fire(
                             MessageEvent(entity.connection(), MessageLevel.CHAT,
                                     "${entity.nickname()} died!",
                                     targetWorld = world))
-                })
+                }
             }
         })
     }
@@ -341,98 +310,6 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
 
     override fun tick(delta: Double) {
         climateGenerator.add(0.000277777777778 * delta)
-        playerUpdateWait -= delta
-        while (playerUpdateWait <= 0.0) {
-            playerUpdateWait += 0.25
-            val random = threadLocalRandom()
-            world.players().forEach {
-                val health = it.health()
-                val maxHealth = it.maxHealth()
-                it.metaData("Vanilla").syncMapMut("Condition") { conditionTag ->
-                    var stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
-                    var wake = conditionTag["Wake"]?.toDouble() ?: 0.0
-                    var hunger = conditionTag["Hunger"]?.toDouble() ?: 0.0
-                    var thirst = conditionTag["Thirst"]?.toDouble() ?: 0.0
-                    var bodyTemperature = conditionTag["BodyTemperature"]?.toDouble() ?: 0.0
-                    var sleeping = conditionTag["Sleeping"]?.toBoolean() ?: false
-                    val ground = it.isOnGround
-                    val inWater = it.isInWater
-                    val pos = it.getCurrentPos()
-                    val temperature = climateGenerator.temperature(pos.intX(),
-                            pos.intY(), pos.intZ())
-                    val regenFactor = if (sleeping) 1.5 else 1.0
-                    val depleteFactor = if (sleeping) 0.05 else 1.0
-                    if (stamina > 0.2 && health < maxHealth) {
-                        val rate = stamina * 0.5
-                        it.heal(rate)
-                        stamina -= rate * 0.1
-                    }
-                    if (inWater) {
-                        val rate = clamp(it.speed().lengthSqr() * 0.00125, 0.0,
-                                0.05)
-                        stamina -= rate
-                        bodyTemperature += rate
-                        thirst -= rate * 0.075
-                    } else if (ground) {
-                        val rate = clamp(it.speed().lengthSqr() * 0.00025, 0.0,
-                                0.05)
-                        stamina -= rate
-                        bodyTemperature += rate
-                    }
-                    stamina -= depleteFactor * 0.00025
-                    if (inWater && thirst < 1.0) {
-                        thirst += 0.025
-                    }
-                    if (stamina < 1.0) {
-                        val rate = regenFactor * hunger * thirst * 0.05 *
-                                (1 - stamina)
-                        stamina += rate
-                        wake -= rate * 0.005
-                        hunger -= rate * 0.003
-                        thirst -= rate * 0.01
-                    }
-                    bodyTemperature += (temperature - bodyTemperature) / 2000.0
-                    if (bodyTemperature < 37.0) {
-                        var rate = max(37.0 - bodyTemperature, 0.0)
-                        rate = min(rate * 8.0 * stamina, 1.0) * 0.04
-                        bodyTemperature += rate
-                        stamina -= rate * 0.5
-                    } else if (bodyTemperature > 37.0) {
-                        var rate = max(bodyTemperature - 37.0, 0.0)
-                        rate = min(rate * thirst, 1.0) * 0.06
-                        bodyTemperature -= rate
-                        thirst -= rate * 0.05
-                    }
-                    if (sleeping) {
-                        wake += 0.0002
-                        val wakeChance = 7.0 - wake * 7.0
-                        if (random.nextDouble() > wakeChance) {
-                            sleeping = false
-                        }
-                    } else {
-                        val sleepChance = wake * 10.0
-                        if (random.nextDouble() > sleepChance) {
-                            sleeping = true
-                        }
-                    }
-                    stamina = min(stamina, 1.0)
-                    if (stamina <= 0.0) {
-                        it.damage(5.0)
-                    }
-                    wake = clamp(wake, 0.0, 1.0)
-                    hunger = clamp(hunger, 0.0, 1.0)
-                    thirst = clamp(thirst, 0.0, 1.0)
-                    conditionTag["Stamina"] = stamina.toTag()
-                    conditionTag["Wake"] = wake.toTag()
-                    conditionTag["Hunger"] = hunger.toTag()
-                    conditionTag["Thirst"] = thirst.toTag()
-                    conditionTag["BodyTemperature"] = bodyTemperature.toTag()
-                    conditionTag["Sleeping"] = sleeping.toTag()
-                }
-                it.connection().send(
-                        PacketEntityMetaData(world.registry, it, "Vanilla"))
-            }
-        }
         syncWait -= delta
         while (syncWait <= 0.0) {
             syncWait += 4.0
@@ -604,3 +481,6 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
         }
     }
 }
+
+private val ITEMS_LISTENER_TOKEN = ListenerToken("VanillaBasics:Items")
+private val DEATH_MESSAGE_TOKEN = ListenerToken("VanillaBasics:DeathMessage")

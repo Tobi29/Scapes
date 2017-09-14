@@ -31,7 +31,7 @@ import org.tobi29.scapes.engine.utils.math.vector.minus
 import org.tobi29.scapes.engine.utils.math.vector.times
 import org.tobi29.scapes.entity.client.MobClient
 
-class MobModelItem(private val entity: MobClient,
+class MobModelItem(override val entity: MobClient,
                    private val item: ItemStack) : MobModel {
     private val pos = MutableVector3d()
     private var dir = 0.0
@@ -48,8 +48,10 @@ class MobModelItem(private val entity: MobClient,
         return dir
     }
 
-    override fun pos(): Vector3d {
-        return pos.now()
+    override fun pos() = pos.now()
+
+    override fun setPos(pos: Vector3d) {
+        this.pos.set(pos)
     }
 
     override fun shapeAABB(aabb: AABB) {

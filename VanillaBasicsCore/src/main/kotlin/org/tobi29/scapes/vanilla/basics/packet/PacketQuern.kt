@@ -36,7 +36,7 @@ class PacketQuern : PacketAbstract, PacketServer {
 
     constructor(type: PacketType,
                 quern: EntityQuernClient) : super(type) {
-        uuid = quern.getUUID()
+        uuid = quern.uuid
     }
 
     constructor(registry: Registries,

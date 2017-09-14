@@ -19,11 +19,26 @@ package org.tobi29.scapes.chunk.generator
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.Update
+import org.tobi29.scapes.engine.utils.ThreadLocal
 
-class GeneratorOutput(height: Int) {
-    val type = IntArray(height)
-    val data = IntArray(height)
+class GeneratorOutput() {
+    var height: Int = 0
+        set(value) {
+            if (field != value) {
+                field = value
+                type = IntArray(value)
+                data = IntArray(value)
+            }
+        }
+    var type = IntArray(height)
+        private set
+    var data = IntArray(height)
+        private set
     val updates = ArrayList<(Registries) -> Update>()
+
+    constructor(height: Int) : this() {
+        this.height = height
+    }
 
     fun type(z: Int,
              type: BlockType) {
@@ -33,5 +48,11 @@ class GeneratorOutput(height: Int) {
     fun data(z: Int,
              data: Int) {
         this.data[z] = data
+    }
+
+    companion object {
+        private val TL = ThreadLocal { GeneratorOutput() }
+
+        fun current(): GeneratorOutput = TL.get()
     }
 }

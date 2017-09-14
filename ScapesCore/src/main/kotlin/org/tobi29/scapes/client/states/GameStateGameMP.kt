@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.states
 
+import kotlinx.coroutines.experimental.runBlocking
 import kotlinx.coroutines.experimental.yield
 import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.block.TerrainTextureRegistry
@@ -86,7 +87,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
 
     @Synchronized
     fun switchScene(newScene: SceneScapesVoxelWorld) {
-        scene?.dispose()
+        runBlocking { scene?.dispose() }
         scene = newScene
         switchPipelineWhenLoaded { gl ->
             val scene = renderScene(gl, newScene)
@@ -105,7 +106,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     }
 
     override fun dispose() {
-        this.scene?.dispose()
+        runBlocking { scene?.dispose() }
         client.stop()
         terrainTextureRegistry.texture.markDisposed()
         engine.sounds.stop("music")

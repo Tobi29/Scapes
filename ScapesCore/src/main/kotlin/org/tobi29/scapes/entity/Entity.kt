@@ -16,14 +16,19 @@
 package org.tobi29.scapes.entity
 
 import org.tobi29.scapes.block.Registries
-import org.tobi29.scapes.engine.utils.UUID
+import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.TagMapWrite
 
-interface Entity {
+interface Entity : ComponentHolder<ComponentEntity> {
     val type: EntityType<*, *>
+    override val componentStorage: ComponentStorage<ComponentEntity>
+    val uuid: UUID
 
-    fun getUUID(): UUID
+    val onAddedToWorld: ConcurrentMap<ListenerToken, () -> Unit>
+    val onRemovedFromWorld: ConcurrentMap<ListenerToken, () -> Unit>
 
     fun getCurrentPos(): Vector3d
 
@@ -34,12 +39,35 @@ interface Entity {
         return aabb
     }
 
+    fun addedToWorld() {
+        onAddedToWorld.values.forEach { it() }
+    }
+
+    fun removedFromWorld() {
+        onRemovedFromWorld.values.forEach { it() }
+    }
+
     companion object {
         fun of(registry: Registries,
-               id: Int) = registry.get<EntityType<*, *>>("Core", "Entity")[id]
+               id: Int) =
+                registry.get<EntityType<*, *>>("Core", "Entity")[id]
 
         fun of(registry: Registries,
-               id: String) = registry.get<EntityType<*, *>>("Core",
-                "Entity")[id]
+               id: String) =
+                registry.get<EntityType<*, *>>("Core", "Entity")[id]
     }
+}
+
+typealias ComponentTypeRegisteredEntity<E, T> = ComponentTypeRegistered<E, T, ComponentEntity>
+
+interface ComponentEntity : ComponentRegistered
+
+interface ComponentSerializable : TagMapWrite {
+    val id: String
+
+    fun read(map: TagMap)
+}
+
+class ListenerToken(val id: String) {
+    override fun toString() = id
 }

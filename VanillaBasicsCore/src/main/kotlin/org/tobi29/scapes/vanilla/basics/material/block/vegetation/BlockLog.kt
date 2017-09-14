@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
@@ -55,7 +57,7 @@ class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
             return false
         }
         if ("Axe" == item.material().toolType(item)) {
-            player.world.taskExecutor.runTask({
+            launch(player.world.taskExecutor + CoroutineName("Destroy-Logs")) {
                 val imTerrain = player.world.terrain
                 destroy(imTerrain, x - 1, y - 1, z + 0, data, 512, player, z)
                 destroy(imTerrain, x + 0, y - 1, z + 0, data, 512, player, z)
@@ -75,7 +77,7 @@ class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
                 destroy(imTerrain, x - 1, y + 1, z + 1, data, 512, player, z)
                 destroy(imTerrain, x + 0, y + 1, z + 1, data, 512, player, z)
                 destroy(imTerrain, x + 1, y + 1, z + 1, data, 512, player, z)
-            }, "Destroy-Logs")
+            }
         }
         return true
     }

@@ -47,7 +47,6 @@ open class GuiInventory(name: String,
                         row.addHori(5.0, 5.0, -1.0, -1.0) { button(it, i) })
                 i++
             }
-            selection(-1, buttons)
             buttons.clear()
         }
         inventoryPane.addVert(0.0, 0.0, -1.0, 10.0, ::GuiComponentGroup)
@@ -59,7 +58,6 @@ open class GuiInventory(name: String,
                     row.addHori(5.0, 5.0, -1.0, -1.0) { button(it, i) })
             i++
         }
-        selection(-1, buttons)
 
         on(GuiAction.BACK, { player.closeGui() })
     }

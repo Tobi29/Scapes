@@ -119,8 +119,6 @@ class GuiCrafting(private val table: Boolean,
                 button(it, 12, recipeType.name())
             }
             if (enabled) {
-                selection(1, label)
-
                 label.on(GuiEvent.CLICK_LEFT) {
                     currentType = recipeType
                     example = 0
@@ -137,6 +135,7 @@ class GuiCrafting(private val table: Boolean,
 
         init {
             val result = addHori(5.0, 5.0, 30.0, 30.0) {
+                it.selectable = true
                 GuiComponentResultButton(it, recipe.result())
             }
             addHori(5.0, 5.0, -1.0, 16.0) { GuiComponentFlowText(it, "<=") }
@@ -157,8 +156,6 @@ class GuiCrafting(private val table: Boolean,
                 }
                 examples.add { b.item.setItem(requirement.example(example)) }
             }
-
-            selection(result)
 
             result.on(GuiEvent.CLICK_LEFT) {
                 player.connection().send(

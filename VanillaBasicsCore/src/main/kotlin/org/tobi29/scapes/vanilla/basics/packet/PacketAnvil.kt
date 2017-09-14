@@ -41,7 +41,7 @@ class PacketAnvil : PacketAbstract, PacketServer {
     constructor(type: PacketType,
                 anvil: EntityAnvilClient,
                 id: Int) : super(type) {
-        uuid = anvil.getUUID()
+        uuid = anvil.uuid
         this.id = id
     }
 

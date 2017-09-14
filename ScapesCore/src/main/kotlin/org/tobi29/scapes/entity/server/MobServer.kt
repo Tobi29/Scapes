@@ -30,13 +30,14 @@ import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.entity.EntityPhysics
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.Mob
 
 abstract class MobServer(type: EntityType<*, *>,
                          world: WorldServer,
                          pos: Vector3d,
                          speed: Vector3d,
                          protected val collision: AABB) : EntityAbstractServer(
-        type, world, pos) {
+        type, world, pos), Mob {
     protected val speed: MutableVector3d
     protected val rot = MutableVector3d()
     protected val positionSender: MobPositionSenderServer

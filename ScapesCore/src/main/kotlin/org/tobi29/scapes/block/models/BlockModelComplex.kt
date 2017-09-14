@@ -85,7 +85,7 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
     private fun buildVAO(inventory: Boolean): Model {
         val mesh = Mesh(false)
         buildVAO(mesh, inventory)
-        return mesh.finish(registry.engine)
+        return mesh.finish(registry.texture.gos)
     }
 
     private fun buildVAO(mesh: Mesh,

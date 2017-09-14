@@ -45,8 +45,6 @@ class GuiCredits(state: GameState,
             button(it, "Back")
         }
 
-        selection(back)
-
         on(GuiAction.BACK) {
             engine.sounds.stop("music.Credits")
             engine.guiStack.swap(this, previous)

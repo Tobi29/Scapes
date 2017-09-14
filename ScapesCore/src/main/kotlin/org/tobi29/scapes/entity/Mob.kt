@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.chunk.generator
+package org.tobi29.scapes.entity
 
-interface ChunkGenerator {
-    fun makeLand(x: Int,
-                 y: Int,
-                 z: Int,
-                 dz: Int,
-                 output: GeneratorOutput)
-}
+interface Mob : Entity

@@ -486,6 +486,10 @@ abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
         updateLight(x, y, z)
     }
 
+    open val isInitialized: Boolean get() = true
+
+    open suspend fun awaitInitialized() {}
+
     open fun dispose() {}
 
     protected fun initHeightMap() {

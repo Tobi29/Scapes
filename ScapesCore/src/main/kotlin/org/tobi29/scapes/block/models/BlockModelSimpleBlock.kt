@@ -251,7 +251,7 @@ class BlockModelSimpleBlock(private val block: BlockType,
         val mesh = Mesh(false)
         buildVAO(mesh, inventory, texTop, texBottom, texSide1, texSide2,
                 texSide3, texSide4)
-        return mesh.finish(registry.engine)
+        return mesh.finish(registry.texture.gos)
     }
 
     private fun buildVAO(mesh: Mesh,

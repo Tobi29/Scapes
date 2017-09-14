@@ -18,6 +18,7 @@ package org.tobi29.scapes.vanilla.basics.gui
 
 import org.tobi29.scapes.client.gui.GuiComponentItemButton
 import org.tobi29.scapes.engine.gui.GuiEvent
+import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.entity.client.EntityContainerClient
 import org.tobi29.scapes.packets.PacketInventoryInteraction
@@ -43,11 +44,16 @@ open class GuiContainerInventory<out T : EntityContainerClient>(name: String,
                                   height: Int,
                                   id: String,
                                   slot: Int): GuiComponentItemButton {
+        return pane.add(x.toDouble(), y.toDouble(), width.toDouble(),
+                height.toDouble()) { buttonContainer(it, id, slot) }
+    }
+
+    fun buttonContainer(parent: GuiLayoutData,
+                        id: String,
+                        slot: Int): GuiComponentItemButton {
+        parent.selectable = true
         val inventory = container.inventories().accessUnsafe(id)
-        val button = pane.add(x.toDouble(), y.toDouble(), width.toDouble(),
-                height.toDouble()) {
-            GuiComponentItemButton(it, inventory.item(slot))
-        }
+        val button = GuiComponentItemButton(parent, inventory.item(slot))
         button.on(GuiEvent.CLICK_LEFT) { leftClickContainer(id, slot) }
         button.on(GuiEvent.CLICK_RIGHT) { rightClickContainer(id, slot) }
         return button

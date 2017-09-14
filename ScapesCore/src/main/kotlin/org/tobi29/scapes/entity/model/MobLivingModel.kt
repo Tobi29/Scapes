@@ -16,4 +16,8 @@
 
 package org.tobi29.scapes.entity.model
 
-interface MobLivingModel : MobModel
+import org.tobi29.scapes.entity.client.MobLivingClient
+
+interface MobLivingModel : MobModel {
+    override val entity: MobLivingClient
+}

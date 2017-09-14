@@ -16,35 +16,53 @@
 
 package org.tobi29.scapes.terrain.lighting
 
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.channels.ActorJob
+import kotlinx.coroutines.experimental.channels.Channel
 import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.vector.MutableVector3i
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.task.Joiner
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
+import org.tobi29.scapes.engine.utils.task.actorThread
 import org.tobi29.scapes.terrain.TerrainBase
+import kotlin.coroutines.experimental.CoroutineContext
 
 class LightingEngineThreaded(private val terrain: TerrainBase<*>,
-                             taskExecutor: TaskExecutor) : LightingEngine {
-    private val updates = ConcurrentLinkedQueue<Vector3i>()
-    private val joiner: Joiner
+                             taskExecutor: CoroutineContext) : LightingEngine {
+    private var updateActor: ActorJob<Vector3i>? = null
 
     init {
-        joiner = taskExecutor.runThread({ run(it) }, "Lighting-Engine")
+        // TODO: Make init method
+        updateActor = actorThread("Lighting-Engine", taskExecutor[Job],
+                Channel.UNLIMITED) {
+            val updates = Pool { MutableVector3i() }
+            val newUpdates = Pool { MutableVector3i() }
+            for (msg in channel) {
+                profilerSection("BlockLight") {
+                    updateBlockLight(updates, newUpdates, msg.x, msg.y, msg.z)
+                }
+                profilerSection("SunLight") {
+                    updateSunLight(updates, newUpdates, msg.x, msg.y, msg.z)
+                }
+            }
+        }
     }
 
     override fun updateLight(x: Int,
                              y: Int,
                              z: Int) {
-        updates.add(Vector3i(x, y, z))
-        joiner.wake()
+        (updateActor ?: throw IllegalStateException(
+                "Lighting engine no longer running")).offer(Vector3i(x, y, z))
     }
 
-    override fun dispose() {
-        joiner.join()
+    override suspend fun dispose() {
+        updateActor?.let {
+            updateActor?.close()
+            updateActor?.join()
+            updateActor = null
+        }
     }
 
     private fun updateBlockLight(updates: Pool<MutableVector3i>,
@@ -200,26 +218,5 @@ class LightingEngineThreaded(private val terrain: TerrainBase<*>,
             zz--
         }
         return sunLight
-    }
-
-    fun run(joiner: Joiner.Joinable) {
-        while (!joiner.marked) {
-            val updates = Pool { MutableVector3i() }
-            val newUpdates = Pool { MutableVector3i() }
-            while (!this.updates.isEmpty()) {
-                val update = this.updates.poll()
-                if (update != null) {
-                    profilerSection("BlockLight") {
-                        updateBlockLight(updates, newUpdates, update.x,
-                                update.y, update.z)
-                    }
-                    profilerSection("SunLight") {
-                        updateSunLight(updates, newUpdates, update.x,
-                                update.y, update.z)
-                    }
-                }
-            }
-            joiner.sleep()
-        }
     }
 }

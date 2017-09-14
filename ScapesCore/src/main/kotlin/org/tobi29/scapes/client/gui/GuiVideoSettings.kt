@@ -53,11 +53,6 @@ class GuiVideoSettings(state: GameState,
             }
         }
 
-        selection(viewDistance)
-        selection(shader)
-        selection(fullscreen)
-        selection(resolutionMultiplier)
-
         viewDistance.on(GuiEvent.CHANGE) {
             scapes.renderDistance = 10.0 + viewDistance.value() * 246.0
         }

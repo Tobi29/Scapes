@@ -17,11 +17,11 @@ package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
+import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
-import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.server.connection.PlayerConnection
@@ -34,7 +34,7 @@ class PacketEntityChange : PacketAbstract, PacketClient {
 
     constructor(type: PacketType,
                 entity: EntityServer) : super(type, entity.getCurrentPos()) {
-        uuid = entity.getUUID()
+        uuid = entity.uuid
         tag = TagMap { entity.write(this) }
     }
 

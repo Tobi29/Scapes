@@ -32,9 +32,6 @@ import org.tobi29.scapes.vanilla.basics.material.update.UpdateLavaFlow
 class ChunkGeneratorOverworld(random: Random,
                               private val terrainGenerator: TerrainGenerator,
                               private val materials: VanillaMaterial) : ChunkGenerator {
-    private var random = Random()
-    private val generator = TerrainGenerator.TerrainGeneratorOutput()
-    private val layer = TerrainGenerator.TerrainGeneratorLayer()
     private val beachGenerator = BeachGenerator(random)
     private val stoneGenerator: StoneGenerator
     private val sandstoneGenerator = SandstoneGenerator(random)
@@ -111,19 +108,17 @@ class ChunkGeneratorOverworld(random: Random,
         }
     }
 
-    override fun seed(x: Int,
-                      y: Int) {
-        var hash = 17
-        hash = 31 * hash + x
-        hash = 31 * hash + y
-        random = Random(hash + seedInt)
-    }
-
     override fun makeLand(x: Int,
                           y: Int,
                           z: Int,
                           dz: Int,
                           output: GeneratorOutput) {
+        var hash = 17
+        hash = 31 * hash + x
+        hash = 31 * hash + y
+        val random = Random(hash + seedInt)
+        val layer = TerrainGenerator.TerrainGeneratorLayer.current()
+        val generator = TerrainGenerator.TerrainGeneratorOutput.current()
         terrainGenerator.generate(x.toDouble(), y.toDouble(), layer)
         terrainGenerator.generate(x.toDouble(), y.toDouble(), layer, generator)
         var stoneType: StoneType

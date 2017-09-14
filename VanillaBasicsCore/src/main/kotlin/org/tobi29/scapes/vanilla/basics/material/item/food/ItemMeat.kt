@@ -18,28 +18,24 @@ package org.tobi29.scapes.vanilla.basics.material.item.food
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.utils.math.floor
-import org.tobi29.scapes.engine.utils.tag.syncMapMut
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
 import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
-import kotlin.collections.set
 
 class ItemMeat(type: VanillaMaterialType) : ItemSimpleData(
         type), ItemDefaultHeatable {
     override fun click(entity: MobPlayerServer,
                        item: ItemStack) {
-        entity.metaData("Vanilla").syncMapMut("Condition") { conditionTag ->
-            val stamina = conditionTag["Stamina"]?.toDouble() ?: 0.0
-            val hunger = conditionTag["Hunger"]?.toDouble() ?: 0.0
-            val thirst = conditionTag["Thirst"]?.toDouble() ?: 0.0
-            conditionTag["Stamina"] = (stamina - 0.8).toTag()
-            conditionTag["Hunger"] = (hunger + 0.1).toTag()
-            conditionTag["Thirst"] = (thirst - 0.3).toTag()
+        entity.getOrNull(ComponentMobLivingServerCondition.COMPONENT)?.run {
+            synchronized(this) {
+                stamina -= 0.8
+                hunger += 0.1
+                thirst -= 0.3
+            }
         }
         entity.damage(5.0)
         item.setAmount(item.amount() - 1)

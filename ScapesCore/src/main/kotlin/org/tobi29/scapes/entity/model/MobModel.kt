@@ -16,7 +16,11 @@
 
 package org.tobi29.scapes.entity.model
 
+import org.tobi29.scapes.entity.client.MobClient
+
 interface MobModel : EntityModel {
+    override val entity: MobClient
+
     fun pitch(): Double
 
     fun yaw(): Double

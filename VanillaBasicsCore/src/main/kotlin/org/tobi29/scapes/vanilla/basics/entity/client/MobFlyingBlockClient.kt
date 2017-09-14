@@ -18,12 +18,13 @@ package org.tobi29.scapes.vanilla.basics.entity.client
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobClient
+import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.entity.model.MobModelBlock
 
 class MobFlyingBlockClient(type: EntityType<*, *>,
@@ -32,12 +33,12 @@ class MobFlyingBlockClient(type: EntityType<*, *>,
         AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
     private val item = ItemStack(world.plugins)
 
+    init {
+        attachModel { MobModelBlock(this, item) }
+    }
+
     override fun read(map: TagMap) {
         super.read(map)
         map["Block"]?.toMap()?.let { item.read(it) }
-    }
-
-    override fun createModel(): MobModelBlock? {
-        return MobModelBlock(this, item)
     }
 }

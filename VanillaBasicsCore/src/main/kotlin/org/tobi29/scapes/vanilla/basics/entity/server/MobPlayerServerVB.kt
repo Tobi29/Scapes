@@ -23,10 +23,8 @@ import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.math.vector.plus
-import org.tobi29.scapes.engine.utils.tag.map
-import org.tobi29.scapes.engine.utils.tag.toBoolean
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.MobPlayerServer
@@ -46,7 +44,10 @@ class MobPlayerServerVB(type: EntityType<*, *>,
         Frustum(90.0, 1.0, 0.1, 24.0), Frustum(50.0, 1.0, 0.1, 2.0), nickname,
         skin, connection) {
     init {
-        onDeath("Local", {
+        registerComponent(
+                ComponentMobLivingServerCondition.COMPONENT,
+                ComponentMobLivingServerCondition(this))
+        onDeath[PLAYER_LISTENER_TOKEN] = {
             inventories.modify<List<ItemStack>>(
                     "Container") { inventory ->
                 val items = ArrayList<ItemStack>()
@@ -62,8 +63,8 @@ class MobPlayerServerVB(type: EntityType<*, *>,
             setPos(Vector3d(world.spawn + Vector3i(0, 0, 1)))
             health = maxHealth
             world.send(PacketEntityChange(registry, this))
-            onSpawn()
-        })
+            spawn()
+        }
     }
 
     override fun wieldMode(): WieldMode {
@@ -90,7 +91,7 @@ class MobPlayerServerVB(type: EntityType<*, *>,
             if (!world.checkBlocked(pos.intX(), pos.intY(),
                     pos.intZ(), mobPos.intX(), mobPos.intY(),
                     mobPos.intZ())) {
-                onNotice(mob)
+                notice(mob)
             }
         }
         if (pos.doubleZ() < -100.0) {
@@ -121,8 +122,8 @@ class MobPlayerServerVB(type: EntityType<*, *>,
     }
 
     override fun isActive(): Boolean {
-        val conditionTag = metaData("Vanilla").map("Condition")
-        return !(conditionTag?.get("Sleeping")?.toBoolean() ?: false)
+        return getOrNull(
+                ComponentMobLivingServerCondition.COMPONENT)?.sleeping != true
     }
 
     override fun onCloseInventory(): Boolean {
@@ -132,3 +133,5 @@ class MobPlayerServerVB(type: EntityType<*, *>,
         return true
     }
 }
+
+private val PLAYER_LISTENER_TOKEN = ListenerToken("VanillaBasics:Player")

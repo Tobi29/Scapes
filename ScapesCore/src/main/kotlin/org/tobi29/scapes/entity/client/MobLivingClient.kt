@@ -18,14 +18,15 @@ package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.selectBlock
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.ConcurrentMap
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.*
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
-import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
-import org.tobi29.scapes.entity.model.MobLivingModel
+import org.tobi29.scapes.entity.ListenerToken
+import org.tobi29.scapes.entity.MobLiving
 import org.tobi29.scapes.packets.PacketMobDamage
 
 abstract class MobLivingClient(type: EntityType<*, *>,
@@ -35,7 +36,12 @@ abstract class MobLivingClient(type: EntityType<*, *>,
                                aabb: AABB,
                                protected var health: Double,
                                protected var maxHealth: Double) : MobClient(
-        type, world, pos, speed, aabb) {
+        type, world, pos, speed, aabb), MobLiving {
+    override final val onNotice: ConcurrentMap<ListenerToken, (MobClient) -> Unit> = ConcurrentHashMap()
+    override final val onJump: ConcurrentMap<ListenerToken, () -> Unit> = ConcurrentHashMap()
+    override final val onHeal: ConcurrentMap<ListenerToken, (Double) -> Unit> = ConcurrentHashMap()
+    override final val onDamage: ConcurrentMap<ListenerToken, (Double) -> Unit> = ConcurrentHashMap()
+    override final val onDeath: ConcurrentMap<ListenerToken, () -> Unit> = ConcurrentHashMap()
     protected var footStep = 0.0
     protected var invincibleTicks = 0.0
 
@@ -45,16 +51,21 @@ abstract class MobLivingClient(type: EntityType<*, *>,
                 rot.now().xz + direction)
     }
 
-    fun onHeal(heal: Double) {
+    fun notice(notice: MobClient) {
+        onNotice.values.forEach { it(notice) }
     }
 
-    open fun onDamage(damage: Double) {
+    fun heal(heal: Double) {
+        onHeal.values.forEach { it(heal) }
     }
 
-    open fun onDeath() {
+    fun damage(damage: Double) {
+        onDamage.values.forEach { it(damage) }
     }
 
-    abstract fun creatureType(): CreatureType
+    fun death() {
+        onDeath.values.forEach { it() }
+    }
 
     fun health(): Double {
         return health
@@ -66,10 +77,6 @@ abstract class MobLivingClient(type: EntityType<*, *>,
 
     val isDead: Boolean
         get() = health <= 0
-
-    override fun createModel(): MobLivingModel? {
-        return null
-    }
 
     override fun read(map: TagMap) {
         super.read(map)
@@ -124,10 +131,10 @@ abstract class MobLivingClient(type: EntityType<*, *>,
         if (newLives < oldLives) {
             invincibleTicks = 0.8
             health = newLives
-            onDamage(oldLives - newLives)
+            damage(oldLives - newLives)
         } else {
             health = newLives
-            onHeal(newLives - oldLives)
+            heal(newLives - oldLives)
         }
     }
 }

@@ -38,7 +38,7 @@ class PacketResearch : PacketAbstract, PacketServer {
 
     constructor(type: PacketType,
                 researchTable: EntityResearchTableClient) : super(type) {
-        uuid = researchTable.getUUID()
+        uuid = researchTable.uuid
     }
 
     constructor(registry: Registries,

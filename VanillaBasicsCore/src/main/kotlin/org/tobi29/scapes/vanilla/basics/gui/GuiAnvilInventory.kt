@@ -18,8 +18,7 @@ package org.tobi29.scapes.vanilla.basics.gui
 
 import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.client.gui.GuiComponentItemButton
-import org.tobi29.scapes.engine.gui.GuiEvent
-import org.tobi29.scapes.engine.gui.GuiStyle
+import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAnvilClient
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
@@ -34,25 +33,55 @@ class GuiAnvilInventory(container: EntityAnvilClient,
         val plugin = player.connection().plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        selection(buttonContainer(16, 120, 30, 30, 0))
-        selection(buttonContainer(16, 210, 30, 30, 1))
-        selection(addAction(66, 120, materials.ingot, 0))
-        selection(addAction(106, 120, materials.metalPickaxe, 1))
-        selection(addAction(106, 160, materials.metalAxe, 2))
-        selection(addAction(106, 200, materials.metalShovel, 3))
-        selection(addAction(146, 120, materials.metalHammer, 4))
-        selection(addAction(146, 160, materials.metalSaw, 5))
-        selection(addAction(146, 200, materials.metalHoe, 6))
-        selection(addAction(186, 120, materials.metalSword, 7))
+        topPane.spacer()
+        val bar = topPane.addVert(0.0, 0.0, -1.0, 120.0,
+                ::GuiComponentGroupSlab)
+        bar.spacer()
+        val items = bar.addHori(0.0, 0.0, 40.0, -1.0, ::GuiComponentGroup)
+        items.addVert(5.0, 5.0, 30.0, 30.0) {
+            buttonContainer(it, "Container", 0)
+        }
+        items.spacer()
+        items.addVert(5.0, 5.0, 30.0, 30.0) {
+            buttonContainer(it, "Container", 1)
+        }
+        val actions1 = bar.addHori(0.0, 0.0, 40.0, -1.0, ::GuiComponentGroup)
+        actions1.addVert(5.0, 5.0, 30.0, 30.0) {
+            buttonAction(it, materials.ingot, 0)
+        }
+        val actions2 = bar.addHori(0.0, 0.0, 40.0, -1.0, ::GuiComponentGroup)
+        actions2.addVert(5.0, 5.0, 30.0, 30.0) {
+            buttonAction(it, materials.metalPickaxe, 1)
+        }
+        actions2.addVert(5.0, 5.0, 30.0, 30.0) {
+            buttonAction(it, materials.metalAxe, 2)
+        }
+        actions2.addVert(5.0, 5.0, 30.0, 30.0) {
+            buttonAction(it, materials.metalShovel, 3)
+        }
+        val actions3 = bar.addHori(0.0, 0.0, 40.0, -1.0, ::GuiComponentGroup)
+        actions3.addVert(5.0, 5.0, 30.0, 30.0) {
+            buttonAction(it, materials.metalHammer, 4)
+        }
+        actions3.addVert(5.0, 5.0, 30.0, 30.0) {
+            buttonAction(it, materials.metalSaw, 5)
+        }
+        actions3.addVert(5.0, 5.0, 30.0, 30.0) {
+            buttonAction(it, materials.metalHoe, 6)
+        }
+        val actions4 = bar.addHori(0.0, 0.0, 40.0, -1.0, ::GuiComponentGroup)
+        actions4.addVert(5.0, 5.0, 30.0, 30.0) {
+            buttonAction(it, materials.metalSword, 7)
+        }
+        bar.spacer()
+        topPane.spacer()
     }
 
-    private fun addAction(x: Int,
-                          y: Int,
-                          material: Material,
-                          i: Int): GuiComponentItemButton {
+    private fun buttonAction(parent: GuiLayoutData,
+                             material: Material,
+                             i: Int): GuiComponentItemButton {
         val icon = material.example(1)
-        val item = pane.add(x.toDouble(), y.toDouble(), 30.0,
-                30.0) { GuiComponentItemButton(it, icon) }
+        val item = GuiComponentItemButton(parent, icon)
         item.on(GuiEvent.CLICK_LEFT) {
             player.connection().send(PacketAnvil(player.registry, container, i))
         }

@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.desktop
 
+import kotlinx.coroutines.experimental.asCoroutineDispatcher
+import kotlinx.coroutines.experimental.runBlocking
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.VERSION
 import org.tobi29.scapes.client.DialogProvider
@@ -34,7 +36,6 @@ import org.tobi29.scapes.engine.graphics.GraphicsCheckException
 import org.tobi29.scapes.engine.gui.GuiBasicStyle
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.server.ConnectionManager
-import org.tobi29.scapes.engine.utils.Crashable
 import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.classpath.ClasspathPath
 import org.tobi29.scapes.engine.utils.io.filesystem.*
@@ -46,10 +47,10 @@ import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.mapMut
 import org.tobi29.scapes.engine.utils.tag.toMutTag
 import org.tobi29.scapes.engine.utils.tag.toTag
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
 import org.tobi29.scapes.plugins.Sandbox
 import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
 import org.tobi29.scapes.server.shell.ScapesServerHeadless
+import java.util.concurrent.ForkJoinPool
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
@@ -121,14 +122,25 @@ fun main(args: Array<String>) {
     } else {
         home = path(System.getProperty("user.dir")).toAbsolutePath()
     }
+
     when (mode) {
         "client" -> {
             val config = home.resolve("ScapesEngine.json")
             val cache = home.resolve("cache")
             val pluginCache = cache.resolve("plugins")
             var engine: ScapesEngine? = null
-            val crashHandler = crashHandler(home, { engine })
-            val taskExecutor = TaskExecutor(crashHandler, "Engine")
+            Thread.setDefaultUncaughtExceptionHandler { _, e ->
+                try {
+                    printerrln("Scapes crashed: $e")
+                    e.printStackTrace()
+                    ContainerGLFW.openFile(crashReport(home, { engine }, e))
+                } finally {
+                    exitProcess(1)
+                }
+            }
+            val taskExecutor =
+                    ForkJoinPool(ForkJoinPool.getCommonPoolParallelism())
+                            .asCoroutineDispatcher()
             val configMap = readConfig(config).toMutTag()
             val saves: (ScapesClient) -> SaveStorage = {
                 SQLiteSaveStorage(home.resolve("saves"))
@@ -187,7 +199,7 @@ fun main(args: Array<String>) {
                             "Unable to initialize graphics:\n${e.message}")
                     exitProcess(1)
                 }
-                engine.dispose()
+                runBlocking { engine!!.dispose() }
             } finally {
                 writeConfig(config, configMap.toTag())
             }
@@ -199,8 +211,20 @@ fun main(args: Array<String>) {
             } else {
                 home
             }
+            Thread.setDefaultUncaughtExceptionHandler { _, e ->
+                try {
+                    printerrln("Scapes crashed: $e")
+                    e.printStackTrace()
+                    crashReport(home, e)
+                } finally {
+                    exitProcess(1)
+                }
+            }
+            val taskExecutor =
+                    ForkJoinPool(ForkJoinPool.getCommonPoolParallelism())
+                            .asCoroutineDispatcher()
             try {
-                val server = ScapesServerHeadless(config)
+                val server = ScapesServerHeadless(taskExecutor, config)
                 server.run(home)
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -234,23 +258,9 @@ private fun writeConfig(path: FilePath,
             printerrln("Failed to store config file: $e")
         }
 
-private fun crashHandler(path: FilePath,
-                         engine: () -> ScapesEngine?) = object : Crashable {
-    override fun crash(e: Throwable): Nothing {
-        try {
-            printerrln("Engine crashed: $e")
-            e.printStackTrace()
-            crashReport(path, engine, e)
-            ContainerGLFW.openFile(path)
-        } finally {
-            exitProcess(1)
-        }
-    }
-}
-
 private fun crashReport(path: FilePath,
                         engine: () -> ScapesEngine?,
-                        e: Throwable) {
+                        e: Throwable): FilePath {
     val time = timeZoneLocal.encodeWithOffset(systemClock()).first()
     val crashReportFile = path.resolve(crashReportName(
             "${
@@ -276,4 +286,26 @@ private fun crashReport(path: FilePath,
                 *debug,
                 crashReportSectionTime(isoOffsetDateTimeWithMillis(time)))
     }
+    return crashReportFile
+}
+
+private fun crashReport(path: FilePath,
+                        e: Throwable): FilePath {
+    val time = timeZoneLocal.encodeWithOffset(systemClock()).first()
+    val crashReportFile = path.resolve(crashReportName(
+            "${
+            time.dateTime.date.run {
+                "${isoYear(year)}-${isoMonth(month)}-${isoDay(day)}"
+            }}_${
+            time.dateTime.time.run {
+                "${isoHour(hour)}-${isoMinute(minute)}-${isoSecond(second)}"
+            }}"))
+    write(crashReportFile) {
+        it.writeCrashReport(e, "Scapes",
+                crashReportSectionStacktrace(e),
+                crashReportSectionActiveThreads(),
+                crashReportSectionSystemProperties(),
+                crashReportSectionTime(isoOffsetDateTimeWithMillis(time)))
+    }
+    return crashReportFile
 }

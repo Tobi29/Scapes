@@ -33,21 +33,21 @@ import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.math.vector.direction
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.map
-import org.tobi29.scapes.engine.utils.tag.toBoolean
 import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.client.EntityContainerClient
-import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.entity.client.MobLivingClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.entity.model.MobLivingModelHuman
 import org.tobi29.scapes.entity.model.RotationSmoothing
 import org.tobi29.scapes.packets.PacketInteraction
 import org.tobi29.scapes.packets.PacketItemUse
 import org.tobi29.scapes.packets.PacketPlayerJump
+import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
 import org.tobi29.scapes.vanilla.basics.gui.GuiPlayerInventory
 
 class MobPlayerClientMainVB(type: EntityType<*, *>,
@@ -64,6 +64,28 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
     private var chargeLeft = 0.0f
     private var chargeRight = 0.0f
 
+    init {
+        val texture = world.scene.skinStorage()[skin]
+        registerComponent(
+                ComponentMobLivingServerCondition.COMPONENT,
+                ComponentMobLivingServerCondition(this))
+        attachModel {
+            MobLivingModelHuman(world.game.modelHumanShared(), this, texture,
+                    false, true, {
+                if (input.requiresCameraSmoothing) RotationSmoothing.TIGHT
+                else RotationSmoothing.DISABLE
+            })
+        }
+        onNotice[PLAYER_LISTENER_TOKEN] = { notice ->
+            if (notice is MobLivingClient) {
+                if (notice.getOrNull(
+                        CreatureType.COMPONENT) == CreatureType.MONSTER) {
+                    game.playlist.setMusic(Playlist.Music.BATTLE)
+                }
+            }
+        }
+    }
+
     internal fun setHotbarSelectLeft(value: Int) {
         inventorySelectLeft = value
         world.send(PacketInteraction(registry,
@@ -78,8 +100,8 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
 
     override fun update(delta: Double) {
         super<MobPlayerClientMain>.update(delta)
-        val conditionTag = metaData("Vanilla").map("Condition")
-        if (conditionTag?.get("Sleeping")?.toBoolean() ?: false) {
+        if (getOrNull(
+                ComponentMobLivingServerCondition.COMPONENT)?.sleeping == true) {
             return
         }
         if (!hasGui()) {
@@ -200,14 +222,6 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
         }
     }
 
-    override fun onNotice(notice: MobClient) {
-        if (notice is MobLivingClient) {
-            if (notice.creatureType() == CreatureType.MONSTER) {
-                game.playlist.setMusic(Playlist.Music.BATTLE)
-            }
-        }
-    }
-
     override fun viewOffset(): Vector3d {
         return Vector3d(0.0, 0.0, 0.63)
     }
@@ -248,15 +262,6 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
         return inventories
     }
 
-    override fun createModel(): MobLivingModelHuman? {
-        val texture = world.scene.skinStorage()[skin]
-        return MobLivingModelHuman(world.game.modelHumanShared(), this, texture,
-                false, true, {
-            if (input.requiresCameraSmoothing) RotationSmoothing.TIGHT
-            else RotationSmoothing.DISABLE
-        })
-    }
-
     override fun read(map: TagMap) {
         super.read(map)
         map["Inventory"]?.toMap()?.let { inventoryTag ->
@@ -277,20 +282,29 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
             }
         }
         listen<HotbarChangeLeftEvent> { event ->
-            setHotbarSelectLeft((inventorySelectLeft + event.delta) remP 10)
-            event.success = true
+            if (!hasGui()) {
+                setHotbarSelectLeft((inventorySelectLeft + event.delta) remP 10)
+                event.success = true
+            }
         }
         listen<HotbarChangeRightEvent> { event ->
-            setHotbarSelectRight((inventorySelectRight + event.delta) remP 10)
-            event.success = true
+            if (!hasGui()) {
+                setHotbarSelectRight(
+                        (inventorySelectRight + event.delta) remP 10)
+                event.success = true
+            }
         }
         listen<HotbarSetLeftEvent> { event ->
-            setHotbarSelectLeft(event.value remP 10)
-            event.success = true
+            if (!hasGui()) {
+                setHotbarSelectLeft(event.value remP 10)
+                event.success = true
+            }
         }
         listen<HotbarSetRightEvent> { event ->
-            setHotbarSelectRight(event.value remP 10)
-            event.success = true
+            if (!hasGui()) {
+                setHotbarSelectRight(event.value remP 10)
+                event.success = true
+            }
         }
         listen<MenuOpenEvent> { event ->
             if (currentGui() !is GuiChatWrite) {
@@ -322,3 +336,5 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
         }
     }
 }
+
+private val PLAYER_LISTENER_TOKEN = ListenerToken("VanillaBasics:Player")

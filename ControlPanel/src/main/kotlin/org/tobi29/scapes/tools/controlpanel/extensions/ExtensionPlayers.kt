@@ -16,52 +16,85 @@
 
 package org.tobi29.scapes.tools.controlpanel.extensions
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Group
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.swt.util.framework.Application
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
+import org.tobi29.scapes.engine.utils.ComponentTypeRegistered
 import org.tobi29.scapes.engine.utils.tag.Tag
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toList
 import org.tobi29.scapes.engine.utils.tag.toMap
+import org.tobi29.scapes.engine.utils.task.Timer
+import org.tobi29.scapes.engine.utils.task.loop
 import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.scapes.tools.controlpanel.ControlPanelDocument
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelPlayers
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
-class ExtensionPlayers(application: Application,
-                       composite: ControlPanelConnection,
-                       connection: ControlPanelProtocol) : Extension(
-        composite, connection) {
+class ExtensionPlayers(
+        application: Application,
+        connection: ControlPanelProtocol
+) : Extension(connection) {
+    private var job: Pair<Job, AtomicBoolean>? = null
+    private var players: ControlPanelPlayers? = null
+
     init {
+        connection.addCommand("Players-List") { payload ->
+            launch(application) {
+                players.ifPresent { players ->
+                    payload["Players"]?.toList()?.let {
+                        players.items = it.asSequence().mapNotNull(
+                                Tag::toMap).mapNotNull {
+                            it["Name"]?.toString()
+                        }.toArray()
+                    }
+                }
+            }
+        }
+    }
+
+    override fun init(holder: ControlPanelDocument) {
+        val stop = AtomicBoolean(false)
+        job = launch(holder.application + CoroutineName("Extension-Players")) {
+            Timer().apply { init() }.loop(Timer.toDiff(1.0),
+                    { delay(it, TimeUnit.NANOSECONDS) }) {
+                if (stop.get()) return@loop false
+
+                connection.send("Players:List", TagMap())
+
+                true
+            }
+        } to stop
+    }
+
+    override fun populate(composite: ControlPanelConnection) {
         val group = Group(composite.server, SWT.NONE)
         group.layout = FillLayout()
         group.text = "Players"
         val players = ControlPanelPlayers(group)
-        connection.addCommand("Players-List") { payload ->
-            application.accessAsync {
-                if (players.isDisposed) {
-                    return@accessAsync
-                }
-                payload["Players"]?.toList()?.let {
-                    players.items = it.asSequence().mapNotNull(
-                            Tag::toMap).mapNotNull {
-                        it["Name"]?.toString()
-                    }.toArray()
-                }
-            }
+
+        this.players = players
+    }
+
+    override fun dispose() {
+        job?.let { (_, stop) ->
+            stop.set(true)
+            this.job = null
         }
-        application.loop.addTask({
-            players.ifPresent {
-                connection.send("Players:List", TagMap())
-                return@addTask 1000
-            }
-            -1
-        }, "Extension-Ping", 0, false)
     }
 
     companion object {
+        val COMPONENT = ComponentTypeRegistered<ControlPanelDocument, ExtensionPlayers, Any>()
+
         fun available(commands: Set<String>): Boolean {
             return commands.contains("Players-List")
         }

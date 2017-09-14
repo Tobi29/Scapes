@@ -20,7 +20,6 @@ import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.AtomicReference
 import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
@@ -61,7 +60,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                 intArrayOf(0, 1, 2, 2, 1, 3), RenderType.TRIANGLES)
 
         // Shaders
-        val shaderBlur1 = gl.engine.graphics.loadShader(
+        val shaderBlur1 = gl.loadShader(
                 "Scapes:shader/Menu1", mapOf(
                 "BLUR_LENGTH" to IntegerExpression(blurSamples),
                 "BLUR_OFFSET" to ArrayExpression(
@@ -69,7 +68,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                 "BLUR_WEIGHT" to ArrayExpression(
                         gaussianBlurWeight(blurSamples) { cos(it * PI) })
         ))
-        val shaderBlur2 = gl.engine.graphics.loadShader(
+        val shaderBlur2 = gl.loadShader(
                 "Scapes:shader/Menu2", mapOf(
                 "BLUR_LENGTH" to IntegerExpression(blurSamples),
                 "BLUR_OFFSET" to ArrayExpression(
@@ -77,14 +76,14 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                 "BLUR_WEIGHT" to ArrayExpression(
                         gaussianBlurWeight(blurSamples) { cos(it * PI) })
         ))
-        val shaderTextured = gl.engine.graphics.loadShader(SHADER_TEXTURED)
+        val shaderTextured = gl.loadShader(SHADER_TEXTURED)
 
         // Framebuffers
-        val f1 = gl.engine.graphics.createFramebuffer(width, height, 1,
+        val f1 = gl.createFramebuffer(width, height, 1,
                 false, false, false)
-        val f2 = gl.engine.graphics.createFramebuffer(width, height, 1,
+        val f2 = gl.createFramebuffer(width, height, 1,
                 false, false, false)
-        val f3 = gl.engine.graphics.createFramebuffer(width, height, 1,
+        val f3 = gl.createFramebuffer(width, height, 1,
                 false, false, false, TextureFilter.LINEAR)
 
         // Render steps
@@ -176,11 +175,6 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         }
     }
 
-    protected fun setBackground(replace: Resource<Texture>,
-                                i: Int) {
-        textures[i] = replace.get()
-    }
-
     protected fun setBackground(replace: Texture,
                                 i: Int) {
         val texture = textures[i]
@@ -206,9 +200,8 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         val random = threadLocalRandom()
         val r = random.nextInt(2)
         for (i in 0..5) {
-            setBackground(
-                    engine.graphics.textures["Scapes:image/gui/panorama/$r/Panorama$i"],
-                    i)
+            setBackground(engine.graphics.textures.getNow(
+                    "Scapes:image/gui/panorama/$r/Panorama$i"), i)
         }
     }
 }

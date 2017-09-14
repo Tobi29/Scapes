@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.server.connection
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.connection.Account
@@ -65,7 +67,7 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
 
     fun mob(consumer: (MobPlayerServer) -> Unit) {
         entity?.let {
-            it.world.loop.addTaskOnce({ consumer(it) }, "Player-Mob", 0, false)
+            launch(it.world + CoroutineName("Player-Mob")) { consumer(it) }
         }
     }
 
@@ -81,8 +83,9 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
         return server
     }
 
-    @Synchronized fun setWorld(world: WorldServer? = null,
-                               pos: Vector3d? = null) {
+    @Synchronized
+    fun setWorld(world: WorldServer? = null,
+                 pos: Vector3d? = null) {
         removeEntity()
         val player = server.server.getPlayer(id())
         permissionLevel = player.permissions()

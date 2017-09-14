@@ -37,13 +37,11 @@ class GuiChestInventory(container: EntityChestClient,
                     y++
                     yy = y * 35 + 91
                     x = 0
-                    selection(buttons)
                     buttons.clear()
                 }
                 xx = x * 35 + 27
                 buttons.add(buttonContainer(xx, yy, 30, 30, i))
             }
-            selection(buttons)
         }
     }
 }

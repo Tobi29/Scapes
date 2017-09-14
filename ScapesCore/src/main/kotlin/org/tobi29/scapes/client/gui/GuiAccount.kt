@@ -61,6 +61,7 @@ class GuiAccount(state: GameState,
         }
         val nicknameRow = row(pane)
         val nickname = nicknameRow.addHori(5.0, 5.0, -1.0, -1.0) {
+            it.selectable = true
             GuiComponentTextField(it, 18, this.nickname)
         }
         val nicknameHelp = nicknameRow.addHori(5.0, 5.0, 30.0, -1.0) {
@@ -70,10 +71,6 @@ class GuiAccount(state: GameState,
         val error = pane.addVert(16.0, 5.0, -1.0, 18.0) {
             GuiComponentText(it, "")
         }
-
-        selection(keyCopy, keyPaste, keyCopyID)
-        selection(nickname)
-        selection(skin)
 
         keyCopy.on(GuiEvent.CLICK_LEFT) {
             state.engine.container.clipboardCopy(Account.key(keyPair))
@@ -138,9 +135,6 @@ consist of letters and digits.
             val back = addControl { button(it, "Back") }
             back.on(GuiEvent.CLICK_LEFT) { fireAction(GuiAction.BACK) }
             on(GuiAction.BACK) { state.engine.guiStack.swap(this, previous) }
-            controlSelection(save, back)
-        } else {
-            controlSelection(save)
         }
     }
 

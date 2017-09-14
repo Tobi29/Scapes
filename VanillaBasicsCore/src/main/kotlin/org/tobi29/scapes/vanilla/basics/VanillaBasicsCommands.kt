@@ -22,6 +22,7 @@ import org.tobi29.scapes.engine.utils.hash
 import org.tobi29.scapes.engine.utils.tag.syncMapMut
 import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.server.ScapesServer
+import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
 import org.tobi29.scapes.vanilla.basics.util.createIngot
 import org.tobi29.scapes.vanilla.basics.util.createTool
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldServer
@@ -97,9 +98,9 @@ internal fun registerCommands(server: ScapesServer,
                     val player = requireGet({ connection.playerByName(it) },
                             playerName)
                     player.mob { mob ->
-                        mob.metaData("Vanilla").syncMapMut(
-                                "Condition") { conditionTag ->
-                            conditionTag["Wake"] = wake.toTag()
+                        mob.getOrNull(
+                                ComponentMobLivingServerCondition.COMPONENT)?.let {
+                            it.wake = wake
                         }
                     }
                 }
@@ -109,9 +110,9 @@ internal fun registerCommands(server: ScapesServer,
                     val player = requireGet({ connection.playerByName(it) },
                             playerName)
                     player.mob { mob ->
-                        mob.metaData("Vanilla").syncMapMut(
-                                "Condition") { conditionTag ->
-                            conditionTag["Hunger"] = saturation.toTag()
+                        mob.getOrNull(
+                                ComponentMobLivingServerCondition.COMPONENT)?.let {
+                            it.hunger = saturation
                         }
                     }
                 }
@@ -121,9 +122,9 @@ internal fun registerCommands(server: ScapesServer,
                     val player = requireGet({ connection.playerByName(it) },
                             playerName)
                     player.mob { mob ->
-                        mob.metaData("Vanilla").syncMapMut(
-                                "Condition") { conditionTag ->
-                            conditionTag["Thirst"] = thirst.toTag()
+                        mob.getOrNull(
+                                ComponentMobLivingServerCondition.COMPONENT)?.let {
+                            it.thirst = thirst
                         }
                     }
                 }

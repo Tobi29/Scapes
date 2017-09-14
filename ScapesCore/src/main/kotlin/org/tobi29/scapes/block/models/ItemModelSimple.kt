@@ -131,7 +131,7 @@ class ItemModelSimple(private val texture: TerrainTexture?,
             mesh.texture(texMaxX, texMaxY)
             mesh.vertex(0.5, -halfPixel, -0.5)
         }
-        return mesh.finish(texture.getTexture().engine)
+        return mesh.finish(texture.getTexture().gos)
     }
 
     override fun render(gl: GL,

@@ -15,6 +15,8 @@
  */
 package org.tobi29.scapes.vanilla.basics.util
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
@@ -148,11 +150,11 @@ fun TerrainServer.explosionBlockPush(
         }
     }
     locations.reset()
-    world.loop.addTaskOnce({
+    launch(world + CoroutineName("Explosion-Entities")) {
         entities.forEach { world.addEntityNew(it) }
         world.explosionEntities(x + 0.5, y + 0.5, z + 0.5, size.toDouble(),
                 push, damage)
-    }, "Explosion-Entities", 0, false)
+    }
 }
 
 private class Location {

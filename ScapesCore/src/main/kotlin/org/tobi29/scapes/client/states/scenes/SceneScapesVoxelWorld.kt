@@ -40,6 +40,8 @@ import org.tobi29.scapes.engine.utils.shader.BooleanExpression
 import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.scapes.entity.model.EntityModel
+import org.tobi29.scapes.entity.model.MobModel
 import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.server.format.WorldSource
@@ -74,7 +76,8 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         particles = ParticleSystem(world, 60.0)
         terrainTextureRegistry = world.game.terrainTextureRegistry()
         skinStorage = ClientSkinStorage(world.game.engine,
-                world.game.engine.graphics.textures["Scapes:image/entity/mob/Player"])
+                world.game.engine.graphics.textures.getNow(
+                        "Scapes:image/entity/mob/Player"))
         val debugValues = world.game.engine.debugValues
         cameraPositionXDebug = debugValues["Camera-Position-X"]
         cameraPositionYDebug = debugValues["Camera-Position-Y"]
@@ -95,7 +98,6 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         world.game.hud.add(8.0, 434.0, -1.0, -1.0) {
             GuiComponentChat(it, world.game.chatHistory)
         }
-        skybox.init()
     }
 
     override fun appendToPipeline(gl: GL): suspend () -> (Double) -> Unit {
@@ -107,19 +109,20 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         val bloom = scapes.bloom
         val exposure = scapes.autoExposure
 
-        val sceneBuffer = gl.engine.graphics.createFramebuffer(
+        val sceneBuffer = gl.createFramebuffer(
                 width, height, 1, true, true, false, TextureFilter.LINEAR)
         val scene = render(gl)
         val render: suspend () -> (Double) -> Unit = if (fxaa) {
-            val shaderFXAA = gl.engine.graphics.loadShader(
+            val shaderFXAA = gl.loadShader(
                     "Scapes:shader/FXAA", mapOf(
                     "SCENE_WIDTH" to IntegerExpression(width),
                     "SCENE_HEIGHT" to IntegerExpression(height)
             ))
-            val fxaaBuffer = gl.engine.graphics.createFramebuffer(
+            val fxaaBuffer = gl.createFramebuffer(
                     width, height, 1, true, true, false, TextureFilter.LINEAR)
             ;{
                 val renderScene = scene()
+                val tNoise = textureNoise.getAsync()
                 val render = gl.into(fxaaBuffer) { delta ->
                     gl.clearDepth()
                     renderScene(delta)
@@ -127,7 +130,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                 val pp = gl.into(sceneBuffer,
                         postProcess(gl, shaderFXAA.getAsync(), fxaaBuffer) {
                             gl.activeTexture(3)
-                            textureNoise.get().bind(gl)
+                            tNoise.bind(gl)
                             gl.activeTexture(0)
                             setUniform1i(gl, 4, 3)
                         })
@@ -143,13 +146,13 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
             }
         }
         val exposureFBO = if (exposure) {
-            gl.engine.graphics.createFramebuffer(1, 1, 1, false, true, false)
+            gl.createFramebuffer(1, 1, 1, false, true, false)
         } else {
             null
         }
         val pp: suspend () -> (Double) -> Unit = if (bloom) {
             val blurSamples = 5
-            val shaderComposite1 = gl.engine.graphics.loadShader(
+            val shaderComposite1 = gl.loadShader(
                     "Scapes:shader/Composite1", mapOf(
                     "BLUR_LENGTH" to IntegerExpression(blurSamples),
                     "BLUR_OFFSET" to ArrayExpression(
@@ -159,7 +162,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                                 pow(cos(it * PI), 0.1)
                             })
             ))
-            val shaderComposite2 = gl.engine.graphics.loadShader(
+            val shaderComposite2 = gl.loadShader(
                     "Scapes:shader/Composite2", mapOf(
                     "BLUR_LENGTH" to IntegerExpression(blurSamples),
                     "BLUR_OFFSET" to ArrayExpression(
@@ -171,7 +174,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                     "ENABLE_BLOOM" to BooleanExpression(true),
                     "ENABLE_EXPOSURE" to BooleanExpression(exposure)
             ))
-            val compositeBuffer = gl.engine.graphics.createFramebuffer(
+            val compositeBuffer = gl.createFramebuffer(
                     width, height, 2, true, true, false,
                     TextureFilter.LINEAR)
             ;{
@@ -194,7 +197,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
             }
         } else {
             val blurSamples = 5
-            val shaderComposite = gl.engine.graphics.loadShader(
+            val shaderComposite = gl.loadShader(
                     "Scapes:shader/Composite2", mapOf(
                     "BLUR_LENGTH" to IntegerExpression(blurSamples),
                     "BLUR_OFFSET" to ArrayExpression(
@@ -222,7 +225,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         }
         if (exposureFBO != null) {
             val blurSamples = 11
-            val shaderExposure = gl.engine.graphics.loadShader(
+            val shaderExposure = gl.loadShader(
                     "Scapes:shader/Exposure", mapOf(
                     "BLUR_LENGTH" to IntegerExpression(blurSamples),
                     "BLUR_OFFSET" to ArrayExpression(
@@ -311,7 +314,8 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
             val render = renderWorld()
             ; { delta ->
             val player = world.player
-            val playerModel = world.playerModel
+            val playerModel = player.getOrNull(
+                    EntityModel.COMPONENT) as? MobModel
             val blackout = 1.0f - clamp(
                     1.0f - player.health().toFloat() * 0.05f,
                     0.0f, 1.0f)
@@ -374,7 +378,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         skinStorage.update(player.game.client())
     }
 
-    fun dispose() {
+    suspend fun dispose() {
         world.dispose()
         particles.dispose()
         skybox.dispose()
@@ -432,9 +436,9 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                     cam: Cam,
                     width: Int,
                     height: Int): suspend () -> (Double) -> Unit {
-        val skyboxFBO = gl.engine.graphics.createFramebuffer(width, height, 1,
+        val skyboxFBO = gl.createFramebuffer(width, height, 1,
                 false, true, false)
-        val shaderTextured = gl.engine.graphics.loadShader(SHADER_TEXTURED)
+        val shaderTextured = gl.loadShader(SHADER_TEXTURED)
         val renderSkybox = skybox.appendToPipeline(gl, cam)
         val renderBackground: suspend () -> (Double) -> Unit = {
             val skyboxRender = renderSkybox()

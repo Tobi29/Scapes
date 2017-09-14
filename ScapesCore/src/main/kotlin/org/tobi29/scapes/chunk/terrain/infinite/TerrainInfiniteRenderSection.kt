@@ -38,8 +38,9 @@ class TerrainInfiniteRenderSection : TerrainInfiniteSection<BlockType, TerrainIn
         terrain.pointerPanes(x, y, z, range, pool)
     }
 
-    override fun addEntity(entity: EntityClient): Boolean {
-        return terrain.addEntity(entity)
+    override fun addEntity(entity: EntityClient,
+                           spawn: Boolean): Boolean {
+        return terrain.addEntity(entity, spawn)
     }
 
     override fun removeEntity(entity: EntityClient): Boolean {
@@ -74,8 +75,9 @@ class TerrainInfiniteRenderSection : TerrainInfiniteSection<BlockType, TerrainIn
         return terrain.getEntitiesAtLeast(minX, minY, minZ, maxX, maxY, maxZ)
     }
 
-    override fun entityAdded(entity: EntityClient) {
-        terrain.entityAdded(entity)
+    override fun entityAdded(entity: EntityClient,
+                             spawn: Boolean) {
+        terrain.entityAdded(entity, spawn)
     }
 
     override fun entityRemoved(entity: EntityClient) {
@@ -96,9 +98,5 @@ class TerrainInfiniteRenderSection : TerrainInfiniteSection<BlockType, TerrainIn
 
     override fun process(packet: PacketBlockChange) {
         terrain.process(packet)
-    }
-
-    override fun dispose() {
-        throw UnsupportedOperationException("Terrain not disposable")
     }
 }

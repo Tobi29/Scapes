@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.gui
 
+import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityResearchTableClient
@@ -27,12 +28,18 @@ class GuiResearchTableInventory(container: EntityResearchTableClient,
                                 style: GuiStyle) : GuiContainerInventory<EntityResearchTableClient>(
         "Research Table", player, container, style) {
     init {
-        selection(buttonContainer(185, 90, 30, 30, 0))
-        val research = pane.add(27.0, 210.0, 120.0, 30.0) {
+        topPane.spacer()
+        val bar = topPane.addVert(0.0, 0.0, -1.0, 120.0,
+                ::GuiComponentGroupSlab)
+        bar.spacer()
+        bar.addHori(5.0, 5.0, 30.0, 30.0) {
+            buttonContainer(it, "Container", 0)
+        }
+        bar.spacer()
+        topPane.spacer()
+        val research = topPane.addVert(16.0, 5.0, 120.0, 30.0) {
             button(it, "Research")
         }
-
-        selection(research)
 
         research.on(GuiEvent.CLICK_LEFT) {
             player.connection().send(PacketResearch(player.registry, container))

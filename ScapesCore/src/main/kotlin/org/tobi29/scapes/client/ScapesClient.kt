@@ -67,7 +67,7 @@ class ScapesClient(val engine: ScapesEngine,
     }
 
     companion object : KLogging() {
-        val COMPONENT = ComponentTypeRegistered<ScapesClient>()
+        val COMPONENT = ComponentTypeRegistered<ScapesEngine, ScapesClient, Any>()
     }
 }
 
@@ -93,7 +93,7 @@ class InputManagerScapes(
     }
 
     companion object : KLogging() {
-        val COMPONENT = ComponentTypeRegistered<InputManagerScapes>()
+        val COMPONENT = ComponentTypeRegistered<ScapesEngine, InputManagerScapes, Any>()
 
         private fun loadService(engine: ScapesEngine,
                                 controller: Controller): ((MutableTagMap) -> InputModeScapes)? {
@@ -129,7 +129,7 @@ interface DialogProvider {
     fun saveScreenshotDialog(result: (FilePath) -> Unit)
 
     companion object {
-        val COMPONENT = ComponentTypeRegisteredPermission<DialogProvider>(
+        val COMPONENT = ComponentTypeRegisteredPermission<ScapesEngine, DialogProvider, Any>(
                 "scapes.dialogs")
     }
 }

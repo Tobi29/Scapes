@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package org.tobi29.scapes.chunk.generator
+package org.tobi29.scapes.entity
 
-interface ChunkGenerator {
-    fun makeLand(x: Int,
-                 y: Int,
-                 z: Int,
-                 dz: Int,
-                 output: GeneratorOutput)
+import org.tobi29.scapes.engine.utils.ConcurrentMap
+
+interface MobLiving : Mob {
+    val onNotice: ConcurrentMap<ListenerToken, in (Mob) -> Unit>
+    val onJump: ConcurrentMap<ListenerToken, () -> Unit>
+    val onHeal: ConcurrentMap<ListenerToken, (Double) -> Unit>
+    val onDamage: ConcurrentMap<ListenerToken, (Double) -> Unit>
+    val onDeath: ConcurrentMap<ListenerToken, () -> Unit>
 }

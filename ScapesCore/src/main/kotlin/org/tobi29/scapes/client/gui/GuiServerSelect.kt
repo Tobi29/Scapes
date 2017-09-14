@@ -91,8 +91,6 @@ class GuiServerSelect(state: GameState,
                 button(it, "Delete")
             }
 
-            selection(label, delete)
-
             address = RemoteAddress(tagMap)
             label.on(GuiEvent.CLICK_LEFT) { event ->
                 state.engine.switchState(GameStateLoadMP(address, state.engine,
@@ -116,8 +114,7 @@ class GuiServerSelect(state: GameState,
                     return@addConnection
                 }
                 try {
-                    channel.register(worker.joiner.selector,
-                            SelectionKey.OP_READ)
+                    channel.register(worker.selector, SelectionKey.OP_READ)
                     label.setText("Fetching info...")
                     // Ignore invalid certificates because worst case
                     // server name and icon get faked

@@ -29,14 +29,15 @@ class GuiAddServer(state: GameState,
         previous, style) {
     init {
         pane.addVert(16.0, 5.0, -1.0, 18.0) { GuiComponentText(it, "IP:") }
-        val ip = row(pane) { GuiComponentTextField(it, 18, "") }
-        pane.addVert(16.0, 5.0, -1.0, 18.0) {
-            GuiComponentText(it, "Port:")
+        val ip = row(pane) {
+            it.selectable = true
+            GuiComponentTextField(it, 18, "")
         }
-        val port = row(pane) { GuiComponentTextField(it, 18, "12345") }
-
-        selection(ip)
-        selection(port)
+        pane.addVert(16.0, 5.0, -1.0, 18.0) { GuiComponentText(it, "Port:") }
+        val port = row(pane) {
+            it.selectable = true
+            GuiComponentTextField(it, 18, "12345")
+        }
 
         save.on(GuiEvent.CLICK_LEFT) {
             val portInt = try {

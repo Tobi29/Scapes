@@ -57,7 +57,7 @@ class GuiComponentBar(parent: GuiLayoutData,
         } else {
             value += (clamp(newValue, 0.0, 1.0) - value) * factor
         }
-        gl.engine.graphics.textureEmpty().bind(gl)
+        gl.graphics.textureEmpty().bind(gl)
         gl.matrixStack.push { matrix ->
             matrix.scale(value.toFloat(), 1.0f, 1.0f)
             model1?.render(gl, shader)

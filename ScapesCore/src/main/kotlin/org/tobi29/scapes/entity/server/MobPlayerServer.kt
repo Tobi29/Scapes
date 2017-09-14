@@ -20,13 +20,10 @@ import org.tobi29.scapes.block.InventoryContainer
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.filterMap
+import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.math.*
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.*
 import org.tobi29.scapes.packets.PacketEntityChange
@@ -53,7 +50,7 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
     protected val viewersMut = ArrayList<MobPlayerServer>()
     override val viewers = viewersMut.readOnly()
     protected val inventories: InventoryContainer
-    private val punchListeners = ConcurrentHashMap<String, (Double) -> Unit>()
+    val onPunch: ConcurrentMap<ListenerToken, (Double) -> Unit> = ConcurrentHashMap()
     val positionReceiver: MobPositionReceiver
     var inventorySelectLeft = 0
     var inventorySelectRight = 9
@@ -61,6 +58,7 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
     protected var currentContainer: EntityContainerServer? = null
 
     init {
+        registerComponent(CreatureType.COMPONENT, CreatureType.CREATURE)
         inventories = InventoryContainer { id ->
             world.send(PacketUpdateInventory(registry, this, id))
         }
@@ -78,7 +76,7 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
                     if (ground != this.isOnGround) {
                         physicsState.isOnGround = ground
                         if (speed.z > 0.0 && !inWater) {
-                            onJump()
+                            jump()
                         }
                     }
                     physicsState.slidingWall = slidingWall
@@ -173,7 +171,7 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
                         rightWeapon().material().click(this, rightWeapon(),
                                 mob) * strength)
             }
-            mob.onNotice(this)
+            mob.notice(this)
             val rad = rot.doubleZ().toRad()
             mob.push(cos(rad) * 10.0,
                     sin(rad) * 10.0, 2.0)
@@ -209,10 +207,6 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
                              y: Int,
                              z: Int): Boolean {
         return false
-    }
-
-    override fun creatureType(): CreatureType {
-        return CreatureType.CREATURE
     }
 
     override fun write(map: ReadWriteTagMap) {
@@ -264,12 +258,7 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
         }
     }
 
-    fun onPunch(id: String,
-                listener: (Double) -> Unit) {
-        punchListeners[id] = listener
-    }
-
-    fun onPunch(strength: Double) {
-        punchListeners.values.forEach { it(strength) }
+    fun punch(strength: Double) {
+        onPunch.values.forEach { it(strength) }
     }
 }

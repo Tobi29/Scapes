@@ -17,12 +17,12 @@
 package org.tobi29.scapes.vanilla.basics.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
+import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.EntityAbstractClient
-import org.tobi29.scapes.entity.model.EntityModel
+import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.vanilla.basics.entity.model.EntityModelBlockBreak
 
 class EntityBlockBreakClient(type: EntityType<*, *>,
@@ -30,13 +30,15 @@ class EntityBlockBreakClient(type: EntityType<*, *>,
         type, world, Vector3d.ZERO) {
     private var progress = 0.0
 
+    init {
+        attachModel {
+            EntityModelBlockBreak(world.game.modelBlockBreakShared(), this)
+        }
+    }
+
     override fun read(map: TagMap) {
         super.read(map)
         map["Progress"]?.toDouble()?.let { progress = it }
-    }
-
-    override fun createModel(): EntityModel? {
-        return EntityModelBlockBreak(world.game.modelBlockBreakShared(), this)
     }
 
     fun progress(): Double {

@@ -33,7 +33,7 @@ class PacketEntityDespawn : PacketAbstract, PacketClient {
 
     constructor(type: PacketType,
                 entity: EntityServer) : super(type) {
-        uuid = entity.getUUID()
+        uuid = entity.uuid
         if (entity is MobLivingServer) {
             dead = entity.isDead
         }
@@ -61,7 +61,7 @@ class PacketEntityDespawn : PacketAbstract, PacketClient {
     override fun runClient(client: ClientConnection) {
         client.getEntity(uuid) { entity ->
             if (dead && entity is MobLivingClient) {
-                entity.onDeath()
+                entity.death()
             }
             entity.world.removeEntity(entity)
         }

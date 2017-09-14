@@ -100,7 +100,7 @@ class GameStateLoadMP(private val address: RemoteAddress,
 
         val channel = connect(worker, address)
         try {
-            channel.register(worker.joiner.selector, SelectionKey.OP_READ)
+            channel.register(worker.selector, SelectionKey.OP_READ)
             gui?.setProgress("Logging in...", 0.6)
             val secureChannel = ssl.newSSLChannel(address, channel,
                     engine.taskExecutor, true)

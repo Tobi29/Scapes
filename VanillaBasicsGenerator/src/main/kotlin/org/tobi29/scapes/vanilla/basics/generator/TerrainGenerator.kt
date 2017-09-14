@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.vanilla.basics.generator
 
+import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
-import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.math.*
 
 class TerrainGenerator(random: Random) {
@@ -216,6 +216,12 @@ class TerrainGenerator(random: Random) {
         var volcanoHeight = 0.0
         var volcanoFactor = 0.0
         var river = 0.0
+
+        companion object {
+            private val TL = ThreadLocal { TerrainGeneratorLayer() }
+
+            fun current(): TerrainGeneratorLayer = TL.get()
+        }
     }
 
     class TerrainGeneratorOutput {
@@ -236,6 +242,12 @@ class TerrainGenerator(random: Random) {
         var soiled = false
         var beach = false
         var lavaChance = 0
+
+        companion object {
+            private val TL = ThreadLocal { TerrainGeneratorOutput() }
+
+            fun current(): TerrainGeneratorOutput = TL.get()
+        }
     }
 
     companion object {

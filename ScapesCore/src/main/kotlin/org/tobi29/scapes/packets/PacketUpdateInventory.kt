@@ -37,7 +37,7 @@ class PacketUpdateInventory : PacketAbstract, PacketClient {
     constructor(type: PacketType,
                 entity: EntityContainerServer,
                 id: String) : super(type) {
-        uuid = entity.getUUID()
+        uuid = entity.uuid
         this.id = id
         tag = entity.inventories().access(id) { TagMap { it.write(this) } }
     }

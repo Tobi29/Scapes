@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.tools.controlpanel
 
+import kotlinx.coroutines.experimental.launch
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.layout.GridLayout
@@ -48,14 +49,17 @@ class ConnectDocument(private val address: RemoteAddress,
 
     init {
         val fail = { e: Exception ->
-            application.accessAsync(document) { composite ->
+            launch(application) {
+                val composite = application.compositeFor(
+                        document) ?: return@launch
                 if (application.message(composite,
                         SWT.ICON_ERROR or SWT.YES or SWT.NO,
                         "Connection lost",
                         "Lost connection:\n" + e.message +
                                 "\n\nTry to reconnect?") == SWT.YES) {
                     application.replaceTab(composite,
-                            ReconnectDocument(address, password, connections))
+                            ReconnectDocument(application, address, password,
+                                    connections))
                 } else {
                     application.closeTab(composite)
                 }
@@ -65,8 +69,10 @@ class ConnectDocument(private val address: RemoteAddress,
             val ssl = SSLHandle()
             try {
                 connect(worker, connection, ssl)
-            } catch(e: SSLCertificateException) {
-                application.accessAsync(this@ConnectDocument) { composite ->
+            } catch (e: SSLCertificateException) {
+                launch(application) {
+                    val composite = application.compositeFor(
+                            document) ?: return@launch
                     val certificates = e.certificates
                     for (certificate in certificates) {
                         val dialog = InputDialog(composite.shell,
@@ -86,7 +92,7 @@ class ConnectDocument(private val address: RemoteAddress,
                         dialog.open()
                         if (!ignored) {
                             application.closeTab(composite)
-                            return@accessAsync
+                            return@launch
                         }
                     }
 
@@ -137,7 +143,7 @@ class ConnectDocument(private val address: RemoteAddress,
                                 ssl: SSLHandle) {
         val channel = connect(worker, address)
         try {
-            channel.register(worker.joiner.selector, SelectionKey.OP_READ)
+            channel.register(worker.selector, SelectionKey.OP_READ)
             val secureChannel = ssl.newSSLChannel(address, channel,
                     worker.connection.taskExecutor, true)
             val bundleChannel = PacketBundleChannel(secureChannel)
@@ -148,12 +154,14 @@ class ConnectDocument(private val address: RemoteAddress,
             val controlPanel = ControlPanelProtocol(worker, bundleChannel,
                     newEventDispatcher())
             controlPanel.addCommand("Commands-Send") { payload ->
-                application.accessAsync(document) { composite ->
+                launch(application) {
+                    val composite = application.compositeFor(
+                            document) ?: return@launch
                     payload["Commands"]?.toList()?.let {
                         val commands = it.asSequence().map(
                                 Tag::toString).toArray()
-                        document = ControlPanelDocument(address,
-                                controlPanel, commands,
+                        document = ControlPanelDocument(application, address,
+                                controlPanel, commands.toSet(),
                                 { connection.requestClose() })
                         application.replaceTab(composite, document)
                     }
@@ -167,7 +175,9 @@ class ConnectDocument(private val address: RemoteAddress,
             secureChannel.requestClose()
             bundleChannel.finishAsync()
             secureChannel.finishAsync()
-            application.accessAsync(document) { composite ->
+            launch(application) {
+                val composite = application.compositeFor(
+                        document) ?: return@launch
                 application.closeTab(composite)
             }
         } finally {

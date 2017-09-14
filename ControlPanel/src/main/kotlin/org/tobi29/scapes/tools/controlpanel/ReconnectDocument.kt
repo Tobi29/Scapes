@@ -16,6 +16,10 @@
 
 package org.tobi29.scapes.tools.controlpanel
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.layout.GridLayout
@@ -30,19 +34,38 @@ import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
+import java.util.concurrent.TimeUnit
 
-class ReconnectDocument(private val address: RemoteAddress,
+class ReconnectDocument(private val application: MultiDocumentApplication,
+                        private val address: RemoteAddress,
                         private val password: String,
                         private val connection: ConnectionManager) : Document {
-    private var timer = 5
+    private var text: Label? = null
+
+    private val job: Job
 
     override val title = address.address + ':' + address.port
     override val shortTitle = address.address
+
+    init {
+        job = launch(application + CoroutineName("Reconnect-Timer")) {
+            for (timer in 4 downTo 0) {
+                delay(1L, TimeUnit.SECONDS)
+                text.ifPresent { it.text = "Reconnecting in $timer..." }
+            }
+            application.compositeFor(this@ReconnectDocument)?.let { composite ->
+                application.replaceTab(composite,
+                        ConnectDocument(address, password, connection,
+                                application))
+            }
+        }
+    }
 
     override fun forceClose() {
     }
 
     override fun destroy() {
+        job.cancel()
     }
 
     override fun populate(composite: DocumentComposite,
@@ -59,25 +82,10 @@ class ReconnectDocument(private val address: RemoteAddress,
         pane.layoutData = GridData(SWT.FILL, SWT.CENTER, true, true)
         val text = Label(pane, SWT.NONE)
         text.layoutData = GridData(SWT.CENTER, SWT.CENTER, true, false)
-        text.text = "Reconnecting in $timer..."
+        text.text = "Reconnecting in 5..."
         val progress = ProgressBar(pane, SWT.INDETERMINATE)
         progress.layoutData = GridData(SWT.FILL, SWT.CENTER, true, false)
-        application.loop.addTask({
-            if (timer <= 0) {
-                application.access(this) { composite ->
-                    application.replaceTab(composite,
-                            ConnectDocument(address, password, this.connection,
-                                    application))
-                }
-                return@addTask -1
-            } else {
-                timer--
-            }
-            text.ifPresent {
-                it.text = "Reconnecting in $timer..."
-                return@addTask 1000
-            }
-            -1
-        }, "Reconnect-Timer", 1000, false)
+
+        this.text = text
     }
 }

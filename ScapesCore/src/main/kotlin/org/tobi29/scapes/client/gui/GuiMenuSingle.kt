@@ -48,8 +48,6 @@ open class GuiMenuSingle(state: GameState,
     }
 
     init {
-        controlSelection(this.back)
-
         this.back.on(GuiEvent.CLICK_LEFT) { fireAction(GuiAction.BACK) }
     }
 }

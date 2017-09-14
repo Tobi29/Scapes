@@ -22,9 +22,24 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.entity.ComponentEntity
+import org.tobi29.scapes.entity.ComponentTypeRegisteredEntity
+import org.tobi29.scapes.entity.client.EntityClient
 
-interface EntityModel {
+interface EntityModel : ComponentEntity {
+    val entity: EntityClient
+
+    override fun init() {
+        entity.world.addEntityModel(this)
+    }
+
+    override fun dispose() {
+        entity.world.removeEntityModel(this)
+    }
+
     fun pos(): Vector3d
+
+    fun setPos(pos: Vector3d)
 
     fun shapeAABB(aabb: AABB)
 
@@ -34,4 +49,8 @@ interface EntityModel {
                world: WorldClient,
                cam: Cam,
                shader: Shader)
+
+    companion object {
+        val COMPONENT = ComponentTypeRegisteredEntity<EntityClient, EntityModel>()
+    }
 }

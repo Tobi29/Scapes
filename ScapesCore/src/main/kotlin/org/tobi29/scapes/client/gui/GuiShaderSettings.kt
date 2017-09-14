@@ -54,11 +54,6 @@ class GuiShaderSettings(state: GameState,
             fxaa = row(pane) { button(it, "FXAA: OFF") }
         }
 
-        selection(animations)
-        selection(bloom)
-        selection(autoExposure)
-        selection(fxaa)
-
         animations.on(GuiEvent.CLICK_LEFT) {
             if (scapes.animations) {
                 animations.setText("Animations: OFF")

@@ -47,10 +47,12 @@ class GuiHud(state: GameState,
             gl.matrixStack.push { matrix ->
                 matrix.translate((size.x * 0.5).toFloat(),
                         (size.y * 0.5).toFloat(), 0.0f)
-                textureCross.get().bind(gl)
-                gl.setBlending(BlendingMode.INVERT)
-                cross.render(gl, shader)
-                gl.setBlending(BlendingMode.NORMAL)
+                textureCross.tryGet()?.let {
+                    it.bind(gl)
+                    gl.setBlending(BlendingMode.INVERT)
+                    cross.render(gl, shader)
+                    gl.setBlending(BlendingMode.NORMAL)
+                }
             }
         }
     }

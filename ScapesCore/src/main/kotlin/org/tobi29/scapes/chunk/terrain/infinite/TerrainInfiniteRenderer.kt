@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer
@@ -84,10 +86,16 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         if (!checkLoaded(chunk)) {
             return
         }
-        terrain.world.game.engine.taskExecutor.runTask({
-            val threadData = THREAD_DATA.get()
-            threadData.process(chunk, i, this)
-        }, taskLock, "Update-Chunk-Geometry")
+        launch(terrain.world.taskExecutor + CoroutineName(
+                "Update-Chunk-Geometry")) {
+            taskLock.increment()
+            try {
+                val threadData = THREAD_DATA.get()
+                threadData.process(chunk, i, this@TerrainInfiniteRenderer)
+            } finally {
+                taskLock.decrement()
+            }
+        }
     }
 
     fun addToQueue(chunk: TerrainInfiniteRendererChunk?) {
@@ -97,12 +105,18 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         if (!checkLoaded(chunk)) {
             return
         }
-        terrain.world.game.engine.taskExecutor.runTask({
-            val threadData = THREAD_DATA.get()
-            for (i in 0 until chunk.zSections()) {
-                threadData.process(chunk, i, this)
+        launch(terrain.world.taskExecutor + CoroutineName(
+                "Update-Chunk-Geometry")) {
+            taskLock.increment()
+            try {
+                val threadData = THREAD_DATA.get()
+                for (i in 0 until chunk.zSections()) {
+                    threadData.process(chunk, i, this@TerrainInfiniteRenderer)
+                }
+            } finally {
+                taskLock.decrement()
             }
-        }, taskLock, "Update-Chunk-Geometry")
+        }
     }
 
     private fun checkLoaded(chunk: TerrainInfiniteRendererChunk): Boolean {
@@ -152,12 +166,18 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
             playerX = newPlayerX
             playerY = newPlayerY
             playerZ = newPlayerZ
-            terrain.world.game.engine.taskExecutor.runTask({
-                profilerSection("Update-Visible") {
-                    updateVisible()
+            launch(terrain.world.taskExecutor + CoroutineName(
+                    "Update-Visible-Chunks")) {
+                taskLock.increment()
+                try {
+                    profilerSection("Update-Visible") {
+                        updateVisible()
+                    }
+                    updatingVisible.set(false)
+                } finally {
+                    taskLock.decrement()
                 }
-                updatingVisible.set(false)
-            }, taskLock, "Update-Visible-Chunks")
+            }
         }
         val camX = camPos.intX()
         val camY = camPos.intY()
@@ -190,7 +210,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         }
         chunks.forEach { it.render(gl, shader1, shader2, cam) }
         if (debug) {
-            gl.engine.graphics.textureEmpty().bind(gl)
+            gl.graphics.textureEmpty().bind(gl)
             chunks.forEach { it.renderFrame(gl, frame, shader1, cam) }
         }
     }

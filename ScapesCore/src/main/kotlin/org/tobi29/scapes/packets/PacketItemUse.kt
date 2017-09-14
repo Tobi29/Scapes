@@ -15,6 +15,9 @@
  */
 package org.tobi29.scapes.packets
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
@@ -24,6 +27,7 @@ import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 import org.tobi29.scapes.server.connection.PlayerConnection
+import java.util.concurrent.TimeUnit
 
 class PacketItemUse : PacketAbstract, PacketServer {
     private var strength = 0.0
@@ -86,7 +90,7 @@ class PacketItemUse : PacketAbstract, PacketServer {
                     item = mob.rightWeapon()
                 }
                 item.material().click(mob, item)
-                mob.onPunch(strength)
+                mob.punch(strength)
                 val pane = mob.selectedBlock(direction)
                 if (pane != null) {
                     val x = pane.x
@@ -99,7 +103,10 @@ class PacketItemUse : PacketAbstract, PacketServer {
                                 face, mob)
                     }
                     if (!flag && strength > 0.0) {
-                        world.loop.addTaskOnce({
+                        launch(world + CoroutineName("Block-Break")) {
+                            delay((item.material().hitWait(
+                                    item) * 0.05).toLong(),
+                                    TimeUnit.MILLISECONDS)
                             mob.inventories().modify("Container") {
                                 val br = item.material().click(mob, item,
                                         terrain, x, y, z, face)
@@ -111,9 +118,7 @@ class PacketItemUse : PacketAbstract, PacketServer {
                                             mob, item, br, strength)
                                 }
                             }
-                        }, "Block-Break",
-                                (item.material().hitWait(item) * 0.05).toLong(),
-                                false)
+                        }
                     }
                 }
             }

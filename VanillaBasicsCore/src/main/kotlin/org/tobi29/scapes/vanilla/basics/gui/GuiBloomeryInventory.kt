@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.gui
 
+import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.utils.math.floor
@@ -30,26 +31,35 @@ class GuiBloomeryInventory(container: EntityBloomeryClient,
     private val bellowsText: GuiComponentText
 
     init {
-        selection(buttonContainer(16, 210, 30, 30, 0))
-        selection(buttonContainer(56, 210, 30, 30, 1))
-        selection(buttonContainer(96, 210, 30, 30, 2))
-        selection(buttonContainer(136, 210, 30, 30, 3))
-        selection(buttonContainer(16, 80, 30, 30, 4))
-        selection(buttonContainer(16, 120, 30, 30, 5))
-        selection(buttonContainer(56, 120, 30, 30, 6))
-        selection(buttonContainer(96, 120, 30, 30, 7))
-        selection(buttonContainer(136, 120, 30, 30, 8))
-        selection(buttonContainer(176, 120, 30, 30, 9))
-        selection(buttonContainer(216, 120, 30, 30, 10))
-        selection(buttonContainer(256, 120, 30, 30, 11))
-        selection(buttonContainer(296, 120, 30, 30, 12))
-        selection(buttonContainer(336, 120, 30, 30, 13))
-        temperatureText = pane.add(40.0, 170.0, -1.0, 24.0) {
+        topPane.spacer()
+        val bar1 = topPane.addVert(32.0, 0.0, -1.0, 40.0,
+                ::GuiComponentGroupSlab)
+        bar1.addHori(5.0, 5.0, 30.0, 30.0) {
+            buttonContainer(it, "Container", 4)
+        }
+        val bar2 = topPane.addVert(32.0, 0.0, -1.0, 40.0,
+                ::GuiComponentGroupSlab)
+        for (i in 5..13) {
+            bar2.addHori(5.0, 5.0, 30.0, 30.0) {
+                buttonContainer(it, "Container", i)
+            }
+        }
+        val bar3 = topPane.addVert(32.0, 0.0, -1.0, 40.0,
+                ::GuiComponentGroupSlab)
+        temperatureText = bar3.addHori(10.0, 10.0, 100.0, 16.0) {
             GuiComponentText(it, "")
         }
-        bellowsText = pane.add(120.0, 170.0, -1.0, 24.0) {
+        bellowsText = bar3.addHori(10.0, 10.0, -1.0, 16.0) {
             GuiComponentText(it, "No bellows attached!")
         }
+        val bar4 = topPane.addVert(32.0, 0.0, -1.0, 40.0,
+                ::GuiComponentGroupSlab)
+        for (i in 0..3) {
+            bar4.addHori(5.0, 5.0, 30.0, 30.0) {
+                buttonContainer(it, "Container", i)
+            }
+        }
+        topPane.spacer()
         updateTemperatureText()
     }
 

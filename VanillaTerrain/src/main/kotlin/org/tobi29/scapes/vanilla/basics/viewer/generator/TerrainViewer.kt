@@ -68,7 +68,8 @@ class TerrainViewer : MultiDocumentApplication("Scapes Terrain Viewer",
         val random = Random()
         val terrainGenerator = TerrainGenerator(random)
         val climateGenerator = ClimateGenerator(random, terrainGenerator)
-        return TerrainViewerAnimatedDocument({ climate(climateGenerator) },
+        return TerrainViewerAnimatedDocument(this,
+                { climate(climateGenerator) },
                 { climateGenerator.add(1.0) })
     }
 
@@ -76,7 +77,7 @@ class TerrainViewer : MultiDocumentApplication("Scapes Terrain Viewer",
         val random = Random()
         val terrainGenerator = TerrainGenerator(random)
         val climateGenerator = ClimateGenerator(random, terrainGenerator)
-        return TerrainViewerAnimatedDocument({
+        return TerrainViewerAnimatedDocument(this, {
             mix(climate(climateGenerator), autumn(climateGenerator), 0.8)
         }, { climateGenerator.add(1.0) })
     }

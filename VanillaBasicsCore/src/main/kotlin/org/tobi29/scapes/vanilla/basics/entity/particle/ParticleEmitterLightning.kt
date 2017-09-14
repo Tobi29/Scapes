@@ -162,20 +162,21 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
     override fun addToPipeline(gl: GL,
                                width: Int,
                                height: Int,
-                               cam: Cam): () -> Unit {
-        val shader = gl.engine.graphics.loadShader(
+                               cam: Cam): suspend () -> (Double) -> Unit {
+        val shader = gl.loadShader(
                 "VanillaBasics:shader/ParticleLightning", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
         ))
-        return render@ {
+        return {
+            val s = shader.getAsync()
+            ;render@ {
             if (!hasAlive) {
                 return@render
             }
             val world = system.world
             val terrain = world.terrain
-            gl.engine.graphics.textureEmpty().bind(gl)
-            val s = shader.get()
+            gl.graphics.textureEmpty().bind(gl)
             for (instance in instances) {
                 if (instance.state != ParticleInstance.State.ALIVE) {
                     continue
@@ -195,6 +196,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
                     }
                 }
             }
+        }
         }
     }
 

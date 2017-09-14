@@ -22,33 +22,32 @@ import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.client.MobLivingEquippedClient
+import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.entity.model.MobLivingModelHuman
 
 class MobSkeletonClient(type: EntityType<*, *>,
                         world: WorldClient) : MobLivingEquippedClient(
         type, world, Vector3d.ZERO, Vector3d.ZERO,
         AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0) {
-
-    override fun onDeath() {
-        val texture = world.game.engine.graphics.textures["VanillaBasics:image/entity/mob/Skeleton"]
-        MobLivingModelHuman.particles(world.game.modelHumanShared(),
-                world.scene.particles(), pos.now(), speed.now(), rot.now(),
-                texture.get(), true, false)
-    }
-
-    override fun creatureType(): CreatureType {
-        return CreatureType.MONSTER
+    init {
+        val texture = world.game.engine.graphics.textures.getNow(
+                "VanillaBasics:image/entity/mob/Skeleton")
+        registerComponent(CreatureType.COMPONENT, CreatureType.MONSTER)
+        attachModel {
+            MobLivingModelHuman(world.game.modelHumanShared(), this, texture,
+                    true, false)
+        }
+        onDeath[SKELETON_LISTENER_TOKEN] = {
+            MobLivingModelHuman.particles(world.game.modelHumanShared(),
+                    world.scene.particles(), pos.now(), speed.now(), rot.now(),
+                    texture, true, false)
+        }
     }
 
     override fun viewOffset(): Vector3d {
         return Vector3d(0.0, 0.0, 0.7)
-    }
-
-    override fun createModel(): MobLivingModelHuman? {
-        val texture = world.game.engine.graphics.textures["VanillaBasics:image/entity/mob/Skeleton"]
-        return MobLivingModelHuman(world.game.modelHumanShared(), this, texture,
-                true, false)
     }
 
     override fun leftWeapon(): ItemStack {
@@ -59,3 +58,5 @@ class MobSkeletonClient(type: EntityType<*, *>,
         return ItemStack(world.plugins)
     }
 }
+
+private val SKELETON_LISTENER_TOKEN = ListenerToken("VanillaBasics:Skeleton")

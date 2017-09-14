@@ -29,7 +29,6 @@ class GuiControlsList(state: GameState,
     init {
         engine[InputManagerScapes.COMPONENT].inputModes.forEach { inputMode ->
             val controls = row(pane) { button(it, inputMode.toString()) }
-            selection(controls)
             controls.on(GuiEvent.CLICK_LEFT) {
                 state.engine.guiStack.swap(this,
                         inputMode.createControlsGUI(state, this))

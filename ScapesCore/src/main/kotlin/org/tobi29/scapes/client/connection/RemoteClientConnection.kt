@@ -16,6 +16,9 @@
 
 package org.tobi29.scapes.client.connection
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.yield
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateServerDisconnect
@@ -23,10 +26,13 @@ import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.scapes.engine.utils.task.Timer
+import org.tobi29.scapes.engine.utils.task.loop
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketPingClient
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
+import java.util.concurrent.TimeUnit
 
 class RemoteClientConnection(private val worker: ConnectionWorker,
                              game: GameStateGameMP,
@@ -42,13 +48,19 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
     private var pingHandler: (Long) -> Unit = {}
 
     override fun start() {
-        game.engine.loop.addTask({
-            send(PacketPingClient(plugins.registry,
-                    System.currentTimeMillis()))
-            downloadDebug.setValue(rateChannel.inputRate / 128.0)
-            uploadDebug.setValue(rateChannel.outputRate / 128.0)
-            if (isClosed) -1 else 1000
-        }, "Connection-Rate", 1000, false)
+        launch(game.engine.taskExecutor + CoroutineName("Connection-Rate")) {
+            Timer().apply { init() }.loop(Timer.toDiff(1.0),
+                    { delay(it, TimeUnit.NANOSECONDS) }) {
+                if (isClosed) return@loop false
+
+                send(PacketPingClient(plugins.registry,
+                        System.currentTimeMillis()))
+                downloadDebug.setValue(rateChannel.inputRate / 128.0)
+                uploadDebug.setValue(rateChannel.outputRate / 128.0)
+
+                true
+            }
+        }
     }
 
     override fun stop() {
@@ -111,7 +123,7 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
     override fun send(packet: PacketServer) {
         sendQueue.add(packet)
         if (packet.isImmediate) {
-            worker.joiner.wake()
+            worker.wake()
         }
     }
 

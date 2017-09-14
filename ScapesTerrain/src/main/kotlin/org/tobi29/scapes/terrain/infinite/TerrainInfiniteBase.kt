@@ -16,15 +16,16 @@
 
 package org.tobi29.scapes.terrain.infinite
 
-import org.tobi29.scapes.engine.utils.task.TaskExecutor
+import kotlinx.coroutines.experimental.runBlocking
 import org.tobi29.scapes.terrain.TerrainBase
 import org.tobi29.scapes.terrain.VoxelType
 import org.tobi29.scapes.terrain.lighting.LightingEngine
 import org.tobi29.scapes.terrain.lighting.LightingEngineThreaded
+import kotlin.coroutines.experimental.CoroutineContext
 
 abstract class TerrainInfiniteBase<B : VoxelType, C : TerrainInfiniteBaseChunk<B>>(
         val zSize: Int,
-        taskExecutor: TaskExecutor,
+        taskExecutor: CoroutineContext,
         override val air: B,
         override val blocks: Array<out B?>,
         val chunkManager: TerrainInfiniteChunkManager<C>,
@@ -155,18 +156,24 @@ abstract class TerrainInfiniteBase<B : VoxelType, C : TerrainInfiniteBaseChunk<B
               y: Int): C? {
         val chunk = chunkManager[x, y]
         if (chunk != null) {
+            if (!chunk.isInitialized) {
+                runBlocking { chunk.awaitInitialized() }
+            }
             chunk.lastAccess = System.currentTimeMillis()
             return chunk
         }
-        return addChunk(x, y)
+        val newChunk = addChunk(x, y) ?: return null
+        runBlocking { newChunk.awaitInitialized() }
+        newChunk.lastAccess = System.currentTimeMillis()
+        return newChunk
     }
 
     fun chunkNoLoad(x: Int,
                     y: Int): C? {
-        return chunkManager[x, y]
+        return chunkManager[x, y]?.takeIf { it.isInitialized }
     }
 
-    fun loadedChunks() = chunkManager.stream()
+    fun loadedChunks() = chunkManager.stream().filter { it.isInitialized }
 
     fun lighting(): LightingEngine {
         return lighting

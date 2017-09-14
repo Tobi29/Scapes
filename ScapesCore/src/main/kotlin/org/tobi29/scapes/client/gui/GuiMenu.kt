@@ -18,7 +18,6 @@ package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.utils.math.Face
 import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
 open class GuiMenu(state: GameState,
@@ -57,15 +56,6 @@ open class GuiMenu(state: GameState,
                 Long.MIN_VALUE + 200) {
             GuiComponentMenuControls(it)
         }
-    }
-
-    fun controlSelection(vararg components: GuiComponent) {
-        components.forEach { component ->
-            selection({ if (!compactControls()) Face.NONE else Face.SOUTH },
-                    component)
-        }
-        selection({ if (compactControls()) Face.NONE else Face.NORTH },
-                *components)
     }
 
     private inner class GuiComponentMenuControls(

@@ -15,27 +15,41 @@
  */
 package org.tobi29.scapes.vanilla.basics.viewer.generator
 
-import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
-import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
-import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
+import org.tobi29.scapes.engine.swt.util.framework.Application
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
+import org.tobi29.scapes.engine.utils.task.Timer
+import org.tobi29.scapes.engine.utils.task.loop
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
-class TerrainViewerAnimatedDocument(colorSupplier: () -> TerrainViewerCanvas.ColorSupplier,
-                                    private val progress: () -> Unit) : TerrainViewerDocument(
-        colorSupplier) {
-    override fun populate(composite: DocumentComposite,
-                          menu: SmartMenuBar,
-                          application: MultiDocumentApplication) {
-        super.populate(composite, menu, application)
-        application.loop.addTask({
-            canvas.ifPresent {
-                if (!it.isRendering) {
-                    progress()
-                    it.render()
+class TerrainViewerAnimatedDocument(
+        application: Application,
+        colorSupplier: () -> TerrainViewerCanvas.ColorSupplier,
+        private val progress: () -> Unit
+) : TerrainViewerDocument(colorSupplier) {
+    val job = AtomicBoolean(false).let { stop ->
+        launch(application + CoroutineName("Animation-Progress")) {
+            Timer().apply { init() }.loop(Timer.toDiff(4.0),
+                    { delay(it, TimeUnit.NANOSECONDS) }) {
+                if (stop.get()) return@loop false
+
+                canvas.ifPresent {
+                    if (!it.isRendering) {
+                        progress()
+                        it.render()
+                    }
                 }
-                return@addTask 250
+
+                true
             }
-            -1
-        }, "Animation-Progress", 0, false)
+        } to stop
+    }
+
+    override fun destroy() {
+        super.destroy()
+        job.let { (_, stop) -> stop.set(true) }
     }
 }

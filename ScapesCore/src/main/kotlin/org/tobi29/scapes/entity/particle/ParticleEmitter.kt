@@ -62,7 +62,7 @@ abstract class ParticleEmitter<P : ParticleInstance> protected constructor(prote
             val j = (i + lastFree) % instances.size
             val instance = instances[j]
             if (instance.state == ParticleInstance.State.DEAD) {
-                lastFree = j
+                lastFree = j + 1
                 initInstance(instance, consumer)
                 instance.state = ParticleInstance.State.NEW
                 activateQueue.add(instance)
@@ -80,7 +80,7 @@ abstract class ParticleEmitter<P : ParticleInstance> protected constructor(prote
     abstract fun addToPipeline(gl: GL,
                                width: Int,
                                height: Int,
-                               cam: Cam): () -> Unit
+                               cam: Cam): suspend () -> (Double) -> Unit
 
     abstract fun update(delta: Double)
 }

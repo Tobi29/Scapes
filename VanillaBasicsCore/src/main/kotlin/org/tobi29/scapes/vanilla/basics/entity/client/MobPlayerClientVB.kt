@@ -21,16 +21,18 @@ import org.tobi29.scapes.block.InventoryContainer
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.client.EntityContainerClient
 import org.tobi29.scapes.entity.client.MobPlayerClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.entity.model.MobLivingModelHuman
+import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
 
 class MobPlayerClientVB(type: EntityType<*, *>,
                         world: WorldClient) : MobPlayerClient(
@@ -40,6 +42,16 @@ class MobPlayerClientVB(type: EntityType<*, *>,
     private val inventories = InventoryContainer().apply {
         add("Container", Inventory(world.plugins, 40))
         add("Hold", Inventory(world.plugins, 1))
+    }
+
+    init {
+        val texture = world.scene.skinStorage()[skin]
+        registerComponent(
+                ComponentMobLivingServerCondition.COMPONENT,
+                ComponentMobLivingServerCondition(this))
+        attachModel {
+            MobLivingModelHuman(world.game.modelHumanShared(), this, texture)
+        }
     }
 
     override fun leftWeapon(): ItemStack {
@@ -70,11 +82,6 @@ class MobPlayerClientVB(type: EntityType<*, *>,
 
     override fun inventories(): InventoryContainer {
         return inventories
-    }
-
-    override fun createModel(): MobLivingModelHuman? {
-        val texture = world.scene.skinStorage()[skin]
-        return MobLivingModelHuman(world.game.modelHumanShared(), this, texture)
     }
 
     override fun read(map: TagMap) {

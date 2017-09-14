@@ -21,9 +21,8 @@ import org.tobi29.scapes.engine.ScapesEngine
 class SceneError(engine: ScapesEngine) : SceneMenu(engine) {
     override fun loadTextures() {
         for (i in 0..5) {
-            setBackground(
-                    engine.graphics.textures["Scapes:image/gui/panorama/error/Panorama$i"],
-                    i)
+            setBackground(engine.graphics.textures.getNow(
+                    "Scapes:image/gui/panorama/error/Panorama$i"), i)
         }
     }
 }

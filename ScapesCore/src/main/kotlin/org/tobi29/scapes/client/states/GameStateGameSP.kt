@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.states
 
+import kotlinx.coroutines.experimental.runBlocking
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
@@ -31,7 +32,7 @@ class GameStateGameSP(clientSupplier: (GameStateGameMP) -> ClientConnection,
                       engine: ScapesEngine) : GameStateGameMP(clientSupplier,
         loadScene, engine) {
     override fun dispose() {
-        this.scene?.dispose()
+        runBlocking { scene?.dispose() }
         client.plugins.removeFileSystems(engine.files)
         try {
             server.stop(ScapesServer.ShutdownReason.ERROR)

@@ -16,15 +16,19 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.chunk.MobSpawner
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
-import org.tobi29.scapes.chunk.generator.GeneratorOutput
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.io.IOException
@@ -32,15 +36,19 @@ import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.engine.utils.math.threadLocalRandom
-import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.engine.utils.math.vector.Vector2i
+import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.task.Joiner
+import org.tobi29.scapes.engine.utils.task.Timer
+import org.tobi29.scapes.engine.utils.task.loop
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManagerDynamic
+import java.util.concurrent.TimeUnit
 
 class TerrainInfiniteServer(override val world: WorldServer,
                             zSize: Int,
@@ -51,80 +59,45 @@ class TerrainInfiniteServer(override val world: WorldServer,
         zSize, world.taskExecutor, air, world.registry,
         TerrainInfiniteChunkManagerDynamic<TerrainInfiniteChunkServer>()), TerrainServer {
     private val chunkUnloadQueue = ConcurrentLinkedQueue<TerrainInfiniteChunkServer>()
-    private val generatorOutput = GeneratorOutput(zSize)
-    private val loadJoiner: Joiner
+    private var loadJob: Pair<Job, AtomicBoolean>? = null
 
     init {
-        loadJoiner = world.taskExecutor.runThread({ joiner ->
-            val requiredChunks = HashSet<Vector2i>()
-            val loadingChunks = ArrayList<Vector2i>()
-            while (!joiner.marked) {
-                val players = world.players()
-                if (players.isEmpty()) {
-                    chunkManager.stream().forEach {
-                        chunkUnloadQueue.add(it)
-                    }
-                    removeChunks()
-                    joiner.sleep(100)
-                } else {
-                    for (player in players) {
+        val stop = AtomicBoolean(false)
+        loadJob = launch(world.taskExecutor + CoroutineName("Chunk-Loading")) {
+            val loader = TerrainInfiniteChunkLoader(loadedChunks(), cxMin,
+                    cxMax, cyMin, cyMax)
+
+            Timer().apply { init() }.loop(Timer.toDiff(10.0),
+                    { delay(it, TimeUnit.NANOSECONDS) }) {
+                if (stop.get()) return@loop false
+
+                while (true) {
+                    for (player in world.players()) {
                         val pos = player.getCurrentPos()
                         val xx = pos.intX() shr 4
                         val yy = pos.intY() shr 4
                         val loadingRadius = (player.connection().loadingRadius() shr 4) + 2
-                        // Add 48 to provide circular sendable area
-                        // Note: 48 was found to be just enough to avoid request spam
-                        val loadingRadiusSqr = loadingRadius * loadingRadius + 48
-                        for (x in -loadingRadius..loadingRadius) {
-                            val xxx = x + xx
-                            for (y in -loadingRadius..loadingRadius) {
-                                val yyy = y + yy
-                                if (xxx in cxMin..cxMax &&
-                                        yyy >= cyMin && yyy <= cyMax) {
-                                    if (x * x + y * y <= loadingRadiusSqr) {
-                                        requiredChunks.add(Vector2i(x + xx,
-                                                y + yy))
-                                    }
-                                }
-                            }
-                        }
+                        loader.requireCircle(xx, yy, loadingRadius)
                     }
-                    for (player in players) {
-                        val loadArea = Vector3i(player.getCurrentPos() / 16.0)
-                        requiredChunks.asSequence().filter {
-                            !hasChunk(it.x, it.y)
-                        }.forEach { loadingChunks.add(it) }
-                        val newChunks: List<Vector2i>
-                        if (loadingChunks.size > 64) {
-                            newChunks = loadingChunks.asSequence().sortedBy {
-                                it.distanceSqr(loadArea)
-                            }.take(32).toList()
-                        } else {
-                            newChunks = loadingChunks.asSequence().take(
-                                    32).toList()
-                        }
-                        addChunks(newChunks)
-                        chunkManager.stream().filter(
-                                { it.shouldPopulate() }).take(
-                                32).forEach({ it.populate() })
-                        chunkManager.stream().filter {
-                            it.shouldFinish() && requiredChunks.contains(it.pos)
-                        }.forEach(TerrainInfiniteChunkServer::finish)
-                        val time = System.currentTimeMillis() - 2000
-                        chunkManager.stream().filter { chunk ->
-                            chunk.lastAccess < time && !requiredChunks.contains(
-                                    chunk.pos)
-                        }.forEach { chunkUnloadQueue.add(it) }
-                        chunkManager.stream().forEach { it.updateAdjacent() }
-                        if (removeChunks() && loadingChunks.isEmpty()) {
-                            joiner.sleep(100)
-                        }
-                        loadingChunks.clear()
-                    }
-                    requiredChunks.clear()
+
+                    val activeRemove = removeChunks(loader.outsideChunks)
+                    val activeAdd = addChunks(loader.requiredChunks {
+                        !chunkManager.has(it.x, it.y)
+                    }.map { it.now() }.toList()).isNotEmpty()
+                    chunkManager.stream().forEach { it.updateAdjacent() }
+                    chunkManager.stream().filter { it.shouldPopulate() }
+                            .forEach { it.populate() }
+                    chunkManager.stream().filter { it.shouldFinish() }
+                            .forEach(TerrainInfiniteChunkServer::finish)
+                    val active = activeAdd || activeRemove
+                    loader.reset()
+
+                    if (!active) break
                 }
+
+                true
             }
-        }, "Chunk-Loading")
+        } to stop
     }
 
     override fun getThreadContext(): TerrainInfiniteServerSection = SECTION.get()
@@ -135,7 +108,8 @@ class TerrainInfiniteServer(override val world: WorldServer,
                 y.toDouble()).toInt()
     }
 
-    override fun addEntity(entity: EntityServer): Boolean {
+    override fun addEntity(entity: EntityServer,
+                           spawn: Boolean): Boolean {
         val pos = entity.getCurrentPos()
         val x = pos.intX() shr 4
         val y = pos.intY() shr 4
@@ -145,9 +119,10 @@ class TerrainInfiniteServer(override val world: WorldServer,
         }) ?: false
     }
 
-    override fun entityAdded(entity: EntityServer) {
-        super.entityAdded(entity)
-        world.entityAdded(entity)
+    override fun entityAdded(entity: EntityServer,
+                             spawn: Boolean) {
+        super.entityAdded(entity, spawn)
+        world.entityAdded(entity, spawn)
     }
 
     override fun entityRemoved(entity: EntityServer) {
@@ -173,38 +148,22 @@ class TerrainInfiniteServer(override val world: WorldServer,
                 chunks.add(null)
                 continue
             }
-            var chunk: TerrainInfiniteChunkServer? = null
-            synchronized(chunkManager) {
-                chunk = chunkManager[x, y]
+            chunks.add(synchronized(chunkManager) {
+                var chunk = chunkManager[x, y]
                 if (chunk == null) {
                     val map = chunkMaps[i]
-                    if (map != null) {
-                        profilerSection("Load") {
-                            var time = System.currentTimeMillis()
-                            val chunk2 = TerrainInfiniteChunkServer(
-                                    Vector2i(x, y), this, zSize, map)
-                            time = System.currentTimeMillis() - time
-                            logger.debug { "Chunk loaded in ${time}ms" }
-                            chunkManager.add(chunk2)
-                            updateAdjacent(chunk2.pos.x, chunk2.pos.y)
-                            chunk = chunk2
-                        }
+                    chunk = TerrainInfiniteChunkServer(Vector2i(x, y), this,
+                            zSize)
+                    if (map == null) {
+                        chunk.generate(generator)
                     } else {
-                        profilerSection("Generate") {
-                            var time = System.currentTimeMillis()
-                            val chunk2 = TerrainInfiniteChunkServer(
-                                    Vector2i(x, y), this, zSize,
-                                    generator, generatorOutput)
-                            time = System.currentTimeMillis() - time
-                            logger.debug { "Chunk generated in ${time}ms" }
-                            chunkManager.add(chunk2)
-                            updateAdjacent(chunk2.pos.x, chunk2.pos.y)
-                            chunk = chunk2
-                        }
+                        chunk.load(map)
                     }
+                    chunkManager.add(chunk)
+                    updateAdjacent(chunk.pos.x, chunk.pos.y)
                 }
-            }
-            chunks.add(chunk)
+                chunk
+            })
         }
         return chunks
     }
@@ -328,8 +287,11 @@ class TerrainInfiniteServer(override val world: WorldServer,
         chunkManager.stream().filter { it.isLoaded }.forEach { consumer(it) }
     }
 
-    override fun dispose() {
-        loadJoiner.join()
+    override suspend fun dispose() {
+        loadJob?.let { (job, stop) ->
+            stop.set(true)
+            job.join()
+        }
         lighting.dispose()
         chunkManager.stream().forEach { chunkUnloadQueue.add(it) }
         removeChunks()
@@ -397,6 +359,22 @@ class TerrainInfiniteServer(override val world: WorldServer,
             logger.error(e) { "Failed to store chunks" }
         }
         return false
+    }
+
+    private fun removeChunks(oi: Sequence<TerrainInfiniteChunkServer>): Boolean {
+        val chunks = ArrayList<Pair<Vector2i, TagMap>>()
+        synchronized(this) {
+            oi.forEach { chunks.add(removeChunk(it)) }
+        }
+        if (chunks.isEmpty()) {
+            return false
+        }
+        try {
+            format.putChunkTags(chunks)
+        } catch (e: IOException) {
+            logger.error(e) { "Failed to store chunks" }
+        }
+        return true
     }
 
     private fun removeChunk(

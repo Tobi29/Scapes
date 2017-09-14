@@ -55,12 +55,12 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
 
     internal fun receiveServer(packet: PacketServer) {
         queue.add(packet)
-        worker.joiner.wake()
+        worker.wake()
     }
 
     internal fun receiveClient(packet: PacketClient) {
         queueClient.add(packet)
-        workerClient?.joiner?.wake()
+        workerClient?.wake()
     }
 
     fun start(client: LocalClientConnection,
@@ -91,7 +91,7 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
         }
         added = true
         setWorld()
-        workerClient.joiner.wake()
+        workerClient.wake()
         return null
     }
 
@@ -146,7 +146,7 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
     override fun transmit(packet: PacketClient) {
         receiveClient(packet)
         if (packet.isImmediate) {
-            worker.joiner.wake()
+            worker.wake()
         }
     }
 
