@@ -48,7 +48,7 @@ abstract class ScapesStandaloneServer(
 
     // TODO: @Throws(IOException::class)
     fun run(path: FilePath) {
-        val stopped = AtomicBoolean(true)
+        val stopped = AtomicBoolean(false)
         val shutdownHook = Thread {
             while (!stopped.get()) {
                 sleepNanos(1000L)
@@ -79,6 +79,7 @@ abstract class ScapesStandaloneServer(
                 }
             }
         } finally {
+            stopped.set(true)
             try {
                 RUNTIME.removeShutdownHook(shutdownHook)
             } catch (e: IllegalStateException) {
