@@ -24,7 +24,9 @@ import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.server.ConnectionCloseException
 import org.tobi29.scapes.engine.server.PacketBundleChannel
 import org.tobi29.scapes.engine.server.receive
-import org.tobi29.scapes.engine.utils.*
+import org.tobi29.scapes.engine.utils.Version
+import org.tobi29.scapes.engine.utils.VersionException
+import org.tobi29.scapes.engine.utils.compare
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.FileCache
@@ -33,6 +35,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.exists
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.tag.toMutTag
+import org.tobi29.scapes.engine.utils.versionParse
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
 import java.security.InvalidKeyException
@@ -67,7 +70,7 @@ object NewClientConnection {
             return null
         }
         var challenge = ByteArray(512)
-        channel.inputStream[challenge]
+        channel.inputStream.get(challenge)
         try {
             val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
             cipher.init(Cipher.DECRYPT_MODE, account.keyPair().private)
@@ -102,8 +105,8 @@ object NewClientConnection {
                     .filter { it.id() == id }
                     .filter {
                         compare(it.version, version).inside(
-                                Comparison.LOWER_BUILD,
-                                Comparison.HIGHER_MINOR)
+                                Version.Comparison.LOWER_REVISION,
+                                Version.Comparison.HIGHER_MINOR)
                     }.firstOrNull()
             if (embedded != null) {
                 plugins.add(embedded)

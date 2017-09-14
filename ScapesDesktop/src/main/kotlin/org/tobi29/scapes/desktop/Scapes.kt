@@ -53,28 +53,28 @@ import org.tobi29.scapes.server.shell.ScapesServerHeadless
 import java.util.concurrent.ForkJoinPool
 import kotlin.system.exitProcess
 
-fun main(args: Array<String>) {
-    val optionsList = ArrayList<CommandOption>()
-    val helpOption = CommandOption(setOf('h'), setOf("help"),
-            "Print this text and exit").also { optionsList.add(it) }
-    val versionOption = CommandOption(setOf('v'), setOf("version"),
-            "Print version and exit").also { optionsList.add(it) }
-    val modeOption = CommandOption(setOf('m'), setOf("mode"), 1,
-            "Specify which mode to run").also { optionsList.add(it) }
-    val debugOption = CommandOption(setOf('d'), setOf("debug"),
-            "Run in debug mode").also { optionsList.add(it) }
-    val glesOption = CommandOption(setOf('e'), setOf("gles"),
-            "Use OpenGL ES").also { optionsList.add(it) }
-    val socketspOption = CommandOption(setOf('r'), setOf("socketsp"),
-            "Use network socket for singleplayer").also { optionsList.add(it) }
-    val touchOption = CommandOption(setOf('t'), setOf("touch"),
-            "Emulate touch interface").also { optionsList.add(it) }
-    val configOption = CommandOption(setOf('c'), setOf("config"), 1,
-            "Config directory for server").also { optionsList.add(it) }
-    val nosandboxOption = CommandOption(setOf('n'), setOf("nosandbox"),
-            "Disable sandbox").also { optionsList.add(it) }
-    val options = optionsList.asSequence()
+private val helpOption = CommandOption(
+        setOf('h'), setOf("help"), "Print this text and exit")
+private val versionOption = CommandOption(
+        setOf('v'), setOf("version"), "Print version and exit")
+private val modeOption = CommandOption(
+        setOf('m'), setOf("mode"), 1, "Specify which mode to run")
+private val debugOption = CommandOption(
+        setOf('d'), setOf("debug"), "Run in debug mode")
+private val glesOption = CommandOption(
+        setOf('e'), setOf("gles"), "Use OpenGL ES")
+private val socketspOption = CommandOption(
+        setOf('r'), setOf("socketsp"), "Use network socket for singleplayer")
+private val touchOption = CommandOption(
+        setOf('t'), setOf("touch"), "Emulate touch interface")
+private val configOption = CommandOption(
+        setOf('c'), setOf("config"), 1, "Config directory for server")
+private val nosandboxOption = CommandOption(
+        setOf('n'), setOf("nosandbox"), "Disable sandbox")
+private val options = listOf(helpOption, versionOption, modeOption, debugOption,
+        glesOption, socketspOption, touchOption, configOption, nosandboxOption)
 
+fun main(args: Array<String>) {
     val commandLine = try {
         val parser = TokenParser(options)
         args.forEach { parser.append(it) }

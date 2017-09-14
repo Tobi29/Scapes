@@ -131,7 +131,7 @@ class GuiServerSelect(state: GameState,
                     }
                     val infoBuffer = ByteBuffer(
                             bundleChannel.inputStream.remaining())
-                    bundleChannel.inputStream[infoBuffer]
+                    bundleChannel.inputStream.get(infoBuffer)
                     infoBuffer.flip()
                     val serverInfo = ServerInfo(infoBuffer)
                     label.setText(serverInfo.name)

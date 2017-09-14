@@ -34,8 +34,8 @@ class CommandRegistry constructor(private val prefix: String = "") {
         val options = ArrayList<CommandOption>()
         options.add(helpOption)
         val compiler = block(options)
-        commands.put(name, compiler(prefix + usage, level, helpOption,
-                options.asSequence(), compiler))
+        commands.put(name,
+                compiler(prefix + usage, level, helpOption, options, compiler))
     }
 
     fun group(name: String): CommandRegistry {
@@ -78,7 +78,7 @@ class CommandRegistry constructor(private val prefix: String = "") {
             usage: String,
             level: Int,
             helpOption: CommandOption,
-            options: Sequence<CommandOption>,
+            options: Iterable<CommandOption>,
             compiler: Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
     ): (List<String>, Executor) -> Command.Compiled {
         return { args, executor ->

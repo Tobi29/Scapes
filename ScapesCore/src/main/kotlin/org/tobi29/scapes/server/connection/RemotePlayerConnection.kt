@@ -64,7 +64,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                 return
             }
             val array = ByteArray(550)
-            input[array]
+            input.get(array)
             id = checksum(array, Algorithm.SHA1).toString()
             val challenge = ByteArray(501)
             SecureRandom().nextBytes(challenge)
@@ -96,7 +96,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                 return
             }
             val challengeReceived = ByteArray(challenge.size)
-            input[challengeReceived]
+            input.get(challengeReceived)
             nickname = input.getString(1 shl 10)
             var length = input.getInt()
             val requests = ArrayList<Int>(length)
@@ -125,7 +125,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             loadingRadius = clamp(input.getInt(), 10,
                     server.server.maxLoadingRadius())
             val buffer = ByteBuffer(64 * 64 * 4)
-            input[buffer]
+            input.get(buffer)
             buffer.flip()
             skin = ServerSkin(Image(64, 64, buffer))
             val response = server.addPlayer(this@RemotePlayerConnection)

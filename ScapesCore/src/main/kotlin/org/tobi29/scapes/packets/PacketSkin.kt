@@ -21,9 +21,9 @@ import org.tobi29.scapes.engine.utils.Algorithm
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.io.ByteBuffer
+import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.server.connection.PlayerConnection
 
 class PacketSkin : PacketAbstract, PacketBoth {
@@ -63,7 +63,7 @@ class PacketSkin : PacketAbstract, PacketBoth {
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
         val buffer = ByteBuffer(64 * 64 * 4)
-        stream[buffer]
+        stream.get(buffer)
         buffer.flip()
         image = Image(64, 64, buffer)
         val algorithm: Algorithm
@@ -74,7 +74,7 @@ class PacketSkin : PacketAbstract, PacketBoth {
         }
 
         val array = ByteArray(algorithm.bytes)
-        stream[array]
+        stream.get(array)
         checksum = Checksum(algorithm, array)
     }
 
@@ -100,7 +100,7 @@ class PacketSkin : PacketAbstract, PacketBoth {
         }
 
         val array = ByteArray(algorithm.bytes)
-        stream[array]
+        stream.get(array)
         checksum = Checksum(algorithm, array)
     }
 
