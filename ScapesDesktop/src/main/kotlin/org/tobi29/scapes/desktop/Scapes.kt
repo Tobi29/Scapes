@@ -47,6 +47,8 @@ import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.mapMut
 import org.tobi29.scapes.engine.utils.tag.toMutTag
 import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.scapes.engine.utils.tryWrap
+import org.tobi29.scapes.engine.utils.unwrapOr
 import org.tobi29.scapes.plugins.Sandbox
 import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
 import org.tobi29.scapes.server.shell.ScapesServerHeadless
@@ -75,15 +77,9 @@ private val options = listOf(helpOption, versionOption, modeOption, debugOption,
         glesOption, socketspOption, touchOption, configOption, nosandboxOption)
 
 fun main(args: Array<String>) {
-    val commandLine = try {
-        val parser = TokenParser(options)
-        args.forEach { parser.append(it) }
-        val tokens = parser.finish()
-
-        val commandLine = tokens.assemble()
-        commandLine.validate()
-        commandLine
-    } catch (e: InvalidCommandLineException) {
+    val commandLine = tryWrap<CommandLine, InvalidCommandLineException> {
+        options.parseCommandLine(args.asIterable())
+    }.unwrapOr { e ->
         printerrln(e.message)
         exitProcess(255)
     }
@@ -93,11 +89,11 @@ fun main(args: Array<String>) {
         help.append("Usage: scapes\n")
         options.printHelp(help)
         println(help)
-        return
+        exitProcess(0)
     }
     if (commandLine.getBoolean(versionOption)) {
         println("Scapes $VERSION")
-        return
+        exitProcess(0)
     }
     if (commandLine.getBoolean(nosandboxOption)) {
         println("----------------------------------------")
