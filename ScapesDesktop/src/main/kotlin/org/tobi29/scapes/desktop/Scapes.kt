@@ -35,6 +35,10 @@ import org.tobi29.scapes.engine.graphics.FontRenderer
 import org.tobi29.scapes.engine.graphics.GraphicsCheckException
 import org.tobi29.scapes.engine.gui.GuiBasicStyle
 import org.tobi29.scapes.engine.gui.GuiStyle
+import org.tobi29.scapes.engine.platform.appIDForCache
+import org.tobi29.scapes.engine.platform.appIDForData
+import org.tobi29.scapes.engine.platform.cacheHome
+import org.tobi29.scapes.engine.platform.dataHome
 import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.classpath.ClasspathPath
@@ -76,6 +80,9 @@ private val nosandboxOption = CommandOption(
 private val options = listOf(helpOption, versionOption, modeOption, debugOption,
         glesOption, socketspOption, touchOption, configOption, nosandboxOption)
 
+val SCAPES_ID = "org.tobi29.scapes"
+val SCAPES_NAME = "Scapes"
+
 fun main(args: Array<String>) {
     val commandLine = tryWrap<CommandLine, InvalidCommandLineException> {
         options.parseCommandLine(args.asIterable())
@@ -86,7 +93,7 @@ fun main(args: Array<String>) {
 
     if (commandLine.getBoolean(helpOption)) {
         val help = StringBuilder()
-        help.append("Usage: scapes\n")
+        help.append("Usage: scapes [run directory]\n")
         options.printHelp(help)
         println(help)
         exitProcess(0)
@@ -111,18 +118,17 @@ fun main(args: Array<String>) {
         Debug.socketSingleplayer(true)
     }
     val mode = commandLine.get(modeOption) ?: "client"
-    val home: FilePath
-    if (commandLine.arguments.isNotEmpty()) {
-        home = path(commandLine.arguments[0])
-        System.setProperty("user.dir", home.toAbsolutePath().toString())
-    } else {
-        home = path(System.getProperty("user.dir")).toAbsolutePath()
-    }
+    val runDir = if (commandLine.arguments.isNotEmpty()) {
+        path(commandLine.arguments[0])
+    } else null
 
     when (mode) {
         "client" -> {
+            val home = runDir
+                    ?: dataHome.resolve(appIDForData(SCAPES_ID, SCAPES_NAME))
+            System.setProperty("user.dir", home.toAbsolutePath().toString())
+            val cache = cacheHome.resolve(appIDForCache(SCAPES_ID, SCAPES_NAME))
             val config = home.resolve("ScapesEngine.json")
-            val cache = home.resolve("cache")
             val pluginCache = cache.resolve("plugins")
             var engine: ScapesEngine? = null
             Thread.setDefaultUncaughtExceptionHandler { _, e ->
@@ -201,6 +207,9 @@ fun main(args: Array<String>) {
             }
         }
         "server" -> {
+            val home = runDir
+                    ?: path(System.getProperty("user.dir")).toAbsolutePath()
+            System.setProperty("user.dir", home.toAbsolutePath().toString())
             val configPath = commandLine.get(configOption)
             val config = if (configPath != null) {
                 home.resolve(path(configPath)).toAbsolutePath()
