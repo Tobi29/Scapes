@@ -49,14 +49,16 @@ abstract class ScapesStandaloneServer(
     // TODO: @Throws(IOException::class)
     fun run(path: FilePath) {
         val stopped = AtomicBoolean(false)
+        val running = AtomicBoolean(true)
         val shutdownHook = Thread {
+            running.set(false)
             while (!stopped.get()) {
                 sleepNanos(1000L)
             }
         }
         RUNTIME.addShutdownHook(shutdownHook)
         try {
-            while (true) {
+            while (running.get()) {
                 val configMap = loadConfig(config.resolve("Server.json"))
                 val keyManagerConfig = configMap["KeyManager"]?.toMap() ?: TagMap()
                 val keyManagerProvider = loadKeyManager(
@@ -68,9 +70,12 @@ abstract class ScapesStandaloneServer(
                         worldSourceConfig["ID"].toString())
                 worldSourceProvider[path, worldSourceConfig, taskExecutor].use { source ->
                     val loop = start(source, configMap, ssl)
-                    while (!server.shouldStop()) {
+                    while (running.get() && !server.shouldStop()) {
                         loop()
                         sleep(100L)
+                    }
+                    if (!running.get()) {
+                        server.scheduleStop(ScapesServer.ShutdownReason.STOP)
                     }
                     server.stop()
                 }
