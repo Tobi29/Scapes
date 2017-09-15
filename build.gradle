@@ -62,7 +62,6 @@ allprojects {
         maven {
             url "https://maven-eclipse.github.io/maven"
         }
-        mavenLocal()
         maven {
             url "https://jitpack.io"
         }
