@@ -42,6 +42,7 @@ class ExtensionStat(
         application: Application,
         connection: ControlPanelProtocol
 ) : Extension(connection) {
+    override val priority = -100
     private var job: Pair<Job, AtomicBoolean>? = null
     private var graphs: ControlPanelGraphs? = null
 

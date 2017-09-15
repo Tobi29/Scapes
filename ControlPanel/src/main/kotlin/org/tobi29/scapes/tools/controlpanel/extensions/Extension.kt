@@ -29,5 +29,7 @@ abstract class Extension(
 interface ComponentUIControlPanel : ComponentUI<ControlPanelConnection>
 
 interface ComponentUI<in C : Widget> {
+    val priority: Int get() = 0
+
     fun populate(composite: C) {}
 }

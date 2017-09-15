@@ -78,7 +78,8 @@ class ControlPanelDocument(
                 Shortcut["Connection.Disconnect", 'D', Shortcut.Modifier.CONTROL])
         composite.layout = FillLayout()
         val panel = ControlPanelConnection(composite)
-        components.asSequence().filterMap<ComponentUIControlPanel>().forEach {
+        components.asSequence().filterMap<ComponentUIControlPanel>()
+                .sortedByDescending { it.priority }.forEach {
             it.populate(panel)
         }
     }
