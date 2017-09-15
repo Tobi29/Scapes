@@ -111,6 +111,8 @@ ext {
             "com.github.Tobi29.ScapesEngine:EngineJVM:$scapesEngineVersion"
     scapesEngineArgumentParser =
             "com.github.Tobi29.ScapesEngine:ArgumentParserJVM:$scapesEngineVersion"
+    scapesEnginePlatformIntegration =
+            "com.github.Tobi29.ScapesEngine:PlatformIntegrationJVM:$scapesEngineVersion"
     scapesEngineTagStructureJSON =
             "com.github.Tobi29.ScapesEngine:TagStructureJSONJVM:$scapesEngineVersion"
     scapesEngineSWTUtils =
