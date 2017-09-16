@@ -23,7 +23,6 @@ import kotlinx.coroutines.experimental.yield
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateServerDisconnect
 import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.task.Timer
@@ -32,6 +31,7 @@ import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketPingClient
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 
 class RemoteClientConnection(private val worker: ConnectionWorker,
@@ -42,6 +42,7 @@ class RemoteClientConnection(private val worker: ConnectionWorker,
                              plugins: Plugins,
                              loadingDistance: Int) : ClientConnection(game,
         plugins, loadingDistance) {
+    // TODO: Port away
     private val sendQueue = ConcurrentLinkedQueue<PacketServer>()
     private var isClosed = false
     private var close = false

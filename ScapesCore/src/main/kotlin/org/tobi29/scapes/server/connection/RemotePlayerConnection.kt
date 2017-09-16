@@ -20,7 +20,6 @@ import kotlinx.coroutines.experimental.yield
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.Algorithm
 import org.tobi29.scapes.engine.utils.AtomicInteger
-import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
@@ -41,6 +40,7 @@ import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 import java.security.spec.InvalidKeySpecException
 import java.security.spec.X509EncodedKeySpec
+import java.util.concurrent.ConcurrentLinkedQueue
 import javax.crypto.BadPaddingException
 import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
@@ -50,6 +50,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                              private val channel: PacketBundleChannel,
                              server: ServerConnection) : PlayerConnection(
         server) {
+    // TODO: Port away
     private val sendQueue = ConcurrentLinkedQueue<PacketClient>()
     private val sendQueueSize = AtomicInteger()
     private var pingWait = 0L

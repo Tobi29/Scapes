@@ -29,7 +29,6 @@ import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
@@ -48,6 +47,7 @@ import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManagerDynamic
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 
 class TerrainInfiniteServer(override val world: WorldServer,
@@ -58,6 +58,7 @@ class TerrainInfiniteServer(override val world: WorldServer,
                             air: BlockType) : TerrainInfinite<EntityServer, TerrainInfiniteChunkServer>(
         zSize, world.taskExecutor, air, world.registry,
         TerrainInfiniteChunkManagerDynamic<TerrainInfiniteChunkServer>()), TerrainServer {
+    // TODO: Port away
     private val chunkUnloadQueue = ConcurrentLinkedQueue<TerrainInfiniteChunkServer>()
     private var loadJob: Pair<Job, AtomicBoolean>? = null
 

@@ -21,13 +21,14 @@ import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.packets.PacketSkin
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class ClientSkinStorage(private val engine: ScapesEngine,
                         private val defaultTexture: Texture) {
     private val skins = ConcurrentHashMap<Checksum, ClientSkin>()
+    // TODO: Port away
     private val skinRequests = ConcurrentLinkedQueue<Checksum>()
     private val defaultSkin = defaultTexture.buffer(0)
             ?: throw IllegalArgumentException("Default skin texture is empty")

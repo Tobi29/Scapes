@@ -17,14 +17,16 @@
 package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.assert
 import org.tobi29.scapes.engine.utils.graphics.Cam
+import java.util.concurrent.ConcurrentLinkedQueue
 
 abstract class ParticleEmitter<P : ParticleInstance> protected constructor(protected val system: ParticleSystem,
                                                                            protected val instances: Array<P>) {
     protected val maxInstances: Int
+    // TODO: Port away
     private val queue = ConcurrentLinkedQueue<(P) -> Unit>()
+    // TODO: Port away
     private val activateQueue = ConcurrentLinkedQueue<P>()
     protected var hasAlive = false
     private var lastFree = 0

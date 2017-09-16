@@ -25,7 +25,6 @@ import org.tobi29.scapes.engine.server.ConnectionCloseException
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
 import org.tobi29.scapes.engine.utils.Algorithm
-import org.tobi29.scapes.engine.utils.ConcurrentLinkedQueue
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.checksum
@@ -40,12 +39,15 @@ import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.event.PlayerJoinEvent
 import org.tobi29.scapes.server.extension.event.PlayerLeaveEvent
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class LocalPlayerConnection(private val worker: ConnectionWorker,
                             server: ServerConnection,
                             loadingDistance: Int) : PlayerConnection(
         server) {
+    // TODO: Port away
     private val queue = ConcurrentLinkedQueue<PacketServer>()
+    // TODO: Port away
     internal val queueClient = ConcurrentLinkedQueue<PacketClient>()
     private var workerClient: ConnectionWorker? = null
 
