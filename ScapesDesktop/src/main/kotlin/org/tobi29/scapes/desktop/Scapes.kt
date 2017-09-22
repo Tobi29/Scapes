@@ -56,8 +56,13 @@ import org.tobi29.scapes.engine.utils.unwrapOr
 import org.tobi29.scapes.plugins.Sandbox
 import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
 import org.tobi29.scapes.server.shell.ScapesServerHeadless
+import java.lang.ref.WeakReference
 import java.util.concurrent.ForkJoinPool
 import kotlin.system.exitProcess
+
+const val APP_ID = "org.tobi29.scapes"
+const val APP_NAME = "Scapes"
+const val APP_EXEC = "scapes"
 
 private val helpOption = CommandOption(
         setOf('h'), setOf("help"), "Print this text and exit")
@@ -80,20 +85,17 @@ private val nosandboxOption = CommandOption(
 private val options = listOf(helpOption, versionOption, modeOption, debugOption,
         glesOption, socketspOption, touchOption, configOption, nosandboxOption)
 
-val SCAPES_ID = "org.tobi29.scapes"
-val SCAPES_NAME = "Scapes"
-
 fun main(args: Array<String>) {
     val commandLine = tryWrap<CommandLine, InvalidCommandLineException> {
         options.parseCommandLine(args.asIterable())
     }.unwrapOr { e ->
         printerrln(e.message)
-        exitProcess(255)
+        exitProcess(1)
     }
 
     if (commandLine.getBoolean(helpOption)) {
         val help = StringBuilder()
-        help.append("Usage: scapes [run directory]\n")
+        help.append("Usage: $APP_EXEC [run directory]\n")
         options.printHelp(help)
         println(help)
         exitProcess(0)
@@ -125,17 +127,18 @@ fun main(args: Array<String>) {
     when (mode) {
         "client" -> {
             val home = runDir
-                    ?: dataHome.resolve(appIDForData(SCAPES_ID, SCAPES_NAME))
+                    ?: dataHome.resolve(appIDForData(APP_ID, APP_NAME))
             System.setProperty("user.dir", home.toAbsolutePath().toString())
-            val cache = cacheHome.resolve(appIDForCache(SCAPES_ID, SCAPES_NAME))
+            val cache = cacheHome.resolve(appIDForCache(APP_ID, APP_NAME))
             val config = home.resolve("ScapesEngine.json")
             val pluginCache = cache.resolve("plugins")
-            var engine: ScapesEngine? = null
+            var engineRef = WeakReference<ScapesEngine?>(null)
             Thread.setDefaultUncaughtExceptionHandler { _, e ->
                 try {
                     printerrln("Scapes crashed: $e")
                     e.printStackTrace()
-                    ContainerGLFW.openFile(crashReport(home, { engine }, e))
+                    ContainerGLFW.openFile(
+                            crashReport(home, { engineRef.get() }, e))
                 } finally {
                     exitProcess(1)
                 }
@@ -163,8 +166,9 @@ fun main(args: Array<String>) {
                                 "Failed to load default font"))
                 GuiBasicStyle(engine, font)
             }
-            engine = ScapesEngine(backend, defaultGuiStyle, taskExecutor,
+            val engine = ScapesEngine(backend, defaultGuiStyle, taskExecutor,
                     configMap)
+            engineRef = WeakReference(engine)
 
             val playlistsPath = home.resolve("playlists")
             createDirectories(playlistsPath.resolve("day"))
@@ -188,20 +192,18 @@ fun main(args: Array<String>) {
             engine.registerComponent(ScapesClient.COMPONENT,
                     ScapesClient(engine, home, pluginCache, saves))
             engine.switchState(
-                    GameStateStartup(engine) { GameStateMenu(engine!!) })
+                    GameStateStartup(engine) { GameStateMenu(engine) })
             try {
                 engine.start()
                 try {
                     engine.container.run()
                 } catch (e: GraphicsCheckException) {
-                    ScapesEngine.logger.error(
-                            e) { "Failed to initialize graphics" }
                     engine.container.message(Container.MessageType.ERROR,
                             "Scapes",
                             "Unable to initialize graphics:\n${e.message}")
                     exitProcess(1)
                 }
-                runBlocking { engine!!.dispose() }
+                runBlocking { engine.dispose() }
             } finally {
                 writeConfig(config, configMap.toTag())
             }
@@ -263,18 +265,18 @@ private fun writeConfig(path: FilePath,
             printerrln("Failed to store config file: $e")
         }
 
-private fun crashReport(path: FilePath,
+private fun crashReport(path: FilePath?,
                         engine: () -> ScapesEngine?,
                         e: Throwable): FilePath {
     val time = timeZoneLocal.encodeWithOffset(systemClock()).first()
-    val crashReportFile = path.resolve(crashReportName(
+    val crashReportFile = path?.resolve(crashReportName(
             "${
             time.dateTime.date.run {
                 "${isoYear(year)}-${isoMonth(month)}-${isoDay(day)}"
             }}_${
             time.dateTime.time.run {
                 "${isoHour(hour)}-${isoMinute(minute)}-${isoSecond(second)}"
-            }}"))
+            }}")) ?: createTempFile("CrashReport", ".txt")
     val debug = try {
         engine()?.debugMap()?.let {
             arrayOf(Pair("Debug values", crashReportSectionProperties(it)))
@@ -294,17 +296,17 @@ private fun crashReport(path: FilePath,
     return crashReportFile
 }
 
-private fun crashReport(path: FilePath,
+private fun crashReport(path: FilePath?,
                         e: Throwable): FilePath {
     val time = timeZoneLocal.encodeWithOffset(systemClock()).first()
-    val crashReportFile = path.resolve(crashReportName(
+    val crashReportFile = path?.resolve(crashReportName(
             "${
             time.dateTime.date.run {
                 "${isoYear(year)}-${isoMonth(month)}-${isoDay(day)}"
             }}_${
             time.dateTime.time.run {
                 "${isoHour(hour)}-${isoMinute(minute)}-${isoSecond(second)}"
-            }}"))
+            }}")) ?: createTempFile("CrashReport", ".txt")
     write(crashReportFile) {
         it.writeCrashReport(e, "Scapes",
                 crashReportSectionStacktrace(e),
