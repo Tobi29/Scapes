@@ -58,6 +58,7 @@ import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
 import org.tobi29.scapes.server.shell.ScapesServerHeadless
 import java.lang.ref.WeakReference
 import java.util.concurrent.ForkJoinPool
+import java.util.concurrent.ForkJoinWorkerThread
 import kotlin.system.exitProcess
 
 const val APP_ID = "org.tobi29.scapes"
@@ -144,7 +145,8 @@ fun main(args: Array<String>) {
                 }
             }
             val taskExecutor =
-                    ForkJoinPool(ForkJoinPool.getCommonPoolParallelism())
+                    ForkJoinPool(ForkJoinPool.getCommonPoolParallelism(),
+                            PermissiveThreadFactory, null, false)
                             .asCoroutineDispatcher()
             val configMap = readConfig(config).toMutTag()
             val saves: (ScapesClient) -> SaveStorage = {
@@ -228,7 +230,8 @@ fun main(args: Array<String>) {
                 }
             }
             val taskExecutor =
-                    ForkJoinPool(ForkJoinPool.getCommonPoolParallelism())
+                    ForkJoinPool(ForkJoinPool.getCommonPoolParallelism(),
+                            PermissiveThreadFactory, null, false)
                             .asCoroutineDispatcher()
             try {
                 val server = ScapesServerHeadless(taskExecutor, config)
@@ -243,6 +246,11 @@ fun main(args: Array<String>) {
             exitProcess(254)
         }
     }
+}
+
+private object PermissiveThreadFactory : ForkJoinPool.ForkJoinWorkerThreadFactory {
+    override fun newThread(pool: ForkJoinPool?) =
+            object : ForkJoinWorkerThread(pool) {}
 }
 
 private fun readConfig(path: FilePath) =
