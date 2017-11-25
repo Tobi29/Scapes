@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.client.InputManagerScapes
+import org.tobi29.scapes.client.input.InputManagerScapes
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiEvent

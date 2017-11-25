@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.material.item.food
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
@@ -68,7 +68,7 @@ class ItemMeat(type: VanillaMaterialType) : ItemSimpleData(
             else -> name.append("Porkchop")
         }
         val temperature = temperature(item)
-        name.append("\nTemp.:").append(floor(temperature)).append("°C")
+        name.append("\nTemp.:").append(temperature.floorToInt()).append("°C")
         return name.toString()
     }
 

@@ -32,7 +32,6 @@ import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.FileCache
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
-import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.tag.toMutTag
 import org.tobi29.scapes.engine.utils.versionParse
@@ -54,7 +53,7 @@ object NewClientConnection {
         val scapes = engine[ScapesClient.COMPONENT]
 
         // Send header
-        channel.outputStream.put(ConnectionInfo.header())
+        channel.outputStream.put(ConnectionInfo.header().view)
         channel.outputStream.put(ConnectionType.PLAY.data())
         channel.queueBundle()
 
@@ -62,7 +61,7 @@ object NewClientConnection {
         progress("Logging in...")
         val keyPair = account.keyPair()
         val array = keyPair.public.encoded
-        channel.outputStream.put(array)
+        channel.outputStream.put(array.view)
         channel.queueBundle()
 
         // Authenticate account and retrieve plugins
@@ -70,7 +69,7 @@ object NewClientConnection {
             return null
         }
         var challenge = ByteArray(512)
-        channel.inputStream.get(challenge)
+        channel.inputStream.get(challenge.view)
         try {
             val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
             cipher.init(Cipher.DECRYPT_MODE, account.keyPair().private)
@@ -114,14 +113,14 @@ object NewClientConnection {
                 val location = FileCache.Location(checksum)
                 val file = FileCache.retrieve(scapes.pluginCache, location)
                 if (file != null) {
-                    plugins.add(PluginFile(file))
+                    plugins.add(PluginFile.loadFile(file))
                 } else {
                     pluginRequests.add(i)
                     plugins.add(null)
                 }
             }
         }
-        channel.outputStream.put(challenge)
+        channel.outputStream.put(challenge.view)
         channel.outputStream.putString(account.nickname())
         channel.outputStream.putInt(pluginRequests.size)
         for (i in pluginRequests) {
@@ -139,7 +138,7 @@ object NewClientConnection {
         }
         var pluginI = 0
         val pluginL = pluginRequests.size
-        val pluginStream = ByteBufferStream()
+        val pluginStream = MemoryViewStreamDefault()
         while (!pluginRequests.isEmpty()) {
             progress("Downloading plugins ($pluginI/$pluginL)...")
             if (channel.receive()) {
@@ -147,19 +146,19 @@ object NewClientConnection {
             }
             val request = pluginRequests[0]
             if (channel.inputStream.getBoolean()) {
-                pluginStream.buffer().flip()
+                pluginStream.flip()
                 val file = FileCache.retrieve(scapes.pluginCache,
                         FileCache.store(scapes.pluginCache, pluginStream))
-                pluginStream.buffer().clear()
+                pluginStream.reset()
                 if (file == null) {
                     throw IllegalStateException(
                             "Concurrent cache modification")
                 }
-                plugins[request] = PluginFile(file)
+                plugins[request] = PluginFile.loadFile(file)
                 pluginRequests.removeAt(0)
                 pluginI++
             } else {
-                process(channel.inputStream, put(pluginStream))
+                channel.inputStream.process { pluginStream.put(it) }
             }
         }
         channel.outputStream.putInt(loadingDistance)
@@ -182,21 +181,19 @@ object NewClientConnection {
         return Pair(plugins2, loadingDistanceServer)
     }
 
-    private fun sendSkin(path: FilePath,
-                         output: WritableByteStream,
-                         engine: ScapesEngine) {
+    private suspend fun sendSkin(path: FilePath,
+                                 output: WritableByteStream,
+                                 engine: ScapesEngine) {
         val image = if (exists(path)) {
-            read(path) { decodePNG(it) }
+            path.readAsync { decodePNG(it) }
         } else {
-            engine.files["Scapes:image/entity/mob/Player.png"].read {
+            engine.files["Scapes:image/entity/mob/Player.png"].readAsync {
                 decodePNG(it)
             }
         }
         if (image.width != 64 || image.height != 64) {
             throw ConnectionCloseException("Invalid skin!")
         }
-        val skin = ByteArray(64 * 64 * 4)
-        image.buffer.get(skin)
-        output.put(skin)
+        output.put(image.view)
     }
 }

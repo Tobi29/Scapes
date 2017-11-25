@@ -18,8 +18,8 @@ package org.tobi29.scapes.vanilla.basics.world.structure
 
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.math.Random
-import org.tobi29.scapes.engine.utils.math.ceil
+import org.tobi29.scapes.engine.math.Random
+import org.tobi29.scapes.engine.utils.math.ceilToInt
 
 fun TerrainServer.genOreRock(x: Int,
                              y: Int,
@@ -30,7 +30,7 @@ fun TerrainServer.genOreRock(x: Int,
                              oreChance: Int,
                              size: Double,
                              random: Random) {
-    val ceilSize = ceil(size)
+    val ceilSize = size.ceilToInt()
     modify(x - ceilSize, y - ceilSize, z - ceilSize, (ceilSize shl 1) + 1,
             (ceilSize shl 1) + 1, (ceilSize shl 1) + 1) { terrain ->
         for (xx in -ceilSize..ceilSize) {

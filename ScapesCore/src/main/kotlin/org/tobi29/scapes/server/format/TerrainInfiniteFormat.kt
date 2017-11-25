@@ -17,7 +17,7 @@
 package org.tobi29.scapes.server.format
 
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.math.vector.Vector2i
+import org.tobi29.scapes.engine.math.vector.Vector2i
 
 interface TerrainInfiniteFormat {
     fun chunkTags(chunks: List<Vector2i>): List<TagMap?>

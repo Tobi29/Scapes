@@ -16,9 +16,9 @@
 package org.tobi29.scapes.block.models
 
 import org.tobi29.scapes.chunk.terrain.Terrain
-import org.tobi29.scapes.engine.utils.math.Face
+import org.tobi29.scapes.engine.math.Face
 import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.round
+import kotlin.math.roundToInt
 
 object SmoothLight {
     private val SIDES = intArrayOf(0, 4, 2, 6, 1, 5, 3, 7, 2, 6, 3, 7, 0, 2, 1,
@@ -86,8 +86,8 @@ object SmoothLight {
                   y: Double,
                   z: Double,
                   terrain: Terrain) {
-        calcLight(triple, side, round(x), round(y),
-                round(z), terrain)
+        calcLight(triple, side, (x).roundToInt(), (y).roundToInt(),
+                (z).roundToInt(), terrain)
     }
 
     class FloatTriple {

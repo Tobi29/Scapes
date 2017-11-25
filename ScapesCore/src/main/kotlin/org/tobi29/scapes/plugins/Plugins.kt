@@ -54,7 +54,7 @@ class Plugins(files: List<PluginFile>,
         if (paths.isEmpty()) {
             classLoader = null
             val classLoader = Plugins::class.java.classLoader
-            val file = PluginFile(
+            val file = PluginFile.load(
                     ClasspathPath(classLoader, "scapes/plugin/Plugin.json"))
             load(file.plugin(classLoader))
         } else {
@@ -146,25 +146,34 @@ class Plugins(files: List<PluginFile>,
 
     companion object : KLogging() {
         // TODO: @Throws(IOException::class)
-        fun installed(path: FilePath): List<PluginFile> {
-            val files = ArrayList<PluginFile>()
+        suspend fun installed(path: FilePath): List<PluginFile> {
+            val paths = ArrayList<FilePath>()
             listRecursive(path) {
                 filter {
                     isRegularFile(it) && isNotHidden(it)
-                }.forEach { files.add(PluginFile(it)) }
+                }.forEach { paths.add(it) }
             }
-            files.addAll(embedded())
-            return files
+            return paths.mapNotNull {
+                try {
+                    PluginFile.loadFile(it)
+                } catch (e: IOException) {
+                    logger.warn { "Failed to read plugins: $e" }
+                    null
+                }
+            } + embedded()
         }
 
         // TODO: @Throws(IOException::class)
-        fun embedded(): List<PluginFile> {
+        suspend fun embedded(): List<PluginFile> {
             val embedded = ClasspathPath(Plugins::class.java.classLoader,
                     "scapes/plugin/Plugin.json")
-            if (embedded.exists()) {
-                return listOf(PluginFile(embedded))
+            val list = ArrayList<PluginFile>()
+
+            try {
+                list.add(PluginFile.load(embedded))
+            } catch (e: IOException) {
             }
-            return emptyList()
+            return list.readOnly()
         }
 
         fun init(registry: Registries) {

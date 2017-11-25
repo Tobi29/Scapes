@@ -18,7 +18,7 @@ package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.io.ByteBuffer
+import org.tobi29.scapes.engine.utils.io.MemoryViewStream
 
 abstract class ParticleEmitterInstanced<P : ParticleInstance>(system: ParticleSystem,
                                                               protected val texture: Texture,
@@ -28,16 +28,11 @@ abstract class ParticleEmitterInstanced<P : ParticleInstance>(system: ParticleSy
                                                               renderType: RenderType,
                                                               instances: Array<P>) : ParticleEmitter<P>(
         system, instances) {
-    protected val vao: ModelHybrid
-    protected val buffer: ByteBuffer
-
-    init {
-        vao = system.world.game.engine.graphics.createModelHybrid(attributes,
-                length, attributesStream, 0,
-                renderType)
-        buffer = system.world.game.engine.allocate(
-                vao.strideStream() * maxInstances)
-    }
+    private val vao = system.world.game.engine.graphics.createModelHybrid(
+            attributes, length, attributesStream, 0, renderType)
+    protected val buffer = MemoryViewStream(
+            system.world.game.engine.container.allocateNative(
+                    vao.strideStream() * maxInstances))
 
     override fun addToPipeline(gl: GL,
                                width: Int,
@@ -51,12 +46,12 @@ abstract class ParticleEmitterInstanced<P : ParticleInstance>(system: ParticleSy
                 return@render
             }
             texture.bind(gl)
-            buffer.clear()
             vao.ensureStored(gl)
+            buffer.reset()
             val count = prepareBuffer(cam)
             if (count > 0) {
                 buffer.flip()
-                vao.bufferStream(gl, buffer)
+                vao.bufferStream(gl, buffer.bufferSlice())
                 s { vao.renderInstanced(gl, it, 6, count) }
             }
         }

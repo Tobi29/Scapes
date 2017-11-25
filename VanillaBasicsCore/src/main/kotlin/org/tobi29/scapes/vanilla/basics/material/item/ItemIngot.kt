@@ -23,7 +23,7 @@ import org.tobi29.scapes.block.models.ItemModelSimple
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.vanilla.basics.material.AlloyType
 import org.tobi29.scapes.vanilla.basics.material.ItemMetal
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
@@ -93,7 +93,7 @@ class ItemIngot(type: VanillaMaterialType) : VanillaItem(type), ItemMetal {
         val alloyType = alloy.type(plugin)
         name.append(alloyType.ingotName)
         val temperature = temperature(item)
-        name.append("\nTemp.:").append(floor(temperature)).append("°C")
+        name.append("\nTemp.:").append(temperature.floorToInt()).append("°C")
         if (temperature > meltingPoint(item)) {
             name.append("\n - Liquid")
         }

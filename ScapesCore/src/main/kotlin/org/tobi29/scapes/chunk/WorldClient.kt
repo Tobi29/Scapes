@@ -18,23 +18,24 @@ package org.tobi29.scapes.chunk
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.isTransparent
-import org.tobi29.scapes.client.InputManagerScapes
-import org.tobi29.scapes.client.InputModeChangeEvent
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.ClientConnection
+import org.tobi29.scapes.client.input.InputManagerScapes
+import org.tobi29.scapes.client.input.InputModeChangeEvent
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.graphics.BlendingMode
 import org.tobi29.scapes.engine.graphics.GL
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.EventDispatcher
 import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.shader.BooleanExpression
@@ -45,6 +46,9 @@ import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.packets.PacketServer
+import kotlin.math.max
+import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 class WorldClient(val connection: ClientConnection,
                   cam: Cam,
@@ -186,11 +190,11 @@ class WorldClient(val connection: ClientConnection,
                       debug: Boolean): suspend () -> (Double) -> Unit {
         val scapes = game.engine[ScapesClient.COMPONENT]
         val resolutionMultiplier = scapes.resolutionMultiplier
-        val width = round(gl.contentWidth * resolutionMultiplier)
-        val height = round(gl.contentHeight * resolutionMultiplier)
+        val width = (gl.contentWidth * resolutionMultiplier).roundToInt()
+        val height = (gl.contentHeight * resolutionMultiplier).roundToInt()
         val animations = scapes.animations
 
-        val shaderTerrain1 = gl.loadShader(
+        val shaderTerrain1 = game.engine.graphics.loadShader(
                 "Scapes:shader/Terrain", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height),
@@ -198,7 +202,7 @@ class WorldClient(val connection: ClientConnection,
                 "LOD_LOW" to BooleanExpression(false),
                 "LOD_HIGH" to BooleanExpression(true)
         ))
-        val shaderTerrain2 = gl.loadShader(
+        val shaderTerrain2 = game.engine.graphics.loadShader(
                 "Scapes:shader/Terrain", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height),
@@ -206,7 +210,7 @@ class WorldClient(val connection: ClientConnection,
                 "LOD_LOW" to BooleanExpression(true),
                 "LOD_HIGH" to BooleanExpression(false)
         ))
-        val shaderEntity = gl.loadShader(
+        val shaderEntity = game.engine.graphics.loadShader(
                 "Scapes:shader/Entity", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
@@ -290,9 +294,9 @@ class WorldClient(val connection: ClientConnection,
         val step = (1 / sqrt(dx * dx + dy * dy + dz * dz.toFloat())).toDouble()
         var i = 0.0
         while (i <= 1) {
-            val x = floor(x1 + dx * i)
-            val y = floor(y1 + dy * i)
-            val z = floor(z1 + dz * i)
+            val x = (x1 + dx * i).floorToInt()
+            val y = (y1 + dy * i).floorToInt()
+            val z = (z1 + dz * i).floorToInt()
             if (!terrain.isTransparent(x, y, z)) {
                 return true
             }

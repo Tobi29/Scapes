@@ -18,13 +18,13 @@ package org.tobi29.scapes.entity.server
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldServer
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.vector.MutableVector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.floor
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMap
@@ -146,7 +146,7 @@ abstract class MobServer(type: EntityType<*, *>,
             it.collision.inside(this, delta)
         }
         isHeadInWater = world.terrain.type(pos.intX(), pos.intY(),
-                floor(pos.doubleZ() + 0.7)).isLiquid
+                (pos.doubleZ() + 0.7).floorToInt()).isLiquid
         positionSender.submitUpdate(uuid, pos.now(), speed.now(), rot.now(),
                 physicsState.isOnGround, physicsState.slidingWall,
                 physicsState.isInWater, physicsState.isSwimming)

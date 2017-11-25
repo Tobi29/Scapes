@@ -17,8 +17,8 @@
 package org.tobi29.scapes.vanilla.basics.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobLivingClient
@@ -31,12 +31,12 @@ class MobPigClient(type: EntityType<*, *>,
         type, world, Vector3d.ZERO, Vector3d.ZERO,
         AABB(-0.45, -0.45, -0.6875, 0.45, 0.45, 0.375), 20.0, 30.0) {
     init {
-        val texture = world.game.engine.graphics.textures.getNow(
-                "VanillaBasics:image/entity/mob/Pig")
+        val texture = world.game.engine.graphics.textures["VanillaBasics:image/entity/mob/Pig"]
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         registerComponent(CreatureType.COMPONENT, CreatureType.CREATURE)
         attachModel {
-            MobLivingModelPig(plugin.modelPigShared(), this, texture)
+            MobLivingModelPig(plugin.modelPigShared().await(), this,
+                    texture.getAsync())
         }
     }
 

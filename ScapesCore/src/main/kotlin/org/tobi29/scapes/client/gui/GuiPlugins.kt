@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.client.gui
 
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.runBlocking
 import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
@@ -49,13 +51,15 @@ class GuiPlugins(state: GameState,
         save.on(GuiEvent.CLICK_LEFT) {
             try {
                 state.engine[DialogProvider.COMPONENT].openPluginDialog { _, stream ->
-                    val temp = createTempFile("Plugin", ".jar")
-                    write(temp) { output ->
-                        process(stream, put(output))
+                    launch(engine.taskExecutor) {
+                        val temp = createTempFile("Plugin", ".jar")
+                        write(temp) { output ->
+                            stream.process { output.put(it) }
+                        }
+                        val newPlugin = PluginFile.loadFile(temp)
+                        move(temp, path.resolve(newPlugin.id() + ".jar"))
+                        updatePlugins()
                     }
-                    val newPlugin = PluginFile(temp)
-                    move(temp, path.resolve(newPlugin.id() + ".jar"))
-                    updatePlugins()
                 }
             } catch (e: IOException) {
                 logger.warn { "Failed to import plugin: $e" }
@@ -63,20 +67,19 @@ class GuiPlugins(state: GameState,
         }
     }
 
-    @Synchronized
     private fun updatePlugins() {
-        try {
-            scrollPane.removeAll()
-            Plugins.installed(
-                    path).asSequence().sortedBy { it.name() }.forEach { file ->
-                scrollPane.addVert(0.0, 0.0, -1.0, 70.0) {
-                    Element(it, file)
+        launch(engine.taskExecutor) {
+            val files = Plugins.installed(
+                    path).asSequence().sortedBy { it.name() }
+            synchronized(this@GuiPlugins) {
+                scrollPane.removeAll()
+                files.forEach { file ->
+                    scrollPane.addVert(0.0, 0.0, -1.0, 70.0) {
+                        Element(it, file)
+                    }
                 }
             }
-        } catch (e: IOException) {
-            logger.warn { "Failed to read plugins: $e" }
         }
-
     }
 
     private inner class Element(parent: GuiLayoutData,
@@ -107,8 +110,8 @@ class GuiPlugins(state: GameState,
                             val stream = BufferedReadChannelStream(
                                     Channels.newChannel(zip.getInputStream(
                                             zip.getEntry(
-                                                    "scapes/plugin/Icon.png"))))
-                            val image = decodePNG(stream, state.engine)
+                                                    "scapes/plugin/Icon.png"))).toChannel())
+                            val image = runBlocking { decodePNG(stream) }
                             val texture = state.engine.graphics.createTexture(
                                     image, 0, TextureFilter.LINEAR,
                                     TextureFilter.LINEAR, TextureWrap.CLAMP,

@@ -141,7 +141,7 @@ class ServerConnection(val server: ScapesServer,
         when (ConnectionType[id]) {
             ConnectionType.GET_INFO -> {
                 val output = channel.outputStream
-                output.put(server.serverInfo.getBuffer())
+                output.put(server.serverInfo.buffer)
                 channel.queueBundle()
             }
             ConnectionType.PLAY -> {

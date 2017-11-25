@@ -21,8 +21,12 @@ import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.collisions
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.math.*
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.utils.math.clamp
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.entity.EntityPhysics
+import kotlin.math.max
+import kotlin.math.min
 
 object ParticlePhysics {
     fun update(delta: Double,
@@ -39,12 +43,12 @@ object ParticlePhysics {
         val goZ = clamp(instance.speed.doubleZ() * delta, -10.0, 10.0)
         val collisions = AABBS.get()
         terrain.collisions(
-                floor(aabb.minX + min(goX, 0.0)),
-                floor(aabb.minY + min(goY, 0.0)),
-                floor(aabb.minZ + min(goZ, 0.0)),
-                floor(aabb.maxX + max(goX, 0.0)),
-                floor(aabb.maxY + max(goY, 0.0)),
-                floor(aabb.maxZ + max(goZ, 0.0)), collisions)
+                (aabb.minX + min(goX, 0.0)).floorToInt(),
+                (aabb.minY + min(goY, 0.0)).floorToInt(),
+                (aabb.minZ + min(goZ, 0.0)).floorToInt(),
+                (aabb.maxX + max(goX, 0.0)).floorToInt(),
+                (aabb.maxY + max(goY, 0.0)).floorToInt(),
+                (aabb.maxZ + max(goZ, 0.0)).floorToInt(), collisions)
         val aabbs = EntityPhysics.collisions(collisions)
         val lastGoZ = aabb.moveOutZ(aabbs, goZ)
         instance.pos.plusZ(lastGoZ)

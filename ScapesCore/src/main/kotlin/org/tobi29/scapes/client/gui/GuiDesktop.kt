@@ -18,8 +18,8 @@ package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.utils.math.min
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
+import org.tobi29.scapes.engine.math.vector.Vector2d
+import kotlin.math.min
 
 open class GuiDesktop(state: GameState,
                       style: GuiStyle) : GuiState(state,

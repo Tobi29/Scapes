@@ -19,9 +19,13 @@ package org.tobi29.scapes.vanilla.basics.world.structure
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainMutable
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.math.Random
-import org.tobi29.scapes.engine.utils.math.*
+import org.tobi29.scapes.engine.math.Random
+import org.tobi29.scapes.engine.math.cosTable
+import org.tobi29.scapes.engine.math.sinTable
+import org.tobi29.scapes.engine.utils.math.TWO_PI
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import kotlin.math.abs
 
 fun TerrainServer.placeRandomRuin(x: Int,
                                   y: Int,
@@ -54,8 +58,8 @@ fun TerrainServer.placeRuinType1(x: Int,
     var d: Double
     for (i in 0 until pillars) {
         d = i.toDouble() / pillars * TWO_PI
-        val xx = x + floor(cosTable(d) * size)
-        val yy = y + floor(sinTable(d) * size)
+        val xx = x + (cosTable(d) * size).floorToInt()
+        val yy = y + (sinTable(d) * size).floorToInt()
         val zz = highestTerrainBlockZAt(xx, yy)
         modify(xx, yy, zz, 1, 1, 4) { terrain ->
             terrain.placePillar(xx, yy, zz,

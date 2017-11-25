@@ -27,10 +27,11 @@ import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.InputDialog
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
-import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.newEventDispatcher
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.io.toChannel
+import org.tobi29.scapes.engine.utils.io.view
 import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.scapes.engine.utils.newEventDispatcher
 import org.tobi29.scapes.engine.utils.tag.Tag
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toList
@@ -49,7 +50,7 @@ class ConnectDocument(private val address: RemoteAddress,
 
     init {
         val fail = { e: Exception ->
-            launch(application) {
+            launch(application.uiContext) {
                 val composite = application.compositeFor(
                         document) ?: return@launch
                 if (application.message(composite,
@@ -70,7 +71,7 @@ class ConnectDocument(private val address: RemoteAddress,
             try {
                 connect(worker, connection, ssl)
             } catch (e: SSLCertificateException) {
-                launch(application) {
+                launch(application.uiContext) {
                     val composite = application.compositeFor(
                             document) ?: return@launch
                     val certificates = e.certificates
@@ -144,17 +145,17 @@ class ConnectDocument(private val address: RemoteAddress,
         val channel = connect(worker, address)
         try {
             channel.register(worker.selector, SelectionKey.OP_READ)
-            val secureChannel = ssl.newSSLChannel(address, channel,
-                    worker.connection.taskExecutor, true)
+            val secureChannel = ssl.newSSLChannel(address,
+                    channel.toChannel(), worker.connection.taskExecutor, true)
             val bundleChannel = PacketBundleChannel(secureChannel)
             val output = bundleChannel.outputStream
-            output.put(ConnectionInfo.header())
+            output.put(ConnectionInfo.header().view)
             output.put(21)
             bundleChannel.queueBundle()
             val controlPanel = ControlPanelProtocol(worker, bundleChannel,
                     newEventDispatcher())
             controlPanel.addCommand("Commands-Send") { payload ->
-                launch(application) {
+                launch(application.uiContext) {
                     val composite = application.compositeFor(
                             document) ?: return@launch
                     payload["Commands"]?.toList()?.let {
@@ -175,7 +176,7 @@ class ConnectDocument(private val address: RemoteAddress,
             secureChannel.requestClose()
             bundleChannel.finishAsync()
             secureChannel.finishAsync()
-            launch(application) {
+            launch(application.uiContext) {
                 val composite = application.compositeFor(
                         document) ?: return@launch
                 application.closeTab(composite)

@@ -19,15 +19,15 @@ package org.tobi29.scapes.vanilla.basics.entity.particle
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.scapes.engine.math.matrix.Matrix4f
+import org.tobi29.scapes.engine.math.vector.times
 import org.tobi29.scapes.engine.utils.AtomicInteger
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.vector.times
 import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 import org.tobi29.scapes.entity.particle.ParticleEmitterInstanced
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.particle.ParticleSystem
+import kotlin.math.max
 
 class ParticleEmitterRain(system: ParticleSystem,
                           texture: Texture) : ParticleEmitterInstanced<ParticleInstance>(
@@ -75,7 +75,7 @@ class ParticleEmitterRain(system: ParticleSystem,
                                width: Int,
                                height: Int,
                                cam: Cam): suspend () -> ((Shader) -> Unit) -> Unit {
-        val shader = gl.loadShader(
+        val shader = system.world.game.engine.graphics.loadShader(
                 "VanillaBasics:shader/ParticleRain", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
@@ -129,7 +129,7 @@ class ParticleEmitterRain(system: ParticleSystem,
                         instance.speed.floatZ())
                 buffer.putFloat(terrain.blockLight(x, y, z) / 15.0f)
                 buffer.putFloat(terrain.sunLight(x, y, z) / 15.0f)
-                matrix.putInto(buffer)
+                matrix.values.forEach { buffer.putFloat(it) }
                 count++
             }
         }

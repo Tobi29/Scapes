@@ -23,7 +23,7 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
+import org.tobi29.scapes.engine.math.vector.Vector2d
 import org.tobi29.scapes.packets.PacketInventoryInteraction
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 

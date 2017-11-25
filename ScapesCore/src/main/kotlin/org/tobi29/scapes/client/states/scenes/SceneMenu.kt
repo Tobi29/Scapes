@@ -16,10 +16,14 @@
 
 package org.tobi29.scapes.client.states.scenes
 
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.run
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.AtomicReference
 import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
@@ -27,10 +31,14 @@ import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
 import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.use
-import org.tobi29.scapes.engine.utils.math.*
+import org.tobi29.scapes.engine.utils.math.remP
+import org.tobi29.scapes.engine.math.threadLocalRandom
 import org.tobi29.scapes.engine.utils.shader.ArrayExpression
 import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 import org.tobi29.scapes.server.format.WorldSource
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.roundToInt
 
 open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     private val textures = arrayOfNulls<Texture>(6)
@@ -48,7 +56,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
 
     override fun appendToPipeline(gl: GL): suspend () -> (Double) -> Unit {
         val space = gl.contentSpace() / 8.0
-        val blurSamples = round(space * 8.0) + 8
+        val blurSamples = (space * 8.0).roundToInt() + 8
         val width = gl.contentWidth / 8
         val height = gl.contentHeight / 8
 
@@ -60,7 +68,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                 intArrayOf(0, 1, 2, 2, 1, 3), RenderType.TRIANGLES)
 
         // Shaders
-        val shaderBlur1 = gl.loadShader(
+        val shaderBlur1 = engine.graphics.loadShader(
                 "Scapes:shader/Menu1", mapOf(
                 "BLUR_LENGTH" to IntegerExpression(blurSamples),
                 "BLUR_OFFSET" to ArrayExpression(
@@ -68,7 +76,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                 "BLUR_WEIGHT" to ArrayExpression(
                         gaussianBlurWeight(blurSamples) { cos(it * PI) })
         ))
-        val shaderBlur2 = gl.loadShader(
+        val shaderBlur2 = engine.graphics.loadShader(
                 "Scapes:shader/Menu2", mapOf(
                 "BLUR_LENGTH" to IntegerExpression(blurSamples),
                 "BLUR_OFFSET" to ArrayExpression(
@@ -76,7 +84,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                 "BLUR_WEIGHT" to ArrayExpression(
                         gaussianBlurWeight(blurSamples) { cos(it * PI) })
         ))
-        val shaderTextured = gl.loadShader(SHADER_TEXTURED)
+        val shaderTextured = engine.graphics.loadShader(SHADER_TEXTURED)
 
         // Framebuffers
         val f1 = gl.createFramebuffer(width, height, 1,
@@ -175,11 +183,24 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
         }
     }
 
-    protected fun setBackground(replace: Texture,
-                                i: Int) {
-        val texture = textures[i]
-        texture?.markDisposed()
-        textures[i] = replace
+    protected fun setBackgroundFromResources(supplier: suspend (Int) -> Resource<Texture>) {
+        setBackground { supplier(it).getAsync() }
+    }
+
+    protected fun setBackground(supplier: suspend (Int) -> Texture) {
+        launch(engine.taskExecutor) {
+            val textures = (0..5).map { i ->
+                async(coroutineContext) {
+                    supplier(i)
+                }
+            }.map { it.await() }
+            run(engine.graphics) {
+                textures.withIndex().forEach { (i, texture) ->
+                    this@SceneMenu.textures[i]?.markDisposed()
+                    this@SceneMenu.textures[i] = texture
+                }
+            }
+        }
     }
 
     private fun saveBackground(source: WorldSource): WorldSource.Panorama? {
@@ -187,21 +208,21 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     }
 
     private fun changeBackground(panorama: WorldSource.Panorama) {
-        panorama.elements.indices.forEach {
-            val image = panorama.elements[it]
-            setBackground(engine.graphics.createTexture(image, 0,
+        if (panorama.elements.size != 6)
+            throw IllegalArgumentException("Panorama does not have 6 images")
+        setBackground { i ->
+            engine.graphics.createTexture(panorama.elements[i], 0,
                     TextureFilter.LINEAR,
                     TextureFilter.LINEAR, TextureWrap.CLAMP,
-                    TextureWrap.CLAMP), it)
+                    TextureWrap.CLAMP)
         }
     }
 
     private fun defaultBackground() {
         val random = threadLocalRandom()
         val r = random.nextInt(2)
-        for (i in 0..5) {
-            setBackground(engine.graphics.textures.getNow(
-                    "Scapes:image/gui/panorama/$r/Panorama$i"), i)
+        setBackgroundFromResources { i ->
+            engine.graphics.textures["Scapes:image/gui/panorama/$r/Panorama$i"]
         }
     }
 }

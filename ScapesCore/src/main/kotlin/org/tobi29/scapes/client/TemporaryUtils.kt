@@ -16,27 +16,25 @@
 
 package org.tobi29.scapes.client
 
-import org.tobi29.scapes.engine.graphics.GraphicsObjectSupplier
+import org.tobi29.scapes.engine.graphics.GraphicsSystem
 import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.graphics.loadShader
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.io.asString
-import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.shader.Expression
 import org.tobi29.scapes.engine.utils.shader.frontend.clike.CLikeShader
 import org.tobi29.scapes.engine.utils.shader.frontend.clike.compileCached
 
-fun GraphicsObjectSupplier.loadShader(
+fun GraphicsSystem.loadShader(
         asset: String,
         properties: Map<String, Expression> = emptyMap()
 ): Resource<Shader> =
         loadShaderSource({
-            engine.files["$asset.program"].read {
-                process(it, asString())
-            }
+            engine.files["$asset.program"].readAsync { it.asString() }
         }, properties)
 
-fun GraphicsObjectSupplier.loadShaderSource(
-        source: () -> String,
+fun GraphicsSystem.loadShaderSource(
+        source: suspend () -> String,
         properties: Map<String, Expression> = emptyMap()
 ): Resource<Shader> =
         loadShader({ CLikeShader.compileCached(source()) }, properties)

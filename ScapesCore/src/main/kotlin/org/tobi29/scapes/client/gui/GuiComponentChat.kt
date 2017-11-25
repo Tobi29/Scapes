@@ -22,8 +22,8 @@ import org.tobi29.scapes.engine.graphics.FontRenderer
 import org.tobi29.scapes.engine.gui.GuiComponent
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.gui.GuiRenderer
+import org.tobi29.scapes.engine.math.vector.Vector2d
 import org.tobi29.scapes.engine.utils.ListenerRegistrar
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
 
 class GuiComponentChat(parent: GuiLayoutData,
                        private val chatHistory: ChatHistory) : GuiComponent(

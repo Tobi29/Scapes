@@ -26,7 +26,7 @@ import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.engine.utils.task.launchThread
 import org.tobi29.scapes.engine.utils.task.loop
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.experimental.TimeUnit
 
 class ParticleSystem(val world: WorldClient,
                      tps: Double) {

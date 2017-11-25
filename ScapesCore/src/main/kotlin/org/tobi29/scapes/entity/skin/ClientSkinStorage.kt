@@ -47,7 +47,7 @@ class ClientSkinStorage(private val engine: ScapesEngine,
     fun addSkin(checksum: Checksum,
                 image: Image) {
         val skin = skins[checksum]
-        skin?.setImage(image.buffer)
+        skin?.setImage(image.view)
     }
 
     operator fun get(checksum: Checksum?): Texture {

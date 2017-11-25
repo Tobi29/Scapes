@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.gui
 
+import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.client.SaveStorage
 import org.tobi29.scapes.client.ScapesClient
@@ -50,23 +51,25 @@ class GuiSaveSelect(state: GameState,
         updateSaves()
 
         save.on(GuiEvent.CLICK_LEFT) { event ->
-            try {
-                val path = scapes.home.resolve("plugins")
-                val plugins = Plugins.installed(path)
-                val worldTypes = plugins.asSequence()
-                        .filter { plugin -> "WorldType" == plugin.parent() }
-                        .sortedBy { it.name() }.toList()
-                if (worldTypes.isEmpty()) {
-                    state.engine.guiStack.swap(this,
-                            GuiMessage(state, this, "Error", NO_WORLD_TYPE,
-                                    style))
-                } else {
-                    state.engine.guiStack.swap(this,
-                            GuiCreateWorld(state, this, worldTypes, plugins,
-                                    style))
+            launch(engine.taskExecutor) {
+                try {
+                    val path = scapes.home.resolve("plugins")
+                    val plugins = Plugins.installed(path)
+                    val worldTypes = plugins.asSequence()
+                            .filter { plugin -> "WorldType" == plugin.parent() }
+                            .sortedBy { it.name() }.toList()
+                    if (worldTypes.isEmpty()) {
+                        state.engine.guiStack.swap(this@GuiSaveSelect,
+                                GuiMessage(state, this@GuiSaveSelect, "Error",
+                                        NO_WORLD_TYPE, style))
+                    } else {
+                        state.engine.guiStack.swap(this@GuiSaveSelect,
+                                GuiCreateWorld(state, this@GuiSaveSelect,
+                                        worldTypes, plugins, style))
+                    }
+                } catch (e: IOException) {
+                    logger.warn { "Failed to read plugins: $e" }
                 }
-            } catch (e: IOException) {
-                logger.warn { "Failed to read plugins: $e" }
             }
         }
     }

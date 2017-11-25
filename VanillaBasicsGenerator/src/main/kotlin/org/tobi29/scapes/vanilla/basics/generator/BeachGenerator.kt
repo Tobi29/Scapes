@@ -16,12 +16,12 @@
 
 package org.tobi29.scapes.vanilla.basics.generator
 
+import org.tobi29.scapes.engine.math.Random
 import org.tobi29.scapes.engine.utils.generation.layer.RandomPermutation
 import org.tobi29.scapes.engine.utils.generation.layer.random
 import org.tobi29.scapes.engine.utils.generation.layer.randomOffset
 import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
-import org.tobi29.scapes.engine.utils.math.Random
-import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.utils.math.floorToInt
 
 class BeachGenerator(random: Random) {
     private val base = RandomPermutation(random)
@@ -33,7 +33,7 @@ class BeachGenerator(random: Random) {
         noise.randomOffset(2, x, y) { x, y ->
             swirl.randomOffset(128.0, x.toDouble(),
                     y.toDouble()) { x, y ->
-                base.random(6, floor(x) shr 10, floor(y) shr 10)
+                base.random(6, x.floorToInt() shr 10, y.floorToInt() shr 10)
             }
         }
     }

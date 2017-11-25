@@ -18,6 +18,8 @@ package org.tobi29.scapes.tools.controlpanel
 import org.eclipse.swt.SWT
 import org.eclipse.swt.widgets.Spinner
 import org.eclipse.swt.widgets.Text
+import org.tobi29.scapes.engine.application.executeMain
+import org.tobi29.scapes.engine.args.CommandLine
 import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.swt.util.Shortcut
@@ -25,18 +27,21 @@ import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.InputDialog
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
+import org.tobi29.scapes.engine.utils.Version
 import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.version
 
-fun main(args: Array<String>) {
-    ControlPanel().run()
-}
+object ControlPanel : MultiDocumentApplication() {
+    override val id = "org.tobi29.scapes.controlpanel"
 
-class ControlPanel : MultiDocumentApplication("Scapes Control Panel",
-        "ControlPanel", version("0.0.0")) {
+    override val execName = "control-panel"
+    override val fullName = "Scapes Control Panel"
+    override val name = "ControlPanel"
+
+    override val version = Version(0, 0, 0)
+
     val connection = ConnectionManager(taskExecutor)
 
-    override fun init() {
+    override fun init(commandLine: CommandLine) {
         connection.workers(1)
         openTab(WelcomeDocument())
     }
@@ -70,4 +75,7 @@ class ControlPanel : MultiDocumentApplication("Scapes Control Panel",
             }
         }, Shortcut["Connection.Connect", 'C', Shortcut.Modifier.CONTROL])
     }
+
+    @JvmStatic
+    fun main(args: Array<String>) = executeMain(args)
 }

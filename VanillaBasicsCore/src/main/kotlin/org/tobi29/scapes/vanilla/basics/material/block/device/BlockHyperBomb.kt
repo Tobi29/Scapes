@@ -20,9 +20,9 @@ import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.Face
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.threadLocalRandom
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType

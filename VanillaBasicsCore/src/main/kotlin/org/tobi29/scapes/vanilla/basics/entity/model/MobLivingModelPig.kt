@@ -21,13 +21,18 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.graphics.push
-import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.utils.math.TWO_PI
+import org.tobi29.scapes.engine.math.angleDiff
+import org.tobi29.scapes.engine.math.cosTable
+import org.tobi29.scapes.engine.math.vector.*
 import org.tobi29.scapes.entity.client.MobLivingClient
 import org.tobi29.scapes.entity.model.Box
 import org.tobi29.scapes.entity.model.MobLivingModel
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sqrt
 
 class MobLivingModelPig(shared: MobLivingModelPigShared,
                         override val entity: MobLivingClient,

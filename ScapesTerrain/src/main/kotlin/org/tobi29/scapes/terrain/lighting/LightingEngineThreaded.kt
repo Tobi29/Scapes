@@ -21,9 +21,9 @@ import kotlinx.coroutines.experimental.channels.ActorJob
 import kotlinx.coroutines.experimental.channels.Channel
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3i
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
+import kotlin.math.max
+import org.tobi29.scapes.engine.math.vector.MutableVector3i
+import org.tobi29.scapes.engine.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.task.actorThread
 import org.tobi29.scapes.terrain.TerrainBase

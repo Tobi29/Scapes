@@ -41,11 +41,11 @@ class GuiAddServer(state: GameState,
 
         save.on(GuiEvent.CLICK_LEFT) {
             val portInt = try {
-                port.text().toInt()
+                port.text.toInt()
             } catch (e: NumberFormatException) {
                 12345
             }
-            val address = RemoteAddress(ip.text(), portInt)
+            val address = RemoteAddress(ip.text, portInt)
             previous.addServer(address.toTag())
             previous.updateServers()
             state.engine.guiStack.swap(this, previous)

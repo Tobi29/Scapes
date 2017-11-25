@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.material.item.food
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.vanilla.basics.material.CropType
 import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
 import org.tobi29.scapes.vanilla.basics.material.ItemResearch
@@ -41,7 +41,7 @@ class ItemDough(type: VanillaMaterialType) : ItemSimpleData(
         val name = StringBuilder(40)
         name.append(materials.crop.name(item)).append("Dough")
         val temperature = temperature(item)
-        name.append("\nTemp.:").append(floor(temperature)).append("°C")
+        name.append("\nTemp.:").append(temperature.floorToInt()).append("°C")
         return name.toString()
     }
 

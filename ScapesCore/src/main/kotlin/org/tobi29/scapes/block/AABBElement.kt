@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.block
 
-import org.tobi29.scapes.engine.utils.math.AABB
+import org.tobi29.scapes.engine.math.AABB
 
 class AABBElement(val aabb: AABB = AABB(0.0, 0.0, 0.0, 0.0, 0.0,
         0.0),

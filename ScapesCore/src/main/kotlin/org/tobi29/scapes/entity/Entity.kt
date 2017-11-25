@@ -17,8 +17,8 @@ package org.tobi29.scapes.entity
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.engine.utils.*
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.TagMapWrite
 

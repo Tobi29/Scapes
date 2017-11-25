@@ -17,67 +17,23 @@
 package org.tobi29.scapes.plugins
 
 import org.tobi29.scapes.engine.utils.*
-import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream
-import org.tobi29.scapes.engine.utils.io.Channels
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.ReadSource
-import org.tobi29.scapes.engine.utils.io.checksum
+import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
 import java.lang.reflect.InvocationTargetException
 import java.util.zip.ZipFile
 
-class PluginFile {
-    private val path: FilePath?
-    private val checksum: Checksum
-    val id: String
-    val name: String
-    val parent: String
-    val mainClass: String
-    val version: Version
-    val scapesVersion: Version
-
-    constructor(path: FilePath) {
-        this.path = path
-        checksum = read(path) { checksum(it) }
-        try {
-            val pluginMap = ZipFile(path.toFile()).use { zip ->
-                readJSON(
-                        BufferedReadChannelStream(Channels.newChannel(
-                                zip.getInputStream(zip.getEntry(
-                                        "scapes/plugin/Plugin.json")))))
-            }
-            id = pluginMap["ID"].toString()
-            name = pluginMap["Name"].toString()
-            parent = pluginMap["Parent"].toString()
-            version = versionParse(pluginMap["Version"].toString())
-            scapesVersion = versionParse(
-                    pluginMap["ScapesVersion"].toString())
-            mainClass = pluginMap["MainClass"].toString()
-        } catch (e: VersionException) {
-            throw IOException(e.message, e)
-        }
-    }
-
-    constructor(metaData: ReadSource) {
-        val pluginMap = metaData.read(::readJSON)
-        try {
-            path = null
-            checksum = Checksum(Algorithm.UNKNOWN, EMPTY_BYTE)
-            id = pluginMap["ID"].toString()
-            name = pluginMap["Name"].toString()
-            parent = pluginMap["Parent"].toString()
-            version = versionParse(pluginMap["Version"].toString())
-            scapesVersion = versionParse(
-                    pluginMap["ScapesVersion"].toString())
-            mainClass = pluginMap["MainClass"].toString()
-        } catch (e: VersionException) {
-            throw IOException(e.message, e)
-        }
-
-    }
-
+class PluginFile(
+        private val path: FilePath?,
+        private val checksum: Checksum,
+        val id: String,
+        val name: String,
+        val parent: String,
+        val version: Version,
+        val scapesVersion: Version,
+        val mainClass: String
+) {
     fun version(): Version {
         return version
     }
@@ -126,5 +82,65 @@ class PluginFile {
 
     companion object {
         val EMPTY_BYTE = byteArrayOf()
+
+        suspend fun loadFile(path: FilePath): PluginFile {
+            val pluginMap = ZipFile(path.toFile()).use { zip ->
+                readJSON(BufferedReadChannelStream(Channels.newChannel(
+                        zip.getInputStream(zip.getEntry(
+                                "scapes/plugin/Plugin.json"))).toChannel()))
+            }
+            try {
+                val checksum = read(path) { checksum(it) }
+                val id = pluginMap["ID"].toString()
+                val name = pluginMap["Name"].toString()
+                val parent = pluginMap["Parent"].toString()
+                val version = versionParse(pluginMap["Version"].toString())
+                val scapesVersion = versionParse(
+                        pluginMap["ScapesVersion"].toString())
+                val mainClass = pluginMap["MainClass"].toString()
+                return PluginFile(path, checksum, id, name, parent, version,
+                        scapesVersion, mainClass)
+            } catch (e: VersionException) {
+                throw IOException(e.message, e)
+            }
+        }
+
+        suspend fun load(metaData: ReadSource): PluginFile {
+            val pluginMap = metaData.readAsync { readJSON(it) }
+            try {
+                val path = null
+                val checksum = Checksum(Algorithm.UNKNOWN, EMPTY_BYTE)
+                val id = pluginMap["ID"].toString()
+                val name = pluginMap["Name"].toString()
+                val parent = pluginMap["Parent"].toString()
+                val version = versionParse(pluginMap["Version"].toString())
+                val scapesVersion = versionParse(
+                        pluginMap["ScapesVersion"].toString())
+                val mainClass = pluginMap["MainClass"].toString()
+                return PluginFile(path, checksum, id, name, parent, version,
+                        scapesVersion, mainClass)
+            } catch (e: VersionException) {
+                throw IOException(e.message, e)
+            }
+        }
+
+        fun load(metaData: ReadSourceLocal): PluginFile {
+            val pluginMap = metaData.readNow(::readJSON)
+            try {
+                val path = null
+                val checksum = Checksum(Algorithm.UNKNOWN, EMPTY_BYTE)
+                val id = pluginMap["ID"].toString()
+                val name = pluginMap["Name"].toString()
+                val parent = pluginMap["Parent"].toString()
+                val version = versionParse(pluginMap["Version"].toString())
+                val scapesVersion = versionParse(
+                        pluginMap["ScapesVersion"].toString())
+                val mainClass = pluginMap["MainClass"].toString()
+                return PluginFile(path, checksum, id, name, parent, version,
+                        scapesVersion, mainClass)
+            } catch (e: VersionException) {
+                throw IOException(e.message, e)
+            }
+        }
     }
 }

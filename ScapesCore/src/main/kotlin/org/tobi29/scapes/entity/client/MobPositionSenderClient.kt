@@ -17,15 +17,16 @@
 package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.block.Registries
+import org.tobi29.scapes.engine.math.abs
+import org.tobi29.scapes.engine.math.angleDiff
+import org.tobi29.scapes.engine.math.max
+import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.vector.MutableVector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.minus
 import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.math.abs
-import org.tobi29.scapes.engine.utils.math.angleDiff
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.minus
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.packets.*
+import kotlin.math.abs
 
 class MobPositionSenderClient(private val registry: Registries,
                               pos: Vector3d,
@@ -59,16 +60,17 @@ class MobPositionSenderClient(private val registry: Registries,
                 swimming, forced, packetHandler)
     }
 
-    @Synchronized fun submitUpdate(uuid: UUID,
-                                   pos: Vector3d,
-                                   speed: Vector3d,
-                                   rot: Vector3d,
-                                   ground: Boolean,
-                                   slidingWall: Boolean,
-                                   inWater: Boolean,
-                                   swimming: Boolean,
-                                   forced: Boolean,
-                                   packetHandler: (PacketBoth) -> Unit) {
+    @Synchronized
+    fun submitUpdate(uuid: UUID,
+                     pos: Vector3d,
+                     speed: Vector3d,
+                     rot: Vector3d,
+                     ground: Boolean,
+                     slidingWall: Boolean,
+                     inWater: Boolean,
+                     swimming: Boolean,
+                     forced: Boolean,
+                     packetHandler: (PacketBoth) -> Unit) {
         var force = forced
         if (!init) {
             init = true

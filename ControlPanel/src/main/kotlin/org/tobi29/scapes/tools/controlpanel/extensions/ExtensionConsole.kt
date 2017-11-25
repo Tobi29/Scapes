@@ -21,7 +21,7 @@ import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Group
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
-import org.tobi29.scapes.engine.swt.util.framework.Application
+import org.tobi29.scapes.engine.swt.util.framework.GuiApplication
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
 import org.tobi29.scapes.engine.utils.ComponentTypeRegistered
 import org.tobi29.scapes.engine.utils.tag.TagMap
@@ -31,14 +31,14 @@ import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConsole
 
 class ExtensionConsole(
-        application: Application,
+        application: GuiApplication,
         connection: ControlPanelProtocol
 ) : Extension(connection) {
     private var console: ControlPanelConsole? = null
 
     init {
         connection.addCommand("Message") { payload ->
-            launch(application) {
+            launch(application.uiContext) {
                 console.ifPresent { console ->
                     payload["Message"]?.toString()?.let {
                         console.console.append(it)

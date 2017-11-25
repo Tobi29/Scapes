@@ -19,7 +19,6 @@ package org.tobi29.scapes.desktop
 import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.ContainerGLFW
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.PlatformDialogs
-import org.tobi29.scapes.engine.input.FileType
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 
@@ -30,7 +29,9 @@ internal class DialogProviderDesktop(
         container?.let { container ->
             container.exec {
                 PlatformDialogs.openFileDialog(container,
-                        FileType.MUSIC.extensions, true, result)
+                        arrayOf("*.mp3" to "MP3 Audio",
+                                "*.ogg" to "OGG Audio",
+                                "*.wav" to "WAV Audio"), true, result)
             }
         }
     }
@@ -39,7 +40,7 @@ internal class DialogProviderDesktop(
         container?.let { container ->
             container.exec {
                 PlatformDialogs.openFileDialog(container,
-                        FileType("*.jar", "Jar Archive").extensions, true,
+                        arrayOf("*.jar" to "Jar Archive"), true,
                         result)
             }
         }
@@ -49,7 +50,7 @@ internal class DialogProviderDesktop(
         container?.let { container ->
             container.exec {
                 PlatformDialogs.openFileDialog(container,
-                        FileType.IMAGE.extensions, false, result)
+                        arrayOf("*.png" to "PNG Picture"), false, result)
             }
         }
     }
@@ -58,7 +59,7 @@ internal class DialogProviderDesktop(
         container?.let { container ->
             container.exec {
                 PlatformDialogs.saveFileDialog(container,
-                        arrayOf(Pair("*.png", "PNG Picture")))?.let {
+                        arrayOf("*.png" to "PNG Picture"))?.let {
                     result(it)
                 }
             }

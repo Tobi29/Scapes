@@ -21,8 +21,8 @@ import org.tobi29.scapes.engine.utils.ComponentStorage
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.MutableVector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.ComponentEntity
 import org.tobi29.scapes.entity.ComponentSerializable

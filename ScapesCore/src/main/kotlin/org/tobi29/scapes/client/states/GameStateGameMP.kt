@@ -16,8 +16,7 @@
 
 package org.tobi29.scapes.client.states
 
-import kotlinx.coroutines.experimental.runBlocking
-import kotlinx.coroutines.experimental.yield
+import kotlinx.coroutines.experimental.*
 import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.client.ChatHistory
@@ -34,10 +33,12 @@ import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
 import org.tobi29.scapes.engine.resource.awaitDone
+import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared
 import org.tobi29.scapes.entity.model.MobLivingModelHumanShared
 import org.tobi29.scapes.entity.particle.ParticleTransparentAtlas
+import org.tobi29.scapes.entity.particle.ParticleTransparentAtlasBuilder
 
 open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection,
                            private val loadScene: Scene,
@@ -50,13 +51,15 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     val debug: Gui
     val debugWidget: GuiComponentWidget
     protected val terrainTextureRegistry: TerrainTextureRegistry
-    protected val particleTransparentAtlas: ParticleTransparentAtlas
+    var particleTransparentAtlas: ParticleTransparentAtlas? = null
+        private set
+    protected var particleTransparentAtlasBuilder: ParticleTransparentAtlasBuilder? = ParticleTransparentAtlasBuilder()
     protected var scene: SceneScapesVoxelWorld? = null
     private val connectionSentProfiler: GuiWidgetDebugValues
     private val connectionReceivedProfiler: GuiWidgetDebugValues
     private val modelHumanShared: MobLivingModelHumanShared
-    private val modelBlockBreakShared: EntityModelBlockBreakShared
-    private var init = false
+    private val modelBlockBreakShared: Deferred<EntityModelBlockBreakShared>
+    private val init = AtomicBoolean(false)
 
     init {
         val scapes = engine[ScapesClient.COMPONENT]
@@ -64,9 +67,12 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         playlist = Playlist(scapes.home.resolve("playlists"), engine)
         client = clientSupplier(this)
         terrainTextureRegistry = TerrainTextureRegistry(engine)
-        particleTransparentAtlas = ParticleTransparentAtlas(engine)
         modelHumanShared = MobLivingModelHumanShared(engine)
-        modelBlockBreakShared = EntityModelBlockBreakShared(engine)
+        modelBlockBreakShared = async(engine) {
+            EntityModelBlockBreakShared(engine, Array(9) {
+                engine.graphics.textures["Scapes:image/entity/Break${it + 1}"].getAsync()
+            })
+        }
         val style = engine.guiStyle
         hud = GuiHud(this, style)
         inputGui = GuiState(this, style)
@@ -137,17 +143,23 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
             type?.createModels(terrainTextureRegistry)
         }
         logger.info { "Loaded terrain models with $size textures in ${time}ms." }
-        particleTransparentAtlas.init()
-        particleTransparentAtlas.initTexture(4)
-        client.start()
         switchPipeline { gl ->
             renderScene(gl, loadScene)
         }
-        init = true
+        launch(engine.taskExecutor) {
+            particleTransparentAtlasBuilder?.let {
+                particleTransparentAtlasBuilder = null
+                particleTransparentAtlas = it.build(engine) {
+                    createTexture(it, 0)
+                }
+            }
+            client.start()
+            init.set(true)
+        }
     }
 
     suspend fun awaitInit() {
-        while (!init) {
+        while (!init.get()) {
             yield()
         }
     }
@@ -170,14 +182,20 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     }
 
     fun particleTransparentAtlas(): ParticleTransparentAtlas {
-        return particleTransparentAtlas
+        return particleTransparentAtlas ?: throw IllegalStateException(
+                "Particle atlas not initialized yet")
+    }
+
+    fun particleTransparentAtlasBuilder(): ParticleTransparentAtlasBuilder {
+        return particleTransparentAtlasBuilder ?: throw IllegalStateException(
+                "Particle atlas already initialized")
     }
 
     fun modelHumanShared(): MobLivingModelHumanShared {
         return modelHumanShared
     }
 
-    fun modelBlockBreakShared(): EntityModelBlockBreakShared {
+    fun modelBlockBreakShared(): Deferred<EntityModelBlockBreakShared> {
         return modelBlockBreakShared
     }
 

@@ -24,17 +24,31 @@ import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.utils.*
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.length
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.Frustum
+import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.length
+import org.tobi29.scapes.engine.utils.EventDispatcher
+import org.tobi29.scapes.engine.utils.ListenerRegistrar
+import org.tobi29.scapes.engine.utils.Pool
+import org.tobi29.scapes.engine.utils.ThreadLocal
+import org.tobi29.scapes.engine.utils.math.TWO_PI
+import org.tobi29.scapes.engine.utils.math.clamp
+import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.entity.EntityPhysics
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.particle.ParticleEmitterBlock
 import org.tobi29.scapes.packets.PacketInteraction
+import kotlin.collections.set
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.sin
 
 abstract class MobPlayerClientMain(type: EntityType<*, *>,
                                    world: WorldClient,
@@ -92,7 +106,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
             }
             EntityPhysics.collide(delta, aabb, aabbs, physicsState) {}
             isHeadInWater = world.terrain.type(pos.intX(), pos.intY(),
-                    floor(pos.doubleZ() + 0.7)).isLiquid
+                    (pos.doubleZ() + 0.7).floorToInt()).isLiquid
             aabbs.reset()
             aabbs.forAllObjects { it.collision = BlockType.STANDARD_COLLISION }
         }
@@ -110,7 +124,8 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
                 pos.doubleZ() + viewOffset.z,
                 pos.doubleX() + lookX, pos.doubleY() + lookY,
                 pos.doubleZ() + lookZ, 0.0, 0.0, 1.0)
-        world.getEntities(viewField).filterMap<MobClient>().forEach { entity ->
+        world.getEntities(
+                viewField).filterIsInstance<MobClient>().forEach { entity ->
             val pos2 = entity.getCurrentPos()
             if (!world.checkBlocked(pos.intX(), pos.intY(),
                     pos.intZ(), pos2.intX(), pos2.intY(),
@@ -127,12 +142,12 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
                 val x = pos.intX()
                 val y = pos.intY()
                 val block = world.terrain.block(x, y,
-                        floor(pos.doubleZ() - 0.1))
+                        (pos.doubleZ() - 0.1).floorToInt())
                 var footStepSound = world.terrain.type(block).footStepSound(
                         world.terrain.data(block))
                 if (footStepSound == null && isOnGround) {
                     val blockBottom = world.terrain.block(x, y,
-                            floor(pos.doubleZ() - 1.4))
+                            (pos.doubleZ() - 1.4).floorToInt())
                     footStepSound = world.terrain.type(
                             blockBottom).footStepSound(
                             world.terrain.data(blockBottom))

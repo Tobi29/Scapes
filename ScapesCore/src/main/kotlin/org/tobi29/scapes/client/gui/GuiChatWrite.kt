@@ -31,19 +31,21 @@ class GuiChatWrite(state: GameStateGameMP,
 
     init {
         write = add(12.0, 480.0, 600.0, 30.0) {
-            GuiComponentTextField(it, 16, "", 64, false, true)
+            GuiComponentTextField(it, 16, "", 64, false)
         }
         add(8.0, 416.0, -1.0, -1.0) {
             GuiComponentChat(it, state.chatHistory)
         }
 
         on(GuiAction.ACTIVATE) {
-            val text = write.text()
+            val text = write.text
             if (!text.isEmpty()) {
                 client.send(PacketChat(client.plugins.registry, text))
             }
             player.closeGui()
         }
         on(GuiAction.BACK) { player.closeGui() }
+
+        currentSelection = write
     }
 }

@@ -23,9 +23,9 @@ import org.tobi29.scapes.block.UpdateType
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainMutable
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.math.max
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import kotlin.math.max
 
 class UpdateWaterFlow(type: UpdateType) : Update(type) {
     constructor(registry: Registries) : this(

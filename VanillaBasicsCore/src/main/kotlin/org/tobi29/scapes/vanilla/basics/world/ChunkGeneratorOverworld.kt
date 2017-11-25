@@ -19,8 +19,7 @@ package org.tobi29.scapes.vanilla.basics.world
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
-import org.tobi29.scapes.engine.utils.math.Random
-import org.tobi29.scapes.engine.utils.math.abs
+import org.tobi29.scapes.engine.math.Random
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.reduceOrNull
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
@@ -28,6 +27,7 @@ import org.tobi29.scapes.vanilla.basics.generator.*
 import org.tobi29.scapes.vanilla.basics.material.OreType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateLavaFlow
+import kotlin.math.abs
 
 class ChunkGeneratorOverworld(random: Random,
                               private val terrainGenerator: TerrainGenerator,

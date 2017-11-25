@@ -20,10 +20,10 @@ import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.Algorithm
 import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.engine.utils.graphics.Image
-import org.tobi29.scapes.engine.utils.io.ByteBuffer
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.scapes.engine.utils.io.view
 import org.tobi29.scapes.server.connection.PlayerConnection
 
 class PacketSkin : PacketAbstract, PacketBoth {
@@ -55,16 +55,15 @@ class PacketSkin : PacketAbstract, PacketBoth {
 
     override fun sendClient(player: PlayerConnection,
                             stream: WritableByteStream) {
-        stream.put(image.buffer)
+        stream.put(image.view)
         stream.putString(checksum.algorithm.name)
-        stream.put(checksum.array())
+        stream.put(checksum.array().view)
     }
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        val buffer = ByteBuffer(64 * 64 * 4)
+        val buffer = ByteArray(64 * 64 * 4).view
         stream.get(buffer)
-        buffer.flip()
         image = Image(64, 64, buffer)
         val algorithm: Algorithm
         try {
@@ -74,7 +73,7 @@ class PacketSkin : PacketAbstract, PacketBoth {
         }
 
         val array = ByteArray(algorithm.bytes)
-        stream.get(array)
+        stream.get(array.view)
         checksum = Checksum(algorithm, array)
     }
 
@@ -87,7 +86,7 @@ class PacketSkin : PacketAbstract, PacketBoth {
     override fun sendServer(client: ClientConnection,
                             stream: WritableByteStream) {
         stream.putString(checksum.algorithm.name)
-        stream.put(checksum.array())
+        stream.put(checksum.array().view)
     }
 
     override fun parseServer(player: PlayerConnection,
@@ -100,7 +99,7 @@ class PacketSkin : PacketAbstract, PacketBoth {
         }
 
         val array = ByteArray(algorithm.bytes)
-        stream.get(array)
+        stream.get(array.view)
         checksum = Checksum(algorithm, array)
     }
 

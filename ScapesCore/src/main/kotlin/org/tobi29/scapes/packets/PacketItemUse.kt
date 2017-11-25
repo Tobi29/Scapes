@@ -24,10 +24,10 @@ import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.server.InvalidPacketDataException
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.math.abs
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
+import org.tobi29.scapes.engine.math.vector.Vector2d
 import org.tobi29.scapes.server.connection.PlayerConnection
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.experimental.TimeUnit
+import kotlin.math.abs
 
 class PacketItemUse : PacketAbstract, PacketServer {
     private var strength = 0.0

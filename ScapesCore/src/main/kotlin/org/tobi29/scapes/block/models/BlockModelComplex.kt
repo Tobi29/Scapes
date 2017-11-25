@@ -15,21 +15,17 @@
  */
 package org.tobi29.scapes.block.models
 
-import org.tobi29.scapes.block.ShaderAnimation
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.utils.graphics.marginX
-import org.tobi29.scapes.engine.utils.graphics.marginY
-import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.cos
-import org.tobi29.scapes.engine.utils.math.sin
+import org.tobi29.scapes.engine.math.Face
 import org.tobi29.scapes.engine.utils.math.toRad
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.plus
-import org.tobi29.scapes.engine.utils.math.vector.times
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.plus
+import org.tobi29.scapes.engine.math.vector.times
+import kotlin.math.cos
+import kotlin.math.sin
 
 class BlockModelComplex(private val registry: TerrainTextureRegistry,
                         private val shapes: List<BlockModelComplex.Shape>,
@@ -39,7 +35,7 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
 
     init {
         shapes.forEach { shape ->
-            shape.scale(scale)
+            shape.scale(scale, scaleTexture = false)
             shape.center()
         }
         model = buildVAO(false)
@@ -157,7 +153,8 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
             return Vector3d(x, y, z)
         }
 
-        fun scale(scale: Double) {
+        fun scale(scale: Double,
+                  scaleTexture: Boolean = true) {
             lll = lll.times(scale)
             hll = hll.times(scale)
             hhl = hhl.times(scale)
@@ -166,12 +163,14 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
             hlh = hlh.times(scale)
             hhh = hhh.times(scale)
             lhh = lhh.times(scale)
-            minX *= scale
-            minY *= scale
-            minZ *= scale
-            maxX *= scale
-            maxY *= scale
-            maxZ *= scale
+            if (!scaleTexture) {
+                minX *= scale
+                minY *= scale
+                minZ *= scale
+                maxX *= scale
+                maxY *= scale
+                maxZ *= scale
+            }
         }
 
         fun center() {

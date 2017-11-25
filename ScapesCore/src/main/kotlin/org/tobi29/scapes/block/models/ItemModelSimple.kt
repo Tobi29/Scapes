@@ -17,10 +17,10 @@
 package org.tobi29.scapes.block.models
 
 import org.tobi29.scapes.block.TerrainTexture
+import org.tobi29.scapes.block.marginX
+import org.tobi29.scapes.block.marginY
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.utils.graphics.marginX
-import org.tobi29.scapes.engine.utils.graphics.marginY
-import org.tobi29.scapes.engine.utils.math.max
+import kotlin.math.max
 
 class ItemModelSimple(private val texture: TerrainTexture?,
                       private val r: Double,

@@ -20,8 +20,8 @@ import org.tobi29.scapes.engine.utils.Array2
 import org.tobi29.scapes.engine.utils.AtomicInteger
 import org.tobi29.scapes.engine.utils.StampLock
 import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.utils.math.abs
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector2i
+import org.tobi29.scapes.engine.math.vector.MutableVector2i
+import kotlin.math.abs
 
 class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         private val center: MutableVector2i,

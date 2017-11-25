@@ -18,13 +18,19 @@ package org.tobi29.scapes.chunk.terrain
 
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.engine.math.Intersection
+import org.tobi29.scapes.engine.math.PointerPane
+import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.distance
+import org.tobi29.scapes.engine.math.vector.plus
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.distance
-import org.tobi29.scapes.engine.utils.math.vector.plus
+import org.tobi29.scapes.engine.utils.math.ceilToInt
+import org.tobi29.scapes.engine.utils.math.sqr
+import org.tobi29.scapes.engine.utils.math.toRad
+import kotlin.math.cos
+import kotlin.math.sin
 
 inline fun <R> TerrainServer.modify(
         crossinline predicate: (TerrainMutableServer) -> Boolean,
@@ -95,7 +101,7 @@ fun Terrain.selectBlock(pos: Vector3d,
                         distance: Double,
                         direction: Vector2d): PointerPane? {
     val pointerPanes = POINTER_PANES.get()
-    pointerPanes(pos.intX(), pos.intY(), pos.intZ(), ceil(distance),
+    pointerPanes(pos.intX(), pos.intY(), pos.intZ(), distance.ceilToInt(),
             pointerPanes)
     val factor = cos(direction.x.toRad()) * distance
     val lookX = cos(direction.y.toRad()) * factor

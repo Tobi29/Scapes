@@ -25,15 +25,15 @@ import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainClient
+import org.tobi29.scapes.engine.math.vector.MutableVector2i
+import org.tobi29.scapes.engine.math.vector.Vector2i
+import org.tobi29.scapes.engine.math.vector.distanceSqr
+import org.tobi29.scapes.engine.math.vector.lengthSqr
 import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.ConcurrentHashSet
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.sqr
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector2i
-import org.tobi29.scapes.engine.utils.math.vector.Vector2i
-import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
-import org.tobi29.scapes.engine.utils.math.vector.lengthSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.task.Timer
@@ -42,7 +42,7 @@ import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.packets.PacketBlockChange
 import org.tobi29.scapes.packets.PacketRequestChunk
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManagerStatic
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.experimental.TimeUnit
 import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.coroutines.experimental.buildSequence
 

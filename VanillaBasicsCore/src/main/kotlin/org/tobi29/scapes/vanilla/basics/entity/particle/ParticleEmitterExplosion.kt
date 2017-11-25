@@ -18,10 +18,10 @@ package org.tobi29.scapes.vanilla.basics.entity.particle
 
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.AABB
+import org.tobi29.scapes.engine.math.AABB
 import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
@@ -86,14 +86,14 @@ class ParticleEmitterExplosion(system: ParticleSystem) : ParticleEmitter<Particl
         private fun trail(emitter: ParticleEmitterTransparent,
                           pos: Vector3d,
                           speed: Vector3d,
-                          texture: ParticleTransparentTexture) {
+                          texture: Int) {
             emitter.add { instance ->
                 val random = threadLocalRandom()
                 instance.pos.set(pos)
                 instance.speed.set(speed)
                 instance.time = 1.0f
                 instance.setPhysics(-0.01f)
-                instance.setTexture(texture)
+                instance.setTexture(emitter, texture)
                 instance.rStart = 4.0f
                 instance.gStart = 3.0f
                 instance.bStart = 0.3f
@@ -111,7 +111,7 @@ class ParticleEmitterExplosion(system: ParticleSystem) : ParticleEmitter<Particl
         private fun smoke(emitter: ParticleEmitterTransparent,
                           pos: Vector3d,
                           speed: Vector3d,
-                          texture: ParticleTransparentTexture,
+                          texture: Int,
                           time: Float) {
             emitter.add { instance ->
                 val random = threadLocalRandom()
@@ -119,7 +119,7 @@ class ParticleEmitterExplosion(system: ParticleSystem) : ParticleEmitter<Particl
                 instance.speed.set(speed)
                 instance.time = time
                 instance.setPhysics(-0.2f, 0.6f)
-                instance.setTexture(texture)
+                instance.setTexture(emitter, texture)
                 instance.rStart = 0.7f
                 instance.gStart = 0.7f
                 instance.bStart = 0.7f

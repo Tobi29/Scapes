@@ -17,10 +17,10 @@
 package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.floor
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.scapes.engine.math.vector.MutableVector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.entity.*
@@ -102,6 +102,6 @@ abstract class MobClient(type: EntityType<*, *>,
 
     open fun move(delta: Double) {
         isHeadInWater = world.terrain.type(pos.intX(), pos.intY(),
-                floor(pos.doubleZ() + 0.7)).isLiquid
+                (pos.doubleZ() + 0.7).floorToInt()).isLiquid
     }
 }

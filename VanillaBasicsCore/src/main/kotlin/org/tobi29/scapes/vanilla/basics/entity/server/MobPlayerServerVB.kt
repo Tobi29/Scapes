@@ -17,12 +17,12 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
+import org.tobi29.scapes.engine.math.*
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3i
+import org.tobi29.scapes.engine.math.vector.plus
 import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.math.vector.plus
+import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.WieldMode
@@ -86,7 +86,7 @@ class MobPlayerServerVB(type: EntityType<*, *>,
                 pos.doubleZ() + viewOffset.z, pos.doubleX() + lookX,
                 pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0.0, 0.0, 1.0)
         world.getEntities(
-                viewField).filterMap<MobServer>().filter { it != this }.forEach { mob ->
+                viewField).filterIsInstance<MobServer>().filter { it != this }.forEach { mob ->
             val mobPos = mob.getCurrentPos()
             if (!world.checkBlocked(pos.intX(), pos.intY(),
                     pos.intZ(), mobPos.intX(), mobPos.intY(),

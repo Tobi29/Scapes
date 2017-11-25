@@ -72,10 +72,9 @@ class PluginClassLoader(
         return permissions
     }
 
-    companion object : KLogging() {
-        // TODO: @Throws(IOException::class)
-        private fun urls(paths: List<FilePath>): Array<URL> {
-            return paths.asSequence().map { it.toUri().toURL() }.toArray()
-        }
-    }
+    companion object : KLogging()
+}
+
+private fun urls(paths: List<FilePath>): Array<URL> {
+    return paths.asSequence().map { it.toUri().java.toURL() }.toArray()
 }

@@ -17,10 +17,10 @@
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.vanilla.basics.generator.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleData
+import kotlin.math.roundToInt
 
 abstract class BlockStone(type: VanillaMaterialType) : BlockSimpleData(type) {
     protected val stoneRegistry = plugins.registry.get<StoneType>(
@@ -50,8 +50,7 @@ abstract class BlockStone(type: VanillaMaterialType) : BlockSimpleData(type) {
 
     fun canBeBroken(toolLevel: Int,
                     data: Int): Boolean {
-        return round(
-                stoneRegistry[data].resistance) * 10 <= toolLevel
+        return (stoneRegistry[data].resistance).roundToInt() * 10 <= toolLevel
     }
 
     override fun maxStackSize(item: ItemStack): Int {

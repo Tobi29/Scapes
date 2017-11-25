@@ -18,9 +18,13 @@ package org.tobi29.scapes.chunk
 import kotlinx.coroutines.experimental.CancellationException
 import kotlinx.coroutines.experimental.CoroutineDispatcher
 import org.tobi29.scapes.block.Registries
-import org.tobi29.scapes.engine.utils.*
+import org.tobi29.scapes.engine.utils.ComponentHolder
+import org.tobi29.scapes.engine.utils.ComponentStorage
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
+import org.tobi29.scapes.engine.math.vector.Vector3i
+import org.tobi29.scapes.engine.utils.task.TaskChannel
+import org.tobi29.scapes.engine.utils.task.offer
+import org.tobi29.scapes.engine.utils.task.processCurrent
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.entity.EntityContainer
 import org.tobi29.scapes.plugins.Plugins
@@ -34,7 +38,7 @@ abstract class World<E : Entity>(
 ) : CoroutineDispatcher(), ComponentHolder<Any>, EntityContainer<E> {
     override val componentStorage = ComponentStorage<Any>()
     val air = plugins.air
-    private val queue = TaskQueue<() -> Unit>()
+    private val queue = TaskChannel<() -> Unit>()
     protected var thread: Thread? = null
     var spawn = Vector3i.ZERO
         protected set
@@ -49,7 +53,7 @@ abstract class World<E : Entity>(
 
     override fun dispatch(context: CoroutineContext,
                           block: Runnable) {
-        queue.add {
+        queue.offer {
             try {
                 block.run()
             } catch (e: CancellationException) {

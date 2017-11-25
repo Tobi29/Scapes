@@ -19,9 +19,8 @@ package org.tobi29.scapes.server.extension.base
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.args.*
 import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.ByteBufferStream
+import org.tobi29.scapes.engine.utils.io.MemoryViewStreamDefault
 import org.tobi29.scapes.engine.utils.io.asString
-import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.server.MessageLevel
@@ -39,14 +38,15 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         val group = server.commandRegistry().group("debug")
 
         group.register("give", 8) {
-            val playerOption = CommandOption(setOf('p'), setOf("player"), 1,
+            val playerOption = CommandOption(setOf('p'), setOf("player"),
+                    listOf("name"),
                     "Player that the item will be given to").also { add(it) }
-            val materialOption = CommandOption(setOf('m'), setOf("material"), 1,
-                    "Material of item").also { add(it) }
-            val dataOption = CommandOption(setOf('d'), setOf("data"), 1,
-                    "Data value of item").also { add(it) }
-            val amountOption = CommandOption(setOf('a'), setOf("amount"), 1,
-                    "Amount of item in stack").also { add(it) }
+            val materialOption = CommandOption(setOf('m'), setOf("material"),
+                    listOf("name"), "Material of item").also { add(it) }
+            val dataOption = CommandOption(setOf('d'), setOf("data"),
+                    listOf("value"), "Data value of item").also { add(it) }
+            val amountOption = CommandOption(setOf('a'), setOf("amount"),
+                    listOf("value"), "Amount of item in stack").also { add(it) }
             return@register { args, executor, commands ->
                 val playerName = args.require(
                         playerOption) { it ?: executor.playerName() }
@@ -67,7 +67,8 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         }
 
         group.register("clear", 8) {
-            val playerOption = CommandOption(setOf('p'), setOf("player"), 1,
+            val playerOption = CommandOption(setOf('p'), setOf("player"),
+                    listOf("name"),
                     "Player whose inventory will be cleared").also { add(it) }
             return@register { args, executor, commands ->
                 val playerName = args.require(
@@ -83,13 +84,18 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         }
 
         group.register("tp", 8) {
-            val playerOption = CommandOption(setOf('p'), setOf("player"), 1,
-                    "Player who will be teleported").also { add(it) }
-            val targetOption = CommandOption(setOf('t'), setOf("target"), 1,
+            val playerOption = CommandOption(setOf('p'), setOf("player"),
+                    listOf("name"), "Player who will be teleported").also {
+                add(it)
+            }
+            val targetOption = CommandOption(setOf('t'), setOf("target"),
+                    listOf("name"),
                     "Target that will be teleported to").also { add(it) }
-            val worldOption = CommandOption(setOf('w'), setOf("world"), 1,
+            val worldOption = CommandOption(setOf('w'), setOf("world"),
+                    listOf("name"),
                     "World that will be teleported to").also { add(it) }
-            val locationOption = CommandOption(setOf('l'), setOf("location"), 3,
+            val locationOption = CommandOption(setOf('l'), setOf("location"),
+                    listOf("x", "y", "z"),
                     "Location that will be teleported to").also { add(it) }
             return@register { args, executor, commands ->
                 val playerName = args.require(
@@ -151,7 +157,8 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         }
 
         group.register("item", 8) {
-            val playerOption = CommandOption(setOf('p'), setOf("player"), 1,
+            val playerOption = CommandOption(setOf('p'), setOf("player"),
+                    listOf("name"),
                     "Player holding the item in the left hand").also { add(it) }
             return@register { args, executor, commands ->
                 val playerName = args.require(
@@ -161,11 +168,11 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                             playerName)
                     player.mob { mob ->
                         try {
-                            val stream = ByteBufferStream()
+                            val stream = MemoryViewStreamDefault()
                             TagMap { mob.leftWeapon().write(this) }.writeJSON(
                                     stream)
-                            stream.buffer().flip()
-                            val str = process(stream, asString())
+                            stream.flip()
+                            val str = stream.asString()
                             executor.events.fire(MessageEvent(executor,
                                     MessageLevel.FEEDBACK_INFO, str, executor))
                         } catch (e: IOException) {

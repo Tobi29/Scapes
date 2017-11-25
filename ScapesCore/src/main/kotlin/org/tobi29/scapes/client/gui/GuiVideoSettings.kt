@@ -24,7 +24,7 @@ import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.math.round
+import kotlin.math.roundToInt
 
 class GuiVideoSettings(state: GameState,
                        previous: Gui,
@@ -36,7 +36,7 @@ class GuiVideoSettings(state: GameState,
         val viewDistance = row(pane) {
             slider(it, "View distance",
                     (scapes.renderDistance - 10.0) / 246.0) { text, value ->
-                text + ": " + round(10.0 + value * 246.0) + 'm'
+                text + ": " + (10.0 + value * 246.0).roundToInt() + 'm'
             }
         }
         val shader = row(pane) { button(it, "Shaders") }
@@ -49,7 +49,7 @@ class GuiVideoSettings(state: GameState,
         val resolutionMultiplier = row(pane) {
             slider(it, "Resolution", reverseResolution(
                     scapes.resolutionMultiplier)) { text, value ->
-                text + ": " + round(resolution(value) * 100.0) + '%'
+                text + ": " + (resolution(value) * 100.0).roundToInt() + '%'
             }
         }
 
@@ -77,7 +77,7 @@ class GuiVideoSettings(state: GameState,
     }
 
     private fun resolution(value: Double): Double {
-        return 1.0 / round(11.0 - value * 10.0)
+        return 1.0 / (11.0 - value * 10.0).roundToInt()
     }
 
     private fun reverseResolution(value: Double): Double {

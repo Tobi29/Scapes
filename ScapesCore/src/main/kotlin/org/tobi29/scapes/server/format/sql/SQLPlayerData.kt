@@ -16,9 +16,7 @@
 package org.tobi29.scapes.server.format.sql
 
 import org.tobi29.scapes.engine.sql.*
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.ByteBuffer
-import org.tobi29.scapes.engine.utils.io.ByteBufferStream
+import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.engine.utils.logging.KLogging
@@ -32,7 +30,7 @@ class SQLPlayerData(private val getPlayer: SQLQuery,
                     private val replacePlayer: SQLReplace,
                     private val deletePlayer: SQLDelete,
                     private val checkPlayer: SQLQuery) : PlayerData {
-    private val stream = ByteBufferStream()
+    private val stream = MemoryViewStreamDefault()
 
     @Synchronized override fun player(id: String): PlayerEntry {
         var permissions = 0
@@ -50,8 +48,8 @@ class SQLPlayerData(private val getPlayer: SQLQuery,
                 }
                 if (row[2] is ByteArray) {
                     val array = row[2] as ByteArray
-                    val entityStructure = readBinary(ByteBufferStream(
-                            ByteBuffer.wrap(array)))
+                    val entityStructure = readBinary(
+                            MemoryViewReadableStream(array.viewBE))
                     return PlayerEntry(permissions, worldName,
                             entityStructure)
                 } else {
@@ -70,10 +68,10 @@ class SQLPlayerData(private val getPlayer: SQLQuery,
         val world = entity.world
         try {
             TagMap { entity.write(this, false) }.writeBinary(stream, 1)
-            stream.buffer().flip()
-            val array = ByteArray(stream.buffer().remaining())
-            stream.buffer().get(array)
-            stream.buffer().clear()
+            stream.flip()
+            val array = ByteArray(stream.remaining())
+            stream.get(array.view)
+            stream.reset()
             replacePlayer(arrayOf(id, world.id, permissions, array))
         } catch (e: IOException) {
             logger.error { "Failed to save player: $e" }

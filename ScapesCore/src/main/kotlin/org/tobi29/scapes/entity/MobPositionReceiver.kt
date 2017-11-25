@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.entity
 
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.MutableVector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 
 class MobPositionReceiver(pos: Vector3d,
                           private val positionListener: (Vector3d) -> Unit,

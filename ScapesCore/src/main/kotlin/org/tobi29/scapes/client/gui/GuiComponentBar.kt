@@ -20,8 +20,8 @@ import org.tobi29.scapes.engine.gui.GuiComponentHeavy
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.gui.GuiRenderer
 import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.min
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
+import org.tobi29.scapes.engine.math.vector.Vector2d
+import kotlin.math.min
 
 class GuiComponentBar(parent: GuiLayoutData,
                       private val r: Float,
@@ -57,7 +57,7 @@ class GuiComponentBar(parent: GuiLayoutData,
         } else {
             value += (clamp(newValue, 0.0, 1.0) - value) * factor
         }
-        gl.graphics.textureEmpty().bind(gl)
+        gl.textureEmpty().bind(gl)
         gl.matrixStack.push { matrix ->
             matrix.scale(value.toFloat(), 1.0f, 1.0f)
             model1?.render(gl, shader)

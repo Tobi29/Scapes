@@ -16,7 +16,7 @@
 package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.Registries
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 
 abstract class PacketAbstract(override val type: PacketType,
                               protected val pos: Vector3d? = null,

@@ -26,7 +26,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.math.Face
+import org.tobi29.scapes.engine.math.Face
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType

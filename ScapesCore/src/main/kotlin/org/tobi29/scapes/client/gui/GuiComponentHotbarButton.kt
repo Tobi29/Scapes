@@ -21,7 +21,7 @@ import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.GuiComponentButtonHeavy
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.gui.GuiRenderer
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
+import org.tobi29.scapes.engine.math.vector.Vector2d
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 
 class GuiComponentHotbarButton(parent: GuiLayoutData,

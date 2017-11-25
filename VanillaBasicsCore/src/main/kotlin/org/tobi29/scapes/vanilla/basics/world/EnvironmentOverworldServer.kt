@@ -24,11 +24,17 @@ import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.math.vector.normalizeSafe
-import org.tobi29.scapes.engine.utils.math.vector.times
+import org.tobi29.scapes.engine.math.Random
+import org.tobi29.scapes.engine.math.cosTable
+import org.tobi29.scapes.engine.math.sinTable
+import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3i
+import org.tobi29.scapes.engine.math.vector.normalizeSafe
+import org.tobi29.scapes.engine.math.vector.times
+import org.tobi29.scapes.engine.utils.math.HALF_PI
+import org.tobi29.scapes.engine.utils.math.clamp
+import org.tobi29.scapes.engine.utils.math.mix
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.ListenerToken
@@ -47,6 +53,7 @@ import org.tobi29.scapes.vanilla.basics.material.ItemHeatable
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import org.tobi29.scapes.vanilla.basics.packet.PacketDayTimeSync
 import org.tobi29.scapes.vanilla.basics.packet.PacketLightning
+import kotlin.math.max
 
 class EnvironmentOverworldServer(override val type: EnvironmentType,
                                  private val world: WorldServer,

@@ -16,21 +16,19 @@
 
 package org.tobi29.scapes.client.gui
 
+import kotlinx.coroutines.experimental.runBlocking
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
+import org.tobi29.scapes.engine.math.threadLocalRandom
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.hash
-import org.tobi29.scapes.engine.utils.io.BufferedReadChannelStream
-import org.tobi29.scapes.engine.utils.io.Channels
-import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.use
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
 import org.tobi29.scapes.plugins.PluginFile
 import java.util.zip.ZipFile
 
@@ -75,24 +73,24 @@ class GuiCreateWorld(state: GameState,
                     worldTypes[environmentID].id(), plugins, style))
         }
         save.on(GuiEvent.CLICK_LEFT) { event ->
-            if (name.text().isEmpty()) {
-                name.setText("New World")
+            if (name.text.isEmpty()) {
+                name.text = "New World"
             }
             try {
-                val saveName = name.text()
+                val saveName = name.text
                 if (saves.exists(saveName)) {
                     state.engine.guiStack.swap(this,
                             GuiMessage(state, this, "Error", SAVE_EXISTS,
                                     style))
                     return@on
                 }
-                val randomSeed = if (seed.text().isEmpty()) {
+                val randomSeed = if (seed.text.isEmpty()) {
                     threadLocalRandom().nextLong()
                 } else {
                     try {
-                        seed.text().toLong()
+                        seed.text.toLong()
                     } catch (e: NumberFormatException) {
-                        hash(seed.text())
+                        hash(seed.text)
                     }
                 }
                 val pluginFiles = ArrayList<FilePath>()
@@ -158,8 +156,8 @@ class GuiCreateWorld(state: GameState,
                             val stream = BufferedReadChannelStream(
                                     Channels.newChannel(zip.getInputStream(
                                             zip.getEntry(
-                                                    "scapes/plugin/Icon.png"))))
-                            val image = decodePNG(stream, state.engine)
+                                                    "scapes/plugin/Icon.png"))).toChannel())
+                            val image = runBlocking { decodePNG(stream) }
                             val texture = state.engine.graphics.createTexture(
                                     image, 0,
                                     TextureFilter.LINEAR,

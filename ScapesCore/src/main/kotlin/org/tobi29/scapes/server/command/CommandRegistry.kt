@@ -18,84 +18,99 @@ package org.tobi29.scapes.server.command
 
 import org.tobi29.scapes.engine.args.*
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.computeAbsent
 
-class CommandRegistry constructor(private val prefix: String = "") {
-    private val commands = ConcurrentHashMap<String, (List<String>, Executor) -> Command.Compiled>()
+class CommandRegistry : CommandRegistrar {
+    private val commands1 = ConcurrentHashMap<List<String>, Pair<CommandConfig, MutableList<CommandElement>>>()
+    private val commands2 = ConcurrentHashMap<String, CommandConfig>()
+    private val commands3 = ConcurrentHashMap<List<String>, (CommandLine, Executor) -> Command.Compiled>()
 
-    fun register(
-            usage: String,
-            level: Int,
-            block: MutableCollection<CommandOption>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>
-            ) -> Unit) {
-        val split = usage.split(' ', limit = 2)
-        val name = split[0]
-        val helpOption = CommandOption(
-                setOf('h'), setOf("help"), "Display this help")
-        val options = ArrayList<CommandOption>()
-        options.add(helpOption)
-        val compiler = block(options)
-        commands.put(name,
-                compiler(prefix + usage, level, helpOption, options, compiler))
+    private val helpOption = CommandOption(
+            setOf('h'), setOf("help"), "Display this help")
+
+    private fun configFor(path: List<String>,
+                          parentAdd: (CommandConfig) -> Unit) =
+            commands1.computeAbsent(path) {
+                ArrayList<CommandElement>().let {
+                    it.add(helpOption)
+                    (CommandConfig(path.last(), it) to it)
+                            .also { (element, _) ->
+                                parentAdd(element)
+                            }
+                }
+            }
+
+    fun subcommand(path: Iterable<String>): Pair<List<CommandConfig>, MutableCollection<CommandElement>> {
+        val pathList = path.toList()
+        if (pathList.isEmpty()) throw IllegalArgumentException("Empty path")
+        val (parent, parentElements: (CommandConfig) -> Unit) =
+                if (pathList.size == 1) emptyList<CommandConfig>() to { element: CommandConfig ->
+                    commands2[pathList.last()] = element
+                }
+                else subcommand(pathList.dropLast(1))
+                        .let { (parent, parentElements) ->
+                            parent to { element: CommandConfig ->
+                                parentElements.add(element)
+                                Unit
+                            }
+                        }
+        val (command, elements) = configFor(pathList, parentElements)
+        return (parent + command) to elements
     }
 
-    fun group(name: String): CommandRegistry {
-        val registry = CommandRegistry(prefix + name + ' ')
-        commands.put(name,
-                { args, executor -> registry[args, name + ' ', executor] })
-        return registry
+    override fun register(
+            path: Iterable<String>,
+            level: Int,
+            block: MutableCollection<CommandElement>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
+    ) {
+        val (command, elements) = subcommand(path)
+        val compiler = block(elements)
+        commands3[command.map { it.name }] = compiler(level, helpOption,
+                compiler)
+        println()
+        println()
+        println()
+        println(commands1)
+        println(commands2)
+        println(commands3)
+        println()
+        println()
+        println()
     }
 
     operator fun get(line: String,
                      executor: Executor): Command.Compiled {
-        return get(line.tokenize(), "", executor)
-    }
-
-    private operator fun get(split: List<String>,
-                             prefix: String,
-                             executor: Executor): Command.Compiled {
-        val pair = command(split)
-        val compiler = commands[pair.first] ?: return Command.Null(
-                Command.Output(255,
-                        "Unknown command: " + prefix + pair.first))
-        return compiler(pair.second, executor)
-    }
-
-    private fun command(split: List<String>): Pair<String, List<String>> {
-        if (split.isEmpty()) {
-            return Pair("", emptyList())
+        val commandLine = try {
+            val tokens = line.tokenize()
+            if (tokens.isEmpty())
+                throw InvalidCommandLineException("Empty command")
+            val first = tokens.first()
+            val args = tokens.subList(1, tokens.size)
+            val command = commands2[first] ?:
+                    throw InvalidCommandLineException("Unknown command: $first")
+            command.parseCommandLine(args)
+        } catch (e: InvalidCommandLineException) {
+            return Command.Null(Command.Output(255, e.message ?: ""))
         }
-        val name = split[0]
-        val args: List<String>
-        if (split.size == 1) {
-            args = emptyList()
-        } else {
-            args = (0 until split.lastIndex).map { split[it + 1] }
-        }
-        return Pair(name, args)
+        val compiler = commands3[commandLine.command.map { it.name }]
+                ?: return Command.Null(Command.Output(255,
+                "Unknown command: ${commandLine.command.joinToString(
+                        " ") { it.name }}"))
+        return compiler(commandLine, executor)
     }
 
     private fun compiler(
-            usage: String,
             level: Int,
             helpOption: CommandOption,
-            options: Iterable<CommandOption>,
             compiler: Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
-    ): (List<String>, Executor) -> Command.Compiled {
-        return { args, executor ->
+    ): (CommandLine, Executor) -> Command.Compiled {
+        return { commandLine, executor ->
             try {
                 Command.requirePermission(executor, level)
-                val parser = TokenParser(options)
-                args.forEach { parser.append(it) }
-                val tokens = parser.finish()
-
-                val commandLine = tokens.assemble()
-                commandLine.validate()
 
                 if (commandLine.getBoolean(helpOption)) {
-                    val help = StringBuilder()
-                    help.append("Usage: ").append(usage).append('\n')
-                    options.printHelp(help)
-                    Command.Null(Command.Output(1, help.toString()))
+                    val help = commandLine.command.printHelp()
+                    Command.Null(Command.Output(1, help))
                 } else {
                     val commands = ArrayList<() -> Unit>()
                     compiler(Command, commandLine, executor, commands)
@@ -108,4 +123,30 @@ class CommandRegistry constructor(private val prefix: String = "") {
             }
         }
     }
+}
+
+class CommandGroupRegistry(private val parent: CommandRegistrar,
+                           private val name: String) : CommandRegistrar {
+    override fun register(
+            path: Iterable<String>,
+            level: Int,
+            block: MutableCollection<CommandElement>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
+    ) = parent.register(listOf(name) + path, level, block)
+
+}
+
+interface CommandRegistrar {
+    fun register(
+            path: Iterable<String>,
+            level: Int,
+            block: MutableCollection<CommandElement>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit)
+
+    fun register(
+            name: String,
+            level: Int,
+            block: MutableCollection<CommandElement>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
+    ) = register(listOf(name), level, block)
+
+    fun group(name: String): CommandGroupRegistry =
+            CommandGroupRegistry(this, name)
 }

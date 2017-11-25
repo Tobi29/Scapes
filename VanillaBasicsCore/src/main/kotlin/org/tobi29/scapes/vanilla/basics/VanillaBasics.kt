@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.vanilla.basics
 
+import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.async
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.EnvironmentType
@@ -69,8 +71,8 @@ class VanillaBasics : WorldType {
     lateinit var stoneTypes: VanillaBasicsStones
     lateinit var entityTypes: VanillaBasicsEntities
     private lateinit var environmentOverworld: EnvironmentType
-    private var modelPigShared: MobLivingModelPigShared? = null
-    private var modelBellowsShared: EntityModelBellowsShared? = null
+    private var modelPigShared: Deferred<MobLivingModelPigShared>? = null
+    private var modelBellowsShared: Deferred<EntityModelBellowsShared>? = null
     private var locked = false
 
     init {
@@ -150,12 +152,12 @@ class VanillaBasics : WorldType {
         return biomeDecorator.values.asSequence()
     }
 
-    fun modelPigShared(): MobLivingModelPigShared {
+    fun modelPigShared(): Deferred<MobLivingModelPigShared> {
         return modelPigShared ?: throw IllegalStateException(
                 "Models not available")
     }
 
-    fun modelBellowsShared(): EntityModelBellowsShared {
+    fun modelBellowsShared(): Deferred<EntityModelBellowsShared> {
         return modelBellowsShared ?: throw IllegalStateException(
                 "Models not available")
     }
@@ -216,9 +218,13 @@ class VanillaBasics : WorldType {
     }
 
     override fun initClient(game: GameStateGameMP) {
-        particles = VanillaParticle(game.particleTransparentAtlas())
-        modelPigShared = MobLivingModelPigShared(game.engine)
-        modelBellowsShared = EntityModelBellowsShared(game.engine)
+        particles = VanillaParticle(game.particleTransparentAtlasBuilder())
+        modelPigShared = async(game.engine.taskExecutor) {
+            MobLivingModelPigShared(game.engine)
+        }
+        modelBellowsShared = async(game.engine.taskExecutor) {
+            EntityModelBellowsShared.load(game.engine)
+        }
     }
 
     override fun worldInit(world: WorldServer) {

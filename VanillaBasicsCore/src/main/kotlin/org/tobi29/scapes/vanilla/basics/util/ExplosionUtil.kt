@@ -21,9 +21,16 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.*
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.engine.math.cosTable
+import org.tobi29.scapes.engine.math.sinTable
+import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.vector.*
+import org.tobi29.scapes.engine.utils.Pool
+import org.tobi29.scapes.engine.utils.ThreadLocal
+import org.tobi29.scapes.engine.utils.assert
+import org.tobi29.scapes.engine.utils.math.TWO_PI
+import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.scapes.engine.utils.putAbsent
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobLivingServer
@@ -31,6 +38,8 @@ import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
+import kotlin.math.PI
+import kotlin.math.abs
 
 private val LOCATIONS = ThreadLocal { Pool { Location() } }
 
@@ -42,7 +51,7 @@ fun WorldServer.explosionEntities(x: Double,
                                   damage: Double) {
     assert { checkThread() }
     getEntities(Vector3d(x, y, z),
-            radius).filterMap<MobServer>().forEach { mob ->
+            radius).filterIsInstance<MobServer>().forEach { mob ->
         val relative = mob.getCurrentPos().minus(Vector3d(x, y, z))
         val s = radius - relative.length()
         if (s > 0) {
@@ -83,9 +92,9 @@ fun TerrainServer.explosionBlockPush(
             var distance = 0.0
             var blast = size.toDouble()
             while (true) {
-                val xxx = floor(x + 0.5 + deltaX * distance)
-                val yyy = floor(y + 0.5 + deltaY * distance)
-                val zzz = floor(z + 0.5 + deltaZ * distance)
+                val xxx = (x + 0.5 + deltaX * distance).floorToInt()
+                val yyy = (y + 0.5 + deltaY * distance).floorToInt()
+                val zzz = (z + 0.5 + deltaZ * distance).floorToInt()
                 val location = locations.push().apply {
                     set(xxx, yyy, zzz)
                 }

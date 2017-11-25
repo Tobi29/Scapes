@@ -16,24 +16,20 @@
 
 package org.tobi29.scapes.connection
 
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.UnsupportedJVMException
+import kotlinx.coroutines.experimental.runBlocking
 import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.engine.utils.graphics.decodePNG
-import org.tobi29.scapes.engine.utils.io.ByteBuffer
-import org.tobi29.scapes.engine.utils.io.ByteBufferStream
-import org.tobi29.scapes.engine.utils.io.CompressionUtil
+import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
 import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.sqrt
-import java.nio.charset.StandardCharsets
+import kotlin.math.sqrt
 
 class ServerInfo {
     val name: String
     val image: Image
-    private val buffer: ByteBuffer
+    val buffer: ByteViewRO
 
     constructor(name: String,
                 iconPath: FilePath) : this(name,
@@ -43,50 +39,36 @@ class ServerInfo {
                 image: Image = Image()) {
         this.name = name
         this.image = image
-        val buffer: ByteBuffer
-        try {
-            buffer = CompressionUtil.compress(ByteBufferStream(image.buffer))
-        } catch (e: IOException) {
-            throw UnsupportedJVMException(e)
-        }
-
+        val buffer = MemoryViewStreamDefault()
+        buffer.putString(name)
+        CompressionUtil.compress(MemoryViewStream(
+                ByteArray(image.view.size).viewBE.apply {
+                    setBytes(0, image.view)
+                }), buffer)
         buffer.flip()
-        val array = name.toByteArray(StandardCharsets.UTF_8)
-        this.buffer = ByteBuffer(1 + array.size + buffer.remaining())
-        this.buffer.put(array.size.toByte())
-        this.buffer.put(array)
-        this.buffer.put(buffer)
-        this.buffer.flip()
+        this.buffer = buffer.bufferSlice().ro
     }
 
-    constructor(buffer: ByteBuffer) {
+    constructor(buffer: ByteViewRO) {
+        val stream = MemoryViewReadableStream(buffer.viewBE)
         var image = Image()
-        val array = ByteArray(buffer.get().toInt())
-        buffer.get(array)
-        name = String(array, StandardCharsets.UTF_8)
+        name = stream.getString(1024)
         try {
-            val imageBuffer = CompressionUtil.decompress(
-                    ByteBufferStream(buffer))
-            imageBuffer.flip()
-            val size = sqrt((imageBuffer.remaining() shr 2).toFloat()).toInt()
+            val imageBuffer = CompressionUtil.decompress(stream)
+            val size = sqrt((imageBuffer.size shr 2).toFloat()).toInt()
             image = Image(size, size, imageBuffer)
         } catch (e: IOException) {
             logger.warn { "Failed to decompress server icon: $e" }
         }
-
-        this.buffer = buffer
+        this.buffer = buffer.ro
         this.image = image
-    }
-
-    fun getBuffer(): ByteBuffer {
-        return buffer.asReadOnlyBuffer()
     }
 
     companion object : KLogging() {
         private fun image(path: FilePath): Image {
             if (exists(path)) {
                 try {
-                    val image = read(path) { decodePNG(it) }
+                    val image = read(path) { runBlocking { decodePNG(it) } }
                     val width = image.width
                     if (width != image.height) {
                         logger.warn { "The icon has to be square sized." }

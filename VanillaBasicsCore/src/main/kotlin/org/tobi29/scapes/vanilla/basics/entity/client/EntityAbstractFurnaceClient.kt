@@ -20,7 +20,7 @@ import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 
 abstract class EntityAbstractFurnaceClient(type: EntityType<*, *>,

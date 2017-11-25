@@ -44,11 +44,8 @@ class GuiComponentControlsAxis(parent: GuiLayoutData,
         on(GuiEvent.CLICK_LEFT) { event ->
             if (editing.toInt() == 0) {
                 blacklist.clear()
-                val axes = controller.axes()
-                for (i in 0 until axes) {
-                    if (controller.axis(i) > 0.5) {
-                        blacklist.add(i)
-                    }
+                for ((i, value) in controller.axes.withIndex()) {
+                    if (value > 0.5) blacklist.add(i)
                 }
                 editing = 1
                 updateText()
@@ -79,10 +76,9 @@ class GuiComponentControlsAxis(parent: GuiLayoutData,
 
     override fun updateComponent(delta: Double) {
         if (editing > 1) {
-            val axes = controller.axes()
-            for (i in 0 until axes) {
+            for ((i, value) in controller.axes.withIndex()) {
                 val blacklisted = blacklist.contains(i)
-                if (controller.axis(i) > 0.5) {
+                if (value > 0.5) {
                     if (!blacklisted) {
                         axis = i
                         tagMap[id] = axis.toTag()

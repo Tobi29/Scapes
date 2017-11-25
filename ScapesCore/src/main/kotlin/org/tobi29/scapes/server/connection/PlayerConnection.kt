@@ -23,10 +23,10 @@ import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
-import org.tobi29.scapes.engine.utils.math.vector.plus
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3i
+import org.tobi29.scapes.engine.math.vector.distanceSqr
+import org.tobi29.scapes.engine.math.vector.plus
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.skin.ServerSkin
 import org.tobi29.scapes.packets.PacketChat

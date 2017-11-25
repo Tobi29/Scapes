@@ -20,14 +20,14 @@ import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.particle.ParticleEmitterTransparent
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.gui.GuiForgeInventory
+import kotlin.math.max
 
 class EntityForgeClient(type: EntityType<*, *>,
                         world: WorldClient) : EntityAbstractFurnaceClient(
@@ -55,12 +55,13 @@ class EntityForgeClient(type: EntityType<*, *>,
                 emitter.add { instance ->
                     val random = threadLocalRandom()
                     instance.pos.set(pos.now())
-                    instance.speed.set(Vector3d(random.nextDouble() * 0.8 - 0.4,
-                            random.nextDouble() * 0.8 - 0.4,
-                            random.nextDouble() * 0.2))
+                    instance.speed.set(
+                            Vector3d(random.nextDouble() * 0.8 - 0.4,
+                                    random.nextDouble() * 0.8 - 0.4,
+                                    random.nextDouble() * 0.2))
                     instance.time = 12.0f
                     instance.setPhysics(-0.2f)
-                    instance.setTexture(plugin.particles.smoke)
+                    instance.setTexture(emitter, plugin.particles.smoke)
                     instance.rStart = 1.0f
                     instance.gStart = 1.0f
                     instance.bStart = 1.0f

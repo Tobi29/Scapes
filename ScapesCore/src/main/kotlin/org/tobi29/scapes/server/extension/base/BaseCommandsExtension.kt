@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.server.extension.base
 
+import org.tobi29.scapes.engine.args.CommandArgument
 import org.tobi29.scapes.engine.args.CommandOption
 import org.tobi29.scapes.engine.args.getBoolean
 import org.tobi29.scapes.engine.args.require
@@ -33,22 +34,26 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         val registry = server.commandRegistry()
         val serverGroup = registry.group("server")
 
-        registry.register("say MESSAGE...", 0) {
-            val nameOption = CommandOption(setOf('n'), setOf("name"), 1,
-                    "Name used for prefix").also { add(it) }
+        registry.register("say", 0) {
+            val nameOption = CommandOption(setOf('n'), setOf("name"),
+                    listOf("name"), "Name used for prefix").also { add(it) }
             val rawOption = CommandOption(setOf('r'), setOf("raw"),
                     "Disable prefix").also { add(it) }
+            val messageArgument = CommandArgument(
+                    name = "message",
+                    count = 0..Integer.MAX_VALUE).also { add(it) }
             return@register { args, executor, commands ->
                 val message: String
                 if (args.getBoolean(rawOption)) {
                     requirePermission(executor, 8, rawOption)
-                    message = args.arguments.joinToString(separator = " ")
+                    message = args.arguments[messageArgument]?.joinToString(
+                            separator = " ") ?: ""
                 } else {
                     val name = args.parameters[nameOption]?.firstOrNull()?.apply {
                         requirePermission(executor, 8, nameOption)
                     } ?: executor.name()
-                    message = "<$name> ${args.arguments.joinToString(
-                            separator = " ")}"
+                    message = "<$name> ${args.arguments[messageArgument]?.joinToString(
+                            separator = " ") ?: ""}"
                 }
                 commands.add {
                     server.events.fire(
@@ -57,26 +62,30 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
             }
         }
 
-        registry.register("tell MESSAGE...", 0) {
-            val targetOption = CommandOption(setOf('t'), setOf("target"), 1,
-                    "Target player").also { add(it) }
-            val nameOption = CommandOption(setOf('n'), setOf("name"), 1,
-                    "Name used for prefix").also { add(it) }
+        registry.register("tell", 0) {
+            val targetOption = CommandOption(setOf('t'), setOf("target"),
+                    listOf("name"), "Target player").also { add(it) }
+            val nameOption = CommandOption(setOf('n'), setOf("name"),
+                    listOf("name"), "Name used for prefix").also { add(it) }
             val rawOption = CommandOption(setOf('r'), setOf("raw"),
                     "Disable prefix").also { add(it) }
+            val messageArgument = CommandArgument(
+                    name = "message",
+                    count = 0..Integer.MAX_VALUE).also { add(it) }
             return@register { args, executor, commands ->
                 val targetName = args.require(
                         targetOption) { it ?: executor.playerName() }
                 val message: String
                 if (args.getBoolean(rawOption)) {
                     requirePermission(executor, 8, rawOption)
-                    message = args.arguments.joinToString(separator = " ")
+                    message = args.arguments[messageArgument]?.joinToString(
+                            separator = " ") ?: ""
                 } else {
                     val name = args.parameters[nameOption]?.firstOrNull()?.apply {
                         requirePermission(executor, 8, nameOption)
                     } ?: executor.name()
-                    message = "<$name> ${args.arguments.joinToString(
-                            separator = " ")}"
+                    message = "<$name> ${args.arguments[messageArgument]?.joinToString(
+                            separator = " ") ?: ""}"
                 }
                 commands.add {
                     val target = requireGet({ connection.playerByName(it) },

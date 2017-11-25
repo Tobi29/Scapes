@@ -26,10 +26,8 @@ import org.tobi29.scapes.engine.utils.ComponentRegisteredHolder
 import org.tobi29.scapes.engine.utils.ComponentType
 import org.tobi29.scapes.engine.utils.ConcurrentHashSet
 import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.min
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
-import org.tobi29.scapes.engine.utils.math.vector.lengthSqr
+import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.vector.lengthSqr
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.engine.utils.task.loop
@@ -38,7 +36,9 @@ import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.packets.PacketEntityComponentData
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldServer
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.experimental.TimeUnit
+import kotlin.math.max
+import kotlin.math.min
 
 class ComponentMobLivingServerCondition(val entity: MobLiving) : ComponentEntity, ComponentSerializable {
     override val id = "VanillaBasics:Condition"

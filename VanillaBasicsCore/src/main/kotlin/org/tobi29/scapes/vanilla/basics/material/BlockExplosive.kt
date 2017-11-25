@@ -18,7 +18,7 @@ package org.tobi29.scapes.vanilla.basics.material
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 
 interface BlockExplosive {
     fun explode(terrain: TerrainServer,

@@ -16,20 +16,92 @@
 package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.engine.ScapesEngine
-import org.tobi29.scapes.engine.graphics.TextureAtlasEngine
+import org.tobi29.scapes.engine.graphics.GraphicsObjectSupplier
+import org.tobi29.scapes.engine.graphics.Texture
+import org.tobi29.scapes.engine.utils.AtomicInteger
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.graphics.*
+import org.tobi29.scapes.engine.math.margin
+import org.tobi29.scapes.engine.math.vector.MutableVector2i
 
-class ParticleTransparentAtlas(engine: ScapesEngine) : TextureAtlasEngine<ParticleTransparentTexture>(
-        engine, 16) {
+class ParticleTransparentAtlas internal constructor(
+        val texture: Texture,
+        private val entries: Array<ParticleTransparentEntry?>) {
+    fun entry(id: Int): ParticleTransparentEntry? = entries.getOrNull(id)
+}
 
-    fun registerTexture(path: String): ParticleTransparentTexture {
-        var texture: ParticleTransparentTexture? = textures[path]
-        if (texture != null) {
-            return texture
+class ParticleTransparentEntry(val x: Int,
+                               val y: Int,
+                               val width: Int,
+                               val height: Int,
+                               atlasWidth: Int,
+                               atlasHeight: Int) {
+    val textureX = x.toDouble() / atlasWidth
+    val textureY = y.toDouble() / atlasHeight
+    val textureWidth = width.toDouble() / atlasWidth
+    val textureHeight = height.toDouble() / atlasHeight
+}
+
+inline fun ParticleTransparentEntry.atPixelX(value: Int): Double {
+    return value / textureWidth
+}
+
+inline fun ParticleTransparentEntry.atPixelY(value: Int): Double {
+    return value / textureHeight
+}
+
+inline fun ParticleTransparentEntry.atPixelMarginX(value: Int): Double {
+    return marginX(atPixelX(value))
+}
+
+inline fun ParticleTransparentEntry.atPixelMarginY(value: Int): Double {
+    return marginY(atPixelX(value))
+}
+
+inline fun ParticleTransparentEntry.marginX(value: Double,
+                                            margin: Double = 0.005): Double {
+    return textureX + margin(value, margin) * textureWidth
+}
+
+inline fun ParticleTransparentEntry.marginY(value: Double,
+                                            margin: Double = 0.005): Double {
+    return textureY + margin(value, margin) * textureHeight
+}
+
+class ParticleTransparentAtlasBuilder {
+    private val textures = ConcurrentHashMap<String, Int>()
+    private val idCounter = AtomicInteger(0)
+
+    fun registerTexture(asset: String): Int =
+            textures.computeIfAbsent(asset) { idCounter.getAndIncrement() }
+
+    suspend fun build(
+            engine: ScapesEngine,
+            texture: GraphicsObjectSupplier.(Image) -> Texture
+    ): ParticleTransparentAtlas {
+        val tiles = textures.entries.map { (asset, id) ->
+            val resource = engine.resources.load {
+                engine.files[asset].readAsync { decodePNG(it) }
+            }
+            id to resource
+        }.map { (id, resource) ->
+            val image = resource.getAsync()
+            Triple(id, image, MutableVector2i())
         }
-        val image = load(path)
-        texture = ParticleTransparentTexture(image.buffer,
-                image.width, image.height) { this.texture }
-        textures.put(path, texture)
-        return texture
+        val atlasSize = assembleAtlas(
+                tiles.asSequence().map { (_, image, position) -> image.size to position })
+        val atlas = MutableImage(atlasSize.x, atlasSize.y)
+        for ((_, image, position) in tiles) {
+            atlas.set(position.x, position.y, image)
+        }
+        val otiles = ArrayList<ParticleTransparentEntry?>(tiles.size)
+        for ((id, image, position) in tiles) {
+            while (otiles.size <= id) otiles.add(null)
+            otiles[id] = ParticleTransparentEntry(position.x, position.y,
+                    image.width, image.height, atlas.width, atlas.height)
+        }
+        return ParticleTransparentAtlas(
+                texture(engine.graphics, atlas.toImage()),
+                otiles.toTypedArray())
     }
 }

@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.server.format.sqljet
 
+import kotlinx.coroutines.experimental.runBlocking
 import org.tmatesoft.sqljet.core.SqlJetException
 import org.tmatesoft.sqljet.core.table.SqlJetDb
 import org.tobi29.scapes.engine.sql.sqljet.SQLJetDatabase
@@ -61,7 +62,7 @@ class SQLJetWorldSource(private val path: FilePath,
         return newPanorama {
             val background = path.resolve("Panorama$it.png")
             if (exists(background)) {
-                read(background) { decodePNG(it) }
+                read(background) { runBlocking { decodePNG(it) } }
             } else {
                 return null
             }
@@ -88,7 +89,7 @@ class SQLJetWorldSource(private val path: FilePath,
 
         fun openDatabase(path: FilePath): SqlJetDb {
             try {
-                val connection = SqlJetDb.open(File(path.toUri()), true)
+                val connection = SqlJetDb.open(File(path.toUri().java), true)
                 return connection
             } catch (e: SqlJetException) {
                 throw IOException(e)

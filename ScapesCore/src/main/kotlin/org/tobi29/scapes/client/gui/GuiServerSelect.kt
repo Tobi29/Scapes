@@ -28,8 +28,9 @@ import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
 import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.io.ByteBuffer
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.io.toChannel
+import org.tobi29.scapes.engine.utils.io.view
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.MutableTagList
 import org.tobi29.scapes.engine.utils.tag.TagMap
@@ -119,20 +120,20 @@ class GuiServerSelect(state: GameState,
                     // Ignore invalid certificates because worst case
                     // server name and icon get faked
                     val ssl = SSLHandle.insecure()
-                    val secureChannel = ssl.newSSLChannel(address, channel,
-                            state.engine.taskExecutor, true)
+                    val secureChannel = ssl.newSSLChannel(address,
+                            channel.toChannel(), state.engine.taskExecutor,
+                            true)
                     val bundleChannel = PacketBundleChannel(secureChannel)
                     val output = bundleChannel.outputStream
-                    output.put(ConnectionInfo.header())
+                    output.put(ConnectionInfo.header().view)
                     output.put(ConnectionType.GET_INFO.data())
                     bundleChannel.queueBundle()
                     if (bundleChannel.receive()) {
                         return@addConnection
                     }
-                    val infoBuffer = ByteBuffer(
-                            bundleChannel.inputStream.remaining())
+                    val infoBuffer = ByteArray(
+                            bundleChannel.inputStream.remaining()).view
                     bundleChannel.inputStream.get(infoBuffer)
-                    infoBuffer.flip()
                     val serverInfo = ServerInfo(infoBuffer)
                     label.setText(serverInfo.name)
                     val image = serverInfo.image

@@ -18,34 +18,30 @@ package org.tobi29.scapes.vanilla.basics.entity.model
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.graphics.Model
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.push
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.Face
+import org.tobi29.scapes.engine.math.PointerPane
+import org.tobi29.scapes.engine.math.vector.MutableVector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.minus
+import org.tobi29.scapes.engine.math.vector.times
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.minus
-import org.tobi29.scapes.engine.utils.math.vector.times
+import org.tobi29.scapes.engine.utils.math.clamp
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBlockBreakClient
+import kotlin.math.min
 
 class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
                             override val entity: EntityBlockBreakClient) : EntityModel {
-    private val pos: MutableVector3d
+    private val pos = MutableVector3d(entity.getCurrentPos())
     private val pointerPanes = Pool { PointerPane() }
-    private val model: Model
-    private val texture = Array(9) {
-        entity.world.game.engine.graphics.textures.getNow(
-                "Scapes:image/entity/Break${it + 1}")
-    }
-
-    init {
-        pos = MutableVector3d(entity.getCurrentPos())
-        model = shared.model
-    }
+    private val model = shared.model
+    private val textures = shared.textures
 
     override fun pos() = pos.now()
 
@@ -79,7 +75,7 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
         val posRenderX = (pos.doubleX() - cam.position.doubleX()).toFloat()
         val posRenderY = (pos.doubleY() - cam.position.doubleY()).toFloat()
         val posRenderZ = (pos.doubleZ() - cam.position.doubleZ()).toFloat()
-        val i = clamp(floor(entity.progress() * 10) + 1, 1, 9)
+        val i = clamp((entity.progress() * 10).floorToInt() + 1, 1, 9)
         if (i < 1 || i > 10) {
             return
         }
@@ -88,7 +84,7 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
                         pos.intZ()) / 15.0f,
                 world.terrain.sunLight(pos.intX(), pos.intY(),
                         pos.intZ()) / 15.0f)
-        texture[i - 1].bind(gl)
+        textures[i - 1].bind(gl)
         for (pane in pointerPanes) {
             gl.matrixStack.push { matrix ->
                 matrix.translate(

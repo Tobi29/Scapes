@@ -17,20 +17,17 @@
 package org.tobi29.scapes.entity.model
 
 import org.tobi29.scapes.engine.ScapesEngine
-import org.tobi29.scapes.engine.graphics.Model
 import org.tobi29.scapes.engine.graphics.RenderType
+import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.graphics.createVTNI
 
-class EntityModelBlockBreakShared(engine: ScapesEngine) {
-    val model: Model
-
-    init {
-        model = engine.graphics.createVTNI(
-                floatArrayOf(-0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f,
-                        0.5f, -0.5f, 0.5f, 0.5f),
-                floatArrayOf(0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f),
-                floatArrayOf(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-                        1.0f, 0.0f, 0.0f, 1.0f), intArrayOf(0, 1, 2, 0, 2, 3),
-                RenderType.TRIANGLES)
-    }
+class EntityModelBlockBreakShared(engine: ScapesEngine,
+                                  val textures: Array<Texture>) {
+    val model = engine.graphics.createVTNI(
+            floatArrayOf(-0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f,
+                    0.5f, -0.5f, 0.5f, 0.5f),
+            floatArrayOf(0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f),
+            floatArrayOf(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+                    1.0f, 0.0f, 0.0f, 1.0f), intArrayOf(0, 1, 2, 0, 2, 3),
+            RenderType.TRIANGLES)
 }

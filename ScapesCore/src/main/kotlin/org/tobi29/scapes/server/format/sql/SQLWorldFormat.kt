@@ -17,13 +17,12 @@
 package org.tobi29.scapes.server.format.sql
 
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.runBlocking
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer
 import org.tobi29.scapes.engine.sql.*
-import org.tobi29.scapes.engine.utils.io.ByteBuffer
-import org.tobi29.scapes.engine.utils.io.ByteBufferStream
-import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.io.filesystem.isNotHidden
 import org.tobi29.scapes.engine.utils.io.filesystem.isRegularFile
@@ -31,7 +30,7 @@ import org.tobi29.scapes.engine.utils.io.filesystem.listRecursive
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.threadLocalRandom
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMutTag
@@ -89,7 +88,7 @@ open class SQLWorldFormat(protected val path: FilePath,
     protected val setWorldPlayers = database.compileUpdate("Players",
             arrayOf("World"), "World")
 
-    private val stream = ByteBufferStream()
+    private val stream = MemoryViewStreamDefault()
 
     init {
         playerData = SQLPlayerData(getPlayer, insertPlayer, replacePlayer,
@@ -113,17 +112,17 @@ open class SQLWorldFormat(protected val path: FilePath,
             val row = rows[0]
             if (row[0] is ByteArray) {
                 val array = row[0] as ByteArray
-                readBinary(ByteBufferStream(ByteBuffer.wrap(array)))
+                readBinary(MemoryViewReadableStream(array.viewBE))
             } else {
                 TagMap()
             }
         } else {
             TagMap()
         }.toMutTag()
-        plugins = createPlugins()
+        plugins = runBlocking { createPlugins() }
     }
 
-    open protected fun createPlugins(): Plugins {
+    open suspend protected fun createPlugins(): Plugins {
         return Plugins(pluginFiles(), idStorage)
     }
 
@@ -143,7 +142,7 @@ open class SQLWorldFormat(protected val path: FilePath,
             val row = rows[0]
             if (row[0] is ByteArray) {
                 val array = row[0] as ByteArray
-                world.read(readBinary(ByteBufferStream(ByteBuffer.wrap(array))))
+                world.read(readBinary(MemoryViewReadableStream(array.viewBE)))
             }
         } else {
             insertWorld(arrayOf(name))
@@ -154,10 +153,10 @@ open class SQLWorldFormat(protected val path: FilePath,
     @Synchronized override fun removeWorld(world: WorldServer) {
         try {
             world.toTag().writeBinary(stream, 1)
-            stream.buffer().flip()
-            val array = ByteArray(stream.buffer().remaining())
-            stream.buffer().get(array)
-            stream.buffer().clear()
+            stream.flip()
+            val array = ByteArray(stream.remaining())
+            stream.get(array.view)
+            stream.reset()
             setWorldData(arrayOf(world.id), array)
         } catch (e: IOException) {
             logger.error { "Failed to save world info: $e" }
@@ -181,14 +180,14 @@ open class SQLWorldFormat(protected val path: FilePath,
     @Synchronized override fun dispose() {
         plugins.dispose()
         idStorage.toTag().writeBinary(stream, 1.toByte())
-        stream.buffer().flip()
-        val array = ByteArray(stream.buffer().remaining())
-        stream.buffer().get(array)
-        stream.buffer().clear()
+        stream.flip()
+        val array = ByteArray(stream.remaining())
+        stream.get(array.view)
+        stream.reset()
         replaceData(arrayOf("IDs", array))
     }
 
-    open protected fun pluginFiles(): List<PluginFile> {
+    open protected suspend fun pluginFiles(): List<PluginFile> {
         val path = this.path.resolve("plugins")
         val files = listRecursive(path) {
             filter { isRegularFile(it) }
@@ -196,7 +195,7 @@ open class SQLWorldFormat(protected val path: FilePath,
         }
         val plugins = ArrayList<PluginFile>(files.size)
         for (file in files) {
-            plugins.add(PluginFile(file))
+            plugins.add(PluginFile.loadFile(file))
         }
         return plugins
     }

@@ -22,11 +22,11 @@ import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
+import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.vector.Vector2i
+import org.tobi29.scapes.engine.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.andNull
 import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
-import org.tobi29.scapes.engine.utils.math.vector.Vector2i
-import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.CreatureType

@@ -23,7 +23,6 @@ import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.filesystem.*
 import org.tobi29.scapes.engine.utils.io.process
-import org.tobi29.scapes.engine.utils.io.put
 import org.tobi29.scapes.engine.utils.logging.KLogging
 
 class GuiPlaylists(state: GameState,
@@ -52,7 +51,9 @@ class GuiPlaylists(state: GameState,
                 val directory = scapes.home.resolve(
                         "playlists").resolve(playlist)
                 state.engine[DialogProvider.COMPONENT].openMusicDialog { name, stream ->
-                    write(directory.resolve(name)) { process(stream, put(it)) }
+                    write(directory.resolve(name)) { output ->
+                        stream.process { output.put(it) }
+                    }
                     updateTitles(playlist)
                 }
             } catch (e: IOException) {

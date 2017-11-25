@@ -20,17 +20,17 @@ import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.AABB
+import org.tobi29.scapes.engine.math.AABB
 import org.tobi29.scapes.engine.utils.math.HALF_PI
-import org.tobi29.scapes.engine.utils.math.atan2Fast
-import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.vector.length
+import org.tobi29.scapes.engine.math.atan2Fast
+import org.tobi29.scapes.engine.math.matrix.Matrix4f
+import org.tobi29.scapes.engine.math.vector.length
 import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 import org.tobi29.scapes.entity.particle.ParticleEmitterInstanced
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.particle.ParticlePhysics
 import org.tobi29.scapes.entity.particle.ParticleSystem
+import kotlin.math.max
 
 class ParticleEmitterSnow(system: ParticleSystem,
                           texture: Texture) : ParticleEmitterInstanced<ParticleInstanceSnow>(
@@ -74,7 +74,7 @@ class ParticleEmitterSnow(system: ParticleSystem,
                                width: Int,
                                height: Int,
                                cam: Cam): suspend () -> ((Shader) -> Unit) -> Unit {
-        val shader = gl.loadShader(
+        val shader = system.world.game.engine.graphics.loadShader(
                 "VanillaBasics:shader/ParticleSnow", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
@@ -131,7 +131,7 @@ class ParticleEmitterSnow(system: ParticleSystem,
                 matrix.rotateRad(yaw + instance.dir, 0f, 1f, 0f)
                 buffer.putFloat(terrain.blockLight(x, y, z) / 15.0f)
                 buffer.putFloat(terrain.sunLight(x, y, z) / 15.0f)
-                matrix.putInto(buffer)
+                matrix.values.forEach { buffer.putFloat(it) }
                 count++
             }
         }

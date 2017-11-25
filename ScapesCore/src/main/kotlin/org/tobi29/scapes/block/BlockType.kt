@@ -22,9 +22,9 @@ import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.PointerPane
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.Face
+import org.tobi29.scapes.engine.math.PointerPane
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.terrain.VoxelType

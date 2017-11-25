@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.material.block
 
 import org.tobi29.scapes.block.Collision
-import org.tobi29.scapes.engine.utils.math.vector.div
+import org.tobi29.scapes.engine.math.vector.div
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.server.MobServer
 

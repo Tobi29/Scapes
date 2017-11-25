@@ -15,10 +15,8 @@
  */
 package org.tobi29.scapes.entity.particle
 
-import org.tobi29.scapes.engine.utils.graphics.marginX
-import org.tobi29.scapes.engine.utils.graphics.marginY
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector2d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.MutableVector2d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 
 class ParticleInstanceTransparent : ParticleInstance() {
     val textureOffset = MutableVector2d()
@@ -57,11 +55,14 @@ class ParticleInstanceTransparent : ParticleInstance() {
         this.waterFriction = waterFriction
     }
 
-    fun setTexture(texture: ParticleTransparentTexture,
+    fun setTexture(emitter: ParticleEmitterTransparent,
+                   id: Int,
                    tMinX: Double = 0.0,
                    tMinY: Double = 0.0,
                    tMaxX: Double = 1.0,
                    tMaxY: Double = 1.0) {
+        val texture = emitter.atlas.entry(id)
+                ?: throw IllegalArgumentException("No such particle")
         val texMinX = texture.marginX(tMinX)
         val texMaxX = texture.marginX(tMaxX)
         val texMinY = texture.marginY(tMinY)

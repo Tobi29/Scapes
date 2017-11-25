@@ -25,7 +25,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.math.Face
+import org.tobi29.scapes.engine.math.Face
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityQuernClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityQuernServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType

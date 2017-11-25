@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.material.item.tool
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
@@ -46,7 +46,7 @@ class ItemMold(type: VanillaMaterialType) : ItemSimpleData(
             else -> name.append("Clay Mold")
         }
         val temperature = temperature(item)
-        name.append("\nTemp.:").append(floor(temperature)).append("°C")
+        name.append("\nTemp.:").append(temperature.floorToInt()).append("°C")
         return name.toString()
     }
 

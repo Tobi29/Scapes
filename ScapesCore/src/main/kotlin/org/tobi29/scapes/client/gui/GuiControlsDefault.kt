@@ -20,16 +20,18 @@ import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.input.ControllerDefault
+import org.tobi29.scapes.engine.input.ControllerButtons
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.mapMut
 
-class GuiControlsDefault(state: GameState,
-                         previous: Gui,
-                         game: ScapesClient,
-                         tagMap: MutableTagMap,
-                         controller: ControllerDefault,
-                         style: GuiStyle) : GuiControls(state, previous, style) {
+class GuiControlsDefault(
+        state: GameState,
+        previous: Gui,
+        game: ScapesClient,
+        tagMap: MutableTagMap,
+        controller: ControllerButtons,
+        style: GuiStyle
+) : GuiControls(state, previous, style) {
     init {
         val movementTag = tagMap.mapMut("Movement")
         addText("Movement")
@@ -72,7 +74,7 @@ class GuiControlsDefault(state: GameState,
         addButton("Right Slot 7", "6Right", hotbarTag, controller)
         addButton("Right Slot 8", "7Right", hotbarTag, controller)
         addButton("Right Slot 9", "8Right", hotbarTag, controller)
-        addButton("Right Slot 10","9Right", hotbarTag, controller)
+        addButton("Right Slot 10", "9Right", hotbarTag, controller)
         addButton("Left Slot 1", "0Left", hotbarTag, controller)
         addButton("Left Slot 2", "1Left", hotbarTag, controller)
         addButton("Left Slot 3", "2Left", hotbarTag, controller)
@@ -82,7 +84,7 @@ class GuiControlsDefault(state: GameState,
         addButton("Left Slot 7", "6Left", hotbarTag, controller)
         addButton("Left Slot 8", "7Left", hotbarTag, controller)
         addButton("Left Slot 9", "8Left", hotbarTag, controller)
-        addButton("Left Slot 10","9Left", hotbarTag, controller)
+        addButton("Left Slot 10", "9Left", hotbarTag, controller)
         addButton("Both Slots 1", "0", hotbarTag, controller)
         addButton("Both Slots 2", "1", hotbarTag, controller)
         addButton("Both Slots 3", "2", hotbarTag, controller)
@@ -92,7 +94,7 @@ class GuiControlsDefault(state: GameState,
         addButton("Both Slots 7", "6", hotbarTag, controller)
         addButton("Both Slots 8", "7", hotbarTag, controller)
         addButton("Both Slots 9", "8", hotbarTag, controller)
-        addButton("Both Slots 10","9", hotbarTag, controller)
+        addButton("Both Slots 10", "9", hotbarTag, controller)
 
         val miscTag = tagMap.mapMut("Misc")
         val miscScrollTag = miscTag.mapMut("Scroll")

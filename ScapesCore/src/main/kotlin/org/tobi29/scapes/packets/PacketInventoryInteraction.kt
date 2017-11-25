@@ -20,7 +20,7 @@ import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.math.ceil
+import org.tobi29.scapes.engine.utils.math.ceilToInt
 import org.tobi29.scapes.entity.client.EntityContainerClient
 import org.tobi29.scapes.entity.server.EntityContainerServer
 import org.tobi29.scapes.server.connection.PlayerConnection
@@ -95,7 +95,7 @@ class PacketInventoryInteraction : PacketAbstract, PacketServer {
                                         }
                                         RIGHT -> if (hold.isEmpty) {
                                             item.take(
-                                                    ceil(item.amount() / 2.0))?.let {
+                                                    (item.amount() / 2.0).ceilToInt())?.let {
                                                 hold.stack(it)
                                             }
                                         } else {

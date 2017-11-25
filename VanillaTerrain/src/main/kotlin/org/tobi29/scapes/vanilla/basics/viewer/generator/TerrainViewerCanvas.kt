@@ -25,7 +25,9 @@ import org.eclipse.swt.graphics.ImageData
 import org.eclipse.swt.graphics.PaletteData
 import org.eclipse.swt.widgets.Canvas
 import org.eclipse.swt.widgets.Composite
-import org.tobi29.scapes.engine.swt.util.framework.Application
+import org.tobi29.scapes.engine.math.vector.Vector2i
+import org.tobi29.scapes.engine.math.vector.distanceSqr
+import org.tobi29.scapes.engine.swt.util.framework.GuiApplication
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
 import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.AtomicInteger
@@ -33,16 +35,14 @@ import org.tobi29.scapes.engine.utils.AtomicLong
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.graphics.hsvToRGB
 import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.min
-import org.tobi29.scapes.engine.utils.math.round
-import org.tobi29.scapes.engine.utils.math.vector.Vector2i
-import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.experimental.TimeUnit
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 class TerrainViewerCanvas(parent: Composite,
                           style: Int,
-                          private val application: Application,
+                          private val application: GuiApplication,
                           private val colorSupplier: () -> TerrainViewerCanvas.ColorSupplier,
                           scale: Int) : Canvas(parent, style) {
     private val chunks = ConcurrentHashMap<Vector2i, Image>()
@@ -155,7 +155,7 @@ class TerrainViewerCanvas(parent: Composite,
 
     private fun queueDraw() {
         if (!drawQueued.getAndSet(true)) {
-            launch(application + CoroutineName("Viewer-Redraw")) {
+            launch(application.uiContext + CoroutineName("Viewer-Redraw")) {
                 delay(100L, TimeUnit.MILLISECONDS)
                 ifPresent { redraw() }
             }
@@ -167,8 +167,8 @@ class TerrainViewerCanvas(parent: Composite,
         addPaintListener { event ->
             drawQueued.set(false)
             val size = size
-            val cx = round(this.cx / scale)
-            val cy = round(this.cy / scale)
+            val cx = (this.cx / scale).roundToInt()
+            val cy = (this.cy / scale).roundToInt()
             val ccx = cx shr CHUNK_BITS
             val ccy = cy shr CHUNK_BITS
             val width = (size.x - 1 shr CHUNK_BITS) + ccx + 1

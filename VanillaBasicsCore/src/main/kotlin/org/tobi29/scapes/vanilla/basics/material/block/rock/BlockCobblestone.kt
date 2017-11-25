@@ -18,7 +18,6 @@ package org.tobi29.scapes.vanilla.basics.material.block.rock
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
 class BlockCobblestone(type: VanillaMaterialType) : BlockStone(type) {
@@ -28,13 +27,13 @@ class BlockCobblestone(type: VanillaMaterialType) : BlockStone(type) {
     }
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
-        textures = stoneRegistry.values().asSequence().map {
+        textures = stoneRegistry.values().map {
             it?.let {
                 return@map registry.registerTexture(
                         "${it.textureRoot}/raw/${it.texture}.png",
                         "VanillaBasics:image/terrain/stone/overlay/Cobble.png")
             }
-        }.toArray()
+        }.toTypedArray()
     }
 
     override fun name(item: ItemStack) = "${stoneName(item)} Cobblestone"

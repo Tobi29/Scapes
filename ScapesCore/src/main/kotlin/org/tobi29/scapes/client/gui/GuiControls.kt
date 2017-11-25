@@ -16,17 +16,17 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.client.InputManagerScapes
+import org.tobi29.scapes.client.input.InputManagerScapes
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.input.ControllerBasic
+import org.tobi29.scapes.engine.input.ControllerButtons
 import org.tobi29.scapes.engine.input.ControllerJoystick
-import org.tobi29.scapes.engine.utils.math.pow
-import org.tobi29.scapes.engine.utils.math.round
+import org.tobi29.scapes.engine.utils.math.cbrt
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.engine.utils.tag.toTag
 import kotlin.collections.set
+import kotlin.math.roundToInt
 
 abstract class GuiControls(state: GameState,
                            previous: Gui,
@@ -58,9 +58,9 @@ abstract class GuiControls(state: GameState,
         var x = value
         x *= 0.1
         if (x >= 0.0) {
-            x = pow(x, 1.0 / 3.0)
+            x = cbrt(x)
         } else {
-            x = -pow(-x, 1.0 / 3.0)
+            x = -cbrt(-x)
         }
         return x * 0.5 + 0.5
     }
@@ -74,7 +74,7 @@ abstract class GuiControls(state: GameState,
     protected fun addButton(name: String,
                             id: String,
                             tagMap: MutableTagMap,
-                            controller: ControllerBasic): GuiComponentControlsButton {
+                            controller: ControllerButtons): GuiComponentControlsButton {
         return row(scrollPane) {
             it.selectable = true
             GuiComponentControlsButton(it, 18, name, id, tagMap, controller)
@@ -97,7 +97,7 @@ abstract class GuiControls(state: GameState,
         val slider = row(scrollPane) {
             slider(it, name, reverseSensitivity(
                     tagMap[id]?.toDouble() ?: 0.0)) { text, value ->
-                text + ": " + round(sensitivity(value) * 100.0) + '%'
+                text + ": " + (sensitivity(value) * 100.0).roundToInt() + '%'
             }
         }
         slider.on(GuiEvent.CHANGE) { event ->

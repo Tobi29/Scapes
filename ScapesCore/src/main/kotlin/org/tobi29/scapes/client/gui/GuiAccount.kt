@@ -26,7 +26,6 @@ import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.checksum
 import org.tobi29.scapes.engine.utils.io.filesystem.write
 import org.tobi29.scapes.engine.utils.io.process
-import org.tobi29.scapes.engine.utils.io.put
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import java.security.KeyPair
 
@@ -108,7 +107,7 @@ consist of letters and digits.
             try {
                 val path = scapes.home.resolve("Skin.png")
                 state.engine[DialogProvider.COMPONENT].openSkinDialog { _, stream ->
-                    write(path) { process(stream, put(it)) }
+                    write(path) { output -> stream.process { output.put(it) } }
                 }
             } catch (e: IOException) {
                 logger.warn { "Failed to import skin: $e" }
@@ -117,7 +116,7 @@ consist of letters and digits.
 
         val save = addControl { button(it, "Save") }
         save.on(GuiEvent.CLICK_LEFT) {
-            this.nickname = nickname.text()
+            this.nickname = nickname.text
             Account.isNameValid(this.nickname)?.let { invalid ->
                 error.text = "Invalid Nickname:\n$invalid"
                 return@on

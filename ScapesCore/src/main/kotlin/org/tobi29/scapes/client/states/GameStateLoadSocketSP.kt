@@ -28,15 +28,17 @@ import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.io.toChannel
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMap
+import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.ssl.dummy.DummyKeyManagerProvider
 import java.net.InetSocketAddress
 import java.nio.channels.SelectionKey
+import kotlin.math.roundToInt
 
 class GameStateLoadSocketSP(private var source: WorldSource?,
                             engine: ScapesEngine,
@@ -129,12 +131,11 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                             gui?.setProgress("Logging in...", 0.6)
                             val ssl = SSLHandle.insecure()
                             val secureChannel = ssl.newSSLChannel(
-                                    RemoteAddress(address), channel,
+                                    RemoteAddress(address), channel.toChannel(),
                                     engine.taskExecutor, true)
                             val bundleChannel = PacketBundleChannel(
                                     secureChannel)
-                            val loadingRadius = round(
-                                    scapes.renderDistance) + 16
+                            val loadingRadius = (scapes.renderDistance).roundToInt() + 16
                             val account = Account[scapes.home.resolve(
                                     "Account.properties")]
                             val (plugins, loadingDistanceServer) = NewClientConnection.run(
@@ -144,11 +145,13 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                             }) ?: return@addConnection
 
                             gui?.setProgress("Loading world...", 1.0)
+                            val skinStorage = ClientSkinStorage(engine,
+                                    engine.graphics.textures["Scapes:image/entity/mob/Player"].getAsync())
                             val game = GameStateGameSP({ state ->
                                 RemoteClientConnection(worker, state,
                                         RemoteAddress(address),
                                         bundleChannel, secureChannel, plugins,
-                                        loadingDistanceServer)
+                                        loadingDistanceServer, skinStorage)
                             }, scene, source, server, engine)
                             this@GameStateLoadSocketSP.server = null
                             this@GameStateLoadSocketSP.source = null

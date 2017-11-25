@@ -22,9 +22,9 @@ import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.utils.graphics.marginX
-import org.tobi29.scapes.engine.utils.graphics.marginY
-import org.tobi29.scapes.engine.utils.math.Face
+import org.tobi29.scapes.block.marginX
+import org.tobi29.scapes.block.marginY
+import org.tobi29.scapes.engine.math.Face
 
 class BlockModelSimpleBlock(private val block: BlockType,
                             private val registry: TerrainTextureRegistry,

@@ -28,10 +28,12 @@ import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.server.*
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.io.toChannel
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.round
+import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import java.nio.channels.SelectionKey
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.math.roundToInt
 
 class GameStateLoadMP(private val address: RemoteAddress,
                       engine: ScapesEngine,
@@ -102,10 +104,10 @@ class GameStateLoadMP(private val address: RemoteAddress,
         try {
             channel.register(worker.selector, SelectionKey.OP_READ)
             gui?.setProgress("Logging in...", 0.6)
-            val secureChannel = ssl.newSSLChannel(address, channel,
-                    engine.taskExecutor, true)
+            val secureChannel = ssl.newSSLChannel(address,
+                    channel.toChannel(), engine.taskExecutor, true)
             val bundleChannel = PacketBundleChannel(secureChannel)
-            val loadingRadius = round(scapes.renderDistance) + 16
+            val loadingRadius = (scapes.renderDistance).roundToInt() + 16
             val account = Account[scapes.home.resolve("Account.properties")]
             val (plugins, loadingDistanceServer) = NewClientConnection.run(
                     bundleChannel, engine, account, loadingRadius,
@@ -113,9 +115,12 @@ class GameStateLoadMP(private val address: RemoteAddress,
                         gui?.setProgress(status, 0.66)
                     }) ?: return@connect
             gui?.setProgress("Loading world...", 1.0)
+            val skinStorage = ClientSkinStorage(engine,
+                    engine.graphics.textures["Scapes:image/entity/mob/Player"].getAsync())
             val game = GameStateGameMP({ state ->
                 RemoteClientConnection(worker, state, address, bundleChannel,
-                        secureChannel, plugins, loadingDistanceServer)
+                        secureChannel, plugins, loadingDistanceServer,
+                        skinStorage)
             }, scene, engine)
             engine.switchState(game)
             game.awaitInit()

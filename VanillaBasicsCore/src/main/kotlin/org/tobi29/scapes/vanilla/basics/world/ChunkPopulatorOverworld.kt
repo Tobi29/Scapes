@@ -19,13 +19,15 @@ package org.tobi29.scapes.vanilla.basics.world
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.engine.math.Random
 import org.tobi29.scapes.engine.utils.EnumMap
-import org.tobi29.scapes.engine.utils.math.Random
 import org.tobi29.scapes.engine.utils.generation.layer.RandomPermutation
 import org.tobi29.scapes.engine.utils.generation.layer.random
 import org.tobi29.scapes.engine.utils.generation.layer.randomOffset
 import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
-import org.tobi29.scapes.engine.utils.math.*
+import org.tobi29.scapes.engine.utils.math.ceilToInt
+import org.tobi29.scapes.engine.utils.math.clamp
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
@@ -33,6 +35,8 @@ import org.tobi29.scapes.vanilla.basics.world.decorator.BiomeDecorator
 import org.tobi29.scapes.vanilla.basics.world.structure.genOre
 import org.tobi29.scapes.vanilla.basics.world.structure.genOreRock
 import org.tobi29.scapes.vanilla.basics.world.structure.placeRandomRuin
+import kotlin.math.abs
+import kotlin.math.max
 
 class ChunkPopulatorOverworld(world: WorldServer,
                               private val plugin: VanillaBasics,
@@ -87,9 +91,11 @@ class ChunkPopulatorOverworld(world: WorldServer,
                 val ore = gen.randomOreType(plugin, data, random)
                 if (ore != null) {
                     val ores = terrain.genOre(xx, yy, zz, materials.stoneRaw,
-                            ore.type, ceil(random.nextDouble() * ore.size),
-                            ceil(random.nextDouble() * ore.size),
-                            ceil(random.nextDouble() * ore.size), ore.chance,
+                            ore.type,
+                            (random.nextDouble() * ore.size).ceilToInt(),
+                            (random.nextDouble() * ore.size).ceilToInt(),
+                            (random.nextDouble() * ore.size).ceilToInt(),
+                            ore.chance,
                             random)
                     if (ores > 0 && random.nextInt(ore.rockChance) == 0) {
                         val xxx = xx + random.nextInt(21) - 10
@@ -163,8 +169,9 @@ class ChunkPopulatorOverworld(world: WorldServer,
                     if (decorators.isEmpty()) {
                         return@run null
                     }
-                    decorators[base.random(decorators.size, floor(x) shr 10,
-                            floor(y) shr 10)]
+                    decorators[base.random(decorators.size,
+                            x.floorToInt() shr 10,
+                            y.floorToInt() shr 10)]
                 }
             }
         }

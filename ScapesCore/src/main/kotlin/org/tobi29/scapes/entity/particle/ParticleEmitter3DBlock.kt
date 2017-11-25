@@ -21,10 +21,10 @@ import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.vector.times
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.vector.times
 import org.tobi29.scapes.engine.utils.shader.IntegerExpression
+import kotlin.math.max
 
 class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleInstance3DBlock>(
         system, Array(256, { ParticleInstance3DBlock() })) {
@@ -67,7 +67,7 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
                                width: Int,
                                height: Int,
                                cam: Cam): suspend () -> (Double) -> Unit {
-        val shader = gl.loadShader(
+        val shader = system.world.game.engine.graphics.loadShader(
                 "Scapes:shader/Entity", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)

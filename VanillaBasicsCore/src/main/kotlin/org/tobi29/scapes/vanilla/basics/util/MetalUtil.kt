@@ -17,7 +17,6 @@
 package org.tobi29.scapes.vanilla.basics.util
 
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.math.abs
 import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.reduceOrNull
 import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
@@ -27,6 +26,7 @@ import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.AlloyType
 import org.tobi29.scapes.vanilla.basics.material.MetalType
+import kotlin.math.abs
 
 fun readAlloy(plugin: VanillaBasics,
               map: TagMap): Alloy {

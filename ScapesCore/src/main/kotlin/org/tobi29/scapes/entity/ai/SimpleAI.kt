@@ -17,9 +17,9 @@
 package org.tobi29.scapes.entity.ai
 
 import org.tobi29.scapes.engine.utils.math.toDeg
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.direction
-import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.direction
+import org.tobi29.scapes.engine.math.vector.distanceSqr
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobServer
 

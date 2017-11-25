@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.entity.EntityType
@@ -32,7 +32,7 @@ class EntityBlockBreakClient(type: EntityType<*, *>,
 
     init {
         attachModel {
-            EntityModelBlockBreak(world.game.modelBlockBreakShared(), this)
+            EntityModelBlockBreak(world.game.modelBlockBreakShared().await(), this)
         }
     }
 

@@ -23,7 +23,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainEntity
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.math.PointerPane
+import org.tobi29.scapes.engine.math.PointerPane
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBase

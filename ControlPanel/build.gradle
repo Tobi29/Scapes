@@ -31,7 +31,7 @@ application {
     url = "https://github.com/Tobi29/Scapes"
     copyright = "© 2012-2016 Tobi29"
     uuid = "51A748AB-490A-4BFE-92D0-45840AEE3395"
-    mainClass = "org.tobi29.scapes.tools.controlpanel.ControlPanelKt"
+    mainClass = "org.tobi29.scapes.tools.controlpanel.ControlPanel"
 }
 
 dependencies {

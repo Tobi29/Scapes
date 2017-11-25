@@ -20,8 +20,8 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.entity.ComponentEntity
 import org.tobi29.scapes.entity.ComponentTypeRegisteredEntity
 import org.tobi29.scapes.entity.client.EntityClient

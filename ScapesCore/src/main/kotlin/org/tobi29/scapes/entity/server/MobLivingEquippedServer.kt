@@ -17,9 +17,9 @@
 package org.tobi29.scapes.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.Frustum
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.Frustum
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 
 abstract class MobLivingEquippedServer(type: EntityType<*, *>,

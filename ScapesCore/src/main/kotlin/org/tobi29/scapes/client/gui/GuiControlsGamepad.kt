@@ -20,7 +20,7 @@ import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.input.ControllerJoystick
+import org.tobi29.scapes.engine.input.ControllerGamepad
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.mapMut
 
@@ -28,7 +28,7 @@ class GuiControlsGamepad(state: GameState,
                          previous: Gui,
                          game: ScapesClient,
                          tagMap: MutableTagMap,
-                         controller: ControllerJoystick,
+                         controller: ControllerGamepad,
                          style: GuiStyle) : GuiControls(state, previous, style) {
     init {
         val movementTag = tagMap.mapMut("Movement")

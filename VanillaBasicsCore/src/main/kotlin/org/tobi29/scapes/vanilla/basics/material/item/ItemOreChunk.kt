@@ -16,7 +16,7 @@
 package org.tobi29.scapes.vanilla.basics.material.item
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
 import org.tobi29.scapes.vanilla.basics.material.ItemResearch
 import org.tobi29.scapes.vanilla.basics.material.MetalType
@@ -30,7 +30,7 @@ class ItemOreChunk(type: VanillaMaterialType) : ItemSimpleData(
         name.append(oreName(item))
         val temperature = temperature(item)
         if (temperature > 0.1f) {
-            name.append("\nTemp.:").append(floor(temperature)).append("°C")
+            name.append("\nTemp.:").append(temperature.floorToInt()).append("°C")
         }
         return name.toString()
     }

@@ -15,18 +15,13 @@
  */
 package org.tobi29.scapes.block.models
 
-import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.ShaderAnimation
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.utils.graphics.marginX
-import org.tobi29.scapes.engine.utils.graphics.marginY
-import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.max
+import org.tobi29.scapes.engine.math.Face
+import kotlin.math.max
 
 class BlockModelLiquid(private val block: BlockType,
                        private val registry: TerrainTextureRegistry,

@@ -16,12 +16,12 @@
 
 package org.tobi29.scapes.entity
 
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.Frustum
-import org.tobi29.scapes.engine.utils.math.ceil
-import org.tobi29.scapes.engine.utils.math.floor
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.Frustum
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.distanceSqr
+import org.tobi29.scapes.engine.utils.math.ceilToInt
+import org.tobi29.scapes.engine.utils.math.floorToInt
 
 fun <E : Entity> EntityContainer<E>.getEntities(minX: Int,
                                                 minY: Int,
@@ -50,12 +50,12 @@ fun <E : Entity> EntityContainer<E>.getEntities(minX: Int,
 
 fun <E : Entity> EntityContainer<E>.getEntities(pos: Vector3d,
                                                 range: Double): Sequence<E> {
-    val minX = floor(pos.x - range)
-    val minY = floor(pos.y - range)
-    val minZ = floor(pos.z - range)
-    val maxX = ceil(pos.x + range)
-    val maxY = ceil(pos.y + range)
-    val maxZ = ceil(pos.z + range)
+    val minX = (pos.x - range).floorToInt()
+    val minY = (pos.y - range).floorToInt()
+    val minZ = (pos.z - range).floorToInt()
+    val maxX = (pos.x + range).ceilToInt()
+    val maxY = (pos.y + range).ceilToInt()
+    val maxZ = (pos.z + range).ceilToInt()
     val rangeSqr = range * range
     return getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
             maxZ).filter { entity ->
@@ -64,12 +64,12 @@ fun <E : Entity> EntityContainer<E>.getEntities(pos: Vector3d,
 }
 
 fun <E : Entity> EntityContainer<E>.getEntities(aabb: AABB): Sequence<E> {
-    val minX = floor(aabb.minX) - EntityContainer.MAX_ENTITY_SIZE
-    val minY = floor(aabb.minY) - EntityContainer.MAX_ENTITY_SIZE
-    val minZ = floor(aabb.minZ) - EntityContainer.MAX_ENTITY_SIZE
-    val maxX = ceil(aabb.maxX) + EntityContainer.MAX_ENTITY_SIZE
-    val maxY = ceil(aabb.maxY) + EntityContainer.MAX_ENTITY_SIZE
-    val maxZ = ceil(aabb.maxZ) + EntityContainer.MAX_ENTITY_SIZE
+    val minX = aabb.minX.floorToInt() - EntityContainer.MAX_ENTITY_SIZE
+    val minY = aabb.minY.floorToInt() - EntityContainer.MAX_ENTITY_SIZE
+    val minZ = aabb.minZ.floorToInt() - EntityContainer.MAX_ENTITY_SIZE
+    val maxX = aabb.maxX.ceilToInt() + EntityContainer.MAX_ENTITY_SIZE
+    val maxY = aabb.maxY.ceilToInt() + EntityContainer.MAX_ENTITY_SIZE
+    val maxZ = aabb.maxZ.ceilToInt() + EntityContainer.MAX_ENTITY_SIZE
     return getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
             maxZ).filter { entity -> aabb.overlay(entity.getAABB()) }
 }
@@ -79,12 +79,12 @@ fun <E : Entity> EntityContainer<E>.getEntities(frustum: Frustum): Sequence<E> {
     val y = frustum.y()
     val z = frustum.z()
     val range = frustum.range()
-    val minX = floor(x - range)
-    val minY = floor(y - range)
-    val minZ = floor(z - range)
-    val maxX = ceil(x + range)
-    val maxY = ceil(y + range)
-    val maxZ = ceil(z + range)
+    val minX = (x - range).floorToInt()
+    val minY = (y - range).floorToInt()
+    val minZ = (z - range).floorToInt()
+    val maxX = (x + range).ceilToInt()
+    val maxY = (y + range).ceilToInt()
+    val maxZ = (z + range).ceilToInt()
     return getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
             maxZ).filter { entity -> frustum.inView(entity.getAABB()) > 0 }
 }

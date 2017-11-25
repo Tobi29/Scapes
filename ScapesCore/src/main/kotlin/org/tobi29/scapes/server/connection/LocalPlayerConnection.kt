@@ -29,7 +29,6 @@ import org.tobi29.scapes.engine.utils.graphics.decodePNG
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.checksum
 import org.tobi29.scapes.engine.utils.io.filesystem.exists
-import org.tobi29.scapes.engine.utils.io.filesystem.read
 import org.tobi29.scapes.entity.skin.ServerSkin
 import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.packets.PacketDisconnect
@@ -65,17 +64,17 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
         workerClient?.wake()
     }
 
-    fun start(client: LocalClientConnection,
-              workerClient: ConnectionWorker,
-              account: Account): String? {
+    suspend fun start(client: LocalClientConnection,
+                      workerClient: ConnectionWorker,
+                      account: Account): String? {
         this.workerClient = workerClient
         val engine = client.game.engine
         val scapes = engine[ScapesClient.COMPONENT]
         val path = scapes.home.resolve("Skin.png")
         val image = if (exists(path)) {
-            read(path) { decodePNG(it) }
+            path.readAsync { decodePNG(it) }
         } else {
-            engine.files["Scapes:image/entity/mob/Player.png"].read {
+            engine.files["Scapes:image/entity/mob/Player.png"].readAsync {
                 decodePNG(it)
             }
         }

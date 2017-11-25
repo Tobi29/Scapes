@@ -26,20 +26,23 @@ import org.tobi29.scapes.engine.server.ConnectionEndException
 import org.tobi29.scapes.engine.server.ConnectionWorker
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.packets.PacketDisconnectSelf
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
 import org.tobi29.scapes.server.connection.LocalPlayerConnection
 
-class LocalClientConnection(private val worker: ConnectionWorker,
-                            game: GameStateGameMP,
-                            private val player: LocalPlayerConnection,
-                            plugins: Plugins,
-                            loadingDistance: Int,
-                            private val account: Account) : ClientConnection(
-        game, plugins, loadingDistance) {
+class LocalClientConnection(
+        private val worker: ConnectionWorker,
+        game: GameStateGameMP,
+        private val player: LocalPlayerConnection,
+        plugins: Plugins,
+        loadingDistance: Int,
+        private val account: Account,
+        skinStorage: ClientSkinStorage
+) : ClientConnection(game, plugins, loadingDistance, skinStorage) {
 
-    override fun start() {
+    override suspend fun start() {
         try {
             player.start(this, worker, account)
         } catch (e: IOException) {

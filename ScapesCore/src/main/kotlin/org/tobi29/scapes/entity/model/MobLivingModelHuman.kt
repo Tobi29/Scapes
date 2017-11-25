@@ -22,13 +22,19 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.graphics.push
+import org.tobi29.scapes.engine.math.*
+import org.tobi29.scapes.engine.math.vector.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.engine.utils.math.TWO_PI
+import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.client.MobLivingEquippedClient
 import org.tobi29.scapes.entity.particle.ParticleEmitterFallenBodyPart
 import org.tobi29.scapes.entity.particle.ParticleSystem
+import kotlin.math.PI
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sqrt
 
 class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                           override val entity: MobLivingEquippedClient,

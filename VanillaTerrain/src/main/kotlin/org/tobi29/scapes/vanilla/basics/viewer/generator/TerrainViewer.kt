@@ -16,23 +16,28 @@
 
 package org.tobi29.scapes.vanilla.basics.viewer.generator
 
+import org.tobi29.scapes.engine.application.executeMain
+import org.tobi29.scapes.engine.args.CommandLine
+import org.tobi29.scapes.engine.math.Random
 import org.tobi29.scapes.engine.swt.util.framework.Document
 import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
-import org.tobi29.scapes.engine.utils.math.Random
-import org.tobi29.scapes.engine.utils.version
+import org.tobi29.scapes.engine.utils.Version
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator
 
-fun main(args: Array<String>) {
-    TerrainViewer().run()
-}
+object TerrainViewer : MultiDocumentApplication() {
+    override val id = "org.tobi29.scapes.terrainviewer"
 
-class TerrainViewer : MultiDocumentApplication("Scapes Terrain Viewer",
-        "TerrainViewer", version("0.0.0")) {
-    override fun init() {
+    override val execName = "terrain-viewer"
+    override val fullName = "Scapes Terrain Viewer"
+    override val name = "TerrainViewer"
+
+    override val version = Version(0, 0, 0)
+
+    override fun init(commandLine: CommandLine) {
         openTab(openTerrain())
     }
 
@@ -81,4 +86,7 @@ class TerrainViewer : MultiDocumentApplication("Scapes Terrain Viewer",
             mix(climate(climateGenerator), autumn(climateGenerator), 0.8)
         }, { climateGenerator.add(1.0) })
     }
+
+    @JvmStatic
+    fun main(args: Array<String>) = executeMain(args)
 }

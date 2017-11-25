@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.server.extension.base
 
+import org.tobi29.scapes.engine.args.CommandArgument
 import org.tobi29.scapes.engine.args.CommandOption
 import org.tobi29.scapes.engine.args.get
 import org.tobi29.scapes.engine.args.requireInt
@@ -33,66 +34,83 @@ class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         val group = server.commandRegistry().group("players")
         val connection = server.connection
 
-        group.register("list [MATCH]", 9) {
-            { args, executor, commands ->
-                val exp = args.arguments.firstOrNull() ?: "*"
-                val pattern = wildcard(exp)
-                commands.add {
-                    server.connection.players.asSequence().map { it.name() }.filter { nickname ->
-                        pattern.matches(nickname)
-                    }.forEach { message ->
-                        executor.events.fire(MessageEvent(executor,
-                                MessageLevel.FEEDBACK_INFO, message, executor))
-                    }
+        group.register("list", 9) {
+            val matchArgument = CommandArgument(
+                    name = "match",
+                    count = 0..1).also { add(it) }
+            ;{ args, executor, commands ->
+            val exp = args.arguments[matchArgument]?.firstOrNull() ?: "*"
+            val pattern = wildcard(exp)
+            commands.add {
+                server.connection.players.asSequence().map { it.name() }.filter { nickname ->
+                    pattern.matches(nickname)
+                }.forEach { message ->
+                    executor.events.fire(MessageEvent(executor,
+                            MessageLevel.FEEDBACK_INFO, message, executor))
                 }
             }
         }
-
-        group.register("add PLAYER-ID...", 9) {
-            { args, _, commands ->
-                args.arguments.forEach {
-                    commands.add { server.addPlayer(it) }
-                }
-            }
         }
 
-        group.register("remove PLAYER-ID...", 9) {
-            { args, _, commands ->
-                args.arguments.forEach {
-                    commands.add { server.removePlayer(it) }
-                }
+        group.register("add", 9) {
+            val playerArgument = CommandArgument(
+                    name = "player-id",
+                    count = 0..Integer.MAX_VALUE).also { add(it) }
+            ;{ args, _, commands ->
+            args.arguments[playerArgument]?.forEach {
+                commands.add { server.addPlayer(it) }
             }
         }
+        }
 
-        group.register("kick PLAYER-NAME...", 9) {
-            val messageOption = CommandOption(setOf('m'), setOf("message"), 1,
+        group.register("remove", 9) {
+            val playerArgument = CommandArgument(
+                    name = "player-id",
+                    count = 0..Integer.MAX_VALUE).also { add(it) }
+            ;{ args, _, commands ->
+            args.arguments[playerArgument]?.forEach {
+                commands.add { server.removePlayer(it) }
+            }
+        }
+        }
+
+        group.register("kick", 9) {
+            val messageOption = CommandOption(setOf('m'), setOf("message"),
+                    listOf("message"),
                     "Message to display when kicked").also { add(it) }
-            return@register { args, _, commands ->
-                args.arguments.forEach {
-                    commands.add {
-                        val player = requireGet({ connection.playerByName(it) },
-                                it)
-                        val message = args.get(
-                                messageOption) ?: "Kick by an Admin!"
-                        player.disconnect(message)
-                    }
+            val playerArgument = CommandArgument(
+                    name = "player",
+                    count = 0..Integer.MAX_VALUE).also { add(it) }
+            ;{ args, _, commands ->
+            args.arguments[playerArgument]?.forEach {
+                commands.add {
+                    val player = requireGet({ connection.playerByName(it) },
+                            it)
+                    val message = args.get(
+                            messageOption) ?: "Kick by an Admin!"
+                    player.disconnect(message)
                 }
             }
         }
+        }
 
-        group.register("op -l LEVEL PLAYER-NAME...", 9) {
-            val levelOption = CommandOption(setOf('l'), setOf("level"), 1,
+        group.register("op", 9) {
+            val levelOption = CommandOption(setOf('l'), setOf("level"),
+                    listOf("value"),
                     "Permission level (0-10)").also { add(it) }
-            return@register { args, _, commands ->
-                args.arguments.forEach {
-                    commands.add {
-                        val player = requireGet({ connection.playerByName(it) },
-                                it)
-                        val level = args.requireInt(levelOption)
-                        player.permissionLevel = level
-                    }
+            val playerArgument = CommandArgument(
+                    name = "player",
+                    count = 0..Integer.MAX_VALUE).also { add(it) }
+            ;{ args, _, commands ->
+            args.arguments[playerArgument]?.forEach {
+                commands.add {
+                    val player = requireGet({ connection.playerByName(it) },
+                            it)
+                    val level = args.requireInt(levelOption)
+                    player.permissionLevel = level
                 }
             }
+        }
         }
     }
 }

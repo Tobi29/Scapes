@@ -19,9 +19,9 @@ import org.threeten.bp.Month
 import org.tobi29.scapes.engine.chrono.timeZoneLocal
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.sound.CLICK
-import org.tobi29.scapes.engine.utils.math.round
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.threadLocalRandom
 import org.tobi29.scapes.engine.utils.systemClock
+import kotlin.math.roundToInt
 
 class GuiComponentLogo(parent: GuiLayoutData,
                        height: Int,
@@ -39,7 +39,7 @@ class GuiComponentLogo(parent: GuiLayoutData,
             GuiComponentText(it, "Scapes", 1.0f, 1.0f, 1.0f, 1.0f)
         }
         splash = add(textX.toDouble(),
-                (textY + round(textSize * 1.2)).toDouble(), -1.0,
+                (textY + (textSize * 1.2).roundToInt()).toDouble(), -1.0,
                 ((textSize shl 1) / 3).toDouble()) {
             GuiComponentText(it, splash(), 1.0f, 1.0f, 0.0f, 1.0f)
         }

@@ -15,8 +15,12 @@
  */
 package org.tobi29.scapes.entity.client
 
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.sync.Mutex
+import kotlinx.coroutines.experimental.sync.withLock
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.WorldClient
+import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
@@ -53,11 +57,25 @@ interface EntityClient : Entity {
 }
 
 private val ATTACH_MODEL_LISTENER_TOKEN = ListenerToken("Scapes:EntityModel")
-fun EntityClient.attachModel(supplier: () -> EntityModel) {
+fun EntityClient.attachModel(supplier: suspend () -> EntityModel) {
+    val mutex = Mutex()
+    val attached = AtomicBoolean(false)
     onAddedToWorld[ATTACH_MODEL_LISTENER_TOKEN] = {
-        registerComponent(EntityModel.COMPONENT, supplier())
+        launch(world.taskExecutor) {
+            if (attached.compareAndSet(false, true)) {
+                mutex.withLock {
+                    registerComponent(EntityModel.COMPONENT, supplier())
+                }
+            }
+        }
     }
     onRemovedFromWorld[ATTACH_MODEL_LISTENER_TOKEN] = {
-        unregisterComponent(EntityModel.COMPONENT)
+        launch(world.taskExecutor) {
+            if (attached.compareAndSet(true, false)) {
+                mutex.withLock {
+                    unregisterComponent(EntityModel.COMPONENT)
+                }
+            }
+        }
     }
 }

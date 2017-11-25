@@ -24,7 +24,12 @@ import org.tobi29.scapes.engine.graphics.ModelAttribute
 import org.tobi29.scapes.engine.graphics.RenderType
 import org.tobi29.scapes.engine.graphics.VertexType
 import org.tobi29.scapes.engine.utils.copy
-import org.tobi29.scapes.engine.utils.math.*
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.Face
+import org.tobi29.scapes.engine.utils.math.floorToInt
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sqrt
 
 class ChunkMesh(private val arrays: VertexArrays) {
     private val triple = SmoothLight.FloatTriple()
@@ -89,9 +94,9 @@ class ChunkMesh(private val arrays: VertexArrays) {
             g2 = g * triple.c
             b2 = b * triple.c
         } else {
-            val xxx = floor(x + side.x)
-            val yyy = floor(y + side.y)
-            val zzz = floor(z + side.z)
+            val xxx = (x + side.x).floorToInt()
+            val yyy = (y + side.y).floorToInt()
+            val zzz = (z + side.z).floorToInt()
             light = terrain.blockLight(xxx, yyy, zzz) / 15.0
             sunLight = terrain.sunLight(xxx, yyy, zzz) / 15.0
             r2 = r

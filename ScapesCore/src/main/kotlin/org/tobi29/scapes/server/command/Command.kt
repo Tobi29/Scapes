@@ -18,10 +18,10 @@ package org.tobi29.scapes.server.command
 
 import org.tobi29.scapes.engine.args.CommandOption
 import org.tobi29.scapes.engine.args.InvalidCommandLineException
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
-import org.tobi29.scapes.engine.utils.math.vector.Vector2i
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
+import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.scapes.engine.math.vector.Vector2i
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3i
 
 object Command {
     open class Compiled(private val commands: Collection<() -> Unit>) {

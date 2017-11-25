@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.gui
 
+import kotlinx.coroutines.experimental.runBlocking
 import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
@@ -62,7 +63,7 @@ class GuiScreenshots(state: GameState,
             val resource = engine.resources.load {
                 try {
                     read(path) {
-                        val image = decodePNG(it, state.engine)
+                        val image = runBlocking { decodePNG(it) }
                         state.engine.graphics.createTexture(image, 0)
                     }
                 } catch (e: IOException) {

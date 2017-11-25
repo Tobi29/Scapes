@@ -23,14 +23,16 @@ import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
+import org.tobi29.scapes.engine.math.Random
+import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.plus
+import org.tobi29.scapes.engine.math.vector.times
 import org.tobi29.scapes.engine.sound.StaticAudio
 import org.tobi29.scapes.engine.utils.chain
 import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.graphics.hsvToRGB
 import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.plus
-import org.tobi29.scapes.engine.utils.math.vector.times
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterRain
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterSnow
@@ -39,6 +41,7 @@ import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.gui.GuiComponentCondition
 import org.tobi29.scapes.vanilla.basics.gui.GuiComponentHotbar
+import kotlin.math.*
 
 class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                            private val biomeGenerator: BiomeGenerator,
@@ -203,7 +206,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                     weatherPos.intZ())
             val downfallIntensity = max(weather * 2.0 - 1.0, 0.0)
             if (temperature > 0) {
-                val amount = round(downfallIntensity * 32.0)
+                val amount = (downfallIntensity * 32.0).roundToInt()
                 val emitter = world.scene.particles().emitter(
                         ParticleEmitterRain::class.java)
                 for (i in 0 until amount) {
@@ -219,7 +222,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                     }
                 }
             } else {
-                val amount = round(downfallIntensity * 12.0)
+                val amount = (downfallIntensity * 12.0).roundToInt()
                 val emitter = world.scene.particles().emitter(
                         ParticleEmitterSnow::class.java)
                 for (i in 0 until amount) {
@@ -312,7 +315,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
         if (player.isHeadInWater) {
             val pos = player.getCurrentPos()
             val light = clamp(world.terrain.light(pos.intX(), pos.intY(),
-                    floor(pos.z + 0.7)) * 0.09333f + 0.2f, 0.0f, 1.0f)
+                    (pos.z + 0.7).floorToInt()) * 0.09333f + 0.2f, 0.0f, 1.0f)
             fogR = 0.1f * light
             fogG = 0.5f * light
             fogB = 0.8f * light
@@ -337,13 +340,14 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                                   cam: Cam): suspend () -> (Double) -> Unit {
         val scene = world.scene
         val player = world.player
-        val shaderSkybox = gl.loadShader(
+        val shaderSkybox = world.game.engine.graphics.loadShader(
                 "VanillaBasics:shader/Skybox")
-        val shaderGlow = gl.loadShader(
+        val shaderGlow = world.game.engine.graphics.loadShader(
                 "VanillaBasics:shader/Glow")
-        val shaderClouds = gl.loadShader(
+        val shaderClouds = world.game.engine.graphics.loadShader(
                 "VanillaBasics:shader/Clouds")
-        val shaderTextured = gl.loadShader(SHADER_TEXTURED)
+        val shaderTextured = world.game.engine.graphics.loadShader(
+                SHADER_TEXTURED)
         return {
             val sSkybox = shaderSkybox.getAsync()
             val sGlow = shaderGlow.getAsync()
@@ -361,7 +365,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                         1.0).toFloat()
                 val skyboxLight = skyLight * fogBrightness
                 // Sky
-                gl.graphics.textureEmpty().bind(gl)
+                gl.textureEmpty().bind(gl)
                 gl.setAttribute4f(GL.COLOR_ATTRIBUTE, 1.0f, 1.0f, 1.0f, 1.0f)
                 sSkybox.setUniform3f(gl, 4, scene.fogR(), scene.fogG(),
                         scene.fogB())
@@ -413,7 +417,7 @@ class WorldSkyboxOverworld(private val climateGenerator: ClimateGenerator,
                 // Clouds
                 fbo.texturesColor[0].bind(gl)
                 cloudMesh.render(gl, sSkybox)
-                gl.graphics.textureEmpty().bind(gl)
+                gl.textureEmpty().bind(gl)
                 // Bottom
                 skyboxBottomMesh.render(gl, sSkybox)
             }

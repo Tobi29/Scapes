@@ -21,10 +21,9 @@ import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.floor
-import org.tobi29.scapes.engine.utils.math.sqrt
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
+import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.task.Timer
@@ -42,6 +41,7 @@ import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.server.connection.ServerConnection
 import org.tobi29.scapes.server.format.WorldFormat
 import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.math.sqrt
 
 class WorldServer(worldFormat: WorldFormat,
                   val id: String,
@@ -218,9 +218,9 @@ class WorldServer(worldFormat: WorldFormat,
         val step = (1 / sqrt(dx * dx + dy * dy + dz * dz.toFloat())).toDouble()
         var i = 0.0
         while (i <= 1) {
-            val x = floor(x1 + dx * i)
-            val y = floor(y1 + dy * i)
-            val z = floor(z1 + dz * i)
+            val x = (x1 + dx * i).floorToInt()
+            val y = (y1 + dy * i).floorToInt()
+            val z = (z1 + dz * i).floorToInt()
             if (!terrain.isTransparent(x, y, z)) {
                 return true
             }

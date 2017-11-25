@@ -22,13 +22,13 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.min
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.minus
-import org.tobi29.scapes.engine.utils.math.vector.times
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.vector.MutableVector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.minus
+import org.tobi29.scapes.engine.math.vector.times
 import org.tobi29.scapes.entity.client.MobClient
+import kotlin.math.min
 
 class MobModelBlock(override val entity: MobClient,
                     private val item: ItemStack) : MobModel {

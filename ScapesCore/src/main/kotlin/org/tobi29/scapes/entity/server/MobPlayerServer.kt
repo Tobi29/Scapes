@@ -20,10 +20,17 @@ import org.tobi29.scapes.block.InventoryContainer
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.*
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.Frustum
+import org.tobi29.scapes.engine.math.PointerPane
+import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.Checksum
+import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.scapes.engine.utils.ConcurrentMap
+import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.scapes.engine.utils.math.toRad
+import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.*
 import org.tobi29.scapes.packets.PacketEntityChange
@@ -31,6 +38,9 @@ import org.tobi29.scapes.packets.PacketOpenGui
 import org.tobi29.scapes.packets.PacketUpdateInventory
 import org.tobi29.scapes.server.connection.PlayerConnection
 import kotlin.collections.set
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.sin
 
 abstract class MobPlayerServer(type: EntityType<*, *>,
                                world: WorldServer,
@@ -161,7 +171,7 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
         hitField.setPerspective(100 / range, 1.0, 0.1, range)
         val mobs = ArrayList<MobLivingServer>()
         world.getEntities(
-                hitField).filterMap<MobLivingServer>().filter { it != this }.forEach { mob ->
+                hitField).filterIsInstance<MobLivingServer>().filter { it != this }.forEach { mob ->
             mobs.add(mob)
             if (side) {
                 mob.damage(leftWeapon().material().click(this, leftWeapon(),
@@ -236,7 +246,7 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
                 rot.now(), physicsState.isOnGround, physicsState.slidingWall,
                 physicsState.isInWater, physicsState.isSwimming)
         isHeadInWater = world.terrain.type(pos.intX(), pos.intY(),
-                floor(pos.doubleZ() + 0.7)).isLiquid
+                (pos.doubleZ() + 0.7).floorToInt()).isLiquid
         if (invincibleTicks > 0.0) {
             invincibleTicks = max(invincibleTicks - delta, 0.0)
         }

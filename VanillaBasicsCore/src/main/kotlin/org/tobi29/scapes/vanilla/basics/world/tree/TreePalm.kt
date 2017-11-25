@@ -17,8 +17,8 @@
 package org.tobi29.scapes.vanilla.basics.world.tree
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.math.Random
-import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.math.Random
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
 object TreePalm : Tree {
@@ -64,8 +64,8 @@ object TreePalm : Tree {
             var yyy = 0
             var i = 0
             while (i < size) {
-                xxx = floor(xx + 0.5)
-                yyy = floor(yy + 0.5)
+                xxx = (xx + 0.5).floorToInt()
+                yyy = (yy + 0.5).floorToInt()
                 TreeUtil.changeBlock(terrain, xxx, yyy, z + i,
                         materials.log, data)
                 TreeUtil.changeBlock(terrain, xxx - 1, yyy, z + i,

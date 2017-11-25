@@ -17,10 +17,15 @@
 package org.tobi29.scapes.vanilla.basics.util
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.cosTable
+import org.tobi29.scapes.engine.math.sinTable
+import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.math.HALF_PI
+import org.tobi29.scapes.engine.utils.math.TWO_PI
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterExplosion
+import kotlin.math.PI
+import kotlin.math.sqrt
 
 fun WorldClient.explosion(pos: Vector3d,
                           speed: Vector3d,

@@ -21,7 +21,7 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.GuiAction
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.utils.math.floorToInt
 
 class GuiDisconnected(state: GameState,
                       message: String,
@@ -42,6 +42,6 @@ class GuiDisconnected(state: GameState,
     }
 
     fun setReconnectTimer(time: Double) {
-        reconnectTimer.text = "Reconnecting in: " + floor(time)
+        reconnectTimer.text = "Reconnecting in: " + time.floorToInt()
     }
 }

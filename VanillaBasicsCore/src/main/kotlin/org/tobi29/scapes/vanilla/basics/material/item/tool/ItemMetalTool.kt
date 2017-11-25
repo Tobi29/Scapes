@@ -24,9 +24,8 @@ import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.floor
-import org.tobi29.scapes.engine.utils.math.tanh
+import org.tobi29.scapes.engine.math.Face
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.engine.utils.tag.toDouble
 import org.tobi29.scapes.engine.utils.tag.toInt
 import org.tobi29.scapes.engine.utils.tag.toTag
@@ -38,6 +37,7 @@ import org.tobi29.scapes.vanilla.basics.material.ItemMetal
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.VanillaItem
 import org.tobi29.scapes.vanilla.basics.util.createTool
+import kotlin.math.tanh
 
 abstract class ItemMetalTool(type: VanillaMaterialType) : VanillaItem(
         type), ItemMetal {
@@ -170,7 +170,7 @@ abstract class ItemMetalTool(type: VanillaMaterialType) : VanillaItem(
         }
         val temperature = temperature(item)
         if (temperature > 0.1f) {
-            name.append("\nTemp.:").append(floor(temperature)).append(
+            name.append("\nTemp.:").append(temperature.floorToInt()).append(
                     "°C")
             if (temperature > meltingPoint(item)) {
                 name.append("\n - Liquid")
@@ -180,7 +180,7 @@ abstract class ItemMetalTool(type: VanillaMaterialType) : VanillaItem(
                 item.metaData("Vanilla")[
                         "ToolDamage"]?.toDouble() ?: 0.0)) * 100.0
         if (damage > 0.1) {
-            name.append("\nDamage: ").append(floor(damage))
+            name.append("\nDamage: ").append(damage.floorToInt())
         }
         return name.toString()
     }

@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.entity.ai
 
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.entity.server.MobServer
 
 interface AI {

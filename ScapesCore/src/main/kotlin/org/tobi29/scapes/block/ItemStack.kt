@@ -15,9 +15,9 @@
  */
 package org.tobi29.scapes.block
 
-import org.tobi29.scapes.engine.utils.math.min
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.plugins.Plugins
+import kotlin.math.min
 
 class ItemStack(private var material: Material,
                 private var data: Int,

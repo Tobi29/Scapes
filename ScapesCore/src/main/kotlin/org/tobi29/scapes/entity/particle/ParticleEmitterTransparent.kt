@@ -18,16 +18,23 @@ package org.tobi29.scapes.entity.particle
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.FastMath
+import org.tobi29.scapes.engine.math.atan2Fast
+import org.tobi29.scapes.engine.math.matrix.Matrix4f
+import org.tobi29.scapes.engine.math.vector.distanceSqr
+import org.tobi29.scapes.engine.math.vector.length
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f
-import org.tobi29.scapes.engine.utils.math.vector.distanceSqr
-import org.tobi29.scapes.engine.utils.math.vector.length
+import org.tobi29.scapes.engine.utils.math.HALF_PI
+import org.tobi29.scapes.engine.utils.math.mix
 import org.tobi29.scapes.engine.utils.shader.IntegerExpression
+import kotlin.math.max
 
-class ParticleEmitterTransparent(system: ParticleSystem,
-                                 texture: Texture) : ParticleEmitterInstanced<ParticleInstanceTransparent>(
-        system, texture, ParticleEmitterTransparent.createAttributes(), 6,
+class ParticleEmitterTransparent(
+        system: ParticleSystem,
+        val atlas: ParticleTransparentAtlas
+) : ParticleEmitterInstanced<ParticleInstanceTransparent>(
+        system, atlas.texture, ParticleEmitterTransparent.createAttributes(), 6,
         ParticleEmitterTransparent.createAttributesStream(),
         RenderType.TRIANGLES, Array(10240, { ParticleInstanceTransparent() })) {
     private val instancesSorted: Array<ParticleInstanceTransparent>
@@ -41,7 +48,7 @@ class ParticleEmitterTransparent(system: ParticleSystem,
                                width: Int,
                                height: Int,
                                cam: Cam): suspend () -> ((Shader) -> Unit) -> Unit {
-        val shader = gl.loadShader(
+        val shader = system.world.game.engine.graphics.loadShader(
                 "Scapes:shader/ParticleTransparent", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
@@ -117,7 +124,7 @@ class ParticleEmitterTransparent(system: ParticleSystem,
                 buffer.putShort(FastMath.convertFloatToHalf(a))
                 buffer.putFloat(terrain.blockLight(x, y, z) / 15.0f)
                 buffer.putFloat(terrain.sunLight(x, y, z) / 15.0f)
-                matrix.putInto(buffer)
+                matrix.values.forEach { buffer.putFloat(it) }
                 buffer.putFloat(instance.textureOffset.floatX())
                 buffer.putFloat(instance.textureOffset.floatY())
                 buffer.putFloat(instance.textureSize.floatX())

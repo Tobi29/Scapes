@@ -16,9 +16,12 @@
 
 package org.tobi29.scapes.vanilla.basics.generator
 
-import org.tobi29.scapes.engine.utils.math.Random
+import org.tobi29.scapes.engine.math.Random
+import org.tobi29.scapes.engine.math.cosTable
+import org.tobi29.scapes.engine.math.sinTable
 import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
 import org.tobi29.scapes.engine.utils.math.*
+import kotlin.math.*
 
 class ClimateGenerator private constructor(private val temperatureNoise: SimplexNoise,
                                            private val humidityNoise: SimplexNoise,
@@ -185,7 +188,7 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
         var rainfall = 4.0 - humidity3 * 3.4
         rainfall *= 1.0 - sinTable(dayTime * PI) * 0.5
         rainfall = max(rainfall, 0.1)
-        weather = pow(weather, rainfall)
+        weather = weather.pow(rainfall)
         return weather
     }
 

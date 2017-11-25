@@ -18,8 +18,8 @@ package org.tobi29.scapes.vanilla.basics.entity.client
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
@@ -32,17 +32,19 @@ class MobSkeletonClient(type: EntityType<*, *>,
         type, world, Vector3d.ZERO, Vector3d.ZERO,
         AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0) {
     init {
-        val texture = world.game.engine.graphics.textures.getNow(
-                "VanillaBasics:image/entity/mob/Skeleton")
+        val texture = world.game.engine.graphics.textures["VanillaBasics:image/entity/mob/Skeleton"]
         registerComponent(CreatureType.COMPONENT, CreatureType.MONSTER)
         attachModel {
-            MobLivingModelHuman(world.game.modelHumanShared(), this, texture,
+            MobLivingModelHuman(world.game.modelHumanShared(), this,
+                    texture.getAsync(),
                     true, false)
         }
         onDeath[SKELETON_LISTENER_TOKEN] = {
-            MobLivingModelHuman.particles(world.game.modelHumanShared(),
-                    world.scene.particles(), pos.now(), speed.now(), rot.now(),
-                    texture, true, false)
+            texture.tryGet()?.let { texture ->
+                MobLivingModelHuman.particles(world.game.modelHumanShared(),
+                        world.scene.particles(), pos.now(), speed.now(),
+                        rot.now(), texture, true, false)
+            }
         }
     }
 

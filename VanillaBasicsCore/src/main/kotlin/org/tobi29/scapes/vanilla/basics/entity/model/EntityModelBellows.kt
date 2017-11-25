@@ -20,39 +20,28 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.push
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.Face
+import org.tobi29.scapes.engine.math.diff
+import org.tobi29.scapes.engine.math.vector.MutableVector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.minus
+import org.tobi29.scapes.engine.math.vector.times
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.diff
-import org.tobi29.scapes.engine.utils.math.min
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.minus
-import org.tobi29.scapes.engine.utils.math.vector.times
-import org.tobi29.scapes.entity.model.Box
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBellowsClient
+import kotlin.math.min
 
 class EntityModelBellows(shared: EntityModelBellowsShared,
                          override val entity: EntityBellowsClient) : EntityModel {
-    private val pos: MutableVector3d
-    private val side: Box
-    private val middle: Box
-    private val pipe: Box
-    private val textureSide = entity.world.game.engine.graphics.textures.getNow(
-            "VanillaBasics:image/terrain/tree/oak/Planks")
-    private val textureMiddle = entity.world.game.engine.graphics.textures.getNow(
-            "VanillaBasics:image/terrain/tree/birch/Planks")
-    private val texturePipe = entity.world.game.engine.graphics.textures.getNow(
-            "VanillaBasics:image/terrain/device/Anvil")
+    private val pos = MutableVector3d(entity.getCurrentPos())
+    private val side = shared.side
+    private val middle = shared.middle
+    private val pipe = shared.pipe
+    private val textureSide = shared.textureSide
+    private val textureMiddle = shared.textureMiddle
+    private val texturePipe = shared.texturePipe
     private var scale = 0.0
-
-    init {
-        pos = MutableVector3d(entity.getCurrentPos())
-        side = shared.side
-        middle = shared.middle
-        pipe = shared.pipe
-    }
 
     override fun pos() = pos.now()
 

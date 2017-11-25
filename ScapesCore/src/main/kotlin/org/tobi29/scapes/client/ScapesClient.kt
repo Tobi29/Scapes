@@ -15,25 +15,15 @@
  */
 package org.tobi29.scapes.client
 
-import org.tobi29.scapes.client.input.InputModeDummy
-import org.tobi29.scapes.client.input.InputModeScapes
-import org.tobi29.scapes.client.input.gamepad.InputModeGamepad
-import org.tobi29.scapes.client.input.keyboard.InputModeKeyboard
-import org.tobi29.scapes.client.input.spi.InputModeProvider
-import org.tobi29.scapes.client.input.touch.InputModeTouch
 import org.tobi29.scapes.engine.ComponentLifecycle
 import org.tobi29.scapes.engine.ComponentStep
 import org.tobi29.scapes.engine.ScapesEngine
-import org.tobi29.scapes.engine.gui.GuiNotificationSimple
-import org.tobi29.scapes.engine.input.*
-import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.ComponentTypeRegistered
 import org.tobi29.scapes.engine.utils.ComponentTypeRegisteredPermission
 import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.tag.*
-import java.util.*
 
 class ScapesClient(val engine: ScapesEngine,
                    val home: FilePath,
@@ -70,54 +60,6 @@ class ScapesClient(val engine: ScapesEngine,
         val COMPONENT = ComponentTypeRegistered<ScapesEngine, ScapesClient, Any>()
     }
 }
-
-class InputManagerScapes(
-        engine: ScapesEngine,
-        configMap: MutableTagMap
-) : InputManager<InputModeScapes>(engine, configMap,
-        InputModeDummy(engine)) {
-    private var initialMode = AtomicBoolean(true)
-
-    override fun inputMode(controller: Controller) =
-            loadService(engine, controller)
-
-    override fun inputModeChanged(inputMode: InputModeScapes) {
-        events.fire(InputModeChangeEvent(inputMode))
-        if (!initialMode.getAndSet(false)) {
-            engine.notifications.add {
-                GuiNotificationSimple(it,
-                        engine.graphics.textures["Scapes:image/gui/input/Default"],
-                        inputMode.toString())
-            }
-        }
-    }
-
-    companion object : KLogging() {
-        val COMPONENT = ComponentTypeRegistered<ScapesEngine, InputManagerScapes, Any>()
-
-        private fun loadService(engine: ScapesEngine,
-                                controller: Controller): ((MutableTagMap) -> InputModeScapes)? {
-            for (provider in ServiceLoader.load(
-                    InputModeProvider::class.java)) {
-                try {
-                    provider.get(engine, controller)?.let { return it }
-                } catch (e: ServiceConfigurationError) {
-                    ScapesClient.logger.warn { "Unable to load input mode provider: $e" }
-                }
-            }
-            if (controller is ControllerDefault) {
-                return { InputModeKeyboard(engine, controller, it) }
-            } else if (controller is ControllerJoystick) {
-                return { InputModeGamepad(engine, controller, it) }
-            } else if (controller is ControllerTouch) {
-                return { InputModeTouch(engine, controller) }
-            }
-            return null
-        }
-    }
-}
-
-class InputModeChangeEvent(val inputMode: InputModeScapes)
 
 interface DialogProvider {
     fun openMusicDialog(result: (String, ReadableByteStream) -> Unit)

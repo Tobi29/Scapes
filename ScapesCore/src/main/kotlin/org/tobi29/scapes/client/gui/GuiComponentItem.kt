@@ -21,7 +21,7 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy
 import org.tobi29.scapes.engine.gui.GuiLayoutData
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
+import org.tobi29.scapes.engine.math.vector.Vector2d
 
 class GuiComponentItem(parent: GuiLayoutData,
                        private var item: ItemStack) : GuiComponentHeavy(

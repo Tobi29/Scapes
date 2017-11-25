@@ -20,12 +20,16 @@ import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.math.TWO_PI
+import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.shader.IntegerExpression
 import org.tobi29.scapes.entity.particle.ParticleEmitter
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.particle.ParticleSystem
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
 
 class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<ParticleInstanceLightning>(
         system, Array(256, { ParticleInstanceLightning() })) {
@@ -123,7 +127,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
         var zz = z
         val xs = cos(dir)
         val ys = sin(dir)
-        dir = pow(random.nextDouble(), 6.0) * 20.0 + 0.2
+        dir = random.nextDouble().pow(6.0) * 20.0 + 0.2
         for (i in 0 until random.nextInt(30) + 4) {
             xx += xs * random.nextDouble() * dir
             yy += ys * random.nextDouble() * dir
@@ -163,7 +167,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
                                width: Int,
                                height: Int,
                                cam: Cam): suspend () -> (Double) -> Unit {
-        val shader = gl.loadShader(
+        val shader = system.world.game.engine.graphics.loadShader(
                 "VanillaBasics:shader/ParticleLightning", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
@@ -176,7 +180,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
             }
             val world = system.world
             val terrain = world.terrain
-            gl.graphics.textureEmpty().bind(gl)
+            gl.textureEmpty().bind(gl)
             for (instance in instances) {
                 if (instance.state != ParticleInstance.State.ALIVE) {
                     continue

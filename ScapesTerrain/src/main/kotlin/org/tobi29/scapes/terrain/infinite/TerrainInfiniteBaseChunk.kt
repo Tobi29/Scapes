@@ -22,9 +22,8 @@ import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.assert
 import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.math.lb
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.vector.Vector2i
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
+import org.tobi29.scapes.engine.math.vector.Vector2i
+import org.tobi29.scapes.engine.math.vector.Vector3i
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.mapMut
 import org.tobi29.scapes.terrain.TerrainChunk
@@ -34,6 +33,7 @@ import org.tobi29.scapes.terrain.VoxelType
 import org.tobi29.scapes.terrain.data.ChunkArraySection1x16
 import org.tobi29.scapes.terrain.data.ChunkArraySection2x4
 import org.tobi29.scapes.terrain.data.ChunkDataStruct
+import kotlin.math.max
 
 abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,
                                                        val parentTerrain: TerrainGlobals<B>,

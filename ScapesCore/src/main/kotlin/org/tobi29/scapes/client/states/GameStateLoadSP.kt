@@ -29,13 +29,14 @@ import org.tobi29.scapes.engine.server.ConnectionManager
 import org.tobi29.scapes.engine.server.SSLHandle
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.round
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMap
+import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.connection.LocalPlayerConnection
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.ssl.dummy.DummyKeyManagerProvider
+import kotlin.math.roundToInt
 
 class GameStateLoadSP(private var source: WorldSource?,
                       engine: ScapesEngine,
@@ -96,7 +97,7 @@ class GameStateLoadSP(private var source: WorldSource?,
                     gui?.setProgress("Starting server...", 0.5)
                     val server = server ?: throw IllegalStateException(
                             "Server lost too early")
-                    val loadingRadius = round(scapes.renderDistance) + 16
+                    val loadingRadius = (scapes.renderDistance).roundToInt() + 16
                     val account = Account[scapes.home.resolve(
                             "Account.properties")]
                     gui?.setProgress("Loading world...", 1.0)
@@ -105,10 +106,12 @@ class GameStateLoadSP(private var source: WorldSource?,
                         val player = LocalPlayerConnection(worker,
                                 server.connection, loadingRadius)
                         engine[ConnectionManager.COMPONENT].addConnection { worker, connection ->
+                            val skinStorage = ClientSkinStorage(engine,
+                                    engine.graphics.textures["Scapes:image/entity/mob/Player"].getAsync())
                             val game = GameStateGameSP({
                                 LocalClientConnection(worker, it,
                                         player, server.plugins, loadingRadius,
-                                        account)
+                                        account, skinStorage)
                             }, scene, source, server, engine)
                             this@GameStateLoadSP.server = null
                             this@GameStateLoadSP.source = null

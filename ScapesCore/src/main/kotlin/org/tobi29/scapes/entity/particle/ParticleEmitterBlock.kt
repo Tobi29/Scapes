@@ -18,14 +18,14 @@ package org.tobi29.scapes.entity.particle
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.atan2Fast
+import org.tobi29.scapes.engine.math.matrix.Matrix4f
+import org.tobi29.scapes.engine.math.vector.length
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.AABB
 import org.tobi29.scapes.engine.utils.math.HALF_PI
-import org.tobi29.scapes.engine.utils.math.atan2Fast
-import org.tobi29.scapes.engine.utils.math.matrix.Matrix4f
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.vector.length
 import org.tobi29.scapes.engine.utils.shader.IntegerExpression
+import kotlin.math.max
 
 class ParticleEmitterBlock(system: ParticleSystem,
                            texture: Texture) : ParticleEmitterInstanced<ParticleInstanceBlock>(
@@ -68,7 +68,7 @@ class ParticleEmitterBlock(system: ParticleSystem,
                                width: Int,
                                height: Int,
                                cam: Cam): suspend () -> ((Shader) -> Unit) -> Unit {
-        val shader = gl.loadShader(
+        val shader = system.world.game.engine.graphics.loadShader(
                 "Scapes:shader/ParticleBlock", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
@@ -129,7 +129,7 @@ class ParticleEmitterBlock(system: ParticleSystem,
                 buffer.put(instance.a)
                 buffer.putFloat(terrain.blockLight(x, y, z) / 15.0f)
                 buffer.putFloat(terrain.sunLight(x, y, z) / 15.0f)
-                matrix.putInto(buffer)
+                matrix.values.forEach { buffer.putFloat(it) }
                 buffer.putFloat(instance.textureOffset.floatX())
                 buffer.putFloat(instance.textureOffset.floatY())
                 buffer.putFloat(instance.textureSize.floatX())

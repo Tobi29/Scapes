@@ -19,19 +19,18 @@ package org.tobi29.scapes.server.format.sql
 import org.tobi29.scapes.engine.sql.SQLQuery
 import org.tobi29.scapes.engine.sql.SQLReplace
 import org.tobi29.scapes.engine.sql.invoke
-import org.tobi29.scapes.engine.utils.io.ByteBuffer
-import org.tobi29.scapes.engine.utils.io.ByteBufferStream
-import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.scapes.engine.utils.io.*
 import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
 import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
 import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.vector.Vector2i
+import org.tobi29.scapes.engine.math.vector.Vector2i
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
 
 class SQLTerrainInfiniteFormat(private val getChunk: SQLQuery,
                                private val replaceChunk: SQLReplace) : TerrainInfiniteFormat {
-    private val stream = ByteBufferStream(growth = { it + 1048576 })
+    private val stream = MemoryViewStreamDefault(
+            growth = { (it shl 1).coerceAtLeast(1048576) })
 
     @Synchronized override fun chunkTags(chunks: List<Vector2i>): List<TagMap?> {
         val maps = ArrayList<TagMap?>(chunks.size)
@@ -50,11 +49,11 @@ class SQLTerrainInfiniteFormat(private val getChunk: SQLQuery,
             chunks: List<Pair<Vector2i, TagMap>>) {
         val values = ArrayList<Array<Any>>(chunks.size)
         for ((pos, map) in chunks) {
-            stream.buffer().clear()
+            stream.reset()
             map.writeBinary(stream, 1)
-            stream.buffer().flip()
-            val array = ByteArray(stream.buffer().remaining())
-            stream.buffer().get(array)
+            stream.flip()
+            val array = ByteArray(stream.remaining())
+            stream.get(array.view)
             values.add(arrayOf(pos.x, pos.y, array))
             if (values.size >= 64) {
                 replaceChunk(*values.toTypedArray())
@@ -76,7 +75,7 @@ class SQLTerrainInfiniteFormat(private val getChunk: SQLQuery,
             val row = rows[0]
             if (row[0] is ByteArray) {
                 val array = row[0] as ByteArray
-                return readBinary(ByteBufferStream(ByteBuffer.wrap(array)))
+                return readBinary(MemoryViewReadableStream(array.viewBE))
             }
         }
         return null

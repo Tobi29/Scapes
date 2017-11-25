@@ -20,20 +20,23 @@ import org.tobi29.scapes.engine.gui.GuiComponentButtonHeavy
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiLayoutData
-import org.tobi29.scapes.engine.input.ControllerBasic
+import org.tobi29.scapes.engine.input.ControllerButtons
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
+import org.tobi29.scapes.engine.utils.ListenerRegistrar
+import org.tobi29.scapes.engine.utils.listenAlive
 import org.tobi29.scapes.engine.utils.tag.MutableTagMap
 import org.tobi29.scapes.engine.utils.tag.toTag
 import kotlin.collections.set
 
-class GuiComponentControlsButton(parent: GuiLayoutData,
-                                 textSize: Int,
-                                 private val name: String,
-                                 private val id: String,
-                                 private val tagMap: MutableTagMap,
-                                 private val controller: ControllerBasic) : GuiComponentButtonHeavy(
-        parent) {
+class GuiComponentControlsButton(
+        parent: GuiLayoutData,
+        textSize: Int,
+        private val name: String,
+        private val id: String,
+        private val tagMap: MutableTagMap,
+        private val controller: ControllerButtons
+) : GuiComponentButtonHeavy(parent) {
     private val text: GuiComponentText
     private val keys = ArrayList<ControllerKey>()
     private var editing: Byte = 0
@@ -58,16 +61,45 @@ class GuiComponentControlsButton(parent: GuiLayoutData,
         updateText()
     }
 
+    override fun ListenerRegistrar.listeners() {
+        listenAlive<ControllerButtons.PressEvent>(
+                {
+                    it.state.controller == controller
+                            && it.action != ControllerButtons.Action.REPEAT
+                }) { event ->
+            synchronized(keys) {
+                when (event.action) {
+                    ControllerButtons.Action.PRESS -> {
+                        if (editing <= 1) return@listenAlive
+                        keys.add(event.key)
+                        event.muted = true
+                    }
+                    ControllerButtons.Action.RELEASE -> {
+                        if (!keys.isEmpty()) {
+                            key = ControllerKeyReference(keys)
+                            tagMap[id] = key.toString().toTag()
+                            editing = 0
+                            keys.clear()
+                        }
+                    }
+                }
+            }
+            updateText()
+        }
+    }
+
     private fun updateText() {
         val text = StringBuilder(16)
         if (editing > 0) {
             text.append('<')
             text.append(name)
             text.append(": ")
-            if (!keys.isEmpty()) {
-                text.append(ControllerKeyReference(keys).humanName())
-            } else {
-                text.append("...")
+            synchronized(keys) {
+                if (!keys.isEmpty()) {
+                    text.append(ControllerKeyReference(keys).humanName())
+                } else {
+                    text.append("...")
+                }
             }
             text.append('>')
         } else {
@@ -79,23 +111,7 @@ class GuiComponentControlsButton(parent: GuiLayoutData,
     }
 
     override fun updateComponent(delta: Double) {
-        if (editing > 1) {
-            controller.pressEvents()
-                    .filter { it.state == ControllerBasic.PressState.PRESS }
-                    .map { it.key }.forEach {
-                keys.add(it)
-            }
-            val keyEvent = controller.pressEvents()
-                    .filter { it.state == ControllerBasic.PressState.RELEASE }
-                    .firstOrNull()
-            if (keyEvent != null && !keys.isEmpty()) {
-                key = ControllerKeyReference(keys)
-                tagMap[id] = key.toString().toTag()
-                editing = 0
-                keys.clear()
-            }
-            updateText()
-        } else if (editing > 0) {
+        if (editing > 0) {
             editing = 2
         }
     }

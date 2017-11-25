@@ -17,7 +17,7 @@
 package org.tobi29.scapes.chunk
 
 import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 
 interface EnvironmentClient {
     val type: EnvironmentType

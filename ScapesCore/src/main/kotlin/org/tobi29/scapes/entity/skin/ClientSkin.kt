@@ -19,15 +19,15 @@ package org.tobi29.scapes.entity.skin
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.io.ByteBuffer
+import org.tobi29.scapes.engine.utils.io.ByteViewRO
 
 class ClientSkin(engine: ScapesEngine,
-                 buffer: ByteBuffer,
+                 buffer: ByteViewRO,
                  val checksum: Checksum) {
     val texture = engine.graphics.createTexture(64, 64, buffer)
     private var unusedTicks = 0
 
-    fun setImage(buffer: ByteBuffer) {
+    fun setImage(buffer: ByteViewRO) {
         texture.setBuffer(buffer)
     }
 

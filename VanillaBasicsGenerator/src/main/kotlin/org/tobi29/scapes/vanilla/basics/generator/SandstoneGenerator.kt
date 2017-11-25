@@ -16,12 +16,12 @@
 
 package org.tobi29.scapes.vanilla.basics.generator
 
+import org.tobi29.scapes.engine.math.Random
 import org.tobi29.scapes.engine.utils.generation.layer.RandomPermutation
 import org.tobi29.scapes.engine.utils.generation.layer.random
 import org.tobi29.scapes.engine.utils.generation.layer.randomOffset
 import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
-import org.tobi29.scapes.engine.utils.math.Random
-import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.utils.math.floorToInt
 
 class SandstoneGenerator(random: Random) {
     private val base = RandomPermutation(random)
@@ -33,7 +33,7 @@ class SandstoneGenerator(random: Random) {
         noise.randomOffset(3, x, y) { x, y ->
             swirl.randomOffset(1024.0, x.toDouble(),
                     y.toDouble()) { x, y ->
-                base.random(4, floor(x) shr 11, floor(y) shr 11) == 0
+                base.random(4, x.floorToInt() shr 11, y.floorToInt() shr 11) == 0
             }
         }
     }

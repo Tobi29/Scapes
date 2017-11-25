@@ -16,9 +16,11 @@
 package org.tobi29.scapes.vanilla.basics.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.engine.math.cosTable
+import org.tobi29.scapes.engine.math.sinTable
+import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.scapes.engine.math.vector.*
+import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toDouble
@@ -29,6 +31,7 @@ import org.tobi29.scapes.entity.server.EntityAbstractServer
 import org.tobi29.scapes.entity.server.MobPositionSenderServer
 import org.tobi29.scapes.entity.server.MobServer
 import kotlin.collections.set
+import kotlin.math.max
 
 class EntityTornadoServer(type: EntityType<*, *>,
                           world: WorldServer) : EntityAbstractServer(
@@ -69,7 +72,7 @@ class EntityTornadoServer(type: EntityType<*, *>,
         updatePosition()
         val currentPos = pos.now()
         world.getEntities(currentPos,
-                16.0).filterMap<MobServer>().forEach { mob ->
+                16.0).filterIsInstance<MobServer>().forEach { mob ->
             val push = mob.getCurrentPos() - currentPos
             val s = max(0.0,
                     320.0 - push.length() * 8.0) * delta

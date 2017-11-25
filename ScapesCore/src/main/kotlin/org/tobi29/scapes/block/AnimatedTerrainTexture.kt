@@ -15,34 +15,35 @@
  */
 package org.tobi29.scapes.block
 
-import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.utils.AtomicInteger
 import org.tobi29.scapes.engine.utils.graphics.generateMipMaps
-import org.tobi29.scapes.engine.utils.io.ByteBuffer
-import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.utils.io.ByteBufferNative
+import org.tobi29.scapes.engine.utils.io.ByteBufferView
+import org.tobi29.scapes.engine.utils.io.ByteViewRO
+import org.tobi29.scapes.engine.utils.io.viewBufferE
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.engine.utils.math.remP
 import org.tobi29.scapes.engine.utils.toArray
 
-class AnimatedTerrainTexture(buffer: ByteBuffer,
+class AnimatedTerrainTexture(buffer: ByteViewRO,
                              width: Int,
                              height: Int,
+                             asset: Array<out String>,
                              shaderAnimation: ShaderAnimation,
-                             engine: ScapesEngine,
                              texture: () -> Texture) : TerrainTexture(
-        null, width, width, shaderAnimation, texture) {
-    private val frames: Array<Array<ByteBuffer>>
+        null, width, width, asset, shaderAnimation, texture) {
+    private val frames: Array<Array<ByteBufferView>>
     private val newFrame = AtomicInteger(-1)
     private var spin = 0.0
 
     init {
         val frameSize = width * width shl 2
         frames = (0 until height / width).asSequence().map {
-            buffer.position(it * frameSize)
-            buffer.limit(buffer.position() + frameSize)
-            generateMipMaps(buffer, engine, width, width, 4,
-                    true)
+            generateMipMaps(
+                    buffer.slice(it * frameSize, frameSize),
+                    { ByteBufferNative(it).viewBufferE }, width, width, 4, true)
         }.toArray()
     }
 
@@ -55,9 +56,9 @@ class AnimatedTerrainTexture(buffer: ByteBuffer,
     }
 
     override fun updateAnim(delta: Double) {
-        val old = floor(spin)
+        val old = spin.floorToInt()
         spin = (spin + delta * 20.0) remP frames.size.toDouble()
-        val i = floor(spin)
+        val i = spin.floorToInt()
         if (old != i) {
             newFrame.set(i)
         }

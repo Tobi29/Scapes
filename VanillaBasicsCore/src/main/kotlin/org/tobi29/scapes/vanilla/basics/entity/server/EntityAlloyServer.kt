@@ -18,8 +18,7 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.Terrain
-import org.tobi29.scapes.engine.utils.math.max
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.packets.PacketEntityChange
@@ -28,6 +27,7 @@ import org.tobi29.scapes.vanilla.basics.material.item.ItemIngot
 import org.tobi29.scapes.vanilla.basics.util.Alloy
 import org.tobi29.scapes.vanilla.basics.util.readAlloy
 import org.tobi29.scapes.vanilla.basics.util.writeAlloy
+import kotlin.math.max
 
 class EntityAlloyServer(type: EntityType<*, *>,
                         world: WorldServer) : EntityAbstractContainerServer(

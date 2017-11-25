@@ -17,8 +17,13 @@
 package org.tobi29.scapes.vanilla.basics.world.tree
 
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
+import org.tobi29.scapes.engine.math.Random
+import org.tobi29.scapes.engine.math.cosTable
+import org.tobi29.scapes.engine.math.sinTable
+import org.tobi29.scapes.engine.math.vector.Vector3i
+import org.tobi29.scapes.engine.utils.math.TWO_PI
+import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.scapes.engine.utils.math.sqr
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
 object TreeSequoia : Tree {
@@ -84,8 +89,8 @@ object TreeSequoia : Tree {
                         val dir = random.nextDouble() * TWO_PI
                         val distance = (1.0 - sqr(
                                 1.0 - random.nextDouble())) * leavesSize
-                        val xx = floor(cosTable(dir) * distance)
-                        val yy = floor(sinTable(dir) * distance)
+                        val xx = (cosTable(dir) * distance).floorToInt()
+                        val yy = (sinTable(dir) * distance).floorToInt()
                         branches.add(Pair(Vector3i(x, y, zz + z),
                                 Vector3i(x + xx, y + yy,
                                         random.nextInt(6) - 2 + zz + z)))
@@ -95,8 +100,8 @@ object TreeSequoia : Tree {
             branches.add(Pair(Vector3i(x, y, z + size),
                     Vector3i(x, y, z + size + 2)))
             val dir = random.nextDouble() * TWO_PI
-            val xx = floor(cosTable(dir) * 2.0f)
-            val yy = floor(sinTable(dir) * 2.0f)
+            val xx = (cosTable(dir) * 2.0f).floorToInt()
+            val yy = (sinTable(dir) * 2.0f).floorToInt()
             branches.add(Pair(Vector3i(x, y, z + size),
                     Vector3i(x + xx, y + yy, z + size + 1)))
             for ((start, end) in branches) {

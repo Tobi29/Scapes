@@ -23,12 +23,18 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.gui.GuiRenderer
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
+import org.tobi29.scapes.engine.math.vector.Vector2d
 
-class GuiComponentCredits(parent: GuiLayoutData,
-                          private val text: String) : GuiComponentHeavy(
+class GuiComponentCredits(parent: GuiLayoutData) : GuiComponentHeavy(
         parent) {
     private var y = 160.0f
+    var text: String = ""
+        set(value) {
+            if (field != value) {
+                field = value
+                dirty()
+            }
+        }
 
     override fun updateMesh(renderer: GuiRenderer,
                             size: Vector2d) {

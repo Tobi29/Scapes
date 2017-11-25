@@ -16,10 +16,7 @@
 
 package org.tobi29.scapes.tools.controlpanel
 
-import kotlinx.coroutines.experimental.CoroutineName
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.*
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.layout.GridLayout
@@ -34,7 +31,6 @@ import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
-import java.util.concurrent.TimeUnit
 
 class ReconnectDocument(private val application: MultiDocumentApplication,
                         private val address: RemoteAddress,
@@ -48,7 +44,7 @@ class ReconnectDocument(private val application: MultiDocumentApplication,
     override val shortTitle = address.address
 
     init {
-        job = launch(application + CoroutineName("Reconnect-Timer")) {
+        job = launch(application.uiContext + CoroutineName("Reconnect-Timer")) {
             for (timer in 4 downTo 0) {
                 delay(1L, TimeUnit.SECONDS)
                 text.ifPresent { it.text = "Reconnecting in $timer..." }

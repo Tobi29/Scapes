@@ -19,10 +19,15 @@ package org.tobi29.scapes.entity
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.collisions
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.vector.MutableVector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.utils.math.clamp
+import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.scapes.engine.utils.math.mix
+import kotlin.math.max
+import kotlin.math.min
 
 object EntityPhysics {
     fun collisions(aabbs: Pool<AABBElement>): Sequence<AABB> {
@@ -39,12 +44,12 @@ object EntityPhysics {
         val goY = clamp(speed.doubleY() * delta, -10.0, 10.0)
         val goZ = clamp(speed.doubleZ() * delta, -10.0, 10.0)
         terrain.collisions(
-                floor(aabb.minX + min(goX, 0.0)),
-                floor(aabb.minY + min(goY, 0.0)),
-                floor(aabb.minZ + min(goZ, 0.0)),
-                floor(aabb.maxX + max(goX, 0.0)),
-                floor(aabb.maxY + max(goY, 0.0)),
-                floor(aabb.maxZ + max(goZ, stepHeight)), aabbs)
+                (aabb.minX + min(goX, 0.0)).floorToInt(),
+                (aabb.minY + min(goY, 0.0)).floorToInt(),
+                (aabb.minZ + min(goZ, 0.0)).floorToInt(),
+                (aabb.maxX + max(goX, 0.0)).floorToInt(),
+                (aabb.maxY + max(goY, 0.0)).floorToInt(),
+                (aabb.maxZ + max(goZ, stepHeight)).floorToInt(), aabbs)
     }
 
     fun move(delta: Double,

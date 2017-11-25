@@ -27,7 +27,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.math.Face
+import org.tobi29.scapes.engine.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityChestClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityChestServer

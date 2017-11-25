@@ -18,7 +18,7 @@ package org.tobi29.scapes.chunk.terrain.infinite
 
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.math.sqr
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector2i
+import org.tobi29.scapes.engine.math.vector.MutableVector2i
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBaseChunk
 
 class TerrainInfiniteChunkLoader<out C : TerrainInfiniteBaseChunk<*>>(

@@ -17,13 +17,12 @@
 package org.tobi29.scapes.vanilla.basics.util
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.math.cos
-import org.tobi29.scapes.engine.utils.math.sin
 import org.tobi29.scapes.engine.utils.math.toRad
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3d
 import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
-
+import kotlin.math.cos
+import kotlin.math.sin
 
 fun MobServer.dropItem(item: ItemStack) {
     val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics

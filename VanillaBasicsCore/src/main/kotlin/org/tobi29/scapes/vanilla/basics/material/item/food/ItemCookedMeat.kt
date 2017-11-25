@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.material.item.food
 
 import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
@@ -78,7 +78,7 @@ class ItemCookedMeat(type: VanillaMaterialType) : ItemSimpleData(
         }
         val temperature = temperature(item)
         if (temperature > 0.1f) {
-            name.append("\nTemp.:").append(floor(temperature)).append(
+            name.append("\nTemp.:").append(temperature.floorToInt()).append(
                     "°C")
         }
         return name.toString()

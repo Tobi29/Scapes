@@ -26,12 +26,14 @@ import org.tobi29.scapes.engine.server.Connection
 import org.tobi29.scapes.engine.server.RemoteAddress
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
 
 abstract class ClientConnection(val game: GameStateGameMP,
                                 val plugins: Plugins,
-                                val loadingDistance: Int) : PlayConnection<PacketServer> {
+                                val loadingDistance: Int,
+                                val skinStorage: ClientSkinStorage) : PlayConnection<PacketServer> {
     val profilerSent = ConnectionProfiler()
     val profilerReceived = ConnectionProfiler()
     protected val pingDebug: GuiWidgetDebugValues.Element
@@ -47,7 +49,7 @@ abstract class ClientConnection(val game: GameStateGameMP,
         uploadDebug = debugValues["Connection-Up"]
     }
 
-    abstract fun start()
+    abstract suspend fun start()
 
     abstract fun stop()
 

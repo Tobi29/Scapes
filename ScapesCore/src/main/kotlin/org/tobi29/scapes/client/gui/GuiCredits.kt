@@ -16,11 +16,11 @@
 
 package org.tobi29.scapes.client.gui
 
+import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.io.asString
-import org.tobi29.scapes.engine.utils.io.process
 import org.tobi29.scapes.engine.utils.logging.KLogging
 
 class GuiCredits(state: GameState,
@@ -29,17 +29,16 @@ class GuiCredits(state: GameState,
         state, style) {
 
     init {
-        val credits = try {
-            state.engine.files["Scapes:Readme.txt"].read {
-                process(it, asString())
-            }
-        } catch (e: IOException) {
-            logger.error { "Error reading Readme.txt: $e" }
-            "Failed to load credits"
-        }
-
         addHori(0.0, 0.0, 120.0, -1.0, ::GuiComponentGroup)
-        addHori(0.0, 0.0, -1.0, 18.0) { GuiComponentCredits(it, credits) }
+        val credits = addHori(0.0, 0.0, -1.0, 18.0) { GuiComponentCredits(it) }
+        launch(engine.taskExecutor) {
+            credits.text = try {
+                state.engine.files["Scapes:Readme.txt"].readAsync { it.asString() }
+            } catch (e: IOException) {
+                logger.error { "Error reading Readme.txt: $e" }
+                "Failed to load credits"
+            }
+        }
         val pane = addHori(0.0, 0.0, 96.0, -1.0, ::GuiComponentVisiblePane)
         val back = pane.addVert(13.0, 64.0, -1.0, 30.0) {
             button(it, "Back")
@@ -49,7 +48,7 @@ class GuiCredits(state: GameState,
             engine.sounds.stop("music.Credits")
             engine.guiStack.swap(this, previous)
         }
-        back.on(GuiEvent.CLICK_LEFT) { event -> fireAction(GuiAction.BACK) }
+        back.on(GuiEvent.CLICK_LEFT) { fireAction(GuiAction.BACK) }
 
         engine.sounds.stop("music")
         engine.sounds.playMusic("Scapes:sound/Credits.ogg",

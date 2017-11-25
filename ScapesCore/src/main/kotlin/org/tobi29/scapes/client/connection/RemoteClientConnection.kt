@@ -27,28 +27,31 @@ import org.tobi29.scapes.engine.utils.io.IOException
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.engine.utils.task.loop
+import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketPingClient
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.experimental.TimeUnit
 
-class RemoteClientConnection(private val worker: ConnectionWorker,
-                             game: GameStateGameMP,
-                             private val address: RemoteAddress,
-                             private val channel: PacketBundleChannel,
-                             private val rateChannel: SSLChannel,
-                             plugins: Plugins,
-                             loadingDistance: Int) : ClientConnection(game,
-        plugins, loadingDistance) {
+class RemoteClientConnection(
+        private val worker: ConnectionWorker,
+        game: GameStateGameMP,
+        private val address: RemoteAddress,
+        private val channel: PacketBundleChannel,
+        private val rateChannel: SSLChannel,
+        plugins: Plugins,
+        loadingDistance: Int,
+        skinStorage: ClientSkinStorage
+) : ClientConnection(game, plugins, loadingDistance, skinStorage) {
     // TODO: Port away
     private val sendQueue = ConcurrentLinkedQueue<PacketServer>()
     private var isClosed = false
     private var close = false
     private var pingHandler: (Long) -> Unit = {}
 
-    override fun start() {
+    override suspend fun start() {
         launch(game.engine.taskExecutor + CoroutineName("Connection-Rate")) {
             Timer().apply { init() }.loop(Timer.toDiff(1.0),
                     { delay(it, TimeUnit.NANOSECONDS) }) {

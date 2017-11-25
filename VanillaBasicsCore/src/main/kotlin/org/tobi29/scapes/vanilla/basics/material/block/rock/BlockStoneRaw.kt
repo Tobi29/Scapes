@@ -18,7 +18,7 @@ package org.tobi29.scapes.vanilla.basics.material.block.rock
 
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.engine.utils.math.Random
+import org.tobi29.scapes.engine.math.Random
 import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 

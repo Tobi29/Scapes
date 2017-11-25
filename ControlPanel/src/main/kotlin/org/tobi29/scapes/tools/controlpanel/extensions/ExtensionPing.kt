@@ -16,21 +16,17 @@
 
 package org.tobi29.scapes.tools.controlpanel.extensions
 
-import kotlinx.coroutines.experimental.CoroutineName
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.*
 import org.eclipse.swt.SWT
 import org.eclipse.swt.widgets.Text
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
+import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.ComponentTypeRegistered
 import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.engine.utils.task.loop
 import org.tobi29.scapes.tools.controlpanel.ControlPanelDocument
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
 
 class ExtensionPing(
         connection: ControlPanelProtocol
@@ -40,7 +36,8 @@ class ExtensionPing(
 
     override fun init(holder: ControlPanelDocument) {
         val stop = AtomicBoolean(false)
-        job = launch(holder.application + CoroutineName("Extension-Ping")) {
+        job = launch(holder.application.uiContext + CoroutineName(
+                "Extension-Ping")) {
             Timer().apply { init() }.loop(Timer.toDiff(1.0),
                     { delay(it, TimeUnit.NANOSECONDS) }) {
                 if (stop.get()) return@loop false

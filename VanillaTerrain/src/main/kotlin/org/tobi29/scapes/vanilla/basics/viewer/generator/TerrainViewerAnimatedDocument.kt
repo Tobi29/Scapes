@@ -18,20 +18,20 @@ package org.tobi29.scapes.vanilla.basics.viewer.generator
 import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
-import org.tobi29.scapes.engine.swt.util.framework.Application
+import org.tobi29.scapes.engine.swt.util.framework.GuiApplication
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
 import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.engine.utils.task.loop
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.experimental.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 class TerrainViewerAnimatedDocument(
-        application: Application,
+        application: GuiApplication,
         colorSupplier: () -> TerrainViewerCanvas.ColorSupplier,
         private val progress: () -> Unit
 ) : TerrainViewerDocument(colorSupplier) {
     val job = AtomicBoolean(false).let { stop ->
-        launch(application + CoroutineName("Animation-Progress")) {
+        launch(application.uiContext + CoroutineName("Animation-Progress")) {
             Timer().apply { init() }.loop(Timer.toDiff(4.0),
                     { delay(it, TimeUnit.NANOSECONDS) }) {
                 if (stop.get()) return@loop false

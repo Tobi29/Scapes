@@ -26,7 +26,6 @@ import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 import org.tobi29.scapes.engine.utils.ComponentHolder
 import org.tobi29.scapes.engine.utils.ComponentStorage
-import org.tobi29.scapes.engine.utils.filterMap
 import org.tobi29.scapes.tools.controlpanel.extensions.*
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 
@@ -78,7 +77,7 @@ class ControlPanelDocument(
                 Shortcut["Connection.Disconnect", 'D', Shortcut.Modifier.CONTROL])
         composite.layout = FillLayout()
         val panel = ControlPanelConnection(composite)
-        components.asSequence().filterMap<ComponentUIControlPanel>()
+        components.asSequence().filterIsInstance<ComponentUIControlPanel>()
                 .sortedByDescending { it.priority }.forEach {
             it.populate(panel)
         }

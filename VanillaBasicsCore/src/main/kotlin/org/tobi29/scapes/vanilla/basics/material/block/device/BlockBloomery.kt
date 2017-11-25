@@ -26,8 +26,7 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.math.Face
+import org.tobi29.scapes.engine.math.Face
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBloomeryClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityBloomeryServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
@@ -94,7 +93,7 @@ class BlockBloomery(type: VanillaMaterialType) : VanillaBlockContainer<EntityBlo
                         z: Int,
                         data: Int) {
         terrain.getEntities(x, y,
-                z).filterMap<EntityBloomeryServer>().forEach { entity ->
+                z).filterIsInstance<EntityBloomeryServer>().forEach { entity ->
             entity.updateBellows(terrain)
         }
     }

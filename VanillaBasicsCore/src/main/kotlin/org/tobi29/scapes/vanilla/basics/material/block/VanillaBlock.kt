@@ -20,11 +20,10 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.filterMap
-import org.tobi29.scapes.engine.utils.math.Face
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.math.vector.plus
+import org.tobi29.scapes.engine.math.Face
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.Vector3i
+import org.tobi29.scapes.engine.math.vector.plus
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityBlockBreakServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
@@ -115,7 +114,7 @@ abstract class VanillaBlock(type: VanillaMaterialType) : BlockType(type.type) {
                         Vector3d.ZERO)
             }
             val entityBreak = terrain.getEntities(x, y, z)
-                    .filterMap<EntityBlockBreakServer>()
+                    .filterIsInstance<EntityBlockBreakServer>()
                     .firstOrNull() ?: run {
                 val entityBreak = materials.plugin.entityTypes.blockBreak.createServer(
                         terrain.world).apply {

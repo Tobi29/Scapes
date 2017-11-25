@@ -26,14 +26,14 @@ import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.AABB
-import org.tobi29.scapes.engine.utils.math.min
+import org.tobi29.scapes.engine.math.AABB
 import org.tobi29.scapes.engine.utils.math.sqr
-import org.tobi29.scapes.engine.utils.math.sqrt
-import org.tobi29.scapes.engine.utils.math.vector.Vector2i
-import org.tobi29.scapes.engine.utils.math.vector.div
+import org.tobi29.scapes.engine.math.vector.Vector2i
+import org.tobi29.scapes.engine.math.vector.div
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.task.TaskLock
+import kotlin.math.min
+import kotlin.math.sqrt
 
 class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                               chunkDistance: Double,
@@ -210,7 +210,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         }
         chunks.forEach { it.render(gl, shader1, shader2, cam) }
         if (debug) {
-            gl.graphics.textureEmpty().bind(gl)
+            gl.textureEmpty().bind(gl)
             chunks.forEach { it.renderFrame(gl, frame, shader1, cam) }
         }
     }

@@ -21,11 +21,11 @@ import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.math.round
-import org.tobi29.scapes.engine.utils.math.vector.Vector2d
+import org.tobi29.scapes.engine.math.vector.Vector2d
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAlloyClient
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
+import kotlin.math.roundToInt
 
 class GuiAlloyInventory(container: EntityAlloyClient,
                         player: MobPlayerClientMainVB,
@@ -67,7 +67,7 @@ class GuiAlloyInventory(container: EntityAlloyClient,
                             "VanillaBasics") as VanillaBasics).name)
             alloy.metals.forEach {
                 text.append('\n').append(it.key.name).append(" - ").append(
-                        round(it.value * 100.0) / 100.0)
+                        (it.value * 100.0).roundToInt() / 100.0)
             }
         } else {
             text.append("Insert molten metal on top\nslot, extract below.")

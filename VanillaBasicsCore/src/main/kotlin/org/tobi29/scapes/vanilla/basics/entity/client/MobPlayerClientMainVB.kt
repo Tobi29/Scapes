@@ -25,13 +25,18 @@ import org.tobi29.scapes.client.Playlist
 import org.tobi29.scapes.client.gui.GuiChatWrite
 import org.tobi29.scapes.client.gui.GuiPause
 import org.tobi29.scapes.client.input.InputModeScapes
-import org.tobi29.scapes.client.input.keyboard.InputModeKeyboard
+import org.tobi29.scapes.client.input.InputModeKeyboard
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.input.ControllerKey
+import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.scapes.engine.math.Frustum
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.direction
 import org.tobi29.scapes.engine.utils.ListenerRegistrar
-import org.tobi29.scapes.engine.utils.math.*
-import org.tobi29.scapes.engine.utils.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.math.vector.direction
+import org.tobi29.scapes.engine.utils.math.clamp
+import org.tobi29.scapes.engine.utils.math.remP
+import org.tobi29.scapes.engine.utils.math.toDeg
+import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.entity.CreatureType
@@ -49,6 +54,7 @@ import org.tobi29.scapes.packets.PacketItemUse
 import org.tobi29.scapes.packets.PacketPlayerJump
 import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
 import org.tobi29.scapes.vanilla.basics.gui.GuiPlayerInventory
+import kotlin.math.*
 
 class MobPlayerClientMainVB(type: EntityType<*, *>,
                             world: WorldClient) : MobPlayerClientMain(
@@ -63,6 +69,7 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
     private var punchRight: Long = -1
     private var chargeLeft = 0.0f
     private var chargeRight = 0.0f
+    private var flyingPressed = false
 
     init {
         val texture = world.scene.skinStorage()[skin]
@@ -108,9 +115,12 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
             // Debug
             if (Debug.enabled()) {
                 (input as? InputModeKeyboard)?.controller?.let { controller ->
-                    if (controller.isPressed(ControllerKey.KEY_F5)) {
-                        flying = !flying
-                    }
+                    if (controller.isDown(ControllerKey.KEY_F5)) {
+                        if (!flyingPressed) {
+                            flyingPressed = true
+                            flying = !flying
+                        }
+                    } else flyingPressed = false
                     if (flying) {
                         if (controller.isDown(ControllerKey.KEY_Q)) {
                             speed.plusZ(60.0 * delta)

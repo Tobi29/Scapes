@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.entity.particle
 
-import org.tobi29.scapes.engine.utils.math.vector.MutableVector3d
+import org.tobi29.scapes.engine.math.vector.MutableVector3d
 
 open class ParticleInstance {
     val pos = MutableVector3d()

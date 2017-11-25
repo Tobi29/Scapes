@@ -19,11 +19,11 @@ package org.tobi29.scapes.vanilla.basics.world.tree
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainMutable
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.engine.utils.math.PI
-import org.tobi29.scapes.engine.utils.math.Random
-import org.tobi29.scapes.engine.utils.math.round
-import org.tobi29.scapes.engine.utils.math.sinTable
-import org.tobi29.scapes.engine.utils.math.vector.*
+import org.tobi29.scapes.engine.math.Random
+import org.tobi29.scapes.engine.math.sinTable
+import org.tobi29.scapes.engine.math.vector.*
+import kotlin.math.PI
+import kotlin.math.roundToInt
 
 object TreeUtil {
     fun makeBranch(terrain: TerrainMutable,
@@ -166,7 +166,7 @@ object TreeUtil {
         var xx = x
         var yy = y
         for (i in 0 until length) {
-            val h = round(sinTable(i / length * PI) * height)
+            val h = (sinTable(i / length * PI) * height).roundToInt()
             changeBlock(terrain, xx, yy, z + h, logType, logData)
             xx += dirX
             yy += dirY
@@ -174,7 +174,7 @@ object TreeUtil {
         xx = x
         yy = y
         for (i in 0 until length) {
-            val h = round(sinTable(i / length * PI) * height)
+            val h = (sinTable(i / length * PI) * height).roundToInt()
             changeBlock(terrain, xx, yy, z + h + 1, type, data)
             changeBlock(terrain, xx - 1, yy, z + h, type, data)
             changeBlock(terrain, xx + 1, yy, z + h, type, data)

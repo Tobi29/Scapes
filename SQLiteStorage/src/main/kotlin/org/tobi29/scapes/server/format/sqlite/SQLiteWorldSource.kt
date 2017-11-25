@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.server.format.sqlite
 
+import kotlinx.coroutines.experimental.runBlocking
 import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteDataSource
 import org.tobi29.scapes.engine.sql.sqlite.SQLiteDatabase
@@ -61,7 +62,7 @@ class SQLiteWorldSource(private val path: FilePath,
         return newPanorama {
             val background = path.resolve("Panorama$it.png")
             if (exists(background)) {
-                read(background) { decodePNG(it) }
+                read(background) { runBlocking { decodePNG(it) } }
             } else {
                 return null
             }
@@ -87,8 +88,7 @@ class SQLiteWorldSource(private val path: FilePath,
         }
 
         fun openDatabase(path: FilePath): Connection {
-            return openDatabase(
-                    "jdbc:sqlite:${path.toAbsolutePath().toUri().toURL()}")
+            return openDatabase("jdbc:sqlite:${path.toAbsolutePath().toUri()}")
         }
 
         fun openDatabase(url: String): Connection {

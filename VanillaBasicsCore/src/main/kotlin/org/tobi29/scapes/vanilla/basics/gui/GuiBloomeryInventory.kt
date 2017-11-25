@@ -19,7 +19,7 @@ package org.tobi29.scapes.vanilla.basics.gui
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.math.floor
+import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBloomeryClient
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 
@@ -70,6 +70,6 @@ class GuiBloomeryInventory(container: EntityBloomeryClient,
     }
 
     private fun updateTemperatureText() {
-        temperatureText.text = "${floor(container.temperature)}°C"
+        temperatureText.text = "${container.temperature.floorToInt()}°C"
     }
 }

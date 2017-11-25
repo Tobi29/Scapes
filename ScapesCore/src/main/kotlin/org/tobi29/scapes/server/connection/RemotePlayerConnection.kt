@@ -65,7 +65,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                 return
             }
             val array = ByteArray(550)
-            input.get(array)
+            input.get(array.view)
             id = checksum(array, Algorithm.SHA1).toString()
             val challenge = ByteArray(501)
             SecureRandom().nextBytes(challenge)
@@ -74,7 +74,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                         X509EncodedKeySpec(array))
                 val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
                 cipher.init(Cipher.ENCRYPT_MODE, key)
-                output.put(cipher.doFinal(challenge))
+                output.put(cipher.doFinal(challenge).view)
             } catch (e: NoSuchAlgorithmException) {
                 throw IOException(e)
             } catch (e: NoSuchPaddingException) {
@@ -97,7 +97,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                 return
             }
             val challengeReceived = ByteArray(challenge.size)
-            input.get(challengeReceived)
+            input.get(challengeReceived.view)
             nickname = input.getString(1 shl 10)
             var length = input.getInt()
             val requests = ArrayList<Int>(length)
@@ -125,9 +125,8 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             }
             loadingRadius = clamp(input.getInt(), 10,
                     server.server.maxLoadingRadius())
-            val buffer = ByteBuffer(64 * 64 * 4)
+            val buffer = ByteArray(64 * 64 * 4).view
             input.get(buffer)
-            buffer.flip()
             skin = ServerSkin(Image(64, 64, buffer))
             val response = server.addPlayer(this@RemotePlayerConnection)
             if (response != null) {
@@ -277,11 +276,11 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
     private fun sendPlugin(path: FilePath,
                            output: WritableByteStream) {
         read(path) { stream ->
-            process(stream, { buffer ->
+            stream.process(1 shl 10 shl 10) {
                 output.putBoolean(false)
-                output.put(buffer)
+                output.put(it)
                 channel.queueBundle()
-            }, 1 shl 10 shl 10)
+            }
         }
         output.putBoolean(true)
         channel.queueBundle()

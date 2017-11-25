@@ -20,7 +20,7 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.engine.utils.Pool
 import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.math.PointerPane
+import org.tobi29.scapes.engine.math.PointerPane
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.packets.PacketBlockChange
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteSection
