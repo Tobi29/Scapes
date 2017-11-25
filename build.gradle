@@ -16,10 +16,10 @@
 
 buildscript {
     def kotlinVersion = "1.2.0-rc-83"
-    def scapesEngineBuildVersion = "0.0.5"
+    def scapesEngineBuildVersion = "0.0.6"
     def dokkaVersion = "0.9.15"
     def junitPlatformVersion = "1.0.0"
-    def shadowVersion = "2.0.0"
+    def shadowVersion = "2.0.1"
 
     repositories {
         jcenter()
@@ -84,7 +84,7 @@ ext {
     log4jVersion = "2.8.1"
     jnaVersion = "4.4.0"
     sqliteJDBCVersion = "3.20.0"
-    scapesEngineVersion = "0.0.6"
+    scapesEngineVersion = "0.0.9"
 
     slf4jSimple = "org.slf4j:slf4j-simple:$slf4jVersion"
     lwjgl = "org.lwjgl:lwjgl:$lwjglVersion"
