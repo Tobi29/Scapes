@@ -26,7 +26,7 @@ import org.tobi29.scapes.engine.utils.graphics.Cam
 import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.engine.utils.task.launchThread
 import org.tobi29.scapes.engine.utils.task.loop
-import kotlinx.coroutines.experimental.TimeUnit
+import java.util.concurrent.TimeUnit
 
 class ParticleSystem(val world: WorldClient,
                      tps: Double) {
@@ -36,8 +36,7 @@ class ParticleSystem(val world: WorldClient,
     init {
         // TODO: Make init method
         val stop = AtomicBoolean(false)
-        updateJob = launchThread("Particles",
-                world.game.engine.taskExecutor[Job]) {
+        updateJob = launchThread("Particles") {
             Timer().apply { init() }.loop(Timer.toDiff(tps),
                     { delay(it, TimeUnit.NANOSECONDS) }) { delta ->
                 if (stop.get()) return@loop false
