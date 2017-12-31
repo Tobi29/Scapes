@@ -39,7 +39,8 @@ import kotlin.math.min
 
 class ComponentMobLivingServerCondition(
         val entity: MobLiving
-) : ComponentRegistered,
+) : ComponentEntity,
+        ComponentRegistered,
         ComponentMapSerializable {
     override val id = "VanillaBasics:Condition"
     var stamina: Double = 0.0
