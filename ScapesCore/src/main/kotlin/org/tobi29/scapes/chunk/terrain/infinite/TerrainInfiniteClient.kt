@@ -16,12 +16,9 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import kotlinx.coroutines.experimental.CoroutineName
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.channels.ActorJob
+import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.experimental.channels.SendChannel
 import kotlinx.coroutines.experimental.channels.actor
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainClient
@@ -29,7 +26,6 @@ import org.tobi29.scapes.engine.math.vector.MutableVector2i
 import org.tobi29.scapes.engine.math.vector.Vector2i
 import org.tobi29.scapes.engine.math.vector.distanceSqr
 import org.tobi29.scapes.engine.math.vector.lengthSqr
-import org.tobi29.scapes.engine.utils.AtomicBoolean
 import org.tobi29.scapes.engine.utils.ConcurrentHashSet
 import org.tobi29.scapes.engine.utils.ThreadLocal
 import org.tobi29.scapes.engine.utils.logging.KLogging
@@ -42,7 +38,7 @@ import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.packets.PacketBlockChange
 import org.tobi29.scapes.packets.PacketRequestChunk
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManagerStatic
-import kotlinx.coroutines.experimental.TimeUnit
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.coroutines.experimental.buildSequence
 
@@ -54,11 +50,12 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
                                                 private val center: MutableVector2i) : TerrainInfinite<EntityClient, TerrainInfiniteChunkClient>(
         zSize, taskExecutor, air, world.registry,
         TerrainInfiniteChunkManagerStatic(center,
-                loadingRadius)), TerrainClient {
+                loadingRadius)),
+        TerrainClient {
     override val renderer: TerrainInfiniteRenderer
     private val sortedLocations: List<Vector2i>
-    private var requestActor: ActorJob<Unit>? = null
-    private var requestHeartbeatJob: Pair<Job, AtomicBoolean>? = null
+    private var requestJob: Job? = null
+    private var requestActor: SendChannel<Unit>? = null
     private val chunkRequests = ConcurrentHashSet<Vector2i>()
 
     constructor(world: WorldClient,
@@ -118,54 +115,53 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
 
     override fun init() {
         val loadingRadiusSqr = sqr(loadingRadius)
-        requestActor = actor(taskExecutor + CoroutineName("Load-Requests")) {
+        requestJob = Job()
+        requestActor = actor(taskExecutor + CoroutineName("Load-Requests"),
+                parent = requestJob) {
             for (msg in channel) {
-                var isLoading = false
-                val playerPos = world.player.getCurrentPos()
-                val x = playerPos.intX() shr 4
-                val y = playerPos.intY() shr 4
-                for (pos in sortedLocations) {
-                    val xx = pos.x + x
-                    val yy = pos.y + y
-                    val chunk = chunkManager[xx, yy]
-                    if (pos.lengthSqr() < loadingRadiusSqr) {
-                        if (chunk == null && !isLoading) {
-                            val p = Vector2i(xx, yy)
-                            if (chunkRequests.size < 3
-                                    && !chunkRequests.contains(p)) {
-                                chunkRequests.add(p)
-                                world.send(
-                                        PacketRequestChunk(
-                                                world.plugins.registry, xx, yy))
-                            } else {
-                                isLoading = true
+                withContext(NonCancellable) {
+                    var isLoading = false
+                    val playerPos = world.player.getCurrentPos()
+                    val x = playerPos.intX() shr 4
+                    val y = playerPos.intY() shr 4
+                    for (pos in sortedLocations) {
+                        val xx = pos.x + x
+                        val yy = pos.y + y
+                        val chunk = chunkManager[xx, yy]
+                        if (pos.lengthSqr() < loadingRadiusSqr) {
+                            if (chunk == null && !isLoading) {
+                                val p = Vector2i(xx, yy)
+                                if (chunkRequests.size < 3
+                                        && !chunkRequests.contains(p)) {
+                                    chunkRequests.add(p)
+                                    world.send(
+                                            PacketRequestChunk(
+                                                    world.plugins.registry, xx,
+                                                    yy))
+                                } else {
+                                    isLoading = true
+                                }
                             }
+                        } else if (chunk != null) {
+                            removeChunk(chunk)
                         }
-                    } else if (chunk != null) {
-                        removeChunk(chunk)
                     }
                 }
             }
         }
-        val stop = AtomicBoolean(false)
-        requestHeartbeatJob = launch(
-                taskExecutor + CoroutineName("Load-Requests-Heartbeat")) {
+        launch(taskExecutor + CoroutineName("Load-Requests-Heartbeat"),
+                parent = requestJob) {
             Timer().apply { init() }.loop(Timer.toDiff(100.0),
                     { delay(it, TimeUnit.NANOSECONDS) }) {
-                if (stop.get()) return@loop false
-
                 requestActor?.offer(Unit)
-
                 true
             }
-        } to stop
+        }
     }
 
     override suspend fun dispose() {
-        requestActor?.let {
-            it.close()
-            it.join()
-        }
+        requestActor?.close()
+        requestJob?.cancelAndJoin()
         lighting.dispose()
         chunkManager.stream().forEach { removeChunk(it) }
         renderer.dispose()

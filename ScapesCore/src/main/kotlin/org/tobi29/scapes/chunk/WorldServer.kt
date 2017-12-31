@@ -19,11 +19,11 @@ import kotlinx.coroutines.experimental.Job
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.connection.PlayConnection
+import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.scapes.engine.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.*
 import org.tobi29.scapes.engine.utils.logging.KLogging
 import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.distanceSqr
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.task.Timer
@@ -308,7 +308,7 @@ class WorldServer(worldFormat: WorldFormat,
 
     fun start() {
         val stop = AtomicBoolean(false)
-        updateJob = launchThread("State", taskExecutor[Job]) {
+        updateJob = launchThread("State") {
             thread = Thread.currentThread()
             val timer = Timer()
             val maxDiff = Timer.toDiff(20.0)

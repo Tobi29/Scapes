@@ -16,7 +16,10 @@
 
 package org.tobi29.scapes.tools.controlpanel.extensions
 
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Group
@@ -33,6 +36,7 @@ import org.tobi29.scapes.engine.utils.task.loop
 import org.tobi29.scapes.tools.controlpanel.ControlPanelDocument
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelGraphs
+import java.util.concurrent.TimeUnit
 
 class ExtensionStat(
         application: GuiApplication,

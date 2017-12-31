@@ -16,27 +16,25 @@
 
 package org.tobi29.scapes.terrain.lighting
 
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.channels.ActorJob
 import kotlinx.coroutines.experimental.channels.Channel
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.math.clamp
-import kotlin.math.max
 import org.tobi29.scapes.engine.math.vector.MutableVector3i
 import org.tobi29.scapes.engine.math.vector.Vector3i
+import org.tobi29.scapes.engine.utils.Pool
+import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.profiler.profilerSection
+import org.tobi29.scapes.engine.utils.task.ActorThreadJob
 import org.tobi29.scapes.engine.utils.task.actorThread
 import org.tobi29.scapes.terrain.TerrainBase
 import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.math.max
 
 class LightingEngineThreaded(private val terrain: TerrainBase<*>,
                              taskExecutor: CoroutineContext) : LightingEngine {
-    private var updateActor: ActorJob<Vector3i>? = null
+    private var updateActor: ActorThreadJob<Vector3i>? = null
 
     init {
         // TODO: Make init method
-        updateActor = actorThread("Lighting-Engine", taskExecutor[Job],
-                Channel.UNLIMITED) {
+        updateActor = actorThread("Lighting-Engine", Channel.UNLIMITED) {
             val updates = Pool { MutableVector3i() }
             val newUpdates = Pool { MutableVector3i() }
             for (msg in channel) {

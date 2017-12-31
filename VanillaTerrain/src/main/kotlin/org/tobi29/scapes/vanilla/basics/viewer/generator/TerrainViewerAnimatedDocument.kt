@@ -22,7 +22,7 @@ import org.tobi29.scapes.engine.swt.util.framework.GuiApplication
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
 import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.engine.utils.task.loop
-import kotlinx.coroutines.experimental.TimeUnit
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 class TerrainViewerAnimatedDocument(

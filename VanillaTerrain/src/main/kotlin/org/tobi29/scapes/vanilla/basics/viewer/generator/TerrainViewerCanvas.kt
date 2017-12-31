@@ -35,7 +35,7 @@ import org.tobi29.scapes.engine.utils.AtomicLong
 import org.tobi29.scapes.engine.utils.ConcurrentHashMap
 import org.tobi29.scapes.engine.utils.graphics.hsvToRGB
 import org.tobi29.scapes.engine.utils.math.clamp
-import kotlinx.coroutines.experimental.TimeUnit
+import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt

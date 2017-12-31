@@ -21,13 +21,10 @@ import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.ComponentRegisteredHolder
-import org.tobi29.scapes.engine.utils.ComponentType
-import org.tobi29.scapes.engine.utils.ConcurrentHashSet
-import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.math.threadLocalRandom
 import org.tobi29.scapes.engine.math.vector.lengthSqr
+import org.tobi29.scapes.engine.utils.*
+import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.engine.utils.task.loop
@@ -36,11 +33,14 @@ import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.packets.PacketEntityComponentData
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldServer
-import kotlinx.coroutines.experimental.TimeUnit
+import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
 
-class ComponentMobLivingServerCondition(val entity: MobLiving) : ComponentEntity, ComponentSerializable {
+class ComponentMobLivingServerCondition(
+        val entity: MobLiving
+) : ComponentRegistered,
+        ComponentMapSerializable {
     override val id = "VanillaBasics:Condition"
     var stamina: Double = 0.0
         @Synchronized get

@@ -26,7 +26,7 @@ import org.tobi29.scapes.engine.utils.io.ReadableByteStream
 import org.tobi29.scapes.engine.utils.io.WritableByteStream
 import org.tobi29.scapes.engine.math.vector.Vector2d
 import org.tobi29.scapes.server.connection.PlayerConnection
-import kotlinx.coroutines.experimental.TimeUnit
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 class PacketItemUse : PacketAbstract, PacketServer {

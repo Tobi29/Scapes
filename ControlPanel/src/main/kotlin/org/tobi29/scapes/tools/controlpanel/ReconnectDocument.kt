@@ -16,7 +16,10 @@
 
 package org.tobi29.scapes.tools.controlpanel
 
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.layout.GridLayout
@@ -31,6 +34,7 @@ import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
 import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
 import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
 import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
+import java.util.concurrent.TimeUnit
 
 class ReconnectDocument(private val application: MultiDocumentApplication,
                         private val address: RemoteAddress,

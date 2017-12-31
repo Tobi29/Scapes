@@ -16,7 +16,10 @@
 
 package org.tobi29.scapes.tools.controlpanel.extensions
 
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.experimental.CoroutineName
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.eclipse.swt.SWT
 import org.eclipse.swt.widgets.Text
 import org.tobi29.scapes.engine.server.ControlPanelProtocol
@@ -27,6 +30,7 @@ import org.tobi29.scapes.engine.utils.task.Timer
 import org.tobi29.scapes.engine.utils.task.loop
 import org.tobi29.scapes.tools.controlpanel.ControlPanelDocument
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
+import java.util.concurrent.TimeUnit
 
 class ExtensionPing(
         connection: ControlPanelProtocol
@@ -39,7 +43,7 @@ class ExtensionPing(
         job = launch(holder.application.uiContext + CoroutineName(
                 "Extension-Ping")) {
             Timer().apply { init() }.loop(Timer.toDiff(1.0),
-                    { delay(it, TimeUnit.NANOSECONDS) }) {
+                    {   delay(it, TimeUnit.NANOSECONDS) }) {
                 if (stop.get()) return@loop false
 
                 label.ifPresent { it.text = connection.ping.toString() }

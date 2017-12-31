@@ -33,7 +33,7 @@ import org.tobi29.scapes.packets.PacketPingClient
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
 import java.util.concurrent.ConcurrentLinkedQueue
-import kotlinx.coroutines.experimental.TimeUnit
+import java.util.concurrent.TimeUnit
 
 class RemoteClientConnection(
         private val worker: ConnectionWorker,
