@@ -41,7 +41,7 @@ class ComponentMobLivingServerCondition(
         val entity: MobLiving
 ) : ComponentEntity,
         ComponentRegistered,
-        ComponentMapSerializable {
+        ComponentSerializable {
     override val id = "VanillaBasics:Condition"
     var stamina: Double = 0.0
         @Synchronized get
