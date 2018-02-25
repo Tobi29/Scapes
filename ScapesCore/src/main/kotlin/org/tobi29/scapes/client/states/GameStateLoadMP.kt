@@ -26,10 +26,10 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
-import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.toChannel
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.server.*
+import org.tobi29.io.IOException
+import org.tobi29.io.toChannel
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import java.nio.channels.SelectionKey
 import java.util.concurrent.atomic.AtomicReference
@@ -38,14 +38,11 @@ import kotlin.math.roundToInt
 class GameStateLoadMP(private val address: RemoteAddress,
                       engine: ScapesEngine,
                       private val scene: Scene) : GameState(engine) {
-    private var gui: GuiLoading? = null
+    private val gui: GuiLoading = GuiLoading(engine.guiStyle)
 
     override fun init() {
-        val scapes = engine[ScapesClient.COMPONENT]
-        gui = GuiLoading(this, engine.guiStyle).apply {
-            setProgress("Connecting...", 0.0)
-            engine.guiStack.add("20-Progress", this)
-        }
+        gui.setProgress("Connecting...", 0.0)
+        engine.guiStack.add("20-Progress", gui)
         switchPipeline { gl ->
             renderScene(gl, scene)
         }
@@ -63,29 +60,27 @@ class GameStateLoadMP(private val address: RemoteAddress,
                 connect(worker, connection, ssl)
             } catch (e: SSLCertificateException) {
                 val certificates = e.certificates
-                gui?.let { gui ->
-                    engine.guiStack.remove(gui)
-                    try {
-                        for (certificate in certificates) {
-                            val result = AtomicReference<Boolean?>()
-                            val warning = GuiCertificateWarning(
-                                    this@GameStateLoadMP, certificate,
-                                    { value -> result.set(value) }, gui.style)
-                            engine.guiStack.add("10-Menu", warning)
-                            while (warning.isValid) {
-                                val ignore = result.get() ?: continue
-                                if (ignore) {
-                                    break
-                                } else {
-                                    fail(e)
-                                    return@addConnection
-                                }
+                engine.guiStack.remove(gui)
+                try {
+                    for (certificate in certificates) {
+                        val result = AtomicReference<Boolean?>()
+                        val warning = GuiCertificateWarning(
+                                this@GameStateLoadMP, certificate,
+                                { value -> result.set(value) }, gui.style)
+                        engine.guiStack.add("10-Menu", warning)
+                        while (warning.isVisible) {
+                            val ignore = result.get() ?: continue
+                            if (ignore) {
+                                break
+                            } else {
+                                fail(e)
+                                return@addConnection
                             }
-                            engine.guiStack.remove(warning)
                         }
-                    } finally {
-                        engine.guiStack.add("20-Progress", gui)
+                        engine.guiStack.remove(warning)
                     }
+                } finally {
+                    engine.guiStack.add("20-Progress", gui)
                 }
                 val sslForce = SSLHandle.fromCertificates(certificates)
                 connect(worker, connection, sslForce)
@@ -93,6 +88,10 @@ class GameStateLoadMP(private val address: RemoteAddress,
                 fail(e)
             }
         }
+    }
+
+    override fun dispose() {
+        engine.guiStack.remove(gui)
     }
 
     private suspend fun connect(worker: ConnectionWorker,
@@ -103,7 +102,7 @@ class GameStateLoadMP(private val address: RemoteAddress,
         val channel = connect(worker, address)
         try {
             channel.register(worker.selector, SelectionKey.OP_READ)
-            gui?.setProgress("Logging in...", 0.6)
+            gui.setProgress("Logging in...", 0.6)
             val secureChannel = ssl.newSSLChannel(address,
                     channel.toChannel(), engine.taskExecutor, true)
             val bundleChannel = PacketBundleChannel(secureChannel)
@@ -112,9 +111,9 @@ class GameStateLoadMP(private val address: RemoteAddress,
             val (plugins, loadingDistanceServer) = NewClientConnection.run(
                     bundleChannel, engine, account, loadingRadius,
                     { status ->
-                        gui?.setProgress(status, 0.66)
+                        gui.setProgress(status, 0.66)
                     }) ?: return@connect
-            gui?.setProgress("Loading world...", 1.0)
+            gui.setProgress("Loading world...", 1.0)
             val skinStorage = ClientSkinStorage(engine,
                     engine.graphics.textures["Scapes:image/entity/mob/Player"].getAsync())
             val game = GameStateGameMP({ state ->

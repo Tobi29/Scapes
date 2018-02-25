@@ -16,10 +16,10 @@
 
 package org.tobi29.scapes.entity.skin
 
+import org.tobi29.checksums.Checksum
+import org.tobi29.io.ByteViewRO
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.io.ByteViewRO
 
 class ClientSkin(engine: ScapesEngine,
                  buffer: ByteViewRO,

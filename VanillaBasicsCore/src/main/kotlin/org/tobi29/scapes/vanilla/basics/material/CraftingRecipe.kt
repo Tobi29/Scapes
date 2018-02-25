@@ -16,22 +16,21 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import org.tobi29.scapes.block.Inventory
-import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.block.Registries
-import org.tobi29.scapes.engine.utils.readOnly
+import org.tobi29.stdex.readOnly
+import org.tobi29.scapes.inventory.Inventory
+import org.tobi29.scapes.inventory.Item
 
 class CraftingRecipe(val id: Int,
                      ingredients: List<CraftingRecipe.Ingredient>,
                      requirements: List<CraftingRecipe.Ingredient>,
-                     private val result: ItemStack) {
+                     val result: Item?) {
     val ingredients = ingredients.readOnly()
     val requirements = requirements.readOnly()
 
-    fun takes(inventory: Inventory): List<ItemStack>? {
-        var inventory = inventory
-        inventory = Inventory(inventory)
-        val takes = ArrayList<ItemStack>()
+    fun takes(inventory: Inventory): List<Item>? {
+        val inventory = Inventory(inventory)
+        val takes = ArrayList<Item>()
         for (ingredient in ingredients) {
             val take = ingredient.match(inventory)
             if (take != null) {
@@ -49,32 +48,42 @@ class CraftingRecipe(val id: Int,
         return takes
     }
 
-    fun result(): ItemStack {
-        return ItemStack(result)
-    }
-
     interface Ingredient {
-        fun match(inventory: Inventory): ItemStack?
+        fun match(inventory: Inventory): Item?
 
-        fun example(i: Int): ItemStack
+        fun example(i: Int): Item
     }
 
-    class IngredientList(private val variations: List<ItemStack>) : Ingredient {
+    class IngredientList(private val variations: List<Item>) : Ingredient {
 
-        constructor(vararg variations: ItemStack) : this(
-                listOf(*variations))
+        constructor(vararg variations: Item) : this(variations.asList())
 
-        override fun match(inventory: Inventory): ItemStack? {
+        override fun match(inventory: Inventory): Item? {
             for (variant in variations) {
-                if (inventory.canTake(variant)) {
+                if (inventory.canTakeAll(variant)) {
                     return variant
                 }
             }
             return null
         }
 
-        override fun example(i: Int): ItemStack {
+        override fun example(i: Int): Item {
             return variations[i % variations.size]
+        }
+    }
+
+    class IngredientPredicate(private val predicate: (Item) -> Boolean,
+                              val examples: List<Item>) : Ingredient {
+        override fun match(inventory: Inventory): Item? {
+            for (i in 0 until inventory.size()) {
+                val item = inventory[i] ?: continue
+                if (predicate(item)) return item
+            }
+            return null
+        }
+
+        override fun example(i: Int): Item {
+            return examples[i % examples.size]
         }
     }
 

@@ -19,11 +19,12 @@ package org.tobi29.scapes.vanilla.basics.entity.particle
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.shader.IntegerExpression
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.graphics.Cam
+import org.tobi29.stdex.math.TWO_PI
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.scapes.engine.shader.IntegerExpression
 import org.tobi29.scapes.entity.particle.ParticleEmitter
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.particle.ParticleSystem
@@ -42,17 +43,17 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
             val normal = FloatArray(lines.size * 6)
             var j = 0
             for (line in lines) {
-                vertex[j] = line.start.floatX()
+                vertex[j] = line.start.x.toFloat()
                 normal[j++] = 0.0f
-                vertex[j] = line.start.floatY()
+                vertex[j] = line.start.y.toFloat()
                 normal[j++] = 0.0f
-                vertex[j] = line.start.floatZ()
+                vertex[j] = line.start.z.toFloat()
                 normal[j++] = 1.0f
-                vertex[j] = line.end.floatX()
+                vertex[j] = line.end.x.toFloat()
                 normal[j++] = 0.0f
-                vertex[j] = line.end.floatY()
+                vertex[j] = line.end.y.toFloat()
                 normal[j++] = 0.0f
-                vertex[j] = line.end.floatZ()
+                vertex[j] = line.end.z.toFloat()
                 normal[j++] = 1.0f
             }
             val index = IntArray(lines.size shl 1)
@@ -70,17 +71,17 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
             val normal = FloatArray(lines.size * 6)
             var j = 0
             for (line in lines) {
-                vertex[j] = line.start.floatX()
+                vertex[j] = line.start.x.toFloat()
                 normal[j++] = 0.0f
-                vertex[j] = line.start.floatY()
+                vertex[j] = line.start.y.toFloat()
                 normal[j++] = 0.0f
-                vertex[j] = line.start.floatZ()
+                vertex[j] = line.start.z.toFloat()
                 normal[j++] = 1.0f
-                vertex[j] = line.end.floatX()
+                vertex[j] = line.end.x.toFloat()
                 normal[j++] = 0.0f
-                vertex[j] = line.end.floatY()
+                vertex[j] = line.end.y.toFloat()
                 normal[j++] = 0.0f
-                vertex[j] = line.end.floatZ()
+                vertex[j] = line.end.z.toFloat()
                 normal[j++] = 1.0f
             }
             val index = IntArray(lines.size shl 1)
@@ -185,15 +186,15 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
                 if (instance.state != ParticleInstance.State.ALIVE) {
                     continue
                 }
-                val x = instance.pos.intX()
-                val y = instance.pos.intY()
-                val z = instance.pos.intZ()
+                val x = instance.pos.x.floorToInt()
+                val y = instance.pos.y.floorToInt()
+                val z = instance.pos.z.floorToInt()
                 if (terrain.block(x, y, z) {
                     !isSolid(it) || isTransparent(it)
                 }) {
-                    val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
-                    val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
-                    val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
+                    val posRenderX = (instance.pos.x - cam.position.x).toFloat()
+                    val posRenderY = (instance.pos.y - cam.position.y).toFloat()
+                    val posRenderZ = (instance.pos.z - cam.position.z).toFloat()
                     gl.matrixStack.push { matrix ->
                         matrix.translate(posRenderX, posRenderY, posRenderZ)
                         models[instance.vao].render(gl, s)

@@ -18,6 +18,26 @@ package org.tobi29.scapes.desktop
 
 import kotlinx.coroutines.experimental.asCoroutineDispatcher
 import kotlinx.coroutines.experimental.runBlocking
+import org.tobi29.application.Application
+import org.tobi29.application.StatusCode
+import org.tobi29.application.executeMain
+import org.tobi29.args.CommandLine
+import org.tobi29.args.get
+import org.tobi29.args.getBoolean
+import org.tobi29.chrono.*
+import org.tobi29.io.*
+import org.tobi29.io.classpath.ClasspathPath
+import org.tobi29.io.filesystem.*
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.json.readJSON
+import org.tobi29.io.tag.json.writeJSON
+import org.tobi29.io.tag.mapMut
+import org.tobi29.io.tag.toMutTag
+import org.tobi29.io.tag.toTag
+import org.tobi29.platform.appIDForCache
+import org.tobi29.platform.appIDForData
+import org.tobi29.platform.cacheHome
+import org.tobi29.platform.dataHome
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.client.SaveStorage
@@ -27,39 +47,19 @@ import org.tobi29.scapes.client.states.GameStateMenu
 import org.tobi29.scapes.engine.Container
 import org.tobi29.scapes.engine.GameStateStartup
 import org.tobi29.scapes.engine.ScapesEngine
-import org.tobi29.scapes.engine.application.Application
-import org.tobi29.scapes.engine.application.StatusCode
-import org.tobi29.scapes.engine.application.executeMain
-import org.tobi29.scapes.engine.args.CommandLine
-import org.tobi29.scapes.engine.args.get
-import org.tobi29.scapes.engine.args.getBoolean
 import org.tobi29.scapes.engine.backends.lwjgl3.ScapesEngineLWJGL3
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.ContainerGLFW
-import org.tobi29.scapes.engine.chrono.*
 import org.tobi29.scapes.engine.graphics.FontRenderer
 import org.tobi29.scapes.engine.graphics.GraphicsCheckException
 import org.tobi29.scapes.engine.gui.GuiBasicStyle
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.platform.appIDForCache
-import org.tobi29.scapes.engine.platform.appIDForData
-import org.tobi29.scapes.engine.platform.cacheHome
-import org.tobi29.scapes.engine.platform.dataHome
-import org.tobi29.scapes.engine.server.ConnectionManager
-import org.tobi29.scapes.engine.utils.Version
-import org.tobi29.scapes.engine.utils.io.*
-import org.tobi29.scapes.engine.utils.io.classpath.ClasspathPath
-import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
-import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
-import org.tobi29.scapes.engine.utils.printerrln
-import org.tobi29.scapes.engine.utils.systemClock
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.mapMut
-import org.tobi29.scapes.engine.utils.tag.toMutTag
-import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.plugins.Sandbox
 import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
 import org.tobi29.scapes.server.shell.ScapesServerHeadless
+import org.tobi29.server.ConnectionManager
+import org.tobi29.stdex.printerrln
+import org.tobi29.utils.Version
+import org.tobi29.utils.systemClock
 import java.lang.ref.WeakReference
 import java.security.AccessController
 import java.security.PrivilegedAction
@@ -212,9 +212,9 @@ object Scapes : Application() {
                 try {
                     engine.start()
                     try {
-                        engine.container.run(engine)
+                        container.run(engine)
                     } catch (e: GraphicsCheckException) {
-                        engine.container.message(Container.MessageType.ERROR,
+                        container.message(Container.MessageType.ERROR,
                                 "Scapes",
                                 "Unable to initialize graphics:\n${e.message}")
                         return 1
@@ -306,7 +306,7 @@ private fun writeConfig(path: FilePath,
 private fun crashReport(path: FilePath?,
                         engine: () -> ScapesEngine?,
                         e: Throwable): FilePath {
-    val time = timeZoneLocal.encodeWithOffset(systemClock()).first()
+    val time = timeZoneLocal.encodeWithOffset(systemClock())
     val crashReportFile = path?.resolve(crashReportName(
             "${
             time.dateTime.date.run {
@@ -336,7 +336,7 @@ private fun crashReport(path: FilePath?,
 
 private fun crashReport(path: FilePath?,
                         e: Throwable): FilePath {
-    val time = timeZoneLocal.encodeWithOffset(systemClock()).first()
+    val time = timeZoneLocal.encodeWithOffset(systemClock())
     val crashReportFile = path?.resolve(crashReportName(
             "${
             time.dateTime.date.run {

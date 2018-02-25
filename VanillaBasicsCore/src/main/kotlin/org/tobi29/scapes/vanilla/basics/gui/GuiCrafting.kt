@@ -16,9 +16,16 @@
 
 package org.tobi29.scapes.vanilla.basics.gui
 
-import org.tobi29.scapes.block.ItemStack
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.launch
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.loopUntilCancel
 import org.tobi29.scapes.client.gui.GuiComponentItem
 import org.tobi29.scapes.engine.gui.*
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.ItemTypeNamed
+import org.tobi29.scapes.inventory.kind
+import org.tobi29.scapes.inventory.name
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 import org.tobi29.scapes.vanilla.basics.material.CraftingRecipe
@@ -34,7 +41,7 @@ class GuiCrafting(private val table: Boolean,
     private var elements = emptyList<Element>()
     private var currentType: CraftingRecipeType? = null
     private var example = 0
-    private var nextExample = 0L
+    private var updateJob: Job? = null
 
     init {
         val columns = topPane.addVert(11.0, 0.0, -1.0, -1.0,
@@ -83,16 +90,21 @@ class GuiCrafting(private val table: Boolean,
         }
     }
 
-    override fun updateComponent(delta: Double) {
-        super.updateComponent(delta)
-        if (System.currentTimeMillis() > nextExample) {
-            if (example == Int.MAX_VALUE) {
-                example = 0
-            } else {
-                example++
+    override fun init() = updateVisible()
+
+    override fun updateVisible() {
+        synchronized(this) {
+            dispose()
+            if (!isVisible) return@synchronized
+            updateJob = launch(engine.taskExecutor) {
+                Timer().apply { init() }.loopUntilCancel(Timer.toDiff(1.0)) {
+                    if (example == Int.MAX_VALUE) {
+                        example = 0
+                    } else {
+                        example++
+                    }
+                }
             }
-            elements.forEach { it.examples() }
-            nextExample = System.currentTimeMillis() + 1000
         }
     }
 
@@ -106,7 +118,7 @@ class GuiCrafting(private val table: Boolean,
                 })
             }
             this.elements = elements
-            nextExample = System.currentTimeMillis() + 1000
+            updateVisible()
         }
     }
 
@@ -131,30 +143,28 @@ class GuiCrafting(private val table: Boolean,
     private inner class Element(parent: GuiLayoutData,
                                 recipe: CraftingRecipe) : GuiComponentGroupSlab(
             parent) {
-        private val examples = ArrayList<() -> Unit>()
-
         init {
             val result = addHori(5.0, 5.0, 30.0, 30.0) {
                 it.selectable = true
-                GuiComponentResultButton(it, recipe.result())
+                GuiComponentResultButton(it, recipe.result)
             }
             addHori(5.0, 5.0, -1.0, 16.0) { GuiComponentFlowText(it, "<=") }
             recipe.ingredients.forEach { ingredient ->
-                val b = addHori(5.0, 5.0, 25.0, 25.0) {
-                    GuiComponentIngredientButton(it,
-                            ingredient.example(example))
+                addHori(5.0, 5.0, 25.0, 25.0) {
+                    GuiComponentIngredientButton(it) {
+                        ingredient.example(example)
+                    }
                 }
-                examples.add { b.item.setItem(ingredient.example(example)) }
             }
             if (recipe.requirements.isNotEmpty()) {
                 addHori(5.0, 5.0, -1.0, 16.0) { GuiComponentFlowText(it, "+") }
             }
             recipe.requirements.forEach { requirement ->
-                val b = addHori(5.0, 5.0, 25.0, 25.0) {
-                    GuiComponentRequirementButton(it,
-                            requirement.example(example))
+                addHori(5.0, 5.0, 25.0, 25.0) {
+                    GuiComponentIngredientButton(it) {
+                        requirement.example(example)
+                    }
                 }
-                examples.add { b.item.setItem(requirement.example(example)) }
             }
 
             result.on(GuiEvent.CLICK_LEFT) {
@@ -162,16 +172,12 @@ class GuiCrafting(private val table: Boolean,
                         PacketCrafting(player.registry, recipe.id))
             }
         }
-
-        fun examples() {
-            examples.forEach { it() }
-        }
     }
 }
 
 sealed private class GuiComponentCraftingButton(
         parent: GuiLayoutData,
-        item: ItemStack
+        item: () -> Item?
 ) : GuiComponentButton(parent) {
     val item = addSubHori(0.0, 0.0, -1.0, -1.0) {
         GuiComponentItem(it, item)
@@ -180,42 +186,48 @@ sealed private class GuiComponentCraftingButton(
 
 private class GuiComponentIngredientButton(
         parent: GuiLayoutData,
-        item: ItemStack
+        item: () -> Item?
 ) : GuiComponentCraftingButton(parent, item) {
     override fun tooltip(p: GuiContainerRow): (() -> Unit)? {
         val text = p.addVert(15.0, 15.0, -1.0, 16.0) {
             GuiComponentText(it, "")
         }
         return {
-            text.text = "Ingredient:\n${item.item().name()}"
+            text.text = item.item()?.let { item ->
+                "Ingredient:\n${item.kind<ItemTypeNamed>()?.name ?: ""}"
+            } ?: ""
         }
     }
 }
 
 private class GuiComponentRequirementButton(
         parent: GuiLayoutData,
-        item: ItemStack
+        item: () -> Item?
 ) : GuiComponentCraftingButton(parent, item) {
     override fun tooltip(p: GuiContainerRow): (() -> Unit)? {
         val text = p.addVert(15.0, 15.0, -1.0, 16.0) {
             GuiComponentText(it, "")
         }
         return {
-            text.text = "Requirement:\n${item.item().name()}"
+            text.text = item.item()?.let { item ->
+                "Requirement:\n${item.kind<ItemTypeNamed>()?.name ?: ""}"
+            } ?: ""
         }
     }
 }
 
 private class GuiComponentResultButton(
         parent: GuiLayoutData,
-        item: ItemStack
-) : GuiComponentCraftingButton(parent, item) {
+        item: Item?
+) : GuiComponentCraftingButton(parent, { item }) {
     override fun tooltip(p: GuiContainerRow): (() -> Unit)? {
         val text = p.addVert(15.0, 15.0, -1.0, 16.0) {
             GuiComponentText(it, "")
         }
         return {
-            text.text = "Result:\n${item.item().name()}"
+            text.text = item.item()?.let { item ->
+                "Result:\n${item.kind<ItemTypeNamed>()?.name ?: ""}"
+            } ?: ""
         }
     }
 }

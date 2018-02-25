@@ -16,10 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation
 
-import org.tobi29.scapes.block.AABBElement
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
 import org.tobi29.scapes.block.models.ItemModel
@@ -28,12 +25,14 @@ import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.*
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.PointerPane
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.math.AABB
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
+import org.tobi29.utils.Pool
+import org.tobi29.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.util.dropItems
@@ -89,14 +88,14 @@ class BlockFlower(type: VanillaMaterialType) : VanillaBlock(type) {
         return terrain.isSolid(x, y, z - 1)
     }
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
         return 0.0
     }
 
     override fun footStepSound(data: Int) = null
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
         return "VanillaBasics:sound/blocks/Foliage.ogg"
     }
@@ -147,8 +146,7 @@ class BlockFlower(type: VanillaMaterialType) : VanillaBlock(type) {
         val world = terrain.world
         terrain.modify(x, y, z - 1, 1, 1, 2) { terrain ->
             if (!terrain.isSolid(x, y, z - 1)) {
-                world.dropItems(drops(ItemStack(materials.air, 0), data), x, y,
-                        z)
+                world.dropItems(drops(null, data), x, y, z)
                 terrain.typeData(x, y, z, terrain.air, 0)
             }
         }
@@ -213,24 +211,24 @@ class BlockFlower(type: VanillaMaterialType) : VanillaBlock(type) {
         }
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
-        modelsItem?.get(item.data())?.render(gl, shader)
+        modelsItem?.get(item.data)?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
-        modelsItem?.get(item.data())?.renderInventory(gl, shader)
+        modelsItem?.get(item.data)?.renderInventory(gl, shader)
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return color(
-                item.data() % 10) + if (item.data() / 10 == 0) " Rose" else " Flower"
+                item.data % 10) + if (item.data / 10 == 0) " Rose" else " Flower"
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 64
     }
 

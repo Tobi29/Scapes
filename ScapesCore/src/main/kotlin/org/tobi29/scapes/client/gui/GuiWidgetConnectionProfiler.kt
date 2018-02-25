@@ -16,18 +16,39 @@
 
 package org.tobi29.scapes.client.gui
 
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.launch
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.loopUntilCancel
 import org.tobi29.scapes.client.connection.ConnectionProfiler
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
 
-class GuiWidgetConnectionProfiler(parent: GuiLayoutData,
-                                  private val profiler: ConnectionProfiler) : GuiWidgetDebugValues(
-        parent) {
+class GuiWidgetConnectionProfiler(
+        parent: GuiLayoutData,
+        private val profiler: ConnectionProfiler
+) : GuiWidgetDebugValues(parent) {
+    private var updateJob: Job? = null
 
-    override fun updateComponent(delta: Double) {
-        super.updateComponent(delta)
-        profiler.bytes.entries.forEach { entry ->
-            get(entry.key.simpleName).setValue(entry.value)
+    override fun init() = updateVisible()
+
+    override fun updateVisible() {
+        synchronized(this) {
+            dispose()
+            if (!isVisible) return@synchronized
+            updateJob = launch(engine.taskExecutor) {
+                Timer().apply { init() }.loopUntilCancel(Timer.toDiff(4.0)) {
+                    profiler.bytes.entries.forEach { entry ->
+                        get(entry.key.simpleName).setValue(entry.value)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun dispose() {
+        synchronized(this) {
+            updateJob?.cancel()
         }
     }
 }

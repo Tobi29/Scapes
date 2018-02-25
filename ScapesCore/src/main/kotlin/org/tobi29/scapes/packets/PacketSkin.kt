@@ -15,18 +15,19 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.checksums.Checksum
+import org.tobi29.checksums.checksumAlgorithmOrNull
+import org.tobi29.graphics.Image
+import org.tobi29.io.IOException
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
+import org.tobi29.io.view
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.Algorithm
-import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.graphics.Image
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.io.view
 import org.tobi29.scapes.server.connection.PlayerConnection
 
-class PacketSkin : PacketAbstract, PacketBoth {
+class PacketSkin : PacketAbstract,
+        PacketBoth {
     private lateinit var image: Image
     private lateinit var checksum: Checksum
 
@@ -65,13 +66,8 @@ class PacketSkin : PacketAbstract, PacketBoth {
         val buffer = ByteArray(64 * 64 * 4).view
         stream.get(buffer)
         image = Image(64, 64, buffer)
-        val algorithm: Algorithm
-        try {
-            algorithm = Algorithm.valueOf(stream.getString(16))
-        } catch (e: IllegalArgumentException) {
-            throw IOException(e)
-        }
-
+        val algorithm = checksumAlgorithmOrNull(stream.getString(16))
+                ?: throw IOException("Invalid checksum algorithm")
         val array = ByteArray(algorithm.bytes)
         stream.get(array.view)
         checksum = Checksum(algorithm, array)
@@ -91,13 +87,8 @@ class PacketSkin : PacketAbstract, PacketBoth {
 
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        val algorithm: Algorithm
-        try {
-            algorithm = Algorithm.valueOf(stream.getString(16))
-        } catch (e: IllegalArgumentException) {
-            throw IOException(e)
-        }
-
+        val algorithm = checksumAlgorithmOrNull(stream.getString(16))
+                ?: throw IOException("Invalid checksum algorithm")
         val array = ByteArray(algorithm.bytes)
         stream.get(array.view)
         checksum = Checksum(algorithm, array)

@@ -20,5 +20,6 @@ version = "0.0.0"
 
 dependencies {
     compile rootProject.ext.scapesEngineMathUtils
-    compile rootProject.ext.scapesEngineThreadUtils
+    compile rootProject.ext.scapesEngineProfiler
+    compile rootProject.ext.scapesEngineCoroutines
 }

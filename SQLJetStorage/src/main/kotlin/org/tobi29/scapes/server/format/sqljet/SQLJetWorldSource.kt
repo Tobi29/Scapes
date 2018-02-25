@@ -19,11 +19,11 @@ package org.tobi29.scapes.server.format.sqljet
 import kotlinx.coroutines.experimental.runBlocking
 import org.tmatesoft.sqljet.core.SqlJetException
 import org.tmatesoft.sqljet.core.table.SqlJetDb
-import org.tobi29.scapes.engine.sql.sqljet.SQLJetDatabase
-import org.tobi29.scapes.engine.utils.graphics.decodePNG
-import org.tobi29.scapes.engine.utils.graphics.encodePNG
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.filesystem.*
+import org.tobi29.sql.sqljet.SQLJetDatabase
+import org.tobi29.graphics.decodePNG
+import org.tobi29.graphics.encodePNG
+import org.tobi29.io.IOException
+import org.tobi29.io.filesystem.*
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldFormat
 import org.tobi29.scapes.server.format.WorldSource

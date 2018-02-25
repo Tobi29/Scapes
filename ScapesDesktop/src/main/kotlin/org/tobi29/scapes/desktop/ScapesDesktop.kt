@@ -19,8 +19,8 @@ package org.tobi29.scapes.desktop
 import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.ContainerGLFW
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.PlatformDialogs
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.filesystem.FilePath
 
 internal class DialogProviderDesktop(
         private val container: ContainerGLFW?

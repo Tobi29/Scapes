@@ -15,66 +15,62 @@
  */
 package org.tobi29.scapes.entity.server
 
-import org.tobi29.scapes.block.Inventory
-import org.tobi29.scapes.block.InventoryContainer
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.checksums.Checksum
+import org.tobi29.io.tag.*
+import org.tobi29.math.AABB
+import org.tobi29.math.Frustum
+import org.tobi29.math.PointerPane
+import org.tobi29.math.vector.Vector2d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.Frustum
-import org.tobi29.scapes.engine.math.PointerPane
-import org.tobi29.scapes.engine.math.vector.Vector2d
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.ConcurrentMap
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.utils.math.toRad
-import org.tobi29.scapes.engine.utils.readOnly
-import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.*
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.packets.PacketOpenGui
 import org.tobi29.scapes.packets.PacketUpdateInventory
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.ConcurrentMap
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.toRad
 import kotlin.collections.set
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
-abstract class MobPlayerServer(type: EntityType<*, *>,
-                               world: WorldServer,
-                               pos: Vector3d,
-                               speed: Vector3d,
-                               aabb: AABB,
-                               lives: Double,
-                               maxLives: Double,
-                               viewField: Frustum,
-                               hitField: Frustum,
-                               protected val nickname: String,
-                               private val skin: Checksum,
-                               protected val connection: PlayerConnection) : MobLivingEquippedServer(
-        type, world, pos, speed, aabb, lives, maxLives, viewField,
-        hitField), EntityContainerServer {
+abstract class MobPlayerServer(
+        type: EntityType<*, *>,
+        world: WorldServer,
+        pos: Vector3d,
+        speed: Vector3d,
+        aabb: AABB,
+        lives: Double,
+        maxLives: Double,
+        viewField: Frustum,
+        hitField: Frustum,
+        protected val nickname: String,
+        private val skin: Checksum,
+        protected val connection: PlayerConnection
+) : MobLivingEquippedServer(type, world, pos, speed, aabb, lives, maxLives,
+        viewField, hitField) {
     protected val positionSenderOther: MobPositionSenderServer
-    protected val viewersMut = ArrayList<MobPlayerServer>()
-    override val viewers = viewersMut.readOnly()
-    protected val inventories: InventoryContainer
     val onPunch: ConcurrentMap<ListenerToken, (Double) -> Unit> = ConcurrentHashMap()
     val positionReceiver: MobPositionReceiver
     var inventorySelectLeft = 0
     var inventorySelectRight = 9
     protected var healWait = 0
-    protected var currentContainer: EntityContainerServer? = null
+    protected var currentContainer: EntityServer? = null
 
     init {
         registerComponent(CreatureType.COMPONENT, CreatureType.CREATURE)
-        inventories = InventoryContainer { id ->
+        this[InventoryContainer.ON_UPDATE][CONTAINER_UPDATE_LISTENER_TOKEN] = { id ->
             world.send(PacketUpdateInventory(registry, this, id))
         }
-        inventories.add("Container", Inventory(world.plugins, 40))
-        inventories.add("Hold", Inventory(world.plugins, 1))
-        viewersMut.add(this)
+        inventories.add("Container", 40)
+        inventories.add("Hold", 1)
         val exceptions = listOf(connection)
         positionSenderOther = MobPositionSenderServer(registry, pos,
                 { world.send(it, exceptions) })
@@ -97,14 +93,12 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
 
     abstract fun isActive(): Boolean
 
-    override fun leftWeapon(): ItemStack {
-        return inventories.access("Container"
-        ) { inventory -> inventory.item(inventorySelectLeft) }
+    override fun leftWeapon(): Item? {
+        return inventories.access("Container") { it[inventorySelectLeft] }
     }
 
-    override fun rightWeapon(): ItemStack {
-        return inventories.access("Container"
-        ) { inventory -> inventory.item(inventorySelectRight) }
+    override fun rightWeapon(): Item? {
+        return inventories.access("Container") { it[inventorySelectRight] }
     }
 
     fun nickname(): String {
@@ -113,20 +107,6 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
 
     fun selectedBlock(direction: Vector2d): PointerPane? {
         return block(6.0, direction)
-    }
-
-    override fun inventories(): InventoryContainer {
-        return inventories
-    }
-
-    override fun addViewer(player: MobPlayerServer) {
-        if (!viewersMut.contains(player)) {
-            viewersMut.add(player)
-        }
-    }
-
-    override fun removeViewer(player: MobPlayerServer) {
-        viewersMut.remove(player)
     }
 
     override fun createPositionHandler(): MobPositionSenderServer {
@@ -148,64 +128,67 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
         return attack(false, strength, direction)
     }
 
-    @Synchronized protected fun attack(side: Boolean,
-                                       strength: Double,
-                                       direction: Vector2d): List<MobLivingServer> {
-        val rotX = rot.doubleX() + direction.y
-        val rotZ = rot.doubleZ() + direction.x
+    @Synchronized
+    protected fun attack(side: Boolean,
+                         strength: Double,
+                         direction: Vector2d): List<MobLivingServer> {
+        val rotX = rot.x + direction.y
+        val rotZ = rot.z + direction.x
         val factor = cos(rotX.toRad()) * 6
         val lookX = cos(rotZ.toRad()) * factor
         val lookY = sin(rotZ.toRad()) * factor
         val lookZ = sin(rotX.toRad()) * 6
         val viewOffset = viewOffset()
-        hitField.setView(pos.doubleX() + viewOffset.x,
-                pos.doubleY() + viewOffset.y,
-                pos.doubleZ() + viewOffset.z, pos.doubleX() + lookX,
-                pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0.0, 0.0, 1.0)
-        val range: Double
-        if (side) {
-            range = leftWeapon().material().hitRange(leftWeapon())
-        } else {
-            range = rightWeapon().material().hitRange(rightWeapon())
-        }
-        hitField.setPerspective(100 / range, 1.0, 0.1, range)
+        hitField.setView(pos.x + viewOffset.x,
+                pos.y + viewOffset.y,
+                pos.z + viewOffset.z, pos.x + lookX,
+                pos.y + lookY, pos.z + lookZ, 0.0, 0.0, 1.0)
         val mobs = ArrayList<MobLivingServer>()
-        world.getEntities(
-                hitField).filterIsInstance<MobLivingServer>().filter { it != this }.forEach { mob ->
-            mobs.add(mob)
-            if (side) {
-                mob.damage(leftWeapon().material().click(this, leftWeapon(),
-                        mob) * strength)
-            } else {
-                mob.damage(
-                        rightWeapon().material().click(this, rightWeapon(),
-                                mob) * strength)
+        val weaponSlot = if (side) inventorySelectLeft else inventorySelectRight
+        inventories.modify("Container") { inventory ->
+            var weapon = inventory[weaponSlot]?.kind<ItemTypeWeapon>()
+                    ?: return@modify
+            val range = weapon.hitRange()
+            hitField.setPerspective(100 / range, 1.0, 0.1, range)
+            world.getEntities(hitField).filterIsInstance<MobLivingServer>()
+                    .filter { it != this }.forEach { mob ->
+                mobs.add(mob)
+                val (stack, damage) = weapon.click(this, mob)
+                inventory[weaponSlot] = stack
+                weapon = stack?.kind() ?: return@modify
+                mob.damage(damage ?: 2.0)
+                mob.notice(this)
+                val rad = rot.z.toRad()
+                mob.push(cos(rad) * 10.0,
+                        sin(rad) * 10.0, 2.0)
             }
-            mob.notice(this)
-            val rad = rot.doubleZ().toRad()
-            mob.push(cos(rad) * 10.0,
-                    sin(rad) * 10.0, 2.0)
         }
+
         return mobs
     }
 
+    @Synchronized
     fun hasGui(): Boolean {
         return currentContainer != null
     }
 
-    fun openGui(gui: EntityContainerServer) {
+    @Synchronized
+    fun openGui(gui: EntityServer) {
         if (hasGui()) {
             closeGui()
         }
         currentContainer = gui
-        world.send(PacketEntityChange(registry, gui as EntityServer))
-        gui.addViewer(this)
+        world.send(PacketEntityChange(registry, gui))
+        gui.viewers.add(this)
         connection.send(PacketOpenGui(registry, gui))
     }
 
+    @Synchronized
     fun closeGui() {
-        currentContainer?.removeViewer(this)
-        currentContainer = null
+        currentContainer?.let {
+            it.viewers.remove(this)
+            currentContainer = null
+        }
     }
 
     open fun onOpenInventory() = true
@@ -228,7 +211,9 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
         map["HealWait"]?.toInt()?.let { healWait = it }
         map["Inventory"]?.toMap()?.let { inventoryTag ->
             inventories.forEach { id, inventory ->
-                inventoryTag[id]?.toMap()?.let { inventory.read(it) }
+                inventoryTag[id]?.toMap()?.let {
+                    inventory.read(world.plugins, it)
+                }
             }
         }
     }
@@ -245,8 +230,9 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
         positionSenderOther.submitUpdate(uuid, pos.now(), speed.now(),
                 rot.now(), physicsState.isOnGround, physicsState.slidingWall,
                 physicsState.isInWater, physicsState.isSwimming)
-        isHeadInWater = world.terrain.type(pos.intX(), pos.intY(),
-                (pos.doubleZ() + 0.7).floorToInt()).isLiquid
+        isHeadInWater = world.terrain.type(pos.x.floorToInt(),
+                pos.y.floorToInt(),
+                (pos.z + 0.7).floorToInt()).isLiquid
         if (invincibleTicks > 0.0) {
             invincibleTicks = max(invincibleTicks - delta, 0.0)
         }
@@ -272,3 +258,6 @@ abstract class MobPlayerServer(type: EntityType<*, *>,
         onPunch.values.forEach { it(strength) }
     }
 }
+
+private val CONTAINER_UPDATE_LISTENER_TOKEN = ListenerToken(
+        "Core:ContainerUpdate")

@@ -16,32 +16,22 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.ItemTypeIconI
+import org.tobi29.scapes.inventory.ItemTypeNamedI
+import org.tobi29.scapes.inventory.ItemTypeStackableDefaultI
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-class ItemString(type: VanillaMaterialType) : ItemSimpleData(type) {
-    override fun types(): Int {
-        return 2
-    }
+class ItemString(
+        type: VanillaMaterialType
+) : VanillaItemBase<ItemString>(type),
+        ItemTypeNamedI<ItemString>,
+        ItemTypeIconI<ItemString>,
+        ItemTypeStackableDefaultI<ItemString> {
+    override val textureAsset
+        get() = "VanillaBasics:image/terrain/other/String"
 
-    override fun texture(data: Int): String {
-        when (data) {
-            0 -> return "VanillaBasics:image/terrain/other/String.png"
-            1 -> return "VanillaBasics:image/terrain/other/Fabric.png"
-            else -> throw IllegalArgumentException("Unknown data: {}" + data)
-        }
-    }
+    override fun name(item: TypedItem<ItemString>) = "String"
 
-    override fun name(item: ItemStack): String {
-        when (item.data()) {
-            0 -> return "String"
-            1 -> return "Fabric"
-            else -> throw IllegalArgumentException(
-                    "Unknown data: {}" + item.data())
-        }
-    }
-
-    override fun maxStackSize(item: ItemStack): Int {
-        return 32
-    }
+    override fun maxStackSize(item: TypedItem<ItemString>) = 8
 }

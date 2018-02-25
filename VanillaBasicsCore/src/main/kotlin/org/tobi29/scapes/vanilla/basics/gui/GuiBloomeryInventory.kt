@@ -16,12 +16,16 @@
 
 package org.tobi29.scapes.vanilla.basics.gui
 
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.launch
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.loopUntilCancel
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBloomeryClient
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
+import org.tobi29.stdex.math.floorToInt
 
 class GuiBloomeryInventory(container: EntityBloomeryClient,
                            player: MobPlayerClientMainVB,
@@ -29,6 +33,7 @@ class GuiBloomeryInventory(container: EntityBloomeryClient,
         "Bloomery", player, container, style) {
     private val temperatureText: GuiComponentText
     private val bellowsText: GuiComponentText
+    private var updateJob: Job? = null
 
     init {
         topPane.spacer()
@@ -63,10 +68,19 @@ class GuiBloomeryInventory(container: EntityBloomeryClient,
         updateTemperatureText()
     }
 
-    override fun updateComponent(delta: Double) {
-        super.updateComponent(delta)
-        updateTemperatureText()
-        bellowsText.visible = !container.hasBellows
+    override fun init() = updateVisible()
+
+    override fun updateVisible() {
+        synchronized(this) {
+            dispose()
+            if (!isVisible) return@synchronized
+            updateJob = launch(engine.taskExecutor) {
+                Timer().apply { init() }.loopUntilCancel(Timer.toDiff(60.0)) {
+                    updateTemperatureText()
+                    bellowsText.visible = !container.hasBellows
+                }
+            }
+        }
     }
 
     private fun updateTemperatureText() {

@@ -20,4 +20,5 @@ version = "0.0.0"
 
 dependencies {
     compile rootProject.ext.scapesEngineGenerationUtils
+    compile rootProject.ext.scapesEngineGraphicsUtils
 }

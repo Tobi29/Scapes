@@ -17,14 +17,14 @@
 package org.tobi29.scapes.terrain.lighting
 
 import kotlinx.coroutines.experimental.channels.Channel
-import org.tobi29.scapes.engine.math.vector.MutableVector3i
-import org.tobi29.scapes.engine.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.task.ActorThreadJob
-import org.tobi29.scapes.engine.utils.task.actorThread
+import org.tobi29.coroutines.ActorThreadJob
+import org.tobi29.coroutines.actorThread
+import org.tobi29.math.vector.MutableVector3i
+import org.tobi29.math.vector.Vector3i
+import org.tobi29.utils.Pool
+import org.tobi29.profiler.profilerSection
 import org.tobi29.scapes.terrain.TerrainBase
+import org.tobi29.stdex.math.clamp
 import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.math.max
 
@@ -70,7 +70,7 @@ class LightingEngineThreaded(private val terrain: TerrainBase<*>,
                                  z: Int) {
         var updatesTake = updates
         var updatesNext = newUpdates
-        updatesTake.push().set(x, y, z)
+        updatesTake.push().setXYZ(x, y, z)
         while (updatesTake.isNotEmpty()) {
             for (update in updatesTake) {
                 if (terrain.isBlockLoaded(update.x, update.y,
@@ -109,17 +109,17 @@ class LightingEngineThreaded(private val terrain: TerrainBase<*>,
                             update.z)) {
                         terrain.blockLight(update.x, update.y,
                                 update.z, light.toInt())
-                        updatesNext.push().set(update.x - 1, update.y,
+                        updatesNext.push().setXYZ(update.x - 1, update.y,
                                 update.z)
-                        updatesNext.push().set(update.x + 1, update.y,
+                        updatesNext.push().setXYZ(update.x + 1, update.y,
                                 update.z)
-                        updatesNext.push().set(update.x, update.y - 1,
+                        updatesNext.push().setXYZ(update.x, update.y - 1,
                                 update.z)
-                        updatesNext.push().set(update.x, update.y + 1,
+                        updatesNext.push().setXYZ(update.x, update.y + 1,
                                 update.z)
-                        updatesNext.push().set(update.x, update.y,
+                        updatesNext.push().setXYZ(update.x, update.y,
                                 update.z - 1)
-                        updatesNext.push().set(update.x, update.y,
+                        updatesNext.push().setXYZ(update.x, update.y,
                                 update.z + 1)
                     }
                 }
@@ -138,7 +138,7 @@ class LightingEngineThreaded(private val terrain: TerrainBase<*>,
                                z: Int) {
         var updatesTake = updates
         var updatesNext = newUpdates
-        updatesTake.push().set(x, y, z)
+        updatesTake.push().setXYZ(x, y, z)
         while (updatesTake.isNotEmpty()) {
             for (update in updatesTake) {
                 if (terrain.isBlockLoaded(update.x, update.y,
@@ -178,17 +178,17 @@ class LightingEngineThreaded(private val terrain: TerrainBase<*>,
                             update.z)) {
                         terrain.sunLight(update.x, update.y,
                                 update.z, light.toInt())
-                        updatesNext.push().set(update.x - 1, update.y,
+                        updatesNext.push().setXYZ(update.x - 1, update.y,
                                 update.z)
-                        updatesNext.push().set(update.x + 1, update.y,
+                        updatesNext.push().setXYZ(update.x + 1, update.y,
                                 update.z)
-                        updatesNext.push().set(update.x, update.y - 1,
+                        updatesNext.push().setXYZ(update.x, update.y - 1,
                                 update.z)
-                        updatesNext.push().set(update.x, update.y + 1,
+                        updatesNext.push().setXYZ(update.x, update.y + 1,
                                 update.z)
-                        updatesNext.push().set(update.x, update.y,
+                        updatesNext.push().setXYZ(update.x, update.y,
                                 update.z - 1)
-                        updatesNext.push().set(update.x, update.y,
+                        updatesNext.push().setXYZ(update.x, update.y,
                                 update.z + 1)
                     }
                 }

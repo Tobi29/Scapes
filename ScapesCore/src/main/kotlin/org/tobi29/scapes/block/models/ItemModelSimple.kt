@@ -20,30 +20,57 @@ import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.marginX
 import org.tobi29.scapes.block.marginY
 import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.scapes.engine.resource.Resource
+import org.tobi29.stdex.math.mix
 import kotlin.math.max
 
-class ItemModelSimple(private val texture: TerrainTexture?,
+class ItemModelSimple(gos: GraphicsObjectSupplier,
+                      private val texture: Resource<Texture>,
+                      private val pixelCountX: Int,
+                      private val pixelCountY: Int,
+                      private val texMinX: Double,
+                      private val texMaxX: Double,
+                      private val texMinY: Double,
+                      private val texMaxY: Double,
                       private val r: Double,
                       private val g: Double,
                       private val b: Double,
                       private val a: Double) : ItemModel {
-    private val model: Model?
-    private val modelInventory: Model?
+    private val model = buildVAO(gos, false)
+    private val modelInventory = buildVAO(gos, true)
 
-    init {
-        model = buildVAO(false)
-        modelInventory = buildVAO(true)
-    }
+    constructor(gos: GraphicsObjectSupplier,
+                texture: Texture,
+                pixelCountX: Int,
+                pixelCountY: Int,
+                texMinX: Double,
+                texMaxX: Double,
+                texMinY: Double,
+                texMaxY: Double,
+                r: Double,
+                g: Double,
+                b: Double,
+                a: Double) : this(gos, Resource(texture),
+            pixelCountX, pixelCountY,
+            texMinX, texMaxX,
+            texMinY, texMaxY,
+            r, g, b, a)
 
-    fun buildVAO(inventory: Boolean): Model? {
+    constructor(texture: TerrainTexture,
+                r: Double,
+                g: Double,
+                b: Double,
+                a: Double
+    ) : this(texture.getTexture().gos,
+            Resource(texture.getTexture()),
+            texture.width, texture.height,
+            texture.marginX(0.0), texture.marginX(1.0),
+            texture.marginY(0.0), texture.marginY(1.0),
+            r, g, b, a)
+
+    fun buildVAO(gos: GraphicsObjectSupplier,
+                 inventory: Boolean): Model {
         val mesh = Mesh(false)
-        if (texture == null) {
-            return null
-        }
-        val texMinX = texture.marginX(0.0)
-        val texMaxX = texture.marginX(1.0)
-        val texMinY = texture.marginY(0.0)
-        val texMaxY = texture.marginY(1.0)
         mesh.color(r, g, b, a)
         if (inventory) {
             mesh.texture(texMinX, texMinY)
@@ -55,8 +82,6 @@ class ItemModelSimple(private val texture: TerrainTexture?,
             mesh.texture(texMinX, texMaxY)
             mesh.vertex(0.0, 1.0, 0.0)
         } else {
-            val pixelCountX = texture.width
-            val pixelCountY = texture.height
             val pixelX = 1.0 / pixelCountX
             val pixelY = 1.0 / pixelCountY
             val halfPixel = max(pixelX, pixelY) / 2.0
@@ -71,7 +96,7 @@ class ItemModelSimple(private val texture: TerrainTexture?,
             mesh.vertex(-0.5, halfPixel, -0.5)
             for (x in pixelCountX - 1 downTo 0) {
                 var pos = x.toDouble() / pixelCountX
-                val xTex = texture.marginX(pos + 0.5 / pixelCountX)
+                val xTex = mix(texMinX, texMaxX, pos + 0.5 / pixelCountX)
                 pos -= 0.5
                 val posInv = pos + pixelX
 
@@ -97,7 +122,7 @@ class ItemModelSimple(private val texture: TerrainTexture?,
             }
             for (y in 0 until pixelCountY) {
                 var pos = y.toDouble() / pixelCountY
-                val yTex = texture.marginY(pos + 0.5 / pixelCountY)
+                val yTex = mix(texMinY, texMaxY, pos + 0.5 / pixelCountY)
                 pos = 0.5 - pos
                 val posInv = pos - pixelY
 
@@ -131,27 +156,25 @@ class ItemModelSimple(private val texture: TerrainTexture?,
             mesh.texture(texMaxX, texMaxY)
             mesh.vertex(0.5, -halfPixel, -0.5)
         }
-        return mesh.finish(texture.getTexture().gos)
+        return mesh.finish(gos)
     }
 
     override fun render(gl: GL,
                         shader: Shader) {
-        if (texture == null || model == null) {
-            return
-        }
-        texture.getTexture().bind(gl)
-        gl.matrixStack.push { matrix ->
-            matrix.rotate(315.0f, 0.0f, 1.0f, 0.0f)
-            model.render(gl, shader)
+        texture.tryGet()?.let { texture ->
+            texture.bind(gl)
+            gl.matrixStack.push { matrix ->
+                matrix.rotate(315.0f, 0.0f, 1.0f, 0.0f)
+                model.render(gl, shader)
+            }
         }
     }
 
     override fun renderInventory(gl: GL,
                                  shader: Shader) {
-        if (texture == null || modelInventory == null) {
-            return
+        texture.tryGet()?.let { texture ->
+            texture.bind(gl)
+            modelInventory.render(gl, shader)
         }
-        texture.getTexture().bind(gl)
-        modelInventory.render(gl, shader)
     }
 }

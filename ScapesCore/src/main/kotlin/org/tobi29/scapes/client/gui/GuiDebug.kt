@@ -21,7 +21,7 @@ import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.logging.KLogging
 
 class GuiDebug(state: GameState,
                previous: Gui,

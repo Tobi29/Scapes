@@ -22,11 +22,11 @@ import org.tobi29.scapes.Debug
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.connection.PlayConnection
-import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.Vector3i
-import org.tobi29.scapes.engine.math.vector.distanceSqr
-import org.tobi29.scapes.engine.math.vector.plus
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.distanceSqr
+import org.tobi29.math.vector.plus
+import org.tobi29.utils.EventDispatcher
+import org.tobi29.stdex.math.floorToInt
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.skin.ServerSkin
 import org.tobi29.scapes.packets.PacketChat
@@ -37,7 +37,8 @@ import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.event.PlayerAuthenticateEvent
 
-abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<PacketClient>, Executor {
+abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<PacketClient>,
+        Executor {
     protected val registry = server.plugins.registry
     protected var entity: MobPlayerServer? = null
     protected var skin: ServerSkin? = null
@@ -101,7 +102,7 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
                 disconnect("Unable to spawn into a world")
                 return
             }
-            val spawnPos = Vector3d(spawnWorld.spawn + Vector3i(0, 0, 1))
+            val spawnPos = Vector3d(spawnWorld.spawn) + Vector3d(0.5, 0.5, 1.5)
             entity = spawnWorld.plugins.worldType.newPlayer(spawnWorld,
                     name(), skin().checksum, this)
             entity.setPos(spawnPos)
@@ -149,8 +150,8 @@ abstract class PlayerConnection(val server: ServerConnection) : PlayConnection<P
         if (pos3d != null) {
             val world = entity.world
             if (!world.terrain.isBlockSendable(entity,
-                    pos3d.intX(), pos3d.intY(),
-                    pos3d.intZ(), packet.isChunkContent)) {
+                    pos3d.x.floorToInt(), pos3d.y.floorToInt(),
+                    pos3d.z.floorToInt(), packet.isChunkContent)) {
                 return
             }
             val range = packet.range()

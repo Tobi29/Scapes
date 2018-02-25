@@ -17,16 +17,17 @@
 package org.tobi29.scapes.server.connection
 
 import kotlinx.coroutines.experimental.yield
-import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.Algorithm
-import org.tobi29.scapes.engine.utils.AtomicInteger
-import org.tobi29.scapes.engine.utils.graphics.Image
-import org.tobi29.scapes.engine.utils.io.*
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.read
-import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.clamp
+import org.tobi29.checksums.ChecksumAlgorithm
+import org.tobi29.checksums.checksum
+import org.tobi29.graphics.Image
+import org.tobi29.io.IOException
+import org.tobi29.io.WritableByteStream
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.io.filesystem.read
+import org.tobi29.io.process
+import org.tobi29.io.tag.binary.writeBinary
+import org.tobi29.io.view
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.entity.skin.ServerSkin
 import org.tobi29.scapes.packets.*
 import org.tobi29.scapes.plugins.PluginFile
@@ -34,6 +35,9 @@ import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.event.PlayerJoinEvent
 import org.tobi29.scapes.server.extension.event.PlayerLeaveEvent
+import org.tobi29.server.*
+import org.tobi29.stdex.atomic.AtomicInt
+import org.tobi29.stdex.math.clamp
 import java.security.InvalidKeyException
 import java.security.KeyFactory
 import java.security.NoSuchAlgorithmException
@@ -52,7 +56,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
         server) {
     // TODO: Port away
     private val sendQueue = ConcurrentLinkedQueue<PacketClient>()
-    private val sendQueueSize = AtomicInteger()
+    private val sendQueueSize = AtomicInt()
     private var pingWait = 0L
     private var pingHandler: (Long) -> Unit = {}
 
@@ -66,7 +70,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             }
             val array = ByteArray(550)
             input.get(array.view)
-            id = checksum(array, Algorithm.SHA1).toString()
+            id = checksum(array, ChecksumAlgorithm.Sha256).toString()
             val challenge = ByteArray(501)
             SecureRandom().nextBytes(challenge)
             try {
@@ -116,8 +120,10 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             channel.queueBundle()
             for (request in requests) {
                 sendPlugin(
-                        plugins.files[request].file() ?: throw IllegalStateException(
-                                "Trying to send embedded plugin"), output)
+                        plugins.files[request].file()
+                                ?: throw IllegalStateException(
+                                        "Trying to send embedded plugin"),
+                        output)
             }
 
             if (channel.receive()) {
@@ -266,7 +272,8 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
 
     private fun sendPluginMetaData(plugin: PluginFile,
                                    output: WritableByteStream) {
-        val checksum = plugin.checksum().array()
+        val checksum = plugin.checksum()?.array()
+                ?: throw IOException("Server with embedded plugin")
         output.putString(plugin.id())
         output.putString(plugin.version().toString())
         output.putString(plugin.scapesVersion().toString())

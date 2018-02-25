@@ -16,6 +16,16 @@
 
 package org.tobi29.scapes.vanilla.basics.world
 
+import org.tobi29.io.tag.*
+import org.tobi29.math.Random
+import org.tobi29.math.cosTable
+import org.tobi29.math.sinTable
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3i
+import org.tobi29.math.vector.normalizedSafe
+import org.tobi29.math.vector.times
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.EnvironmentType
 import org.tobi29.scapes.chunk.MobSpawner
@@ -24,23 +34,11 @@ import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.math.cosTable
-import org.tobi29.scapes.engine.math.sinTable
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.Vector3i
-import org.tobi29.scapes.engine.math.vector.normalizeSafe
-import org.tobi29.scapes.engine.math.vector.times
-import org.tobi29.scapes.engine.utils.math.HALF_PI
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.mix
-import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.ListenerToken
-import org.tobi29.scapes.entity.server.EntityContainerServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.terrain.TerrainChunk
@@ -49,15 +47,22 @@ import org.tobi29.scapes.vanilla.basics.entity.server.MobItemServer
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator
-import org.tobi29.scapes.vanilla.basics.material.ItemHeatable
+import org.tobi29.scapes.vanilla.basics.material.ItemTypeHeatable
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
+import org.tobi29.scapes.vanilla.basics.material.heat
 import org.tobi29.scapes.vanilla.basics.packet.PacketDayTimeSync
 import org.tobi29.scapes.vanilla.basics.packet.PacketLightning
+import org.tobi29.stdex.math.HALF_PI
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.mix
+import kotlin.collections.set
 import kotlin.math.max
 
 class EnvironmentOverworldServer(override val type: EnvironmentType,
                                  private val world: WorldServer,
-                                 plugin: VanillaBasics) : EnvironmentServer, EnvironmentClimate {
+                                 plugin: VanillaBasics) : EnvironmentServer,
+        EnvironmentClimate {
     private val materials: VanillaMaterial
     private val gen: ChunkGeneratorOverworld
     private val pop: ChunkPopulatorOverworld
@@ -221,27 +226,25 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
             }
         })
         world.entityListener({ entity ->
-            if (entity is EntityContainerServer) {
-                var itemUpdateWait = 1.0
-                entity.onUpdate[ITEMS_LISTENER_TOKEN] = { delta ->
-                    itemUpdateWait -= delta
-                    while (itemUpdateWait <= 0.0) {
-                        itemUpdateWait += 1.0
-                        val inventories = entity.inventories()
-                        val pos = entity.getCurrentPos()
-                        val temperature = climateGenerator.temperature(
-                                pos.intX(), pos.intY(), pos.intZ())
-                        inventories.forEachModify { id, inventory ->
-                            var flag = false
-                            for (i in 0 until inventory.size()) {
-                                val type = inventory.item(i).material()
-                                if (type is ItemHeatable) {
-                                    type.heat(inventory.item(i), temperature)
-                                    flag = true
-                                }
+            var itemUpdateWait = 1.0
+            entity.onUpdate[ITEMS_LISTENER_TOKEN] = { delta ->
+                itemUpdateWait -= delta
+                while (itemUpdateWait <= 0.0) {
+                    itemUpdateWait += 1.0
+                    val inventories = entity.inventories
+                    val pos = entity.getCurrentPos()
+                    val temperature = climateGenerator.temperature(
+                            pos.x.floorToInt(), pos.y.floorToInt(),
+                            pos.z.floorToInt())
+                    inventories.forEachModify { id, inventory ->
+                        var flag = false
+                        for (i in 0 until inventory.size()) {
+                            inventory[i].kind<ItemTypeHeatable>()?.let { itemHeatable ->
+                                inventory[i] = itemHeatable.heat(temperature)
+                                flag = true
                             }
-                            flag
                         }
+                        flag
                     }
                 }
             }
@@ -249,14 +252,14 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
                 var itemUpdateWait = 1.0
                 val pos = entity.getCurrentPos()
                 val temperature = climateGenerator.temperature(
-                        pos.intX(), pos.intY(), pos.intZ())
+                        pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt())
                 entity.onUpdate[ITEMS_LISTENER_TOKEN] = { delta ->
                     itemUpdateWait -= delta
                     while (itemUpdateWait <= 0.0) {
                         itemUpdateWait += 1.0
-                        val type = entity.item.material()
-                        if (type is ItemHeatable) {
-                            type.heat(entity.item, temperature, 20.0)
+                        entity.item.kind<ItemTypeHeatable>()?.let { itemHeatable ->
+                            entity.item = itemHeatable.heat(temperature)
                         }
                     }
                 }
@@ -288,7 +291,7 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
 
     override fun calculateSpawn(terrain: TerrainServer): Vector3i {
         var x = 0
-        val y = -11250
+        val y = -12000
         var flag = false
         while (!flag) {
             if (!terrainGenerator.isValidSpawn(x.toDouble(),
@@ -375,7 +378,7 @@ class EnvironmentOverworldServer(override val type: EnvironmentType,
         val rx = cosTable(azimuth) * rd
         val ry = sinTable(azimuth) * rd
         val mix = clamp(elevation * 100.0, -1.0, 1.0)
-        return Vector3d(rx, ry, rz).normalizeSafe().times(mix)
+        return Vector3d(rx, ry, rz).normalizedSafe().times(mix)
     }
 
     fun simulateSeason(terrain: TerrainServer,

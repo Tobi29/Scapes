@@ -16,11 +16,11 @@
 
 package org.tobi29.scapes.terrain.infinite
 
-import org.tobi29.scapes.engine.utils.Array2
-import org.tobi29.scapes.engine.utils.AtomicInteger
-import org.tobi29.scapes.engine.utils.StampLock
-import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.math.vector.MutableVector2i
+import org.tobi29.arrays.Array2
+import org.tobi29.math.vector.MutableVector2i
+import org.tobi29.utils.StampLock
+import org.tobi29.stdex.assert
+import org.tobi29.stdex.atomic.AtomicInt
 import kotlin.math.abs
 
 class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
@@ -31,8 +31,8 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
             arrayOfNulls<TerrainInfiniteBaseChunk<*>?>(size * size)
     private val array = Array2(size, size, arrayFlat)
     private val lock = StampLock()
-    private val x = AtomicInteger()
-    private val y = AtomicInteger()
+    private val x = AtomicInt()
+    private val y = AtomicInt()
 
     override fun add(chunk: C) {
         lock.write {

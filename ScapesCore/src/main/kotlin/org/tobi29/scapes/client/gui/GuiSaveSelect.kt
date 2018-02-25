@@ -28,9 +28,9 @@ import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.use
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.io.IOException
+import org.tobi29.io.use
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.plugins.Plugins
 
 class GuiSaveSelect(state: GameState,

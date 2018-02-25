@@ -16,23 +16,23 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
-import org.tobi29.scapes.block.Inventory
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
-import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.scapes.entity.client.GUI_COMPONENT
 import org.tobi29.scapes.vanilla.basics.gui.GuiFurnaceInventory
 
-class EntityFurnaceClient(type: EntityType<*, *>,
-                          world: WorldClient) : EntityAbstractFurnaceClient(
-        type, world, Vector3d.ZERO, Inventory(world.plugins, 8), 4, 3) {
-
-    override fun gui(player: MobPlayerClientMain): Gui? {
-        if (player is MobPlayerClientMainVB) {
-            return GuiFurnaceInventory(this, player,
-                    player.game.engine.guiStyle)
+class EntityFurnaceClient(
+        type: EntityType<*, *>,
+        world: WorldClient
+) : EntityAbstractFurnaceClient(type, world, Vector3d.ZERO, 4, 3) {
+    init {
+        inventories.add("Container", 8)
+        registerComponent(GUI_COMPONENT) { player ->
+            if (player is MobPlayerClientMainVB) {
+                GuiFurnaceInventory(this, player, player.game.engine.guiStyle)
+            } else null
         }
-        return null
     }
 }

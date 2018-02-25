@@ -16,20 +16,21 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.server
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.math.*
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.plus
+import org.tobi29.scapes.block.ItemStackData
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.engine.math.*
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.plus
-import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.util.dropItem
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.toRad
 
 class MobPigServer(type: EntityType<*, *>,
                    world: WorldServer) : MobLivingServer(
@@ -51,7 +52,8 @@ class MobPigServer(type: EntityType<*, *>,
                             2) + 1}.ogg", this)
         }
         onDeath[PIG_LISTENER_TOKEN] = {
-            world.dropItem(ItemStack(materials.meat, 0, random.nextInt(7) + 10),
+            world.dropItem(
+                    ItemStackData(materials.meat, 0, random.nextInt(7) + 10),
                     this.pos.now())
         }
     }
@@ -79,7 +81,7 @@ class MobPigServer(type: EntityType<*, *>,
     override fun update(delta: Double) {
         // Movement
         if (isSwimming) {
-            speed.plusZ(1.2)
+            speed.addZ(1.2)
             physicsState.isOnGround = false
         }
         ai.update(delta)
@@ -108,8 +110,8 @@ class MobPigServer(type: EntityType<*, *>,
             walkSpeed *= 0.2
         }
         walkSpeed *= delta
-        speed.plusX(cosTable(rot.doubleZ().toRad()) * walkSpeed)
-        speed.plusY(sinTable(rot.doubleZ().toRad()) * walkSpeed)
+        speed.addX(cosTable(rot.z.toRad()) * walkSpeed)
+        speed.addY(sinTable(rot.z.toRad()) * walkSpeed)
         soundWait -= delta
         if (soundWait <= 0.0) {
             val random = threadLocalRandom()
@@ -126,8 +128,8 @@ class MobPigServer(type: EntityType<*, *>,
                 Vector3d((random.nextInt(17) - 8).toDouble(),
                         (random.nextInt(17) - 8).toDouble(),
                         (random.nextInt(7) - 3).toDouble()))
-        if (canMoveHere(world.terrain, vector3d.intX(), vector3d.intY(),
-                vector3d.intZ())) {
+        if (canMoveHere(world.terrain, vector3d.x.floorToInt(),
+                vector3d.y.floorToInt(), vector3d.z.floorToInt())) {
             return vector3d
         }
         return null

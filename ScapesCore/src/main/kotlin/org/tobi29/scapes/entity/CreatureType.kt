@@ -16,7 +16,9 @@
 
 package org.tobi29.scapes.entity
 
-enum class CreatureType(private val despawn: Boolean) : ComponentEntity {
+import org.tobi29.utils.ComponentRegistered
+
+enum class CreatureType(private val despawn: Boolean) : ComponentRegistered {
     CREATURE(false),
     MONSTER(true);
 

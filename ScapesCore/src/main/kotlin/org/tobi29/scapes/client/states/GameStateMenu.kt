@@ -29,20 +29,16 @@ import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.resource.awaitDone
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.io.IOException
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.logging.KLogging
 
 class GameStateMenu(engine: ScapesEngine) : GameState(engine) {
+    private val gui: Gui
     private val scene = SceneMenu(engine)
 
-    override fun dispose() {
-        engine.sounds.stop("music")
-    }
-
-    override fun init() {
+    init {
         val scapes = engine[ScapesClient.COMPONENT]
-        val style = engine.guiStyle
         val file = scapes.home.resolve("Account.properties")
         val account = try {
             Account.read(file)
@@ -50,9 +46,12 @@ class GameStateMenu(engine: ScapesEngine) : GameState(engine) {
             logger.error { "Failed to read account file: $e" }
             null
         }
-        val menu = menu(account, file, style)
-        menu.visible = false
-        engine.guiStack.add("10-Menu", menu)
+        gui = menu(account, file, engine.guiStyle)
+    }
+
+    override fun init() {
+        gui.visible = false
+        engine.guiStack.add("10-Menu", gui)
         switchPipeline { gl ->
             val busy = busyPipeline(gl)
             ;{
@@ -68,12 +67,17 @@ class GameStateMenu(engine: ScapesEngine) : GameState(engine) {
             ;{
             val sceneRender = scene()
             engine.resources.awaitDone()
-            menu.visible = true
+            gui.visible = true
             ;{ delta ->
             sceneRender(delta)
         }
         }
         }
+    }
+
+    override fun dispose() {
+        engine.guiStack.remove("10-Menu")
+        engine.sounds.stop("music")
     }
 
     override val isMouseGrabbed: Boolean

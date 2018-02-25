@@ -16,71 +16,98 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.food
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.scapes.block.ItemTypeIconKindsI
+import org.tobi29.scapes.block.ItemTypeUseableI
+import org.tobi29.scapes.block.copy
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.scapes.inventory.*
 import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
-import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
+import org.tobi29.scapes.vanilla.basics.entity.server.access
+import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatableI
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
-import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
+import org.tobi29.scapes.vanilla.basics.material.item.VanillaItemBase
+import org.tobi29.io.tag.MutableTag
+import org.tobi29.io.tag.toInt
+import org.tobi29.io.tag.toTag
+import org.tobi29.stdex.math.floorToInt
 
-class ItemMeat(type: VanillaMaterialType) : ItemSimpleData(
-        type), ItemDefaultHeatable {
-    override fun click(entity: MobPlayerServer,
-                       item: ItemStack) {
-        entity.getOrNull(ComponentMobLivingServerCondition.COMPONENT)?.run {
-            synchronized(this) {
-                stamina -= 0.8
-                hunger += 0.1
-                thirst -= 0.3
-            }
-        }
-        entity.damage(5.0)
-        item.setAmount(item.amount() - 1)
-    }
+class ItemMeat(
+        type: VanillaMaterialType
+) : VanillaItemBase<ItemMeat>(type),
+        ItemTypeMeatI<ItemMeat>,
+        ItemTypeNamedI<ItemMeat>,
+        ItemTypeIconKindsI<ItemMeat, MeatType>,
+        ItemTypeStackableDefaultI<ItemMeat>,
+        ItemTypeUseableI<ItemMeat>,
+        ItemDefaultHeatableI<ItemMeat> {
+    override fun textureAsset(kind: MeatType) =
+            "${kind.texture}/Raw"
 
-    override fun click(entity: MobPlayerServer,
-                       item: ItemStack,
-                       hit: MobServer): Double {
-        if (hit is MobLivingServer) {
-            hit.damage(1.0)
-            item.setAmount(item.amount() - 1)
-        }
-        return 0.0
-    }
-
-    override fun types(): Int {
-        return 1
-    }
-
-    override fun texture(data: Int): String {
-        when (data) {
-            0 -> return "VanillaBasics:image/terrain/food/meat/pork/Raw.png"
-            else -> throw IllegalArgumentException("Unknown data: {}" + data)
-        }
-    }
-
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<ItemMeat>): String {
         val name = StringBuilder(40)
-        when (item.data()) {
-            else -> name.append("Porkchop")
-        }
+        name.append(kind(item).rawName)
         val temperature = temperature(item)
         name.append("\nTemp.:").append(temperature.floorToInt()).append("°C")
         return name.toString()
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
-        return 32
-    }
+    override fun maxStackSize(item: TypedItem<ItemMeat>) = 32
 
-    override fun heatTransferFactor(item: ItemStack) = 0.001
+    override fun heatTransferFactor(item: TypedItem<ItemMeat>) = 0.001
 
-    override fun temperatureUpdated(item: ItemStack) {
+    override fun temperatureUpdated(item: TypedItem<ItemMeat>): Item? {
         if (temperature(item) >= 60.0) {
-            item.setMaterial(materials.cookedMeat)
+            return item.copy(type = materials.cookedMeat)
         }
+        return item
     }
+
+    override fun click(entity: MobPlayerServer,
+                       item: TypedItem<ItemMeat>): Item? {
+        entity.getOrNull(ComponentMobLivingServerCondition.COMPONENT)?.access {
+            stamina -= 0.8
+            hunger += 0.1
+            thirst -= 0.3
+        }
+        entity.damage(5.0)
+        return item.copy(amount = item.amount - 1).orNull()
+    }
+
+    override fun click(entity: MobPlayerServer,
+                       item: TypedItem<ItemMeat>,
+                       hit: MobServer): Pair<Item?, Double?> =
+            (if (hit is MobLivingServer) {
+                hit.heal(1.0)
+                item.copy(item.amount - 1).orNull()
+            } else item) to 0.0
+}
+
+interface ItemTypeMeatI<I : ItemType> : ItemTypeKindsI<I, MeatType> {
+    override val kinds: Set<MeatType>
+        get() = MeatType.values().toSet()
+
+    override fun kind(item: TypedItem<I>): MeatType =
+            item.metaData["MeatType"]?.toMeatType()
+                    ?: MeatType.PORK
+
+    override fun kind(item: TypedItem<I>,
+                      value: MeatType): TypedItem<I> =
+            item.copy((item.metaData +
+                    ("MeatType" to value.id.toTag())).toTag())
+}
+
+enum class MeatType(val id: Int,
+                    val texture: String,
+                    val rawName: String,
+                    val cookedName: String = "Cooked $rawName") {
+    PORK(0, "$TEXTURE_ROOT/pork", "Pork")
+}
+
+private const val TEXTURE_ROOT = "VanillaBasics:image/terrain/food/meat"
+
+fun MutableTag.toMeatType(): MeatType? = when (toInt()) {
+    0 -> MeatType.PORK
+    else -> null
 }

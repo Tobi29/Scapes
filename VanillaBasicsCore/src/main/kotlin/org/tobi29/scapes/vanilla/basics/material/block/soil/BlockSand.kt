@@ -16,9 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.soil
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
 import org.tobi29.scapes.chunk.ChunkMesh
@@ -26,20 +24,22 @@ import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.utils.toArray
-import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
+import org.tobi29.math.Face
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.utils.toArray
+import org.tobi29.scapes.inventory.*
+import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatableI
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
 class BlockSand(type: VanillaMaterialType) : BlockSoil(
-        type), ItemDefaultHeatable {
+        type),
+        ItemDefaultHeatableI<BlockType> {
     private var textures: Array<TerrainTexture?>? = null
     private var models: Array<BlockModel?>? = null
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
-        return (if ("Shovel" == item.material().toolType(
-                item)) 2 else 20).toDouble()
+        return (if ("Shovel" == item.kind<ItemTypeTool>()?.toolType()) 2 else 20).toDouble()
     }
 
     override fun particleTexture(face: Face,
@@ -87,44 +87,49 @@ class BlockSand(type: VanillaMaterialType) : BlockSoil(
         }
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
-        models?.get(item.data())?.render(gl, shader)
+        models?.get(item.data)?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
-        models?.get(item.data())?.renderInventory(gl, shader)
+        models?.get(item.data)?.renderInventory(gl, shader)
     }
 
-    override fun name(item: ItemStack): String {
-        when (item.data()) {
-            1 -> return "Gravel"
-            2 -> return "Clay\nTemp.: " + temperature(item) + " C"
-            else -> return "Sand\nTemp.: " + temperature(item) + " C"
-        }
+    override fun name(item: TypedItem<BlockType>): String {
+        if (item.data == 1) return "Gravel"
+        val name = StringBuilder(40)
+        name.append(when (item.data) {
+            2 -> "Clay"
+            else -> "Sand"
+        })
+        val temperature = temperature(item)
+        name.append("\nTemp.:").append(temperature.floorToInt()).append("°C")
+        return name.toString()
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 16
     }
 
-    override fun heatTransferFactor(item: ItemStack) = 0.001
+    override fun heatTransferFactor(item: TypedItem<BlockType>) = 0.001
 
-    override fun temperatureUpdated(item: ItemStack) {
+    override fun temperatureUpdated(item: TypedItem<BlockType>): Item? {
         if (temperature(item) >= meltingPoint(item)) {
-            if (item.data() == 0) {
-                item.setMaterial(materials.glass)
-            } else if (item.data() == 2) {
-                item.setMaterial(materials.brick)
+            if (item.data == 0) {
+                return ItemStack(type = materials.glass, amount = item.amount)
+            } else if (item.data == 2) {
+                return ItemStack(type = materials.brick, amount = item.amount)
             }
         }
+        return item
     }
 
-    fun meltingPoint(item: ItemStack): Float {
-        when (item.data()) {
+    fun meltingPoint(item: TypedItem<BlockType>): Float {
+        when (item.data) {
             1 -> return 0.0f
             2 -> return 600.0f
             else -> return 1000.0f

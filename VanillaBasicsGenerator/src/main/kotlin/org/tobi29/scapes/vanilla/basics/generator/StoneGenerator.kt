@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.vanilla.basics.generator
 
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.utils.generation.layer.RandomPermutation
-import org.tobi29.scapes.engine.utils.generation.layer.random
-import org.tobi29.scapes.engine.utils.generation.layer.randomOffset
-import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.generation.layer.RandomPermutation
+import org.tobi29.generation.layer.random
+import org.tobi29.generation.layer.randomOffset
+import org.tobi29.generation.value.OpenSimplexNoise
+import org.tobi29.math.Random
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.utils.toArray
 
 class StoneGenerator(random: Random,
                      stoneLayers: Sequence<Sequence<StoneType>>) {
@@ -37,7 +37,7 @@ class StoneGenerator(random: Random,
     class Layer(random: Random,
                 private val types: Array<StoneType>) {
         private val base = RandomPermutation(random)
-        private val swirl = SimplexNoise(random.nextLong())
+        private val swirl = OpenSimplexNoise(random.nextLong())
         private val noise = RandomPermutation(random)
 
         fun stoneType(x: Int,

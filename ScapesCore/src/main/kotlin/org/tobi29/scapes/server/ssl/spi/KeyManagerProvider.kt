@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.server.ssl.spi
 
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.io.tag.TagMap
 import javax.net.ssl.KeyManager
 
 interface KeyManagerProvider {

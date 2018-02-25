@@ -16,14 +16,14 @@
 
 package org.tobi29.scapes.vanilla.basics.viewer.generator
 
-import org.tobi29.scapes.engine.application.executeMain
-import org.tobi29.scapes.engine.args.CommandLine
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.swt.util.framework.Document
-import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
-import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
-import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
-import org.tobi29.scapes.engine.utils.Version
+import org.tobi29.application.executeMain
+import org.tobi29.args.CommandLine
+import org.tobi29.math.Random
+import org.tobi29.application.swt.framework.Document
+import org.tobi29.application.swt.framework.DocumentComposite
+import org.tobi29.application.swt.framework.MultiDocumentApplication
+import org.tobi29.application.swt.widgets.SmartMenuBar
+import org.tobi29.utils.Version
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator

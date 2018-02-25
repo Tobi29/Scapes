@@ -21,7 +21,7 @@ import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
-import org.tobi29.scapes.engine.test.assertions.shouldEqual
+import org.tobi29.assertions.shouldEqual
 import org.tobi29.scapes.plugins.Sandbox
 
 object SandboxTests : Spek({

@@ -16,23 +16,25 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
-import org.tobi29.scapes.block.Inventory
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
-import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.scapes.entity.client.EntityAbstractClient
+import org.tobi29.scapes.entity.client.GUI_COMPONENT
 import org.tobi29.scapes.vanilla.basics.gui.GuiResearchTableInventory
 
-class EntityResearchTableClient(type: EntityType<*, *>,
-                                world: WorldClient) : EntityAbstractContainerClient(
-        type, world, Vector3d.ZERO, Inventory(world.plugins, 2)) {
-
-    override fun gui(player: MobPlayerClientMain): Gui? {
-        if (player is MobPlayerClientMainVB) {
-            return GuiResearchTableInventory(this, player,
-                    player.game.engine.guiStyle)
+class EntityResearchTableClient(
+        type: EntityType<*, *>,
+        world: WorldClient
+) : EntityAbstractClient(type, world, Vector3d.ZERO) {
+    init {
+        inventories.add("Container", 2)
+        registerComponent(GUI_COMPONENT) { player ->
+            if (player is MobPlayerClientMainVB) {
+                GuiResearchTableInventory(this, player,
+                        player.game.engine.guiStyle)
+            } else null
         }
-        return null
     }
 }

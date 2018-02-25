@@ -17,20 +17,14 @@ package org.tobi29.scapes.vanilla.basics.util
 
 import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.launch
+import org.tobi29.math.cosTable
+import org.tobi29.math.sinTable
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.*
 import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.ItemStackData
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.cosTable
-import org.tobi29.scapes.engine.math.sinTable
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.*
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.utils.putAbsent
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobLivingServer
@@ -38,6 +32,12 @@ import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
+import org.tobi29.stdex.ThreadLocal
+import org.tobi29.stdex.assert
+import org.tobi29.stdex.math.TWO_PI
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.putAbsent
+import org.tobi29.utils.Pool
 import kotlin.math.PI
 import kotlin.math.abs
 
@@ -56,7 +56,7 @@ fun WorldServer.explosionEntities(x: Double,
         val s = radius - relative.length()
         if (s > 0) {
             val p = s * push
-            val force = relative.normalizeSafe().times(p)
+            val force = relative.normalizedSafe().times(p)
             mob.push(force.x, force.y, force.z)
             if (mob is MobLivingServer) {
                 mob.damage(s * damage)
@@ -138,9 +138,7 @@ fun TerrainServer.explosionBlockPush(
             } else {
                 if (random.nextDouble() < dropChance) {
                     if (type is VanillaBlock) {
-                        world.dropItems(type.drops(
-                                ItemStack(world.plugins),
-                                data), xxx, yyy, zzz)
+                        world.dropItems(type.drops(null, data), xxx, yyy, zzz)
                     }
                 } else if (type.isSolid(data) &&
                         !type.isTransparent(data) &&
@@ -151,7 +149,7 @@ fun TerrainServer.explosionBlockPush(
                         setSpeed(Vector3d(random.nextDouble() * 0.1 - 0.05,
                                 random.nextDouble() * 0.1 - 0.05,
                                 random.nextDouble() * 1 + 2))
-                        setType(ItemStack(type, data))
+                        setType(ItemStackData(type, data))
                     })
                 }
             }

@@ -23,7 +23,7 @@ import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.gui.GuiRenderer
-import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.math.vector.Vector2d
 
 class GuiComponentCredits(parent: GuiLayoutData) : GuiComponentHeavy(
         parent) {
@@ -39,8 +39,8 @@ class GuiComponentCredits(parent: GuiLayoutData) : GuiComponentHeavy(
     override fun updateMesh(renderer: GuiRenderer,
                             size: Vector2d) {
         val font = gui.style.font
-        font.render(FontRenderer.to(renderer, 1.0f, 1.0f, 1.0f, 1.0f), text,
-                size.floatY(), size.floatX())
+        font.render(FontRenderer.to(renderer, 1.0, 1.0, 1.0, 1.0), text, size.y,
+                size.x)
     }
 
     override fun transform(matrix: Matrix,

@@ -19,8 +19,8 @@ import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.gui.GuiRenderer
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.math.vector.Vector2d
+import org.tobi29.stdex.math.clamp
 import kotlin.math.min
 
 class GuiComponentBar(parent: GuiLayoutData,
@@ -78,9 +78,9 @@ class GuiComponentBar(parent: GuiLayoutData,
         var g2 = g1 * 0.5f
         var b2 = b1 * 0.5f
         model1 = engine.graphics.createVCTI(
-                floatArrayOf(0.0f, size.floatY(), 0.0f, size.floatX(),
-                        size.floatY(), 0.0f, 0.0f, 0.0f, 0.0f, size.floatX(),
-                        0.0f, 0.0f),
+                floatArrayOf(0.0f, size.y.toFloat(), 0.0f, size.x.toFloat(),
+                        size.y.toFloat(), 0.0f, 0.0f, 0.0f, 0.0f,
+                        size.x.toFloat(), 0.0f, 0.0f),
                 floatArrayOf(r2, g2, b2, a, r2, g2, b2, a, r1, g1, b1, a, r1,
                         g1, b1, a),
                 floatArrayOf(0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f),
@@ -92,9 +92,9 @@ class GuiComponentBar(parent: GuiLayoutData,
         g2 *= 0.4f
         b2 *= 0.4f
         model2 = engine.graphics.createVCTI(
-                floatArrayOf(0.0f, size.floatY(), 0.0f, size.floatX(),
-                        size.floatY(), 0.0f, 0.0f, 0.0f, 0.0f, size.floatX(),
-                        0.0f, 0.0f),
+                floatArrayOf(0.0f, size.y.toFloat(), 0.0f, size.x.toFloat(),
+                        size.y.toFloat(), 0.0f, 0.0f, 0.0f, 0.0f,
+                        size.x.toFloat(), 0.0f, 0.0f),
                 floatArrayOf(r2, g2, b2, a, r2, g2, b2, a, r1, g1, b1, a, r1,
                         g1, b1, a),
                 floatArrayOf(0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f),

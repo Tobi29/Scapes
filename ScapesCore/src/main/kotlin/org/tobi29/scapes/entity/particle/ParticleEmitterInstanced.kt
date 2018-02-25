@@ -17,8 +17,8 @@
 package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.io.MemoryViewStream
+import org.tobi29.graphics.Cam
+import org.tobi29.io.MemoryViewStream
 
 abstract class ParticleEmitterInstanced<P : ParticleInstance>(system: ParticleSystem,
                                                               protected val texture: Texture,

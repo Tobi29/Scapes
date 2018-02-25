@@ -20,8 +20,8 @@ import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
-import org.tobi29.scapes.engine.test.assertions.shouldEqual
-import org.tobi29.scapes.engine.math.Random
+import org.tobi29.assertions.shouldEqual
+import org.tobi29.math.Random
 import org.tobi29.scapes.terrain.data.ChunkArraySection1x16
 import org.tobi29.scapes.terrain.data.ChunkArraySection1x8
 import org.tobi29.scapes.terrain.data.ChunkArraySection2x4

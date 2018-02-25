@@ -19,25 +19,26 @@ package org.tobi29.scapes.chunk.terrain.infinite
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.SendChannel
 import kotlinx.coroutines.experimental.channels.actor
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.loop
+import org.tobi29.io.tag.TagMap
+import org.tobi29.logging.KLogging
+import org.tobi29.math.vector.MutableVector2i
+import org.tobi29.math.vector.Vector2i
+import org.tobi29.math.vector.distanceSqr
+import org.tobi29.math.vector.lengthSqr
+import org.tobi29.profiler.profilerSection
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainClient
-import org.tobi29.scapes.engine.math.vector.MutableVector2i
-import org.tobi29.scapes.engine.math.vector.Vector2i
-import org.tobi29.scapes.engine.math.vector.distanceSqr
-import org.tobi29.scapes.engine.math.vector.lengthSqr
-import org.tobi29.scapes.engine.utils.ConcurrentHashSet
-import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.sqr
-import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.task.Timer
-import org.tobi29.scapes.engine.utils.task.loop
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.packets.PacketBlockChange
 import org.tobi29.scapes.packets.PacketRequestChunk
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManagerStatic
+import org.tobi29.stdex.ConcurrentHashSet
+import org.tobi29.stdex.ThreadLocal
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.sqr
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.coroutines.experimental.buildSequence
@@ -85,9 +86,9 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
         }
         profilerSection("ChunkManager") {
             val pos = world.player.getCurrentPos()
-            val xx = pos.intX() shr 4
-            val yy = pos.intY() shr 4
-            center.set(xx, yy)
+            val xx = pos.x.floorToInt() shr 4
+            val yy = pos.y.floorToInt() shr 4
+            center.setXY(xx, yy)
             if (chunkManager.update()) {
                 requestActor?.offer(Unit)
             }
@@ -118,12 +119,12 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
         requestJob = Job()
         requestActor = actor(taskExecutor + CoroutineName("Load-Requests"),
                 parent = requestJob) {
-            for (msg in channel) {
-                withContext(NonCancellable) {
+            withContext(NonCancellable) {
+                for (msg in channel) {
                     var isLoading = false
                     val playerPos = world.player.getCurrentPos()
-                    val x = playerPos.intX() shr 4
-                    val y = playerPos.intY() shr 4
+                    val x = playerPos.x.floorToInt() shr 4
+                    val y = playerPos.y.floorToInt() shr 4
                     for (pos in sortedLocations) {
                         val xx = pos.x + x
                         val yy = pos.y + y
@@ -228,8 +229,8 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
     override fun addEntity(entity: EntityClient,
                            spawn: Boolean): Boolean {
         val pos = entity.getCurrentPos()
-        val x = pos.intX() shr 4
-        val y = pos.intY() shr 4
+        val x = pos.x.floorToInt() shr 4
+        val y = pos.y.floorToInt() shr 4
         return chunkC(x, y, { chunk ->
             chunk.addEntity(entity, spawn)
             true

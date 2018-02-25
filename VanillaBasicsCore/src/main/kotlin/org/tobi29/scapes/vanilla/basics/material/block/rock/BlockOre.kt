@@ -16,15 +16,17 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.math.Face
+import org.tobi29.math.Random
+import org.tobi29.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
-import org.tobi29.scapes.vanilla.basics.util.dropItem
+import org.tobi29.scapes.vanilla.basics.util.dropItems
 
 abstract class BlockOre(type: VanillaMaterialType) : BlockStone(type) {
     override fun destroy(terrain: TerrainMutableServer,
@@ -34,36 +36,36 @@ abstract class BlockOre(type: VanillaMaterialType) : BlockStone(type) {
                          data: Int,
                          face: Face,
                          player: MobPlayerServer,
-                         item: ItemStack): Boolean {
+                         item: Item?): Boolean {
         if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
             return false
         }
-        if ("Pickaxe" == item.material().toolType(item) && !canBeBroken(
-                item.material().toolLevel(item), data)) {
-            drops(item, data).forEach {
-                player.world.dropItem(it, x + face.x, y + face.y, z + face.z)
-            }
+        if ("Pickaxe" == item.kind<ItemTypeTool>()?.toolType() && !canBeBroken(
+                item.kind<ItemTypeTool>()?.toolLevel() ?: 0, data)) {
+            player.world.dropItems(drops(item, data), x + face.x, y + face.y,
+                    z + face.z)
             terrain.type(x, y, z, materials.stoneRaw)
             return false
         }
         return true
     }
 
-    override fun drops(item: ItemStack,
-                       data: Int): List<ItemStack> {
+    override fun drops(item: Item?,
+                       data: Int): List<Item> {
         return dropsOre(item, data) + listOf(
-                ItemStack(materials.stoneRock, data, Random().nextInt(4) + 8))
+                ItemStackData(materials.stoneRock, data,
+                        Random().nextInt(4) + 8))
     }
 
-    abstract fun dropsOre(item: ItemStack,
-                          data: Int): List<ItemStack>
+    abstract fun dropsOre(item: Item?,
+                          data: Int): List<Item>
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
-        if ("Pickaxe" == item.material().toolType(item) && canBeBroken(
-                item.material().toolLevel(item), data)) {
+        if ("Pickaxe" == item.kind<ItemTypeTool>()?.toolType() && canBeBroken(
+                item.kind<ItemTypeTool>()?.toolLevel() ?: 0, data)) {
             return super.resistance(item, data)
-        } else if ("Pickaxe" == item.material().toolType(item)) {
+        } else if ("Pickaxe" == item.kind<ItemTypeTool>()?.toolType()) {
             return 12.0
         }
         return -1.0
@@ -80,7 +82,7 @@ abstract class BlockOre(type: VanillaMaterialType) : BlockStone(type) {
         }.toArray()
     }
 
-    override fun maxStackSize(item: ItemStack) = 4
+    override fun maxStackSize(item: TypedItem<BlockType>) = 4
 
     protected abstract fun oreTexture(): String
 }

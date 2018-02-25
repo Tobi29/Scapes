@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.terrain
 
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.math.vector.Vector3i
+import org.tobi29.math.vector.Vector3i
+import org.tobi29.io.tag.MutableTagMap
 
 interface TerrainChunk {
     val posBlock: Vector3i

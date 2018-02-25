@@ -16,9 +16,9 @@
 
 package org.tobi29.scapes.plugins
 
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.logging.KLogging
+import org.tobi29.utils.toArray
 import java.io.FilePermission
 import java.net.URL
 import java.net.URLClassLoader

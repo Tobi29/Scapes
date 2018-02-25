@@ -15,6 +15,14 @@
  */
 package org.tobi29.scapes.chunk
 
+import org.tobi29.graphics.Cam
+import org.tobi29.io.tag.TagMap
+import org.tobi29.logging.KLogging
+import org.tobi29.math.AABB
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.floorToInt
+import org.tobi29.profiler.profilerSection
+import org.tobi29.scapes.block.light
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.isTransparent
@@ -27,25 +35,19 @@ import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.graphics.BlendingMode
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.readOnly
-import org.tobi29.scapes.engine.utils.shader.BooleanExpression
-import org.tobi29.scapes.engine.utils.shader.IntegerExpression
-import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.scapes.engine.shader.BooleanExpression
+import org.tobi29.scapes.engine.shader.IntegerExpression
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.packets.PacketServer
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.readOnly
+import org.tobi29.utils.EventDispatcher
+import org.tobi29.uuid.Uuid
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
@@ -56,9 +58,10 @@ class WorldClient(val connection: ClientConnection,
                   terrainSupplier: (WorldClient) -> TerrainClient,
                   environmentSupplier: (WorldClient) -> EnvironmentClient,
                   playerTag: TagMap,
-                  playerID: UUID) : World<EntityClient>(
+                  playerID: Uuid) : World<EntityClient>(
         connection.plugins, connection.game.engine.taskExecutor,
-        connection.plugins.registry, seed), PlayConnection<PacketServer> {
+        connection.plugins.registry, seed),
+        PlayConnection<PacketServer> {
     val game = connection.game
     val events = EventDispatcher(game.engine.events) {
         listen<InputModeChangeEvent> { event ->
@@ -70,7 +73,7 @@ class WorldClient(val connection: ClientConnection,
     val terrain: TerrainClient
     val environment: EnvironmentClient
     private val infoLayers = ConcurrentHashMap<String, () -> TerrainRenderInfo.InfoLayer>()
-    private val entityModels = ConcurrentHashMap<UUID, EntityModel>()
+    private val entityModels = ConcurrentHashMap<Uuid, EntityModel>()
     private var disposed = false
 
     init {
@@ -112,7 +115,7 @@ class WorldClient(val connection: ClientConnection,
         return player == entity || terrain.hasEntity(entity)
     }
 
-    override fun getEntity(uuid: UUID): EntityClient? {
+    override fun getEntity(uuid: Uuid): EntityClient? {
         if (player.uuid == uuid) {
             return player
         }
@@ -128,7 +131,7 @@ class WorldClient(val connection: ClientConnection,
                              z: Int): Sequence<EntityClient> {
         val sequence = terrain.getEntities(x, y, z)
         val pos = player.getCurrentPos()
-        if (pos.intX() == x && pos.intY() == y && pos.intZ() == z) {
+        if (pos.x.floorToInt() == x && pos.y.floorToInt() == y && pos.z.floorToInt() == z) {
             return sequence + player
         }
         return sequence
@@ -156,7 +159,8 @@ class WorldClient(val connection: ClientConnection,
     fun update(delta: Double) {
         profilerSection("Entities") {
             val pos = player.getCurrentPos()
-            if (terrain.isBlockTicking(pos.intX(), pos.intY(), pos.intZ())) {
+            if (terrain.isBlockTicking(pos.x.floorToInt(), pos.y.floorToInt(),
+                            pos.z.floorToInt())) {
                 player.update(delta)
                 player.move(delta)
             } else {
@@ -176,7 +180,7 @@ class WorldClient(val connection: ClientConnection,
         profilerSection("Tasks") {
             process()
         }
-        spawn = Vector3i(player.getCurrentPos())
+        spawn = player.getCurrentPos().floorToInt()
     }
 
     fun updateRender(cam: Cam,
@@ -218,6 +222,9 @@ class WorldClient(val connection: ClientConnection,
 
         val particles = scene.particles().addToPipeline(gl, width, height, cam)
 
+        terrain.renderer.lodDistance =
+                clamp(gl.space() * 96.0, 32.0, 96.0).roundToInt()
+
         return {
             val sTerrain1 = shaderTerrain1.getAsync()
             val sTerrain2 = shaderTerrain2.getAsync()
@@ -231,14 +238,12 @@ class WorldClient(val connection: ClientConnection,
             val sunLightReduction =
                     environment.sunLightReduction(cx, cy) / 15.0f
             val playerLight = max(
-                    player.leftWeapon().material().playerLight(
-                            player.leftWeapon()),
-                    player.rightWeapon().material().playerLight(
-                            player.rightWeapon()))
+                    player.leftWeapon().light,
+                    player.rightWeapon().light).toFloat()
             val sunlightNormal = environment.sunLightNormal(cx, cy)
-            val snx = sunlightNormal.floatX()
-            val sny = sunlightNormal.floatY()
-            val snz = sunlightNormal.floatZ()
+            val snx = sunlightNormal.x.toFloat()
+            val sny = sunlightNormal.y.toFloat()
+            val snz = sunlightNormal.z.toFloat()
             val fr = scene.fogR()
             val fg = scene.fogG()
             val fb = scene.fogB()
@@ -273,8 +278,8 @@ class WorldClient(val connection: ClientConnection,
                 it.shapeAABB(aabb)
                 cam.frustum.inView(aabb) != 0
             }.forEach {
-                it.render(gl, this, cam, sEntity)
-            }
+                        it.render(gl, this, cam, sEntity)
+                    }
             scene.terrainTextureRegistry().texture.bind(gl)
             terrain.renderer.renderAlpha(gl, sTerrain1, sTerrain2, cam)
             renderParticles(delta)

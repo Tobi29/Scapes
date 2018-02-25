@@ -16,16 +16,10 @@
 
 package org.tobi29.scapes.terrain.infinite
 
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.StampLock
-import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.lb
-import org.tobi29.scapes.engine.math.vector.Vector2i
-import org.tobi29.scapes.engine.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.tag.mapMut
+import org.tobi29.math.vector.Vector2i
+import org.tobi29.math.vector.Vector3i
+import org.tobi29.utils.Pool
+import org.tobi29.utils.StampLock
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.terrain.TerrainGlobals
 import org.tobi29.scapes.terrain.TerrainLock
@@ -33,6 +27,12 @@ import org.tobi29.scapes.terrain.VoxelType
 import org.tobi29.scapes.terrain.data.ChunkArraySection1x16
 import org.tobi29.scapes.terrain.data.ChunkArraySection2x4
 import org.tobi29.scapes.terrain.data.ChunkDataStruct
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.io.tag.mapMut
+import org.tobi29.stdex.ThreadLocal
+import org.tobi29.stdex.assert
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.lb
 import kotlin.math.max
 
 abstract class TerrainInfiniteBaseChunk<B : VoxelType>(val pos: Vector2i,

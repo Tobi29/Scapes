@@ -16,15 +16,13 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.math.vector.Vector2d
 
-class GuiHud(state: GameState,
-             style: GuiStyle) : GuiDesktop(state, style) {
+class GuiHud(style: GuiStyle) : GuiScaled(style) {
     private val cross: Model
-    private val textureCross = gui.engine.graphics.textures["Scapes:image/gui/Cross"]
+    private val textureCross = engine.graphics.textures["Scapes:image/gui/Cross"]
 
     init {
         cross = engine.graphics.createVCTI(

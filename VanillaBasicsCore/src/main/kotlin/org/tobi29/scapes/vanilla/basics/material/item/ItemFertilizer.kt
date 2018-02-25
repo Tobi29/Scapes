@@ -16,72 +16,46 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.block.models.ItemModel
-import org.tobi29.scapes.block.models.ItemModelSimple
+import org.tobi29.scapes.block.ItemTypeIconI
+import org.tobi29.scapes.block.ItemTypeUseableI
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.modify
-import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.math.Face
+import org.tobi29.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.ItemTypeNamedI
+import org.tobi29.scapes.inventory.ItemTypeStackableDefaultI
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateSaplingGrowth
 
-class ItemFertilizer(type: VanillaMaterialType) : VanillaItem(type) {
-    private var texture: TerrainTexture? = null
-    private var model: ItemModel? = null
+class ItemFertilizer(
+        type: VanillaMaterialType
+) : VanillaItemBase<ItemFertilizer>(type),
+        ItemTypeNamedI<ItemFertilizer>,
+        ItemTypeIconI<ItemFertilizer>,
+        ItemTypeStackableDefaultI<ItemFertilizer>,
+        ItemTypeUseableI<ItemFertilizer> {
+    override val textureAsset
+        get() = "VanillaBasics:image/terrain/other/Fertilizer"
 
     override fun click(entity: MobPlayerServer,
-                       item: ItemStack,
+                       item: TypedItem<ItemFertilizer>,
                        terrain: TerrainServer,
                        x: Int,
                        y: Int,
                        z: Int,
-                       face: Face): Double {
-        terrain.modify(materials.sapling, x, y, z) { terrain ->
-            terrain.addDelayedUpdate(
-                    UpdateSaplingGrowth(entity.world.registry).set(x, y, z,
-                            3.0))
-        }
-        return 0.0
-    }
+                       face: Face): Pair<Item?, Double?> =
+            run {
+                terrain.modify(materials.sapling, x, y, z) { terrain ->
+                    terrain.addDelayedUpdate(
+                            UpdateSaplingGrowth(entity.world.registry).set(x, y,
+                                    z, 3.0))
+                }
+                item to 0.0
+            }
 
-    override fun click(entity: MobPlayerServer,
-                       item: ItemStack,
-                       hit: MobServer): Double {
-        return 0.0
-    }
+    override fun name(item: TypedItem<ItemFertilizer>) = "Fertilizer (Debug)"
 
-    override fun registerTextures(registry: TerrainTextureRegistry) {
-        texture = registry.registerTexture(
-                "VanillaBasics:image/terrain/other/Fertilizer.png")
-    }
-
-    override fun createModels(registry: TerrainTextureRegistry) {
-        model = ItemModelSimple(texture, 1.0, 1.0, 1.0, 1.0)
-    }
-
-    override fun render(item: ItemStack,
-                        gl: GL,
-                        shader: Shader) {
-        model?.render(gl, shader)
-    }
-
-    override fun renderInventory(item: ItemStack,
-                                 gl: GL,
-                                 shader: Shader) {
-        model?.renderInventory(gl, shader)
-    }
-
-    override fun name(item: ItemStack): String {
-        return "Fertilizer (Debug)"
-    }
-
-    override fun maxStackSize(item: ItemStack): Int {
-        return 64
-    }
+    override fun maxStackSize(item: TypedItem<ItemFertilizer>) = 64
 }

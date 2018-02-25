@@ -18,7 +18,7 @@ package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.math.vector.Vector2d
 
 open class GuiMenu(state: GameState,
                    title: String,
@@ -69,7 +69,8 @@ open class GuiMenu(state: GameState,
             }
         }
 
-        override fun newLayoutManager(size: Vector2d): GuiLayoutManager {
+        override fun newLayoutManager(components: Collection<GuiComponent>,
+                                      size: Vector2d): GuiLayoutManager {
             return if (compactControls()) {
                 GuiLayoutManagerHorizontal(Vector2d(24.0, 0.0),
                         Vector2d(size.x - 48.0, 40.0), components)

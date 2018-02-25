@@ -27,13 +27,13 @@ import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Label
 import org.eclipse.swt.widgets.MenuItem
 import org.eclipse.swt.widgets.ProgressBar
-import org.tobi29.scapes.engine.server.ConnectionManager
-import org.tobi29.scapes.engine.server.RemoteAddress
-import org.tobi29.scapes.engine.swt.util.framework.Document
-import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
-import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
-import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
-import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
+import org.tobi29.server.ConnectionManager
+import org.tobi29.server.RemoteAddress
+import org.tobi29.application.swt.framework.Document
+import org.tobi29.application.swt.framework.DocumentComposite
+import org.tobi29.application.swt.framework.MultiDocumentApplication
+import org.tobi29.application.swt.widgets.SmartMenuBar
+import org.tobi29.application.swt.widgets.ifPresent
 import java.util.concurrent.TimeUnit
 
 class ReconnectDocument(private val application: MultiDocumentApplication,

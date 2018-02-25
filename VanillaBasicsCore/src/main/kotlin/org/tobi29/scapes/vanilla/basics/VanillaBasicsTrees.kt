@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.world.tree.*
 

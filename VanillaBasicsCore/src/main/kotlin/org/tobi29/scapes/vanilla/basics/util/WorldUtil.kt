@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.vanilla.basics.util
 
-import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
-fun WorldServer.dropItems(items: List<ItemStack>,
+fun WorldServer.dropItems(items: List<Item>,
                           x: Int,
                           y: Int,
                           z: Int,
@@ -33,7 +33,7 @@ fun WorldServer.dropItems(items: List<ItemStack>,
     }
 }
 
-fun WorldServer.dropItem(item: ItemStack,
+fun WorldServer.dropItem(item: Item,
                          x: Int,
                          y: Int,
                          z: Int,
@@ -41,7 +41,7 @@ fun WorldServer.dropItem(item: ItemStack,
     dropItem(item, Vector3d(x + 0.5, y + 0.5, z + 0.5), despawntime)
 }
 
-fun WorldServer.dropItem(item: ItemStack,
+fun WorldServer.dropItem(item: Item,
                          pos: Vector3d,
                          despawntime: Double = 600.0) {
     val plugin = plugins.plugin("VanillaBasics") as VanillaBasics
@@ -51,7 +51,7 @@ fun WorldServer.dropItem(item: ItemStack,
         setSpeed(Vector3d(-2.0 + random.nextDouble() * 4.0,
                 -2.0 + random.nextDouble() * 4.0,
                 random.nextDouble() * 1.0 + 0.5))
-        this.item.set(item)
+        this.item = item
         this.despawntime = despawntime
     }
     addEntityNew(entity)

@@ -16,17 +16,17 @@
 
 package org.tobi29.scapes.entity.server
 
+import org.tobi29.math.abs
+import org.tobi29.math.angleDiff
+import org.tobi29.math.max
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.MutableVector3d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.minus
 import org.tobi29.scapes.block.Registries
-import org.tobi29.scapes.engine.math.abs
-import org.tobi29.scapes.engine.math.angleDiff
-import org.tobi29.scapes.engine.math.max
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.minus
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.packets.*
+import org.tobi29.stdex.math.clamp
+import org.tobi29.uuid.Uuid
 import kotlin.math.abs
 
 class MobPositionSenderServer(private val registry: Registries,
@@ -54,7 +54,7 @@ class MobPositionSenderServer(private val registry: Registries,
                 FORCE_TIME_RANDOM).toLong() shl 3)
     }
 
-    fun submitUpdate(uuid: UUID,
+    fun submitUpdate(uuid: Uuid,
                      pos: Vector3d,
                      speed: Vector3d,
                      rot: Vector3d,
@@ -68,7 +68,7 @@ class MobPositionSenderServer(private val registry: Registries,
     }
 
     @Synchronized
-    fun submitUpdate(uuid: UUID,
+    fun submitUpdate(uuid: Uuid,
                      pos: Vector3d,
                      speed: Vector3d,
                      rot: Vector3d,
@@ -102,23 +102,23 @@ class MobPositionSenderServer(private val registry: Registries,
         } else {
             if (max(abs(sentPosRelative.now().minus(
                     pos))) > POSITION_SEND_RELATIVE_OFFSET) {
-                val x = (clamp(pos.x - sentPosRelative.doubleX(), -0.25,
+                val x = (clamp(pos.x - sentPosRelative.x, -0.25,
                         0.25) * 500.0).toByte()
-                val y = (clamp(pos.y - sentPosRelative.doubleY(), -0.25,
+                val y = (clamp(pos.y - sentPosRelative.y, -0.25,
                         0.25) * 500.0).toByte()
-                val z = (clamp(pos.z - sentPosRelative.doubleZ(), -0.25,
+                val z = (clamp(pos.z - sentPosRelative.z, -0.25,
                         0.25) * 500.0).toByte()
-                sentPosRelative.plusX(x / 500.0)
-                sentPosRelative.plusY(y / 500.0)
-                sentPosRelative.plusZ(z / 500.0)
+                sentPosRelative.addX(x / 500.0)
+                sentPosRelative.addY(y / 500.0)
+                sentPosRelative.addZ(z / 500.0)
                 packetHandler(
                         PacketMobMoveRelative(registry, uuid, oldPos, x, y, z))
             }
-            if (abs(sentSpeed.doubleX()) > SPEED_SEND_OFFSET && abs(
+            if (abs(sentSpeed.x) > SPEED_SEND_OFFSET && abs(
                     speed.x) <= SPEED_SEND_OFFSET ||
-                    abs(sentSpeed.doubleY()) > SPEED_SEND_OFFSET && abs(
+                    abs(sentSpeed.y) > SPEED_SEND_OFFSET && abs(
                             speed.y) <= SPEED_SEND_OFFSET ||
-                    abs(sentSpeed.doubleZ()) > SPEED_SEND_OFFSET && abs(
+                    abs(sentSpeed.z) > SPEED_SEND_OFFSET && abs(
                             speed.z) <= SPEED_SEND_OFFSET) {
                 sendSpeed(uuid, Vector3d.ZERO, false)
             } else if (max(
@@ -126,11 +126,11 @@ class MobPositionSenderServer(private val registry: Registries,
                 sendSpeed(uuid, speed, false)
             }
         }
-        if (force || abs(angleDiff(sentRot.doubleX(),
+        if (force || abs(angleDiff(sentRot.x,
                 rot.x)) > DIRECTION_SEND_OFFSET || abs(
-                angleDiff(sentRot.doubleY(),
+                angleDiff(sentRot.y,
                         rot.y)) > DIRECTION_SEND_OFFSET || abs(
-                angleDiff(sentRot.doubleZ(),
+                angleDiff(sentRot.z,
                         rot.z)) > DIRECTION_SEND_OFFSET) {
             sendRotation(uuid, rot, force)
         }
@@ -148,7 +148,7 @@ class MobPositionSenderServer(private val registry: Registries,
         }
     }
 
-    fun sendPos(uuid: UUID,
+    fun sendPos(uuid: Uuid,
                 pos: Vector3d,
                 forced: Boolean,
                 packetHandler: (PacketBoth) -> Unit = this.packetHandler) {
@@ -165,17 +165,17 @@ class MobPositionSenderServer(private val registry: Registries,
                         pos.y, pos.z))
     }
 
-    fun sendRotation(uuid: UUID,
+    fun sendRotation(uuid: Uuid,
                      rot: Vector3d,
                      forced: Boolean,
                      packetHandler: (PacketBoth) -> Unit = this.packetHandler) {
         sentRot.set(rot)
         packetHandler(PacketMobChangeRot(registry, uuid,
-                if (forced) null else sentPosAbsolute.now(), rot.floatX(),
-                rot.floatY(), rot.floatZ()))
+                if (forced) null else sentPosAbsolute.now(), rot.x.toFloat(),
+                rot.y.toFloat(), rot.z.toFloat()))
     }
 
-    fun sendSpeed(uuid: UUID,
+    fun sendSpeed(uuid: Uuid,
                   speed: Vector3d,
                   forced: Boolean,
                   packetHandler: (PacketBoth) -> Unit = this.packetHandler) {

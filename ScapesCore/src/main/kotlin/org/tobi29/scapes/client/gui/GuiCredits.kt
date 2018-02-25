@@ -19,9 +19,9 @@ package org.tobi29.scapes.client.gui
 import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.asString
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.io.IOException
+import org.tobi29.io.asString
+import org.tobi29.logging.KLogging
 
 class GuiCredits(state: GameState,
                  previous: Gui,

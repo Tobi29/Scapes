@@ -16,45 +16,22 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.block.models.ItemModel
-import org.tobi29.scapes.block.models.ItemModelSimple
-import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.block.ItemTypeIconI
+import org.tobi29.scapes.inventory.ItemTypeNamedI
+import org.tobi29.scapes.inventory.ItemTypeStackableDefaultI
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-class ItemStick(type: VanillaMaterialType) : VanillaItem(type) {
-    private var texture: TerrainTexture? = null
-    private var model: ItemModel? = null
+class ItemStick(
+        type: VanillaMaterialType
+) : VanillaItemBase<ItemStick>(type),
+        ItemTypeNamedI<ItemStick>,
+        ItemTypeIconI<ItemStick>,
+        ItemTypeStackableDefaultI<ItemStick> {
+    override val textureAsset
+        get() = "VanillaBasics:image/terrain/other/Stick"
 
-    override fun registerTextures(registry: TerrainTextureRegistry) {
-        texture = registry.registerTexture(
-                "VanillaBasics:image/terrain/other/Stick.png")
-    }
+    override fun name(item: TypedItem<ItemStick>) = "Stick"
 
-    override fun createModels(registry: TerrainTextureRegistry) {
-        model = ItemModelSimple(texture, 1.0, 1.0, 1.0, 1.0)
-    }
-
-    override fun render(item: ItemStack,
-                        gl: GL,
-                        shader: Shader) {
-        model?.render(gl, shader)
-    }
-
-    override fun renderInventory(item: ItemStack,
-                                 gl: GL,
-                                 shader: Shader) {
-        model?.renderInventory(gl, shader)
-    }
-
-    override fun name(item: ItemStack): String {
-        return "Stick"
-    }
-
-    override fun maxStackSize(item: ItemStack): Int {
-        return 16
-    }
+    override fun maxStackSize(item: TypedItem<ItemStick>) = 16
 }

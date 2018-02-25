@@ -18,13 +18,13 @@ package org.tobi29.scapes.client
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.ScapesEngineConfig
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.isNotHidden
-import org.tobi29.scapes.engine.utils.io.filesystem.isRegularFile
-import org.tobi29.scapes.engine.utils.io.filesystem.listRecursive
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.io.IOException
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.io.filesystem.isNotHidden
+import org.tobi29.io.filesystem.isRegularFile
+import org.tobi29.io.filesystem.listRecursive
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.engine.volume
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import java.security.AccessController
@@ -48,8 +48,8 @@ class Playlist(private val path: FilePath,
             } else {
                 val music: Music
                 val pos = player.getCurrentPos()
-                if (player.world.environment.sunLightReduction(
-                        pos.intX().toDouble(), pos.intY().toDouble()) > 8) {
+                if (player.world.environment.sunLightReduction(pos.x,
+                        pos.y) > 8) {
                     music = Music.NIGHT
                 } else {
                     music = Music.DAY

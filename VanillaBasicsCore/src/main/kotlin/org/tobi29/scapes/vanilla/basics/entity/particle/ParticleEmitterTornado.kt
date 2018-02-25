@@ -16,19 +16,19 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.particle
 
+import org.tobi29.graphics.Cam
+import org.tobi29.math.cosTable
+import org.tobi29.math.sinTable
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.math.cosTable
-import org.tobi29.scapes.engine.math.sinTable
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.entity.particle.ParticleEmitter
 import org.tobi29.scapes.entity.particle.ParticleEmitterTransparent
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.particle.ParticleSystem
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
+import org.tobi29.stdex.math.TWO_PI
+import org.tobi29.stdex.math.toRad
 
 class ParticleEmitterTornado(system: ParticleSystem) : ParticleEmitter<ParticleInstanceTornado>(
         system, Array(10240, { ParticleInstanceTornado() })) {
@@ -76,7 +76,7 @@ class ParticleEmitterTornado(system: ParticleSystem) : ParticleEmitter<ParticleI
                 continue
             }
             hasAlive = true
-            instance.pos.plusZ(18.0 * delta)
+            instance.pos.addZ(18.0 * delta)
             instance.width += (0.8 * delta).toFloat()
             instance.spin += (220.0 * delta).toFloat()
             instance.spin %= 360.0f
@@ -84,13 +84,13 @@ class ParticleEmitterTornado(system: ParticleSystem) : ParticleEmitter<ParticleI
             if (instance.puff <= 0.0) {
                 instance.puff += 0.1f
                 val s = instance.spin.toRad().toDouble()
-                val x = instance.pos.doubleX() + cosTable(
+                val x = instance.pos.x + cosTable(
                         s) * instance.width.toDouble() * instance.widthRandom.toDouble() + cosTable(
                         instance.baseSpin.toDouble()) * instance.width
-                val y = instance.pos.doubleY() + sinTable(
+                val y = instance.pos.y + sinTable(
                         s) * instance.width.toDouble() * instance.widthRandom.toDouble() + sinTable(
                         instance.baseSpin.toDouble()) * instance.width.toDouble() * 3.0
-                trail(emitter, Vector3d(x, y, instance.pos.doubleZ()),
+                trail(emitter, Vector3d(x, y, instance.pos.z),
                         Vector3d.ZERO, plugin.particles.cloud)
             }
         }

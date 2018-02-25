@@ -16,11 +16,12 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.tool
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
+import org.tobi29.scapes.vanilla.basics.material.item.VanillaItem
 
 class ItemMetalHoe(type: VanillaMaterialType) : ItemMetalTool(type) {
-    override fun isWeapon(item: ItemStack): Boolean {
+    override fun isWeapon(item: TypedItem<VanillaItem>): Boolean {
         return true
     }
 

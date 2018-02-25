@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.gui
 
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.client.gui.GuiComponentHotbarButton
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.GuiEvent
@@ -26,10 +27,10 @@ class GuiComponentHotbar(parent: GuiLayoutData,
                          player: MobPlayerClientMainVB) : GuiComponentGroupSlab(
         parent) {
     init {
-        player.inventories().access("Container") { inventory ->
+        player.inventories.access("Container") { inventory ->
             for (i in 0..9) {
                 val button = addHori(5.0, 5.0, -1.0, -1.0) {
-                    GuiComponentHotbarButton(it, inventory.item(i), player, i)
+                    GuiComponentHotbarButton(it, inventory.reference(i), player, i)
                 }
                 button.on(GuiEvent.CLICK_LEFT) {
                     player.setHotbarSelectRight(i)

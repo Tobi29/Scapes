@@ -21,8 +21,8 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.input.ControllerButtons
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.tag.mapMut
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.io.tag.mapMut
 
 class GuiControlsDefault(
         state: GameState,

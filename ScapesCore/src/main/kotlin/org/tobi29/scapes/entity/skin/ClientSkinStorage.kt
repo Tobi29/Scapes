@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.entity.skin
 
+import org.tobi29.checksums.Checksum
+import org.tobi29.graphics.Image
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Texture
-import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.graphics.Image
 import org.tobi29.scapes.packets.PacketSkin
+import org.tobi29.stdex.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 
 class ClientSkinStorage(private val engine: ScapesEngine,

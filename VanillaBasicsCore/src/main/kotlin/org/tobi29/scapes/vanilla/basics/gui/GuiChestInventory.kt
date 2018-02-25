@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.gui
 
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.engine.gui.GuiComponent
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityChestClient
@@ -26,7 +27,7 @@ class GuiChestInventory(container: EntityChestClient,
                         style: GuiStyle) : GuiContainerInventory<EntityChestClient>(
         "Chest", player, container, style) {
     init {
-        container.inventories().access("Container") { inventory ->
+        container.inventories.access("Container") { inventory ->
             var x = -1
             var y = 0
             var xx: Int

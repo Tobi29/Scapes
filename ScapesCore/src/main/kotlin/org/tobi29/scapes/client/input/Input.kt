@@ -16,6 +16,9 @@
 
 package org.tobi29.scapes.client.input
 
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.logging.KLogging
+import org.tobi29.math.vector.Vector2d
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.gui.GuiMessage
 import org.tobi29.scapes.client.input.spi.InputModeProvider
@@ -25,12 +28,9 @@ import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiControllerDummy
 import org.tobi29.scapes.engine.gui.GuiNotificationSimple
 import org.tobi29.scapes.engine.input.*
-import org.tobi29.scapes.engine.math.vector.Vector2d
-import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.ComponentTypeRegistered
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.spiLoad
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
+import org.tobi29.stdex.atomic.AtomicBoolean
+import org.tobi29.utils.ComponentTypeRegistered
+import org.tobi29.utils.spiLoad
 
 interface InputModeScapes : InputMode {
     val requiresCameraSmoothing get() = true
@@ -110,7 +110,7 @@ class InputManagerScapes(
                     InputModeKeyboard(engine,
                             controller, it)
                 }
-            } else if (controller is ControllerGamepad) {
+            } else if (controller is ControllerJoystick) {
                 return {
                     InputModeGamepad(engine,
                             controller, it)

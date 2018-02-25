@@ -17,8 +17,8 @@
 package org.tobi29.scapes.vanilla.basics.world
 
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
-import org.tobi29.scapes.engine.utils.math.mix
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
+import org.tobi29.stdex.math.mix
 
 class ClimateInfoLayer(private val climateGenerator: ClimateGenerator) : TerrainRenderInfo.InfoLayer {
     private var sx = 0

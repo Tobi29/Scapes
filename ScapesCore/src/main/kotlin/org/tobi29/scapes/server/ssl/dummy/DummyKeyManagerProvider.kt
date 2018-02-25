@@ -16,12 +16,12 @@
 
 package org.tobi29.scapes.server.ssl.dummy
 
-import org.tobi29.scapes.engine.server.keyManagers
-import org.tobi29.scapes.engine.server.keyStore
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.server.keyManagers
+import org.tobi29.server.keyStore
+import org.tobi29.io.IOException
+import org.tobi29.io.filesystem.FilePath
 import org.tobi29.scapes.server.ssl.spi.KeyManagerProvider
+import org.tobi29.io.tag.TagMap
 import java.security.KeyStoreException
 import javax.net.ssl.KeyManager
 

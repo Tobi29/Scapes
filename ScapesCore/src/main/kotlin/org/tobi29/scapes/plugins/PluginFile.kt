@@ -16,17 +16,20 @@
 
 package org.tobi29.scapes.plugins
 
-import org.tobi29.scapes.engine.utils.*
-import org.tobi29.scapes.engine.utils.io.*
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.read
-import org.tobi29.scapes.engine.utils.io.tag.json.readJSON
+import org.tobi29.checksums.Checksum
+import org.tobi29.io.*
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.io.filesystem.read
+import org.tobi29.io.tag.json.readJSON
+import org.tobi29.utils.Version
+import org.tobi29.utils.VersionException
+import org.tobi29.utils.versionParse
 import java.lang.reflect.InvocationTargetException
 import java.util.zip.ZipFile
 
 class PluginFile(
         private val path: FilePath?,
-        private val checksum: Checksum,
+        private val checksum: Checksum?,
         val id: String,
         val name: String,
         val parent: String,
@@ -58,7 +61,7 @@ class PluginFile(
         return parent
     }
 
-    fun checksum(): Checksum {
+    fun checksum(): Checksum? {
         return checksum
     }
 
@@ -109,7 +112,7 @@ class PluginFile(
             val pluginMap = metaData.readAsync { readJSON(it) }
             try {
                 val path = null
-                val checksum = Checksum(Algorithm.UNKNOWN, EMPTY_BYTE)
+                val checksum = null
                 val id = pluginMap["ID"].toString()
                 val name = pluginMap["Name"].toString()
                 val parent = pluginMap["Parent"].toString()
@@ -128,7 +131,7 @@ class PluginFile(
             val pluginMap = metaData.readNow(::readJSON)
             try {
                 val path = null
-                val checksum = Checksum(Algorithm.UNKNOWN, EMPTY_BYTE)
+                val checksum = null
                 val id = pluginMap["ID"].toString()
                 val name = pluginMap["Name"].toString()
                 val parent = pluginMap["Parent"].toString()

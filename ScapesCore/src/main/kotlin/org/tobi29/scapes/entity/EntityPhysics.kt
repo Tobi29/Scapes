@@ -16,16 +16,16 @@
 
 package org.tobi29.scapes.entity
 
+import org.tobi29.math.AABB
+import org.tobi29.math.vector.MutableVector3d
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.collisions
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.utils.math.mix
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.mix
+import org.tobi29.utils.Pool
 import kotlin.math.max
 import kotlin.math.min
 
@@ -40,9 +40,9 @@ object EntityPhysics {
                    aabb: AABB,
                    stepHeight: Double,
                    aabbs: Pool<AABBElement>) {
-        val goX = clamp(speed.doubleX() * delta, -10.0, 10.0)
-        val goY = clamp(speed.doubleY() * delta, -10.0, 10.0)
-        val goZ = clamp(speed.doubleZ() * delta, -10.0, 10.0)
+        val goX = clamp(speed.x * delta, -10.0, 10.0)
+        val goY = clamp(speed.y * delta, -10.0, 10.0)
+        val goZ = clamp(speed.z * delta, -10.0, 10.0)
         terrain.collisions(
                 (aabb.minX + min(goX, 0.0)).floorToInt(),
                 (aabb.minY + min(goY, 0.0)).floorToInt(),
@@ -60,13 +60,13 @@ object EntityPhysics {
              state: PhysicsState,
              collisions: Pool<AABBElement>) {
         val aabbs = collisions(collisions)
-        var goX = clamp(speed.doubleX() * delta, -10.0, 10.0)
-        var goY = clamp(speed.doubleY() * delta, -10.0, 10.0)
-        val goZ = clamp(speed.doubleZ() * delta, -10.0, 10.0)
+        var goX = clamp(speed.x * delta, -10.0, 10.0)
+        var goY = clamp(speed.y * delta, -10.0, 10.0)
+        val goZ = clamp(speed.z * delta, -10.0, 10.0)
         var ground = false
         var slidingWall = false
         val lastGoZ = aabb.moveOutZ(aabbs, goZ)
-        pos.plusZ(lastGoZ)
+        pos.addZ(lastGoZ)
         aabb.add(0.0, 0.0, lastGoZ)
         if (lastGoZ - goZ > 0) {
             ground = true
@@ -78,7 +78,7 @@ object EntityPhysics {
             if (goX != 0.0) {
                 val lastGoX = aabb.moveOutX(aabbs, goX)
                 if (lastGoX != 0.0) {
-                    pos.plusX(lastGoX)
+                    pos.addX(lastGoX)
                     aabb.add(lastGoX, 0.0, 0.0)
                     goX -= lastGoX
                     walking = true
@@ -87,7 +87,7 @@ object EntityPhysics {
             if (goY != 0.0) {
                 val lastGoY = aabb.moveOutY(aabbs, goY)
                 if (lastGoY != 0.0) {
-                    pos.plusY(lastGoY)
+                    pos.addY(lastGoY)
                     aabb.add(0.0, lastGoY, 0.0)
                     goY -= lastGoY
                     walking = true
@@ -117,10 +117,10 @@ object EntityPhysics {
                 val lastGoY = aabbStep.moveOutY(aabbs, goY)
                 // Check if walk was successful
                 if (lastGoX != 0.0 || lastGoY != 0.0) {
-                    pos.plusX(lastGoX)
-                    pos.plusY(lastGoY)
+                    pos.addX(lastGoX)
+                    pos.addY(lastGoY)
                     aabb.copy(aabbStep).add(0.0, lastGoY, 0.0)
-                    pos.plusZ(step)
+                    pos.addZ(step)
                 } else {
                     // Collide
                     slidingWall = true
@@ -155,23 +155,23 @@ object EntityPhysics {
                        waterFriction: Double,
                        wallFriction: Double,
                        state: PhysicsState) {
-        speed.div(1.0 + airFriction * delta)
+        speed.divide(1.0 + airFriction * delta)
         if (state.isInWater) {
-            speed.div(1.0 + waterFriction * delta)
+            speed.divide(1.0 + waterFriction * delta)
         } else {
             if (state.isOnGround) {
-                speed.div(1.0 + groundFriction * delta * gravitation)
+                speed.divide(1.0 + groundFriction * delta * gravitation)
             }
             if (state.slidingWall) {
                 val div = 1.0 + wallFriction * delta
                 if (speed.z > 0.0) {
-                    speed.div(Vector3d(div, div, 1.0))
+                    speed.divide(Vector3d(div, div, 1.0))
                 } else {
-                    speed.div(div)
+                    speed.divide(div)
                 }
             }
         }
-        speed.plusZ(-gravitation * gravitationMultiplier * delta)
+        speed.addZ(-gravitation * gravitationMultiplier * delta)
     }
 
     fun collide(delta: Double,

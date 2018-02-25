@@ -16,6 +16,7 @@
 
 // Scapes core
 include "ScapesCore"
+include "ScapesInventory"
 include "ScapesTerrain"
 include "MariaDBStorage"
 include "SQLiteStorage"

@@ -17,16 +17,17 @@ package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
 import org.tobi29.scapes.entity.client.MobLivingClient
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.uuid.Uuid
 
-class PacketEntityDespawn : PacketAbstract, PacketClient {
-    private lateinit var uuid: UUID
+class PacketEntityDespawn : PacketAbstract,
+        PacketClient {
+    private lateinit var uuid: Uuid
     private var dead = false
 
     constructor(type: PacketType) : super(type)
@@ -54,7 +55,7 @@ class PacketEntityDespawn : PacketAbstract, PacketClient {
     // TODO: @Throws(IOException::class)
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.getLong(), stream.getLong())
+        uuid = Uuid(stream.getLong(), stream.getLong())
         dead = stream.getBoolean()
     }
 

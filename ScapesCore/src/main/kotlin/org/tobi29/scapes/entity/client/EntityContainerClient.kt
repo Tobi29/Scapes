@@ -15,11 +15,12 @@
  */
 package org.tobi29.scapes.entity.client
 
-import org.tobi29.scapes.block.InventoryContainer
 import org.tobi29.scapes.engine.gui.Gui
+import org.tobi29.scapes.entity.ComponentTypeRegisteredEntity
 
 interface EntityContainerClient : EntityClient {
-    fun gui(player: MobPlayerClientMain): Gui?
-
-    fun inventories(): InventoryContainer
 }
+
+typealias ComponentGui = (MobPlayerClientMain) -> Gui?
+
+val GUI_COMPONENT = ComponentTypeRegisteredEntity<EntityClient, ComponentGui>()

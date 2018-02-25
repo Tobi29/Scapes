@@ -15,12 +15,13 @@
  */
 package org.tobi29.scapes.client.gui
 
-import org.threeten.bp.Month
-import org.tobi29.scapes.engine.chrono.timeZoneLocal
+import org.tobi29.chrono.Month
+import org.tobi29.chrono.encode
+import org.tobi29.chrono.timeZoneLocal
+import org.tobi29.math.threadLocalRandom
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.sound.CLICK
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.utils.systemClock
+import org.tobi29.utils.systemClock
 import kotlin.math.roundToInt
 
 class GuiComponentLogo(parent: GuiLayoutData,
@@ -36,12 +37,12 @@ class GuiComponentLogo(parent: GuiLayoutData,
             GuiComponentIcon(it, engine.graphics.textures["Scapes:image/Icon"])
         }
         add(textX.toDouble(), textY.toDouble(), -1.0, textSize.toDouble()) {
-            GuiComponentText(it, "Scapes", 1.0f, 1.0f, 1.0f, 1.0f)
+            GuiComponentText(it, "Scapes")
         }
         splash = add(textX.toDouble(),
                 (textY + (textSize * 1.2).roundToInt()).toDouble(), -1.0,
                 ((textSize shl 1) / 3).toDouble()) {
-            GuiComponentText(it, splash(), 1.0f, 1.0f, 0.0f, 1.0f)
+            GuiComponentText(it, splash(), 1.0, 1.0, 0.0)
         }
         on(GuiEvent.CLICK_LEFT) { event ->
             engine.sounds.playSound(CLICK, "sound.GUI", 1.0, 1.0)
@@ -61,7 +62,7 @@ class GuiComponentLogo(parent: GuiLayoutData,
 
         private fun splash(): String {
             val text: String
-            val (date, _) = timeZoneLocal.encode(systemClock()).first()
+            val (date, _) = timeZoneLocal.encode(systemClock())
             if (date.day == 1 && date.month == Month.APRIL) {
                 text = "COMIC\nSANS!!!"
             } else if (date.day == 29 && date.month == Month.FEBRUARY) {

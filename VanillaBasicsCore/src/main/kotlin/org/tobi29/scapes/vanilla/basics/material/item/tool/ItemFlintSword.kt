@@ -16,15 +16,16 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.tool
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
+import org.tobi29.scapes.vanilla.basics.material.item.VanillaItem
 
 class ItemFlintSword(type: VanillaMaterialType) : ItemFlintTool(type) {
-    override fun isWeapon(item: ItemStack): Boolean {
+    override fun isWeapon(item: TypedItem<VanillaItem>): Boolean {
         return true
     }
 
-    override fun hitRange(item: ItemStack): Double {
+    override fun hitRange(item: TypedItem<VanillaItem>): Double {
         return 4.0
     }
 

@@ -16,17 +16,19 @@
 
 package org.tobi29.scapes.vanilla.basics.generator
 
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.math.cosTable
-import org.tobi29.scapes.engine.math.sinTable
-import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
-import org.tobi29.scapes.engine.utils.math.*
+import org.tobi29.generation.value.OpenSimplexNoise
+import org.tobi29.generation.value.noiseOctave
+import org.tobi29.math.Random
+import org.tobi29.math.cosTable
+import org.tobi29.math.sinTable
+import org.tobi29.stdex.math.*
 import kotlin.math.*
 
-class ClimateGenerator private constructor(private val temperatureNoise: SimplexNoise,
-                                           private val humidityNoise: SimplexNoise,
-                                           private val weatherNoise: SimplexNoise,
-                                           private val terrainGenerator: TerrainGenerator) {
+class ClimateGenerator private constructor(private val temperatureNoise: OpenSimplexNoise,
+                                           private val humidityNoise: OpenSimplexNoise,
+                                           private val weatherNoise: OpenSimplexNoise,
+                                           private val terrainGenerator: TerrainGenerator,
+                                           val cloudSeed: Long) {
     private var day: Long = 0
     private var dayTime = 0.0
     private var sunDeclination = 0.0
@@ -36,9 +38,10 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
 
     constructor(random: Random,
                 terrainGenerator: TerrainGenerator) : this(
-            SimplexNoise(random.nextLong()),
-            SimplexNoise(random.nextLong()),
-            SimplexNoise(random.nextLong()), terrainGenerator)
+            OpenSimplexNoise(random.nextLong()),
+            OpenSimplexNoise(random.nextLong()),
+            OpenSimplexNoise(random.nextLong()), terrainGenerator,
+            random.nextLong())
 
     fun add(time: Double) {
         dayTime += time
@@ -78,7 +81,7 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
     fun at(day: Long,
            dayTime: Double): ClimateGenerator {
         val climateGenerator = ClimateGenerator(temperatureNoise, humidityNoise,
-                weatherNoise, terrainGenerator)
+                weatherNoise, terrainGenerator, cloudSeed)
         climateGenerator.day = day
         climateGenerator.dayTime = dayTime
         climateGenerator.updateTime()
@@ -240,10 +243,9 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
                 0.5)
         val noiseExtreme = temperatureNoise.noise(xx / 4.0, yy / 4.0,
                 (day + dayTime) / 40.0)
-        var temperature = mix(sunIntensity,
-                sunIntensity * sunIntensity, 0.5) * 80.0 - 10.0
-        temperature += noiseGlobal * 40.0
-        temperature += noiseLocal * 10.0
+        var temperature = sunIntensity * 100.0 - 30.0
+        temperature += noiseGlobal * 20.0
+        temperature += noiseLocal * 8.0
         temperature += max(noiseExtreme - 0.3, 0.0) * 160.0
         temperature += min(0.3 - noiseExtreme, 0.0) * 160.0
         temperature -= humidity3 * 20.0
@@ -307,7 +309,7 @@ class ClimateGenerator private constructor(private val temperatureNoise: Simplex
         val terrainFactor = terrainGenerator.generateTerrainFactorLayer(x, y)
         return (1.0 - terrainGenerator.generateRiverLayer(x, y,
                 terrainGenerator.generateMountainFactorLayer(x, y,
-                        terrainFactor), 4.0)) * 0.5
+                        terrainFactor), 16.0)) * 0.5
     }
 
     fun sunLightReduction(x: Double,

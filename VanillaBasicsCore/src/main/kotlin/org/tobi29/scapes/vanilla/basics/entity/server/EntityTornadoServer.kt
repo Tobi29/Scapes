@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.tobi29.scapes.vanilla.basics.entity.server
 
+import org.tobi29.io.tag.ReadWriteTagMap
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toTag
+import org.tobi29.math.cosTable
+import org.tobi29.math.sinTable
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.*
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.math.cosTable
-import org.tobi29.scapes.engine.math.sinTable
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.*
-import org.tobi29.scapes.engine.utils.math.toRad
-import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toTag
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.EntityAbstractServer
 import org.tobi29.scapes.entity.server.MobPositionSenderServer
 import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.toRad
 import kotlin.collections.set
 import kotlin.math.max
 
@@ -65,10 +67,10 @@ class EntityTornadoServer(type: EntityType<*, *>,
         dir += (random.nextDouble() * 80.0 - 40.0) * delta
         val d = dir.toRad()
         val speed = 2.0 * delta
-        pos.plusX(cosTable(d) * speed)
-        pos.plusY(sinTable(d) * speed)
-        pos.setZ(world.terrain.highestTerrainBlockZAt(pos.intX(),
-                pos.intY()) + 0.5)
+        pos.addX(cosTable(d) * speed)
+        pos.addY(sinTable(d) * speed)
+        pos.setZ(world.terrain.highestTerrainBlockZAt(pos.x.floorToInt(),
+                pos.y.floorToInt()) + 0.5)
         updatePosition()
         val currentPos = pos.now()
         world.getEntities(currentPos,
@@ -76,7 +78,7 @@ class EntityTornadoServer(type: EntityType<*, *>,
             val push = mob.getCurrentPos() - currentPos
             val s = max(0.0,
                     320.0 - push.length() * 8.0) * delta
-            val force = push.normalizeSafe() * -s
+            val force = push.normalizedSafe() * -s
             mob.push(force.x, force.y, s)
         }
         time -= delta

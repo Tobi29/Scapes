@@ -16,10 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation
 
-import org.tobi29.scapes.block.AABBElement
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
 import org.tobi29.scapes.block.models.ItemModel
@@ -28,13 +25,15 @@ import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.*
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.PointerPane
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.math.AABB
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.utils.Pool
+import org.tobi29.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
@@ -94,14 +93,14 @@ class BlockSapling(type: VanillaMaterialType) : VanillaBlock(type) {
         return false
     }
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
         return 0.0
     }
 
     override fun footStepSound(data: Int) = null
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
         return "VanillaBasics:sound/blocks/Foliage.ogg"
     }
@@ -154,8 +153,7 @@ class BlockSapling(type: VanillaMaterialType) : VanillaBlock(type) {
         val world = terrain.world
         terrain.modify(x, y, z - 1, 1, 1, 2) { terrain ->
             if (!terrain.isSolid(x, y, z - 1)) {
-                world.dropItems(drops(ItemStack(materials.air, 0), data), x, y,
-                        z)
+                world.dropItems(drops(null, data), x, y, z)
                 terrain.typeData(x, y, z, terrain.air, 0)
             }
         }
@@ -184,28 +182,28 @@ class BlockSapling(type: VanillaMaterialType) : VanillaBlock(type) {
                 BlockModelComplex(registry, shapes, 0.0625)
             }.toArray()
             modelsItem = it.asSequence().map {
-                ItemModelSimple(it, 1.0, 1.0, 1.0, 1.0)
+                ItemModelSimple(it!!, 1.0, 1.0, 1.0, 1.0)
             }.toArray()
         }
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
-        modelsItem?.get(item.data())?.render(gl, shader)
+        modelsItem?.get(item.data)?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
-        modelsItem?.get(item.data())?.renderInventory(gl, shader)
+        modelsItem?.get(item.data)?.renderInventory(gl, shader)
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return materials.log.name(item) + " Sapling"
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 64
     }
 

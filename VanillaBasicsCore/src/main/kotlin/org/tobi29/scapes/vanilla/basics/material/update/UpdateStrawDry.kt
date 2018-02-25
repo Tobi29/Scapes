@@ -32,7 +32,7 @@ class UpdateStrawDry(type: UpdateType) : Update(type) {
         val world = terrain.world
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        terrain.modify(materials.straw, x, y, z) { terrain ->
+        terrain.modify(materials.strawBlock, x, y, z) { terrain ->
             val block = terrain.block(x, y, z)
             if (terrain.data(block) == 0) {
                 terrain.data(x, y, z, 1)
@@ -45,6 +45,6 @@ class UpdateStrawDry(type: UpdateType) : Update(type) {
         val plugin = terrain.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        return type == materials.straw
+        return type == materials.strawBlock
     }
 }

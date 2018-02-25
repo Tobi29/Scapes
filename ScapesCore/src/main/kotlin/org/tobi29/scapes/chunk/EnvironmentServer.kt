@@ -19,10 +19,10 @@ package org.tobi29.scapes.chunk
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.TagMapWrite
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.Vector3i
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3i
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.TagMapWrite
 
 interface EnvironmentServer : TagMapWrite {
     val type: EnvironmentType

@@ -17,20 +17,16 @@
 package org.tobi29.scapes.server
 
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.cancelAndJoin
 import kotlinx.coroutines.experimental.runBlocking
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.connection.ServerInfo
-import org.tobi29.scapes.engine.server.ConnectionManager
-import org.tobi29.scapes.engine.server.SSLHandle
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.newEventDispatcher
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toInt
-import org.tobi29.scapes.engine.utils.tag.toMap
+import org.tobi29.server.ConnectionManager
+import org.tobi29.server.SSLHandle
+import org.tobi29.utils.EventDispatcher
+import org.tobi29.io.IOException
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.plugins.Dimension
 import org.tobi29.scapes.plugins.Plugins
@@ -40,6 +36,11 @@ import org.tobi29.scapes.server.extension.ServerExtensions
 import org.tobi29.scapes.server.format.PlayerData
 import org.tobi29.scapes.server.format.WorldFormat
 import org.tobi29.scapes.server.format.WorldSource
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toInt
+import org.tobi29.io.tag.toMap
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.assert
 import kotlin.coroutines.experimental.CoroutineContext
 
 class ScapesServer(source: WorldSource,
@@ -53,7 +54,7 @@ class ScapesServer(source: WorldSource,
     val plugins: Plugins
     val seed: Long
     val extensions: ServerExtensions
-    val events = newEventDispatcher()
+    val events = EventDispatcher()
     private val format: WorldFormat
     private val playerData: PlayerData
     private val commandRegistry: CommandRegistry
@@ -188,7 +189,7 @@ class ScapesServer(source: WorldSource,
         runBlocking {
             worlds.values.forEach { this@ScapesServer.stopWorld(it) }
             connections.dispose()
-            taskExecutor[Job]?.cancel()
+            taskExecutor[Job]?.cancelAndJoin()
             format.dispose()
         }
     }

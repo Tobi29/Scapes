@@ -16,43 +16,51 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.server
 
-import org.tobi29.scapes.block.Inventory
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.copy
+import org.tobi29.scapes.block.data
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.Terrain
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.stdex.math.floorToInt
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.inventory.*
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.item.ItemIngot
+import org.tobi29.scapes.vanilla.basics.material.meltingPoint
+import org.tobi29.scapes.vanilla.basics.material.temperature
 
-class EntityForgeServer(type: EntityType<*, *>,
-                        world: WorldServer) : EntityAbstractFurnaceServer(
-        type, world, Vector3d.ZERO, Inventory(world.plugins, 9), 4, 3,
+class EntityForgeServer(
+        type: EntityType<*, *>,
+        world: WorldServer
+) : EntityAbstractFurnaceServer(type, world, Vector3d.ZERO, 4, 3,
         Double.POSITIVE_INFINITY, 1.006, 5.0, 50, { inventory, item ->
-    if (item.amount() == 1) {
-        val type = item.material()
-        if (type is ItemIngot) {
-            if (type.temperature(item) >= type.meltingPoint(
-                    item) && item.data() == 1) {
+    if (item.amount == 1) {
+        item.kind<ItemIngot>()?.let { item ->
+            if (item.temperature >= item.meltingPoint && item.data == 1) {
                 val plugin = world.plugins.plugin(
                         "VanillaBasics") as VanillaBasics
                 val materials = plugin.materials
-                if (inventory.item(8).take(
-                        ItemStack(materials.mold, 1)) != null) {
-                    item.setData(0)
-                }
-            }
-        }
-    }
+                val (remaining, taken) = inventory[8].takeAll(
+                        Item(materials.mold))
+                if (!taken.isEmpty()) {
+                    inventory[8] = remaining
+                    item.copy(data = 0)
+                } else item
+            } else item
+        } ?: item
+    } else item
 }) {
+    init {
+        inventories.add("Container", 9)
+    }
 
     override fun update(delta: Double) {
         super.update(delta)
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        val xx = pos.intX()
-        val yy = pos.intY()
-        val zz = pos.intZ()
+        val xx = pos.x.floorToInt()
+        val yy = pos.y.floorToInt()
+        val zz = pos.z.floorToInt()
         val blockOff = materials.forge.block(0)
         val blockOn = materials.forge.block(1)
         if (temperature > 80.0) {

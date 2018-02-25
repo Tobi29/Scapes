@@ -16,17 +16,20 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.scapes.block.*
+import org.tobi29.utils.toArray
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
 class BlockCobblestoneCracked(type: VanillaMaterialType) : BlockStone(type) {
-    override fun drops(item: ItemStack,
-                       data: Int): List<ItemStack> {
-        if ("Pickaxe" == item.material().toolType(item) && canBeBroken(
-                item.material().toolLevel(item), data)) {
-            return listOf(ItemStack(materials.stoneRock, data, 9))
+    override fun drops(item: Item?,
+                       data: Int): List<Item> {
+        val tool = item.kind<ItemTypeTool>()
+        if ("Pickaxe" == tool?.toolType() && canBeBroken(
+                tool.toolLevel(), data)) {
+            return listOf(ItemStackData(materials.stoneRock, data, 9))
         }
         return emptyList()
     }
@@ -42,7 +45,7 @@ class BlockCobblestoneCracked(type: VanillaMaterialType) : BlockStone(type) {
         }.toArray()
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return "Cracked ${stoneName(item)} Cobblestone"
     }
 }

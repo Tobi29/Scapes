@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.entity.client
 
-import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.entity.WieldMode
+import org.tobi29.scapes.inventory.Item
 
 interface EntityEquippedClient : EntityClient {
-    fun leftWeapon(): ItemStack
+    fun leftWeapon(): Item? = null
 
-    fun rightWeapon(): ItemStack
+    fun rightWeapon(): Item? = null
 
     fun wieldMode(): WieldMode {
         return WieldMode.DUAL

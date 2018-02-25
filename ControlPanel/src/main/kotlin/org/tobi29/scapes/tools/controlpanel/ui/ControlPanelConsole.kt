@@ -23,8 +23,8 @@ import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.layout.GridLayout
 import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Text
-import org.tobi29.scapes.engine.swt.util.Fonts
-import org.tobi29.scapes.engine.swt.util.HTMLLineStyler
+import org.tobi29.application.swt.Fonts
+import org.tobi29.application.swt.HTMLLineStyler
 
 class ControlPanelConsole(parent: Composite) : Composite(parent, SWT.NONE) {
     val console: StyledText

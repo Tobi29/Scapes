@@ -17,10 +17,11 @@
 package org.tobi29.scapes.vanilla.basics.packet
 
 import org.tobi29.scapes.block.Registries
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.server.InvalidPacketDataException
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.server.InvalidPacketDataException
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
 import org.tobi29.scapes.packets.Packet
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketServer
@@ -28,7 +29,8 @@ import org.tobi29.scapes.packets.PacketType
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.material.CraftingRecipe
 
-class PacketCrafting : PacketAbstract, PacketServer {
+class PacketCrafting : PacketAbstract,
+        PacketServer {
     private var id = 0
 
     constructor(type: PacketType) : super(type)
@@ -65,9 +67,9 @@ class PacketCrafting : PacketAbstract, PacketServer {
 
         player.mob { mob ->
             // TODO: Check if table nearby
-            mob.inventories().modify("Container") { inventory ->
-                val result = recipe.result()
-                if (inventory.canAdd(result) >= result.amount()) {
+            mob.inventories.modify("Container") { inventory ->
+                val result = recipe.result
+                if (inventory.canAddAll(result)) {
                     recipe.takes(inventory)?.let { takes ->
                         takes.forEach { inventory.take(it) }
                         inventory.add(result)

@@ -17,25 +17,26 @@ package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.entity.client.EntityContainerClient
-import org.tobi29.scapes.entity.server.EntityContainerServer
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
+import org.tobi29.scapes.entity.client.GUI_COMPONENT
+import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.uuid.Uuid
 
-class PacketOpenGui : PacketAbstract, PacketClient {
-    private lateinit var uuid: UUID
+class PacketOpenGui : PacketAbstract,
+        PacketClient {
+    private lateinit var uuid: Uuid
 
     constructor(type: PacketType) : super(type)
 
     constructor(type: PacketType,
-                entity: EntityContainerServer) : super(type) {
+                entity: EntityServer) : super(type) {
         uuid = entity.uuid
     }
 
     constructor(registry: Registries,
-                entity: EntityContainerServer) : this(
+                entity: EntityServer) : this(
             Packet.make(registry, "core.packet.OpenGui"), entity)
 
     override fun sendClient(player: PlayerConnection,
@@ -46,15 +47,13 @@ class PacketOpenGui : PacketAbstract, PacketClient {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.getLong(), stream.getLong())
+        uuid = Uuid(stream.getLong(), stream.getLong())
     }
 
     override fun runClient(client: ClientConnection) {
         client.mob { mob ->
             client.getEntity(uuid) { entity ->
-                if (entity is EntityContainerClient) {
-                    entity.gui(mob)?.let { mob.openGui(it) }
-                }
+                entity[GUI_COMPONENT](mob)?.let { mob.openGui(it) }
             }
         }
     }

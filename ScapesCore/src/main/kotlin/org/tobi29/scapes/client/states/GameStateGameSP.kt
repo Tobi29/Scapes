@@ -20,8 +20,8 @@ import kotlinx.coroutines.experimental.runBlocking
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.io.IOException
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldSource
 

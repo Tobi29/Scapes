@@ -16,17 +16,19 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.scapes.block.*
+import org.tobi29.utils.toArray
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
 class BlockStoneTotem(type: VanillaMaterialType) : BlockStone(type) {
-    override fun drops(item: ItemStack,
-                       data: Int): List<ItemStack> {
-        if ("Pickaxe" == item.material().toolType(item) && canBeBroken(
-                item.material().toolLevel(item), data)) {
-            return listOf(ItemStack(materials.stoneRock, data, 9))
+    override fun drops(item: Item?,
+                       data: Int): List<Item> {
+        if ("Pickaxe" == item.kind<ItemTypeTool>()?.toolType() && canBeBroken(
+                item.kind<ItemTypeTool>()?.toolLevel() ?: 0, data)) {
+            return listOf(ItemStackData(materials.stoneRock, data, 9))
         }
         return emptyList()
     }
@@ -41,7 +43,7 @@ class BlockStoneTotem(type: VanillaMaterialType) : BlockStone(type) {
         }.toArray()
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return "Fancy " + stoneName(item) + " Stone"
     }
 }

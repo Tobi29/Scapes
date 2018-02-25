@@ -18,6 +18,7 @@ package org.tobi29.scapes.client.input
 
 import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.launch
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.gui.GuiControlsDefault
@@ -28,19 +29,18 @@ import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiController
 import org.tobi29.scapes.engine.gui.GuiControllerMouse
 import org.tobi29.scapes.engine.input.*
-import org.tobi29.scapes.engine.math.vector.Vector2d
-import org.tobi29.scapes.engine.math.vector.times
-import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.graphics.encodePNG
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.filesystem.write
-import org.tobi29.scapes.engine.utils.listenAlive
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.tag.mapMut
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.math.vector.Vector2d
+import org.tobi29.math.vector.times
+import org.tobi29.utils.EventDispatcher
+import org.tobi29.graphics.encodePNG
+import org.tobi29.io.IOException
+import org.tobi29.io.filesystem.write
+import org.tobi29.utils.listenAlive
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.io.tag.mapMut
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toTag
 import kotlin.collections.set
 
 class InputModeKeyboard(engine: ScapesEngine,

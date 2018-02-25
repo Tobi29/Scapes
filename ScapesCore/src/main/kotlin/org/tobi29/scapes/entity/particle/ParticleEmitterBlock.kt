@@ -15,16 +15,18 @@
  */
 package org.tobi29.scapes.entity.particle
 
+import org.tobi29.scapes.block.light
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.atan2Fast
-import org.tobi29.scapes.engine.math.matrix.Matrix4f
-import org.tobi29.scapes.engine.math.vector.length
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.HALF_PI
-import org.tobi29.scapes.engine.utils.shader.IntegerExpression
+import org.tobi29.math.AABB
+import org.tobi29.math.atan2Fast
+import org.tobi29.math.matrix.Matrix4f
+import org.tobi29.math.vector.length
+import org.tobi29.graphics.Cam
+import org.tobi29.stdex.math.HALF_PI
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.scapes.engine.shader.IntegerExpression
 import kotlin.math.max
 
 class ParticleEmitterBlock(system: ParticleSystem,
@@ -52,12 +54,12 @@ class ParticleEmitterBlock(system: ParticleSystem,
                 instance.state = ParticleInstance.State.DEAD
                 continue
             }
-            aabb.minX = instance.pos.doubleX() - SIZE
-            aabb.minY = instance.pos.doubleY() - SIZE
-            aabb.minZ = instance.pos.doubleZ() - SIZE
-            aabb.maxX = instance.pos.doubleX() + SIZE
-            aabb.maxY = instance.pos.doubleY() + SIZE
-            aabb.maxZ = instance.pos.doubleZ() + SIZE
+            aabb.minX = instance.pos.x - SIZE
+            aabb.minY = instance.pos.y - SIZE
+            aabb.minZ = instance.pos.z - SIZE
+            aabb.maxX = instance.pos.x + SIZE
+            aabb.maxY = instance.pos.y + SIZE
+            aabb.maxZ = instance.pos.z + SIZE
             ParticlePhysics.update(delta, instance, terrain, aabb, gravitation,
                     1.0f, instance.friction, 0.4f, 8.0f)
         }
@@ -81,13 +83,11 @@ class ParticleEmitterBlock(system: ParticleSystem,
             val s = shader.getAsync()
             ;{ render ->
             val sunLightReduction = environment.sunLightReduction(
-                    cam.position.doubleX(),
-                    cam.position.doubleY()) / 15.0f
+                    cam.position.x,
+                    cam.position.y) / 15.0f
             val playerLight = max(
-                    player.leftWeapon().material().playerLight(
-                            player.leftWeapon()),
-                    player.rightWeapon().material().playerLight(
-                            player.rightWeapon()))
+                    player.leftWeapon().light,
+                    player.rightWeapon().light).toFloat()
             s.setUniform3f(gl, 4, scene.fogR(), scene.fogG(), scene.fogB())
             s.setUniform1f(gl, 5, scene.fogDistance() * scene.renderDistance())
             s.setUniform1i(gl, 6, 1)
@@ -106,15 +106,15 @@ class ParticleEmitterBlock(system: ParticleSystem,
             if (instance.state != ParticleInstance.State.ALIVE) {
                 continue
             }
-            val x = instance.pos.intX()
-            val y = instance.pos.intY()
-            val z = instance.pos.intZ()
+            val x = instance.pos.x.floorToInt()
+            val y = instance.pos.y.floorToInt()
+            val z = instance.pos.z.floorToInt()
             if (terrain.block(x, y, z) {
                 !isSolid(it) || isTransparent(it)
             }) {
-                val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
-                val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
-                val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
+                val posRenderX = (instance.pos.x - cam.position.x).toFloat()
+                val posRenderY = (instance.pos.y - cam.position.y).toFloat()
+                val posRenderZ = (instance.pos.z - cam.position.z).toFloat()
                 val yaw = atan2Fast(-posRenderY, -posRenderX)
                 val pitch = atan2Fast(posRenderZ,
                         length(posRenderX, posRenderY))
@@ -130,10 +130,10 @@ class ParticleEmitterBlock(system: ParticleSystem,
                 buffer.putFloat(terrain.blockLight(x, y, z) / 15.0f)
                 buffer.putFloat(terrain.sunLight(x, y, z) / 15.0f)
                 matrix.values.forEach { buffer.putFloat(it) }
-                buffer.putFloat(instance.textureOffset.floatX())
-                buffer.putFloat(instance.textureOffset.floatY())
-                buffer.putFloat(instance.textureSize.floatX())
-                buffer.putFloat(instance.textureSize.floatY())
+                buffer.putFloat(instance.textureOffset.x.toFloat())
+                buffer.putFloat(instance.textureOffset.y.toFloat())
+                buffer.putFloat(instance.textureSize.x.toFloat())
+                buffer.putFloat(instance.textureSize.y.toFloat())
                 count++
             }
         }

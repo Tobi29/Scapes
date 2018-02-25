@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.structural
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.block.models.BlockModel
@@ -26,7 +26,9 @@ import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.math.Face
+import org.tobi29.math.Face
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 
@@ -36,7 +38,7 @@ class BlockGlass(type: VanillaMaterialType) : VanillaBlock(type) {
     private var modelFrame: BlockModel? = null
     private var modelTransparent: BlockModel? = null
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
         return 1.0
     }
@@ -45,7 +47,7 @@ class BlockGlass(type: VanillaMaterialType) : VanillaBlock(type) {
         return "VanillaBasics:sound/footsteps/Stone.ogg"
     }
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
         return "VanillaBasics:sound/blocks/Stone.ogg"
     }
@@ -110,25 +112,25 @@ class BlockGlass(type: VanillaMaterialType) : VanillaBlock(type) {
                 textureTransparent, 1.0, 1.0, 1.0, 1.0)
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
         modelFrame?.render(gl, shader)
         modelTransparent?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
         modelFrame?.renderInventory(gl, shader)
         modelTransparent?.renderInventory(gl, shader)
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return "Glass"
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 16
     }
 }

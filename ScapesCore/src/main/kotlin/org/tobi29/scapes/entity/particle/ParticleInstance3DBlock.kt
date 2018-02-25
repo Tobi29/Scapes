@@ -15,11 +15,11 @@
  */
 package org.tobi29.scapes.entity.particle
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.math.vector.MutableVector3d
+import org.tobi29.math.vector.MutableVector3d
+import org.tobi29.scapes.inventory.Item
 
 class ParticleInstance3DBlock : ParticleInstance() {
     val rotation = MutableVector3d()
     val rotationSpeed = MutableVector3d()
-    lateinit var item: ItemStack
+    lateinit var item: Item
 }

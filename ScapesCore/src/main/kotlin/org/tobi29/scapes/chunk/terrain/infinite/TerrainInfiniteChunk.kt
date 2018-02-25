@@ -18,22 +18,23 @@ package org.tobi29.scapes.chunk.terrain.infinite
 
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainEntity
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.math.vector.Vector2i
-import org.tobi29.scapes.engine.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.readOnly
+import org.tobi29.math.vector.Vector2i
+import org.tobi29.math.vector.Vector3i
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBaseChunk
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.readOnly
+import org.tobi29.uuid.Uuid
 
 abstract class TerrainInfiniteChunk<E : Entity>(pos: Vector2i,
                                                 private val entityTerrain: TerrainEntity<E>,
                                                 zSize: Int) : TerrainInfiniteBaseChunk<BlockType>(
-        pos, entityTerrain, zSize), TerrainChunk {
+        pos, entityTerrain, zSize),
+        TerrainChunk {
     override val posBlock = Vector3i(pos.x shl 4, pos.y shl 4, 0)
     override val size = Vector3i(16, 16, zSize)
-    protected val entitiesMut = ConcurrentHashMap<UUID, E>()
+    protected val entitiesMut = ConcurrentHashMap<Uuid, E>()
     val entities = entitiesMut.readOnly()
 
     fun addEntity(entity: E,

@@ -16,16 +16,16 @@
 
 package org.tobi29.scapes.server.format.sql
 
-import org.tobi29.scapes.engine.sql.SQLQuery
-import org.tobi29.scapes.engine.sql.SQLReplace
-import org.tobi29.scapes.engine.sql.invoke
-import org.tobi29.scapes.engine.utils.io.*
-import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
-import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.math.vector.Vector2i
-import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.logging.KLogging
+import org.tobi29.math.vector.Vector2i
+import org.tobi29.sql.SQLQuery
+import org.tobi29.sql.SQLReplace
+import org.tobi29.sql.invoke
+import org.tobi29.io.*
+import org.tobi29.io.tag.binary.readBinary
+import org.tobi29.io.tag.binary.writeBinary
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
+import org.tobi29.io.tag.TagMap
 
 class SQLTerrainInfiniteFormat(private val getChunk: SQLQuery,
                                private val replaceChunk: SQLReplace) : TerrainInfiniteFormat {

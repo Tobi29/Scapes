@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.gui
 
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.client.gui.GuiComponentItemButton
 import org.tobi29.scapes.client.gui.GuiMenuSingle
 import org.tobi29.scapes.client.gui.GuiUtils
@@ -23,13 +24,14 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.math.vector.Vector2d
 import org.tobi29.scapes.packets.PacketInventoryInteraction
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 
 open class GuiInventory(name: String,
                         protected val player: MobPlayerClientMainVB,
-                        style: GuiStyle) : GuiMenuSingle(player.game, name, style) {
+                        style: GuiStyle) : GuiMenuSingle(player.game, name,
+        style) {
     protected val topPane = pane.addVert(0.0, 0.0, -1.0, -1.0,
             ::GuiComponentGroup)
     protected val inventoryPane = pane.addVert(16.0, 5.0, 350.0, 150.0,
@@ -70,8 +72,8 @@ open class GuiInventory(name: String,
     protected fun button(parent: GuiLayoutData,
                          id: String,
                          slot: Int): GuiComponentItemButton {
-        val inventory = player.inventories().accessUnsafe(id)
-        val button = GuiComponentItemButton(parent, inventory.item(slot))
+        val inventory = player.inventories.accessUnsafe(id)
+        val button = GuiComponentItemButton(parent, inventory.reference(slot))
         button.on(GuiEvent.CLICK_LEFT) { leftClick(id, slot) }
         button.on(GuiEvent.CLICK_RIGHT) { rightClick(id, slot) }
         return button
@@ -110,10 +112,9 @@ open class GuiInventory(name: String,
             matrix.modelViewProjection().orthogonal(0.0f, 0.0f,
                     gl.contentWidth.toFloat(),
                     gl.contentHeight.toFloat())
-            player.inventories().access("Hold") { inventory ->
+            player.inventories.access("Hold") { inventory ->
                 GuiUtils.items(cursorX.toFloat(), cursorY.toFloat(), 60.0f,
-                        60.0f, inventory.item(0), gl, shader, style.font,
-                        pixelSize)
+                        60.0f, inventory[0], gl, shader, style.font, pixelSize)
             }
         }
     }

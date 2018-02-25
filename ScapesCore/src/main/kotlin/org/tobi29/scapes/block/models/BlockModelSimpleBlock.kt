@@ -16,15 +16,11 @@
 
 package org.tobi29.scapes.block.models
 
-import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.block.marginX
-import org.tobi29.scapes.block.marginY
-import org.tobi29.scapes.engine.math.Face
+import org.tobi29.math.Face
 
 class BlockModelSimpleBlock(private val block: BlockType,
                             private val registry: TerrainTextureRegistry,
@@ -120,18 +116,20 @@ class BlockModelSimpleBlock(private val block: BlockType,
             val texMaxX = texTop.marginX(1.0)
             val texMinY = texTop.marginY(0.0)
             val texMaxY = texTop.marginY(1.0)
-            mesh.addVertex(terrain, Face.UP, x.toDouble(), y.toDouble(),
-                    z1.toDouble(), xx, yy, zz1, texMinX, texMinY, r2, g2, b2,
-                    a2, lod, anim)
-            mesh.addVertex(terrain, Face.UP, x1.toDouble(), y.toDouble(),
-                    z1.toDouble(), xx1, yy, zz1, texMaxX, texMinY, r2, g2, b2,
-                    a2, lod, anim)
-            mesh.addVertex(terrain, Face.UP, x1.toDouble(), y1.toDouble(),
-                    z1.toDouble(), xx1, yy1, zz1, texMaxX, texMaxY, r2, g2, b2,
-                    a2, lod, anim)
-            mesh.addVertex(terrain, Face.UP, x.toDouble(), y1.toDouble(),
-                    z1.toDouble(), xx, yy1, zz1, texMinX, texMaxY, r2, g2, b2,
-                    a2, lod, anim)
+            mesh.addQuad(terrain, Face.UP,
+                    x.toDouble(), y.toDouble(), z1.toDouble(),
+                    x1.toDouble(), y.toDouble(), z1.toDouble(),
+                    x1.toDouble(), y1.toDouble(), z1.toDouble(),
+                    x.toDouble(), y1.toDouble(), z1.toDouble(),
+                    xx, yy, zz1,
+                    xx1, yy, zz1,
+                    xx1, yy1, zz1,
+                    xx, yy1, zz1,
+                    texMaxX, texMinY,
+                    texMinX, texMinY,
+                    texMinX, texMaxY,
+                    texMaxX, texMaxY,
+                    r2, g2, b2, a2, lod, anim)
         }
         if (texBottom != null && terrain.type(x, y, z0).connectStage(terrain, x,
                 y, z0) < connectStage) {
@@ -142,18 +140,20 @@ class BlockModelSimpleBlock(private val block: BlockType,
             val texMaxX = texBottom.marginX(1.0)
             val texMinY = texBottom.marginY(0.0)
             val texMaxY = texBottom.marginY(1.0)
-            mesh.addVertex(terrain, Face.DOWN, x.toDouble(), y1.toDouble(),
-                    z.toDouble(), xx, yy1, zz, texMinX, texMaxY, r2, g2, b2, a2,
-                    lod, anim)
-            mesh.addVertex(terrain, Face.DOWN, x1.toDouble(), y1.toDouble(),
-                    z.toDouble(), xx1, yy1, zz, texMaxX, texMaxY, r2, g2, b2,
-                    a2, lod, anim)
-            mesh.addVertex(terrain, Face.DOWN, x1.toDouble(), y.toDouble(),
-                    z.toDouble(), xx1, yy, zz, texMaxX, texMinY, r2, g2, b2, a2,
-                    lod, anim)
-            mesh.addVertex(terrain, Face.DOWN, x.toDouble(), y.toDouble(),
-                    z.toDouble(), xx, yy, zz, texMinX, texMinY, r2, g2, b2, a2,
-                    lod, anim)
+            mesh.addQuad(terrain, Face.DOWN,
+                    x.toDouble(), y1.toDouble(), z.toDouble(),
+                    x1.toDouble(), y1.toDouble(), z.toDouble(),
+                    x1.toDouble(), y.toDouble(), z.toDouble(),
+                    x.toDouble(), y.toDouble(), z.toDouble(),
+                    xx, yy1, zz,
+                    xx1, yy1, zz,
+                    xx1, yy, zz,
+                    xx, yy, zz,
+                    texMaxX, texMinY,
+                    texMinX, texMinY,
+                    texMinX, texMaxY,
+                    texMaxX, texMaxY,
+                    r2, g2, b2, a2, lod, anim)
         }
         if (texSide1 != null && terrain.type(x, y0, z).connectStage(terrain, x,
                 y0, z) < connectStage) {
@@ -164,18 +164,20 @@ class BlockModelSimpleBlock(private val block: BlockType,
             val texMaxX = texSide1.marginX(1.0)
             val texMinY = texSide1.marginY(0.0)
             val texMaxY = texSide1.marginY(1.0)
-            mesh.addVertex(terrain, Face.NORTH, x1.toDouble(), y.toDouble(),
-                    z1.toDouble(), xx1, yy, zz1, texMaxX, texMinY, r2, g2, b2,
-                    a2, lod, anim)
-            mesh.addVertex(terrain, Face.NORTH, x.toDouble(), y.toDouble(),
-                    z1.toDouble(), xx, yy, zz1, texMinX, texMinY, r2, g2, b2,
-                    a2, lod, anim)
-            mesh.addVertex(terrain, Face.NORTH, x.toDouble(), y.toDouble(),
-                    z.toDouble(), xx, yy, zz, texMinX, texMaxY, r2, g2, b2, a2,
-                    lod, anim)
-            mesh.addVertex(terrain, Face.NORTH, x1.toDouble(), y.toDouble(),
-                    z.toDouble(), xx1, yy, zz, texMaxX, texMaxY, r2, g2, b2, a2,
-                    lod, anim)
+            mesh.addQuad(terrain, Face.NORTH,
+                    x1.toDouble(), y.toDouble(), z1.toDouble(),
+                    x.toDouble(), y.toDouble(), z1.toDouble(),
+                    x.toDouble(), y.toDouble(), z.toDouble(),
+                    x1.toDouble(), y.toDouble(), z.toDouble(),
+                    xx1, yy, zz1,
+                    xx, yy, zz1,
+                    xx, yy, zz,
+                    xx1, yy, zz,
+                    texMaxX, texMinY,
+                    texMinX, texMinY,
+                    texMinX, texMaxY,
+                    texMaxX, texMaxY,
+                    r2, g2, b2, a2, lod, anim)
         }
         if (texSide2 != null && terrain.type(x1, y, z).connectStage(terrain, x1,
                 y, z) < connectStage) {
@@ -187,18 +189,20 @@ class BlockModelSimpleBlock(private val block: BlockType,
             val texMaxX = texSide2.marginX(1.0)
             val texMinY = texSide2.marginY(0.0)
             val texMaxY = texSide2.marginY(1.0)
-            mesh.addVertex(terrain, Face.EAST, x1.toDouble(), y1.toDouble(),
-                    z1.toDouble(), xx1, yy1, zz1, texMaxX, texMinY, r2, g2, b2,
-                    a2, lod, anim)
-            mesh.addVertex(terrain, Face.EAST, x1.toDouble(), y.toDouble(),
-                    z1.toDouble(), xx1, yy, zz1, texMinX, texMinY, r2, g2, b2,
-                    a2, lod, anim)
-            mesh.addVertex(terrain, Face.EAST, x1.toDouble(), y.toDouble(),
-                    z.toDouble(), xx1, yy, zz, texMinX, texMaxY, r2, g2, b2, a2,
-                    lod, anim)
-            mesh.addVertex(terrain, Face.EAST, x1.toDouble(), y1.toDouble(),
-                    z.toDouble(), xx1, yy1, zz, texMaxX, texMaxY, r2, g2, b2,
-                    a2, lod, anim)
+            mesh.addQuad(terrain, Face.EAST,
+                    x1.toDouble(), y1.toDouble(), z1.toDouble(),
+                    x1.toDouble(), y.toDouble(), z1.toDouble(),
+                    x1.toDouble(), y.toDouble(), z.toDouble(),
+                    x1.toDouble(), y1.toDouble(), z.toDouble(),
+                    xx1, yy1, zz1,
+                    xx1, yy, zz1,
+                    xx1, yy, zz,
+                    xx1, yy1, zz,
+                    texMaxX, texMinY,
+                    texMinX, texMinY,
+                    texMinX, texMaxY,
+                    texMaxX, texMaxY,
+                    r2, g2, b2, a2, lod, anim)
         }
         if (texSide3 != null && terrain.type(x, y1, z).connectStage(terrain, x,
                 y1, z) < connectStage) {
@@ -210,18 +214,20 @@ class BlockModelSimpleBlock(private val block: BlockType,
             val texMaxX = texSide3.marginX(1.0)
             val texMinY = texSide3.marginY(0.0)
             val texMaxY = texSide3.marginY(1.0)
-            mesh.addVertex(terrain, Face.SOUTH, x1.toDouble(), y1.toDouble(),
-                    z.toDouble(), xx1, yy1, zz, texMinX, texMaxY, r2, g2, b2,
-                    a2, lod, anim)
-            mesh.addVertex(terrain, Face.SOUTH, x.toDouble(), y1.toDouble(),
-                    z.toDouble(), xx, yy1, zz, texMaxX, texMaxY, r2, g2, b2, a2,
-                    lod, anim)
-            mesh.addVertex(terrain, Face.SOUTH, x.toDouble(), y1.toDouble(),
-                    z1.toDouble(), xx, yy1, zz1, texMaxX, texMinY, r2, g2, b2,
-                    a2, lod, anim)
-            mesh.addVertex(terrain, Face.SOUTH, x1.toDouble(), y1.toDouble(),
-                    z1.toDouble(), xx1, yy1, zz1, texMinX, texMinY, r2, g2, b2,
-                    a2, lod, anim)
+            mesh.addQuad(terrain, Face.SOUTH,
+                    x1.toDouble(), y1.toDouble(), z.toDouble(),
+                    x.toDouble(), y1.toDouble(), z.toDouble(),
+                    x.toDouble(), y1.toDouble(), z1.toDouble(),
+                    x1.toDouble(), y1.toDouble(), z1.toDouble(),
+                    xx1, yy1, zz,
+                    xx, yy1, zz,
+                    xx, yy1, zz1,
+                    xx1, yy1, zz1,
+                    texMinX, texMaxY,
+                    texMaxX, texMaxY,
+                    texMaxX, texMinY,
+                    texMinX, texMinY,
+                    r2, g2, b2, a2, lod, anim)
         }
         if (texSide4 != null && terrain.type(x0, y, z).connectStage(terrain, x0,
                 y, z) < connectStage) {
@@ -232,18 +238,20 @@ class BlockModelSimpleBlock(private val block: BlockType,
             val texMaxX = texSide4.marginX(1.0)
             val texMinY = texSide4.marginY(0.0)
             val texMaxY = texSide4.marginY(1.0)
-            mesh.addVertex(terrain, Face.WEST, x.toDouble(), y1.toDouble(),
-                    z.toDouble(), xx, yy1, zz, texMinX, texMaxY, r2, g2, b2, a2,
-                    lod, anim)
-            mesh.addVertex(terrain, Face.WEST, x.toDouble(), y.toDouble(),
-                    z.toDouble(), xx, yy, zz, texMaxX, texMaxY, r2, g2, b2, a2,
-                    lod, anim)
-            mesh.addVertex(terrain, Face.WEST, x.toDouble(), y.toDouble(),
-                    z1.toDouble(), xx, yy, zz1, texMaxX, texMinY, r2, g2, b2,
-                    a2, lod, anim)
-            mesh.addVertex(terrain, Face.WEST, x.toDouble(), y1.toDouble(),
-                    z1.toDouble(), xx, yy1, zz1, texMinX, texMinY, r2, g2, b2,
-                    a2, lod, anim)
+            mesh.addQuad(terrain, Face.WEST,
+                    x.toDouble(), y1.toDouble(), z.toDouble(),
+                    x.toDouble(), y.toDouble(), z.toDouble(),
+                    x.toDouble(), y.toDouble(), z1.toDouble(),
+                    x.toDouble(), y1.toDouble(), z1.toDouble(),
+                    xx, yy1, zz,
+                    xx, yy, zz,
+                    xx, yy, zz1,
+                    xx, yy1, zz1,
+                    texMinX, texMaxY,
+                    texMaxX, texMaxY,
+                    texMaxX, texMinY,
+                    texMinX, texMinY,
+                    r2, g2, b2, a2, lod, anim)
         }
     }
 

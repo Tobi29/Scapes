@@ -18,40 +18,30 @@ package org.tobi29.scapes.tools.controlpanel.extensions
 
 import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import org.eclipse.swt.SWT
 import org.eclipse.swt.widgets.Text
-import org.tobi29.scapes.engine.server.ControlPanelProtocol
-import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
-import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.ComponentTypeRegistered
-import org.tobi29.scapes.engine.utils.task.Timer
-import org.tobi29.scapes.engine.utils.task.loop
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.loopUntilCancel
+import org.tobi29.server.ControlPanelProtocol
+import org.tobi29.application.swt.widgets.ifPresent
+import org.tobi29.utils.ComponentTypeRegistered
 import org.tobi29.scapes.tools.controlpanel.ControlPanelDocument
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
-import java.util.concurrent.TimeUnit
 
 class ExtensionPing(
         connection: ControlPanelProtocol
 ) : Extension(connection) {
-    private var job: Pair<Job, AtomicBoolean>? = null
+    private var job: Job? = null
     private var label: Text? = null
 
     override fun init(holder: ControlPanelDocument) {
-        val stop = AtomicBoolean(false)
-        job = launch(holder.application.uiContext + CoroutineName(
-                "Extension-Ping")) {
-            Timer().apply { init() }.loop(Timer.toDiff(1.0),
-                    {   delay(it, TimeUnit.NANOSECONDS) }) {
-                if (stop.get()) return@loop false
-
+        job = launch(holder.application.uiContext +
+                CoroutineName("Extension-Ping")) {
+            Timer().apply { init() }.loopUntilCancel(Timer.toDiff(1.0)) {
                 label.ifPresent { it.text = connection.ping.toString() }
-
-                true
             }
-        } to stop
-
+        }
     }
 
     override fun populate(composite: ControlPanelConnection) {
@@ -61,10 +51,7 @@ class ExtensionPing(
     }
 
     override fun dispose() {
-        job?.let { (_, stop) ->
-            stop.set(true)
-            this.job = null
-        }
+        job?.cancel()
     }
 
     companion object {

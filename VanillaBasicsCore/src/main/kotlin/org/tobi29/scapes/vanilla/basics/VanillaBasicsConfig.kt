@@ -17,8 +17,8 @@
 package org.tobi29.scapes.vanilla.basics
 
 import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.StoneType
 import org.tobi29.scapes.vanilla.basics.material.*
@@ -135,7 +135,7 @@ class OreTypeCreator(materials: VanillaMaterial) {
 class CraftingRecipeCreator {
     val ingredients = RecipeList()
     val requirements = RecipeList()
-    var result: ItemStack? = null
+    lateinit var result: Item
 }
 
 class RecipeList {
@@ -145,11 +145,11 @@ class RecipeList {
         list.add(ingredient)
     }
 
-    fun add(item: ItemStack) {
+    fun add(item: Item) {
         add(CraftingRecipe.IngredientList(item))
     }
 
-    fun add(item: List<ItemStack>) {
+    fun add(item: List<Item>) {
         add(CraftingRecipe.IngredientList(item))
     }
 }
@@ -162,8 +162,7 @@ class CraftingRecipesCreator(val materials: VanillaMaterial,
                 "VanillaBasics", "CraftingRecipe")
         val creator = CraftingRecipeCreator()
         craftingRecipe(creator)
-        val result = creator.result ?: throw IllegalArgumentException(
-                "Result is not set")
+        val result = creator.result
         val recipe = craftingRegistry.reg(id) {
             CraftingRecipe(it, creator.ingredients.list,
                     creator.requirements.list, result)

@@ -21,22 +21,22 @@ import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.layout.GridLayout
 import org.eclipse.swt.widgets.*
-import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.swt.util.framework.Document
-import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
-import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
-import org.tobi29.scapes.engine.swt.util.widgets.InputDialog
-import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.toChannel
-import org.tobi29.scapes.engine.utils.io.view
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.newEventDispatcher
-import org.tobi29.scapes.engine.utils.tag.Tag
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toList
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.logging.KLogging
+import org.tobi29.server.*
+import org.tobi29.application.swt.framework.Document
+import org.tobi29.application.swt.framework.DocumentComposite
+import org.tobi29.application.swt.framework.MultiDocumentApplication
+import org.tobi29.application.swt.widgets.InputDialog
+import org.tobi29.application.swt.widgets.SmartMenuBar
+import org.tobi29.utils.EventDispatcher
+import org.tobi29.io.IOException
+import org.tobi29.io.toChannel
+import org.tobi29.io.view
+import org.tobi29.utils.toArray
 import org.tobi29.scapes.tools.controlpanel.ui.Certificate
+import org.tobi29.io.tag.Tag
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toList
 import java.nio.channels.SelectionKey
 
 class ConnectDocument(private val address: RemoteAddress,
@@ -153,7 +153,7 @@ class ConnectDocument(private val address: RemoteAddress,
             output.put(21)
             bundleChannel.queueBundle()
             val controlPanel = ControlPanelProtocol(worker, bundleChannel,
-                    newEventDispatcher())
+                    EventDispatcher())
             controlPanel.addCommand("Commands-Send") { payload ->
                 launch(application.uiContext) {
                     val composite = application.compositeFor(

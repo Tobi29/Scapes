@@ -16,51 +16,31 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.block.models.ItemModel
-import org.tobi29.scapes.block.models.ItemModelSimple
-import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.scapes.block.ItemTypeIconKindsI
+import org.tobi29.scapes.block.copy
+import org.tobi29.scapes.inventory.ItemTypeKindsI
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-abstract class ItemSimpleData(type: VanillaMaterialType) : VanillaItem(type) {
-    protected var textures: Array<TerrainTexture?>? = null
-    protected var models: Array<ItemModel?>? = null
-
+abstract class ItemSimpleData(type: VanillaMaterialType) : VanillaItem(type),
+        ItemTypeKindsI<VanillaItem, Int>,
+        ItemTypeIconKindsI<VanillaItem, Int> {
     protected abstract fun types(): Int
 
     protected abstract fun texture(data: Int): String?
 
-    override fun registerTextures(registry: TerrainTextureRegistry) {
-        textures = (0 until types()).asSequence().map {
-            val texture = texture(it) ?: return@map null
-            registry.registerTexture(texture)
-        }.toArray()
+    override val kinds: Set<Int> = HashSet<Int>().apply {
+        repeat(types()) { add(it) }
     }
 
-    override fun createModels(registry: TerrainTextureRegistry) {
-        textures?.let {
-            models = it.asSequence().map {
-                if (it == null) {
-                    return@map null
-                }
-                ItemModelSimple(it, 1.0, 1.0, 1.0, 1.0)
-            }.toArray()
-        }
-    }
+    override fun kind(item: TypedItem<VanillaItem>): Int =
+            data(item).let { if (it < types()) it else 0 }
 
-    override fun render(item: ItemStack,
-                        gl: GL,
-                        shader: Shader) {
-        models?.get(item.data())?.render(gl, shader)
-    }
+    override fun kind(item: TypedItem<VanillaItem>,
+                      value: Int): TypedItem<VanillaItem> =
+            item.copy(data = value)
 
-    override fun renderInventory(item: ItemStack,
-                                 gl: GL,
-                                 shader: Shader) {
-        models?.get(item.data())?.renderInventory(gl, shader)
-    }
+    override fun textureAsset(kind: Int): String = texture(kind)
+            ?.removeSuffix(".png")
+            ?: throw IllegalArgumentException("Invalid kind")
 }

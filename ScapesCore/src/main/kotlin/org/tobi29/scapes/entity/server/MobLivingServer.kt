@@ -18,18 +18,11 @@ package org.tobi29.scapes.entity.server
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.selectBlock
-import org.tobi29.scapes.engine.math.*
-import org.tobi29.scapes.engine.math.vector.Vector2d
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.plus
-import org.tobi29.scapes.engine.math.vector.xz
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.ConcurrentMap
-import org.tobi29.scapes.engine.utils.math.toRad
-import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.math.*
+import org.tobi29.math.vector.Vector2d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.plus
+import org.tobi29.math.vector.xz
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.MobLiving
@@ -37,6 +30,14 @@ import org.tobi29.scapes.entity.ai.AI
 import org.tobi29.scapes.entity.ai.SimpleAI
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.packets.PacketMobDamage
+import org.tobi29.io.tag.ReadWriteTagMap
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toTag
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.ConcurrentMap
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.toRad
 import kotlin.collections.set
 import kotlin.math.cos
 import kotlin.math.max
@@ -51,7 +52,8 @@ abstract class MobLivingServer(type: EntityType<*, *>,
                                protected var maxHealth: Double,
                                protected val viewField: Frustum,
                                protected val hitField: Frustum) : MobServer(
-        type, world, pos, speed, aabb), MobLiving {
+        type, world, pos, speed, aabb),
+        MobLiving {
     override final val onNotice: ConcurrentMap<ListenerToken, (MobServer) -> Unit> = ConcurrentHashMap()
     override final val onJump: ConcurrentMap<ListenerToken, () -> Unit> = ConcurrentHashMap()
     override final val onHeal: ConcurrentMap<ListenerToken, (Double) -> Unit> = ConcurrentHashMap()
@@ -71,24 +73,24 @@ abstract class MobLivingServer(type: EntityType<*, *>,
 
     @Synchronized
     fun attack(damage: Double): List<MobLivingServer> {
-        val rotX = rot.doubleX().toRad()
-        val rotZ = rot.doubleZ().toRad()
+        val rotX = rot.x.toRad()
+        val rotZ = rot.z.toRad()
         val factor = cos(rotX) * 6.0
         val lookX = cos(rotZ) * factor
         val lookY = sin(rotZ) * factor
         val lookZ = sin(rotX) * 6.0
         val viewOffset = viewOffset()
-        hitField.setView(pos.doubleX() + viewOffset.x,
-                pos.doubleY() + viewOffset.y,
-                pos.doubleZ() + viewOffset.z, pos.doubleX() + lookX,
-                pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0.0, 0.0, 1.0)
+        hitField.setView(pos.x + viewOffset.x,
+                pos.y + viewOffset.y,
+                pos.z + viewOffset.z, pos.x + lookX,
+                pos.y + lookY, pos.z + lookZ, 0.0, 0.0, 1.0)
         val mobs = ArrayList<MobLivingServer>()
         world.getEntities(
                 hitField).filterIsInstance<MobLivingServer>().filter { it != this }.forEach { mob ->
             mobs.add(mob)
             mob.damage(damage)
             mob.notice(this)
-            val rad = rot.doubleZ().toRad()
+            val rad = rot.z.toRad()
             mob.push(cos(rad) * 10.0,
                     sin(rad) * 10.0, 2.0)
         }
@@ -170,21 +172,22 @@ abstract class MobLivingServer(type: EntityType<*, *>,
 
     override fun move(delta: Double) {
         super.move(delta)
-        val lookX = cosTable(rot.doubleZ().toRad()) *
-                cosTable(rot.doubleX().toRad()) * 6.0
-        val lookY = sinTable(rot.doubleZ().toRad()) *
-                cosTable(rot.doubleX().toRad()) * 6.0
-        val lookZ = sinTable(rot.doubleX().toRad()) * 6
+        val lookX = cosTable(rot.z.toRad()) *
+                cosTable(rot.x.toRad()) * 6.0
+        val lookY = sinTable(rot.z.toRad()) *
+                cosTable(rot.x.toRad()) * 6.0
+        val lookZ = sinTable(rot.x.toRad()) * 6
         val viewOffset = viewOffset()
-        viewField.setView(pos.doubleX() + viewOffset.x,
-                pos.doubleY() + viewOffset.y,
-                pos.doubleZ() + viewOffset.z, pos.doubleX() + lookX,
-                pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0.0, 0.0, 1.0)
+        viewField.setView(pos.x + viewOffset.x,
+                pos.y + viewOffset.y,
+                pos.z + viewOffset.z, pos.x + lookX,
+                pos.y + lookY, pos.z + lookZ, 0.0, 0.0, 1.0)
         world.getEntities(
                 viewField).filterIsInstance<MobServer>().filter { it != this }.forEach { mob ->
             val otherPos = mob.getCurrentPos()
-            if (!world.checkBlocked(pos.intX(), pos.intY(), pos.intZ(),
-                    otherPos.intX(), otherPos.intY(), otherPos.intZ())) {
+            if (!world.checkBlocked(pos.x.floorToInt(), pos.y.floorToInt(),
+                    pos.z.floorToInt(), otherPos.x.floorToInt(),
+                    otherPos.y.floorToInt(), otherPos.z.floorToInt())) {
                 notice(mob)
             }
         }

@@ -16,6 +16,15 @@
 package org.tobi29.scapes.client.states.scenes
 
 import kotlinx.coroutines.experimental.runBlocking
+import org.tobi29.coroutines.Timer
+import org.tobi29.graphics.Cam
+import org.tobi29.graphics.gaussianBlurOffset
+import org.tobi29.graphics.gaussianBlurWeight
+import org.tobi29.io.IOException
+import org.tobi29.logging.KLogging
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.plus
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
@@ -26,23 +35,9 @@ import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateGameSP
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.plus
-import org.tobi29.scapes.engine.utils.chain
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
-import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.ceilToInt
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.utils.math.sqr
-import org.tobi29.scapes.engine.utils.shader.ArrayExpression
-import org.tobi29.scapes.engine.utils.shader.BooleanExpression
-import org.tobi29.scapes.engine.utils.shader.IntegerExpression
-import org.tobi29.scapes.engine.utils.task.Timer
+import org.tobi29.scapes.engine.shader.ArrayExpression
+import org.tobi29.scapes.engine.shader.BooleanExpression
+import org.tobi29.scapes.engine.shader.IntegerExpression
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.entity.model.MobModel
@@ -50,6 +45,11 @@ import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.newPanorama
+import org.tobi29.stdex.math.ceilToInt
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.sqr
+import org.tobi29.utils.chain
 import kotlin.math.*
 
 class SceneScapesVoxelWorld(private val world: WorldClient,
@@ -388,9 +388,9 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
     fun takePanorama(gl: GL) {
         val fbo = engine.graphics.createFramebuffer(256, 256, 1, true, false,
                 false)
-        fbo.activate(gl)
-        val panorama = takePanorama(gl, fbo)
-        fbo.deactivate(gl)
+        val panorama = fbo.activate(gl) {
+            takePanorama(gl, fbo)
+        }
         if (state is GameStateGameSP) {
             try {
                 state.source.panorama(panorama)
@@ -426,8 +426,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                     yaw, 0.0f)
             gl.clearDepth()
             render(0.0)
-            fbo.texturesColor[0].bind(gl)
-            gl.screenShotFBO(fbo)
+            gl.screenShotFBOColor(0, 0, fbo.width(), fbo.height())
         }
         world.game.setHudVisible(true)
         return panorama

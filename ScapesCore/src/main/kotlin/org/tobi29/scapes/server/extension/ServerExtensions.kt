@@ -16,11 +16,11 @@
 
 package org.tobi29.scapes.server.extension
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.tag.ReadTagMap
-import org.tobi29.scapes.engine.utils.tag.toMap
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.extension.spi.ServerExtensionProvider
+import org.tobi29.io.tag.ReadTagMap
+import org.tobi29.io.tag.toMap
 import java.util.*
 
 class ServerExtensions(private val server: ScapesServer) {

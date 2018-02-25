@@ -16,9 +16,9 @@
 
 package org.tobi29.scapes.plugins
 
+import org.tobi29.checksums.Checksum
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.utils.Checksum
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.connection.PlayerConnection

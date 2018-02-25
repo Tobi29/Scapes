@@ -16,18 +16,19 @@
 
 package org.tobi29.scapes.plugins
 
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.block.*
-import org.tobi29.scapes.engine.utils.io.FileSystemContainer
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.classpath.ClasspathPath
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.isNotHidden
-import org.tobi29.scapes.engine.utils.io.filesystem.isRegularFile
-import org.tobi29.scapes.engine.utils.io.filesystem.listRecursive
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.readOnly
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
+import org.tobi29.io.FileSystemContainer
+import org.tobi29.io.IOException
+import org.tobi29.io.classpath.ClasspathPath
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.io.filesystem.isNotHidden
+import org.tobi29.io.filesystem.isRegularFile
+import org.tobi29.io.filesystem.listRecursive
+import org.tobi29.scapes.inventory.ItemType
 import org.tobi29.scapes.packets.*
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.stdex.readOnly
 import java.net.URLClassLoader
 
 class Plugins(files: List<PluginFile>,
@@ -40,7 +41,7 @@ class Plugins(files: List<PluginFile>,
     val registry: Registries
     lateinit var air: BlockAir
         private set
-    lateinit var materialResolver: Map<String, Material>
+    lateinit var materialResolver: Map<String, ItemType>
         private set
     private val classLoader: URLClassLoader?
     private var worldTypeMut: WorldType? = null
@@ -122,7 +123,7 @@ class Plugins(files: List<PluginFile>,
     fun init() {
         if (!init) {
             registry.registryTypes({ registry ->
-                registry.add("Core", "Material", 0, Short.MAX_VALUE.toInt())
+                registry.add("Core", "ItemType", 0, Short.MAX_VALUE.toInt())
                 registry.add("Core", "Entity", 0, Int.MAX_VALUE)
                 registry.add("Core", "Environment", 0, Int.MAX_VALUE)
                 registry.add("Core", "Packet", 0, Short.MAX_VALUE.toInt())
@@ -130,7 +131,7 @@ class Plugins(files: List<PluginFile>,
                 pluginsMut.forEach { it.registryType(registry) }
             })
             init(registry)
-            registry.get<Material>("Core", "Material").run {
+            registry.get<ItemType>("Core", "ItemType").run {
                 air = reg("core.block.Air", 0) {
                     BlockAir(MaterialType(this@Plugins, it, "core.block.Air"))
                 }
@@ -139,7 +140,7 @@ class Plugins(files: List<PluginFile>,
             pluginsMut.forEach { it.init(registry) }
             registry.lock()
             materialResolver = assembleMaterialResolver(
-                    registry.get<Material>("Core", "Material"))
+                    registry.get<ItemType>("Core", "ItemType"))
             init = true
         }
     }
@@ -286,7 +287,7 @@ class Plugins(files: List<PluginFile>,
             }
         }
 
-        fun assembleMaterialResolver(registry: Registries.Registry<Material>) =
+        fun assembleMaterialResolver(registry: Registries.Registry<ItemType>) =
                 registry.values.asSequence().filterNotNull().flatMap { material ->
                     val nameID = material.nameID
                     sequenceOf(Pair(nameID, material),
@@ -296,7 +297,8 @@ class Plugins(files: List<PluginFile>,
     }
 }
 
-fun <T : Material> Registries.Registry<Material>.reg(name: String,
-                                                     plugins: Plugins,
-                                                     block: (MaterialType) -> T) = reg(
-        name) { block(MaterialType(plugins, it, name)) }
+fun <T : ItemType> Registries.Registry<ItemType>.reg(
+        name: String,
+        plugins: Plugins,
+        block: (MaterialType) -> T
+) = reg(name) { block(MaterialType(plugins, it, name)) }

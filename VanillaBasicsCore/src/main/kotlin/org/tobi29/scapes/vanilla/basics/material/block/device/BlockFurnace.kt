@@ -16,9 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.device
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
 import org.tobi29.scapes.chunk.ChunkMesh
@@ -27,8 +25,11 @@ import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.math.Face
+import org.tobi29.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityFurnaceClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFurnaceServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
@@ -52,17 +53,16 @@ class BlockFurnace(type: VanillaMaterialType) : VanillaBlockContainer<EntityFurn
         return super.place(terrain, x, y, z, face, player)
     }
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
-        return (if ("Pickaxe" == item.material().toolType(
-                item)) 12 else -1).toDouble()
+        return (if ("Pickaxe" == item.kind<ItemTypeTool>()?.toolType()) 12 else -1).toDouble()
     }
 
     override fun footStepSound(data: Int): String {
         return "VanillaBasics:sound/footsteps/Stone.ogg"
     }
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
         return "VanillaBasics:sound/blocks/Stone.ogg"
     }
@@ -128,23 +128,23 @@ class BlockFurnace(type: VanillaMaterialType) : VanillaBlockContainer<EntityFurn
         models = modelList.toArray(arrayOfNulls<BlockModel>(modelList.size))
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
         models?.get(4)?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
         models?.get(4)?.renderInventory(gl, shader)
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return "Furnace"
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 1
     }
 }

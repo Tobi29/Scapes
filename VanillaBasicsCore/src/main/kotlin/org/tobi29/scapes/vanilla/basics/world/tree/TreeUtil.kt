@@ -19,9 +19,9 @@ package org.tobi29.scapes.vanilla.basics.world.tree
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainMutable
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.math.sinTable
-import org.tobi29.scapes.engine.math.vector.*
+import org.tobi29.math.Random
+import org.tobi29.math.sinTable
+import org.tobi29.math.vector.*
 import kotlin.math.PI
 import kotlin.math.roundToInt
 
@@ -37,9 +37,8 @@ object TreeUtil {
             val step = 1.0 / distance
             var i = 0.0
             while (i <= 1) {
-                val block = start + Vector3i(delta.times(i))
-                changeBlock(terrain, block.x, block.y, block.z,
-                        type, data)
+                val block = start + delta.times(i).roundToInt()
+                changeBlock(terrain, block.x, block.y, block.z, type, data)
                 i += step
             }
         }

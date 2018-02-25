@@ -16,20 +16,19 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.server
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.math.*
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.plus
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.engine.math.*
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.plus
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.server.MobLivingEquippedServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.toRad
 
 class MobZombieServer(type: EntityType<*, *>,
                       world: WorldServer) : MobLivingEquippedServer(
@@ -81,7 +80,7 @@ class MobZombieServer(type: EntityType<*, *>,
 
     override fun update(delta: Double) {
         if (isSwimming) {
-            speed.plusZ(1.2)
+            speed.addZ(1.2)
             physicsState.isOnGround = false
         }
         ai.update(delta)
@@ -115,8 +114,8 @@ class MobZombieServer(type: EntityType<*, *>,
             walkSpeed *= 0.2
         }
         walkSpeed *= delta
-        speed.plusX(cosTable(rot.doubleZ().toRad()) * walkSpeed)
-        speed.plusY(sinTable(rot.doubleZ().toRad()) * walkSpeed)
+        speed.addX(cosTable(rot.z.toRad()) * walkSpeed)
+        speed.addY(sinTable(rot.z.toRad()) * walkSpeed)
         soundWait -= delta
         if (soundWait <= 0.0) {
             val random = threadLocalRandom()
@@ -125,18 +124,10 @@ class MobZombieServer(type: EntityType<*, *>,
                     "VanillaBasics:sound/entity/mob/zombie/Calm${random.nextInt(
                             2) + 1}.ogg", this)
         }
-        if (world.terrain.light(pos.intX(), pos.intY(),
-                (pos.doubleZ() + 0.7).floorToInt()) > 10) {
+        if (world.terrain.light(pos.x.floorToInt(), pos.y.floorToInt(),
+                (pos.z + 0.7).floorToInt()) > 10) {
             damage(0.5)
         }
-    }
-
-    override fun leftWeapon(): ItemStack {
-        return ItemStack(world.plugins)
-    }
-
-    override fun rightWeapon(): ItemStack {
-        return ItemStack(world.plugins)
     }
 
     private fun findWalkPosition(): Vector3d? {
@@ -145,8 +136,8 @@ class MobZombieServer(type: EntityType<*, *>,
                 Vector3d((random.nextInt(17) - 8).toDouble(),
                         (random.nextInt(17) - 8).toDouble(),
                         (random.nextInt(7) - 3).toDouble()))
-        if (canMoveHere(world.terrain, vector3d.intX(), vector3d.intY(),
-                vector3d.intZ())) {
+        if (canMoveHere(world.terrain, vector3d.x.floorToInt(), vector3d.y.floorToInt(),
+                vector3d.z.floorToInt())) {
             return vector3d
         }
         return null

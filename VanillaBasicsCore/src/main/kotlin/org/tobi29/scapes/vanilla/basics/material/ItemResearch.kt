@@ -16,12 +16,22 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.inventory.ItemType
+import org.tobi29.scapes.inventory.ItemTypeI
+import org.tobi29.scapes.inventory.TypedItem
 
-interface ItemResearch {
-    fun infoText(item: ItemStack): String? {
-        return null
-    }
+typealias ItemResearch = ItemResearchI<*>
 
-    fun identifiers(item: ItemStack): Array<String>
+interface ItemResearchI<in I : ItemType> : ItemTypeI<I> {
+    fun infoText(item: TypedItem<I>): String? = null
+
+    fun identifiers(item: TypedItem<I>): Array<String>
 }
+
+inline val TypedItem<ItemResearch>.infoText: String?
+    get() = @Suppress("UNCHECKED_CAST")
+    (type as ItemResearchI<ItemType>).infoText(this)
+
+inline val TypedItem<ItemResearch>.identifiers: Array<String>
+    get() = @Suppress("UNCHECKED_CAST")
+    (type as ItemResearchI<ItemType>).identifiers(this)

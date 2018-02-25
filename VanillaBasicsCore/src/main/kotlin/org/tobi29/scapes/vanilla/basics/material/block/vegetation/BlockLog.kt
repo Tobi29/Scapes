@@ -18,9 +18,8 @@ package org.tobi29.scapes.vanilla.basics.material.block.vegetation
 
 import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.launch
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.math.Face
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
 import org.tobi29.scapes.chunk.ChunkMesh
@@ -30,16 +29,21 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import org.tobi29.scapes.vanilla.basics.material.ItemFuel
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.inventory.kind
+import org.tobi29.scapes.vanilla.basics.material.ItemTypeFuelI
 import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.util.dropItem
+import org.tobi29.utils.toArray
 
-class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
+class BlockLog(
+        type: VanillaMaterialType
+) : VanillaBlock(type),
+        ItemTypeFuelI<BlockType> {
     private val treeRegistry = plugins.registry.get<TreeType>("VanillaBasics",
             "TreeType")
     private var textures: Array<Pair<TerrainTexture, TerrainTexture>?>? = null
@@ -52,11 +56,11 @@ class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
                          data: Int,
                          face: Face,
                          player: MobPlayerServer,
-                         item: ItemStack): Boolean {
+                         item: Item?): Boolean {
         if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
             return false
         }
-        if ("Axe" == item.material().toolType(item)) {
+        if ("Axe" == item.kind<ItemTypeTool>()?.toolType()) {
             launch(player.world.taskExecutor + CoroutineName("Destroy-Logs")) {
                 val imTerrain = player.world.terrain
                 destroy(imTerrain, x - 1, y - 1, z + 0, data, 512, player, z)
@@ -82,17 +86,17 @@ class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
         return true
     }
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
-        return (if ("Axe" == item.material().toolType(item))
+        return (if ("Axe" == item.kind<ItemTypeTool>()?.toolType())
             10
-        else if ("Saw" == item.material().toolType(item)) 2 else -1).toDouble()
+        else if ("Saw" == item.kind<ItemTypeTool>()?.toolType()) 2 else -1).toDouble()
     }
 
-    override fun drops(item: ItemStack,
-                       data: Int): List<ItemStack> {
-        if ("Saw" == item.material().toolType(item)) {
-            return listOf(ItemStack(materials.wood, data, 2))
+    override fun drops(item: Item?,
+                       data: Int): List<Item> {
+        if ("Saw" == item.kind<ItemTypeTool>()?.toolType()) {
+            return listOf(ItemStackData(materials.wood, data, 2))
         }
         return emptyList()
     }
@@ -101,9 +105,9 @@ class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
         return "VanillaBasics:sound/footsteps/Wood.ogg"
     }
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
-        return if ("Axe" == item.material().toolType(item))
+        return if ("Axe" == item.kind<ItemTypeTool>()?.toolType())
             "VanillaBasics:sound/blocks/Axe.ogg"
         else
             "VanillaBasics:sound/blocks/Saw.ogg"
@@ -161,23 +165,23 @@ class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
         }
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
-        models?.get(item.data())?.render(gl, shader)
+        models?.get(item.data)?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
-        models?.get(item.data())?.renderInventory(gl, shader)
+        models?.get(item.data)?.renderInventory(gl, shader)
     }
 
-    override fun name(item: ItemStack): String {
-        return treeRegistry[item.data()].name
+    override fun name(item: TypedItem<BlockType>): String {
+        return treeRegistry[item.data].name
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 16
     }
 
@@ -201,7 +205,7 @@ class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
         }) {
             return
         }
-        terrain.world.dropItem(ItemStack(this, data), x, y, z)
+        terrain.world.dropItem(ItemStackData(this, data), x, y, z)
         if (length > 0) {
             val i = length - 1
             if (z > minZ) {
@@ -236,9 +240,9 @@ class BlockLog(type: VanillaMaterialType) : VanillaBlock(type), ItemFuel {
         }
     }
 
-    override fun fuelTemperature(item: ItemStack) = 0.2
+    override fun fuelTemperature(item: TypedItem<BlockType>) = 0.2
 
-    override fun fuelTime(item: ItemStack) = 80.0
+    override fun fuelTime(item: TypedItem<BlockType>) = 80.0
 
-    override fun fuelTier(item: ItemStack) = 10
+    override fun fuelTier(item: TypedItem<BlockType>) = 10
 }

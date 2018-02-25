@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.material.block
 
 import org.tobi29.scapes.block.Collision
-import org.tobi29.scapes.engine.math.vector.div
+import org.tobi29.math.vector.div
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.server.MobServer
 
@@ -29,7 +29,7 @@ class CollisionLeaves : Collision() {
 
     override fun inside(particle: ParticleInstance,
                         delta: Double) {
-        particle.speed.div(1.0 + 1.2 * delta)
+        particle.speed.divide(1.0 + 1.2 * delta)
     }
 
     override val isSolid: Boolean

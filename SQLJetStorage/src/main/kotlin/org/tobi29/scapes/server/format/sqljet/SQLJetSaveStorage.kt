@@ -17,7 +17,7 @@
 package org.tobi29.scapes.server.format.sqljet
 
 import org.tobi29.scapes.client.SaveStorage
-import org.tobi29.scapes.engine.utils.io.filesystem.*
+import org.tobi29.io.filesystem.*
 import org.tobi29.scapes.server.format.WorldSource
 
 class SQLJetSaveStorage(private val path: FilePath) : SaveStorage {

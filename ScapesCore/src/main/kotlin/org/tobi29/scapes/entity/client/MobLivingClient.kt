@@ -18,20 +18,20 @@ package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.selectBlock
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.PointerPane
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.*
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.ConcurrentMap
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.math.AABB
+import org.tobi29.math.PointerPane
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.*
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.MobLiving
 import org.tobi29.scapes.packets.PacketMobDamage
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.ConcurrentMap
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.floorToInt
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -42,7 +42,8 @@ abstract class MobLivingClient(type: EntityType<*, *>,
                                aabb: AABB,
                                protected var health: Double,
                                protected var maxHealth: Double) : MobClient(
-        type, world, pos, speed, aabb), MobLiving {
+        type, world, pos, speed, aabb),
+        MobLiving {
     override final val onNotice: ConcurrentMap<ListenerToken, (MobClient) -> Unit> = ConcurrentHashMap()
     override final val onJump: ConcurrentMap<ListenerToken, () -> Unit> = ConcurrentHashMap()
     override final val onHeal: ConcurrentMap<ListenerToken, (Double) -> Unit> = ConcurrentHashMap()
@@ -98,15 +99,15 @@ abstract class MobLivingClient(type: EntityType<*, *>,
             val currentSpeed = speed()
             if (max(abs(currentSpeed.x),
                     abs(currentSpeed.y)) > 0.1) {
-                val x = pos.intX()
-                val y = pos.intY()
+                val x = pos.x.floorToInt()
+                val y = pos.y.floorToInt()
                 val block = world.terrain.block(x, y,
-                        (pos.doubleZ() - 0.1).floorToInt())
+                        (pos.z - 0.1).floorToInt())
                 var footStepSound = world.terrain.type(block).footStepSound(
                         world.terrain.data(block))
                 if (footStepSound == null && isOnGround) {
                     val blockBottom = world.terrain.block(x, y,
-                            (pos.doubleZ() - 1.4).floorToInt())
+                            (pos.z - 1.4).floorToInt())
                     footStepSound = world.terrain.type(
                             blockBottom).footStepSound(
                             world.terrain.data(blockBottom))

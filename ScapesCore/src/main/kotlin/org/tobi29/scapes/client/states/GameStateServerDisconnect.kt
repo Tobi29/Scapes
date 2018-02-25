@@ -21,7 +21,7 @@ import org.tobi29.scapes.client.states.scenes.SceneError
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.renderScene
-import org.tobi29.scapes.engine.server.RemoteAddress
+import org.tobi29.server.RemoteAddress
 
 class GameStateServerDisconnect(message: String,
                                 private val address: RemoteAddress?,
@@ -40,6 +40,10 @@ class GameStateServerDisconnect(message: String,
         switchPipeline { gl ->
             renderScene(gl, scene)
         }
+    }
+
+    override fun dispose() {
+        engine.guiStack.remove(gui)
     }
 
     override val isMouseGrabbed: Boolean

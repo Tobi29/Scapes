@@ -16,10 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.soil
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.ShaderAnimation
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
@@ -27,10 +24,14 @@ import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.*
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.math.Face
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.ItemStack
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.vanilla.basics.material.CropType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
@@ -64,27 +65,24 @@ class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
                          data: Int,
                          face: Face,
                          player: MobPlayerServer,
-                         item: ItemStack): Boolean {
-        if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
-            return false
-        }
-        if ("Hoe" == item.material().toolType(item)) {
+                         item: Item?): Boolean {
+        val tool = item.kind<ItemTypeTool>()
+        if ("Hoe" == tool?.toolType()) {
             if (data > 0) {
-                if (item.material().toolLevel(item) >= 10) {
+                if (tool.toolLevel() >= 10) {
                     player.world.dropItem(
-                            ItemStack(materials.grassBundle, 0, data), x, y,
-                            z + 1)
+                            ItemStack(materials.grassBundle, data), x, y, z + 1)
                     terrain.data(x, y, z, 0)
                 } else {
-                    player.world.dropItem(ItemStack(materials.grassBundle, 0),
-                            x, y, z + 1)
+                    player.world.dropItem(
+                            TypedItem(materials.grassBundle), x, y, z + 1)
                     terrain.data(x, y, z, data - 1)
                 }
                 val random = threadLocalRandom()
                 if (random.nextInt(20) == 0) {
-                    player.world.dropItem(ItemStack(materials.seed,
-                            random.nextInt(cropRegistry.values().size)), x, y,
-                            z + 1)
+                    player.world.dropItem(Item(materials.seed,
+                            cropRegistry[random.nextInt(
+                                    cropRegistry.values().size)]), x, y, z + 1)
                 }
             } else {
                 terrain.type(x, y, z, materials.farmland)
@@ -93,26 +91,26 @@ class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
             }
             return false
         }
-        return true
+        return super.destroy(terrain, x, y, z, data, face, player, item)
     }
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
-        return if ("Shovel" == item.material().toolType(item))
-            3.0
-        else if ("Hoe" == item.material().toolType(item)) 0.2 else 30.0
+        val tool = item.kind<ItemTypeTool>()
+        return if ("Shovel" == tool?.toolType()) 3.0
+        else if ("Hoe" == tool?.toolType()) 0.2 else 30.0
     }
 
-    override fun drops(item: ItemStack,
-                       data: Int): List<ItemStack> {
-        return listOf(ItemStack(materials.dirt, 0))
+    override fun drops(item: Item?,
+                       data: Int): List<Item> {
+        return listOf(ItemStackData(materials.dirt, 0))
     }
 
     override fun footStepSound(data: Int): String {
         return "VanillaBasics:sound/footsteps/Grass.ogg"
     }
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
         return "VanillaBasics:sound/blocks/Stone.ogg"
     }
@@ -329,25 +327,25 @@ class BlockGrass(type: VanillaMaterialType) : VanillaBlock(type) {
         }
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
         modelBlockGrass?.render(gl, shader)
         modelBlockDirt?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
         modelBlockGrass?.renderInventory(gl, shader)
         modelBlockDirt?.renderInventory(gl, shader)
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return "Grass"
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 16
     }
 }

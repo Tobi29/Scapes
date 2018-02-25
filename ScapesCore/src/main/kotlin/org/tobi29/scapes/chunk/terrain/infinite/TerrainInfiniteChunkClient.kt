@@ -16,13 +16,14 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import org.tobi29.scapes.engine.utils.andNull
-import org.tobi29.scapes.engine.math.vector.Vector2i
-import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.math.vector.Vector2i
+import org.tobi29.utils.andNull
+import org.tobi29.profiler.profilerSection
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBaseChunk
+import org.tobi29.io.tag.*
+import org.tobi29.stdex.math.floorToInt
 
 class TerrainInfiniteChunkClient(pos: Vector2i,
                                  val terrain: TerrainInfiniteClient,
@@ -43,8 +44,8 @@ class TerrainInfiniteChunkClient(pos: Vector2i,
                     entity.move(delta)
                 }
                 val pos = entity.getCurrentPos()
-                val x = pos.intX() shr 4
-                val y = pos.intY() shr 4
+                val x = pos.x.floorToInt() shr 4
+                val y = pos.y.floorToInt() shr 4
                 if ((x != this.pos.x || y != this.pos.y) && unmapEntity(
                         entity)) {
                     if (terrain.chunkC(x, y, { chunk ->

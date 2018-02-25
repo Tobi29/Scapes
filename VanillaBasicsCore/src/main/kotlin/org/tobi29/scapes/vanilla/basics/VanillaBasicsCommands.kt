@@ -16,15 +16,18 @@
 
 package org.tobi29.scapes.vanilla.basics
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.args.*
-import org.tobi29.scapes.engine.utils.hash
-import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.args.*
+import org.tobi29.io.tag.toTag
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
-import org.tobi29.scapes.vanilla.basics.util.createIngot
+import org.tobi29.scapes.vanilla.basics.material.copy
+import org.tobi29.scapes.vanilla.basics.util.Alloy
 import org.tobi29.scapes.vanilla.basics.util.createTool
+import org.tobi29.scapes.vanilla.basics.util.id
+import org.tobi29.scapes.vanilla.basics.util.toIngot
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldServer
+import org.tobi29.stdex.longHashCode
 
 internal fun registerCommands(server: ScapesServer,
                               plugin: VanillaBasics) {
@@ -141,8 +144,6 @@ internal fun registerCommands(server: ScapesServer,
                 listOf("name"), "Metal type").also { add(it) }
         val dataOption = CommandOption(setOf('d'), setOf("data"),
                 listOf("value"), "Data value of item").also { add(it) }
-        val amountOption = CommandOption(setOf('a'), setOf("amount"),
-                listOf("value"), "Amount of item in stack").also { add(it) }
         val temperatureOption = CommandOption(setOf('t'), setOf("temperature"),
                 listOf("value"), "Temperature of metal").also { add(it) }
         return@register { args, executor, commands ->
@@ -150,17 +151,19 @@ internal fun registerCommands(server: ScapesServer,
                     playerOption) { it ?: executor.playerName() }
             val metal = args.require(metalOption)
             val data = args.getInt(dataOption) ?: 0
-            val amount = args.getInt(amountOption) ?: 1
             val temperature = args.getDouble(temperatureOption) ?: 0.0
             commands.add {
                 val player = requireGet({ connection.playerByName(it) },
                         playerName)
                 val alloyType = requireGet({ plugin.alloyType(metal) }, metal)
-                val item = ItemStack(materials.ingot, data, amount)
-                createIngot(item, alloyType)
-                item.metaData("Vanilla")["Temperature"] = temperature.toTag()
+                val ingot = alloyType.ingredients.toIngot(plugin)
+                val item = ingot.copy(
+                        temperature = temperature,
+                        metaData = (ingot.metaData +
+                                ("Data" to data.toTag())).toTag()
+                )
                 player.mob { mob ->
-                    mob.inventories().modify("Container") { it.add(item) }
+                    mob.inventories.modify("Container") { it.add(item) }
                 }
             }
         }
@@ -174,8 +177,6 @@ internal fun registerCommands(server: ScapesServer,
                 listOf("name"), "Metal type").also { add(it) }
         val dataOption = CommandOption(setOf('d'), setOf("data"),
                 listOf("value"), "Data value of item").also { add(it) }
-        val amountOption = CommandOption(setOf('a'), setOf("amount"),
-                listOf("value"), "Amount of item in stack").also { add(it) }
         val temperatureOption = CommandOption(setOf('t'), setOf("temperature"),
                 listOf("value"), "Temperature of metal").also { add(it) }
         val kindOption = CommandOption(setOf('k'), setOf("kind"),
@@ -186,20 +187,23 @@ internal fun registerCommands(server: ScapesServer,
             val metal = args.require(metalOption)
             val kind = args.require(kindOption)
             val data = args.getInt(dataOption) ?: 0
-            val amount = args.getInt(amountOption) ?: 1
             val temperature = args.getDouble(temperatureOption) ?: 0.0
             commands.add {
                 val player = requireGet({ connection.playerByName(it) },
                         playerName)
                 val alloyType = requireGet({ plugin.alloyType(metal) }, metal)
-                val item = ItemStack(materials.ingot, data, amount)
-                createIngot(item, alloyType)
-                item.metaData("Vanilla")["Temperature"] = temperature.toTag()
-                if (!createTool(plugin, item, kind)) {
-                    error("Unknown tool kind: " + kind)
-                }
+                val kindId = id(kind)
+                if (kindId < 0) error("Unknown tool kind: " + kind)
+                val tool = createTool(plugin, kindId,
+                        Alloy(alloyType.ingredients), temperature)
+                val item = tool.copy(
+                        metaData = (tool.metaData +
+                                ("Data" to data.toTag())).toTag()
+                )
                 player.mob { mob ->
-                    mob.inventories().modify("Container") { it.add(item) }
+                    mob.inventories.modify("Container") {
+                        it.add(item)
+                    }
                 }
             }
         }
@@ -215,7 +219,7 @@ internal fun registerCommands(server: ScapesServer,
             args.arguments[worldArgument]?.forEach {
                 commands.add {
                     server.registerWorld({ plugin.createEnvironment(it) }, it,
-                            hash(it, server.seed))
+                            it.longHashCode(server.seed))
                 }
             }
         }

@@ -23,10 +23,11 @@ import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.input.ControllerButtons
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
-import org.tobi29.scapes.engine.utils.ListenerRegistrar
-import org.tobi29.scapes.engine.utils.listenAlive
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.utils.ListenerRegistrar
+import org.tobi29.utils.listenAlive
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.io.tag.toTag
+import org.tobi29.stdex.atomic.AtomicBoolean
 import kotlin.collections.set
 
 class GuiComponentControlsButton(
@@ -39,38 +40,28 @@ class GuiComponentControlsButton(
 ) : GuiComponentButtonHeavy(parent) {
     private val text: GuiComponentText
     private val keys = ArrayList<ControllerKey>()
-    private var editing: Byte = 0
+    private var editing = AtomicBoolean(false)
     private var key: ControllerKeyReference?
 
     init {
         text = addSubHori(4.0, 0.0, -1.0,
                 textSize.toDouble()) { GuiComponentText(it, "") }
         key = ControllerKeyReference.valueOf(tagMap[id].toString())
-        on(GuiEvent.CLICK_LEFT) { event ->
-            if (editing.toInt() == 0) {
-                editing = 1
-                updateText()
-            }
-        }
-        on(GuiEvent.HOVER_LEAVE) { event ->
-            if (editing > 1) {
-                editing = 0
-                updateText()
-            }
-        }
+        on(GuiEvent.CLICK_LEFT) { if (!editing.getAndSet(true)) updateText() }
+        on(GuiEvent.HOVER_LEAVE) { if (editing.getAndSet(false)) updateText() }
         updateText()
     }
 
     override fun ListenerRegistrar.listeners() {
-        listenAlive<ControllerButtons.PressEvent>(
+        listenAlive<ControllerButtons.PressEvent>(100,
                 {
                     it.state.controller == controller
                             && it.action != ControllerButtons.Action.REPEAT
                 }) { event ->
+            if (!editing.get()) return@listenAlive
             synchronized(keys) {
                 when (event.action) {
                     ControllerButtons.Action.PRESS -> {
-                        if (editing <= 1) return@listenAlive
                         keys.add(event.key)
                         event.muted = true
                     }
@@ -78,7 +69,7 @@ class GuiComponentControlsButton(
                         if (!keys.isEmpty()) {
                             key = ControllerKeyReference(keys)
                             tagMap[id] = key.toString().toTag()
-                            editing = 0
+                            editing.set(false)
                             keys.clear()
                         }
                     }
@@ -90,7 +81,7 @@ class GuiComponentControlsButton(
 
     private fun updateText() {
         val text = StringBuilder(16)
-        if (editing > 0) {
+        if (editing.get()) {
             text.append('<')
             text.append(name)
             text.append(": ")
@@ -108,11 +99,5 @@ class GuiComponentControlsButton(
             text.append(key?.humanName() ?: "Not set")
         }
         this.text.text = text.toString()
-    }
-
-    override fun updateComponent(delta: Double) {
-        if (editing > 0) {
-            editing = 2
-        }
     }
 }

@@ -19,8 +19,6 @@ package org.tobi29.scapes.vanilla.basics
 import org.tobi29.scapes.vanilla.basics.generator.StoneType
 
 class VanillaBasicsStones(reg: (String, (Int) -> StoneType) -> StoneType) {
-    private val ROOT = "VanillaBasics:image/terrain/stone"
-
     val DIRT_STONE = reg("vanilla.basics.stone.DirtStone") {
         StoneType(it, "Dirt Stone", ROOT, 0.1)
     }
@@ -64,3 +62,5 @@ class VanillaBasicsStones(reg: (String, (Int) -> StoneType) -> StoneType) {
         StoneType(it, "Granite", ROOT, 1.5)
     }
 }
+
+private const val ROOT = "VanillaBasics:image/terrain/stone"

@@ -16,9 +16,10 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.data
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
 import org.tobi29.scapes.chunk.ChunkMesh
@@ -26,8 +27,9 @@ import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.math.Face
+import org.tobi29.utils.toArray
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
 abstract class BlockSimple(type: VanillaMaterialType) : VanillaBlock(type) {
@@ -66,13 +68,13 @@ abstract class BlockSimple(type: VanillaMaterialType) : VanillaBlock(type) {
                 1.0, 1.0, lod)
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
         model?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
         model?.renderInventory(gl, shader)
@@ -120,16 +122,16 @@ abstract class BlockSimpleData(type: VanillaMaterialType) : VanillaBlock(type) {
         }
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
-        models?.get(item.data())?.render(gl, shader)
+        models?.get(item.data)?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
-        models?.get(item.data())?.renderInventory(gl, shader)
+        models?.get(item.data)?.renderInventory(gl, shader)
     }
 }
 

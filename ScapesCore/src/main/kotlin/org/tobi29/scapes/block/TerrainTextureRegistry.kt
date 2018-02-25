@@ -17,16 +17,17 @@
 package org.tobi29.scapes.block
 
 import kotlinx.coroutines.experimental.runBlocking
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Texture
-import org.tobi29.scapes.engine.math.vector.MutableVector2i
-import org.tobi29.scapes.engine.math.vector.Vector2i
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.graphics.*
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.ReadSource
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.math.vector.MutableVector2i
+import org.tobi29.math.vector.Vector2i
+import org.tobi29.graphics.*
+import org.tobi29.io.IOException
+import org.tobi29.io.ReadSource
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.computeAbsent
 
 class TerrainTextureRegistry(val engine: ScapesEngine) {
     private val minSize: Int = 16
@@ -132,7 +133,7 @@ class TerrainTextureRegistry(val engine: ScapesEngine) {
     fun registerTexture(paths: Array<out String>,
                         animated: Boolean,
                         shaderAnimation: ShaderAnimation = ShaderAnimation.NONE): TerrainTexture {
-        return registered.computeIfAbsent(
+        return registered.computeAbsent(
                 Triple(paths.map { engine.files[it] }, animated,
                         shaderAnimation)) {
             val image = runBlocking { load(paths.map { engine.files[it] }) }

@@ -15,19 +15,21 @@
  */
 package org.tobi29.scapes.entity.particle
 
+import org.tobi29.scapes.block.light
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.FastMath
-import org.tobi29.scapes.engine.math.atan2Fast
-import org.tobi29.scapes.engine.math.matrix.Matrix4f
-import org.tobi29.scapes.engine.math.vector.distanceSqr
-import org.tobi29.scapes.engine.math.vector.length
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.HALF_PI
-import org.tobi29.scapes.engine.utils.math.mix
-import org.tobi29.scapes.engine.utils.shader.IntegerExpression
+import org.tobi29.math.AABB
+import org.tobi29.math.FastMath
+import org.tobi29.math.atan2Fast
+import org.tobi29.math.matrix.Matrix4f
+import org.tobi29.math.vector.distanceSqr
+import org.tobi29.math.vector.length
+import org.tobi29.graphics.Cam
+import org.tobi29.stdex.math.HALF_PI
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.mix
+import org.tobi29.scapes.engine.shader.IntegerExpression
 import kotlin.math.max
 
 class ParticleEmitterTransparent(
@@ -61,13 +63,11 @@ class ParticleEmitterTransparent(
             val s = shader.getAsync()
             ;{ render ->
             val sunLightReduction = environment.sunLightReduction(
-                    cam.position.doubleX(),
-                    cam.position.doubleY()) / 15.0f
+                    cam.position.x,
+                    cam.position.y) / 15.0f
             val playerLight = max(
-                    player.leftWeapon().material().playerLight(
-                            player.leftWeapon()),
-                    player.rightWeapon().material().playerLight(
-                            player.rightWeapon()))
+                    player.leftWeapon().light,
+                    player.rightWeapon().light).toFloat()
             s.setUniform3f(gl, 4, scene.fogR(), scene.fogG(), scene.fogB())
             s.setUniform1f(gl, 5, scene.fogDistance() * scene.renderDistance())
             s.setUniform1i(gl, 6, 1)
@@ -94,9 +94,9 @@ class ParticleEmitterTransparent(
             if (instance.state != ParticleInstance.State.ALIVE) {
                 continue
             }
-            val x = instance.posRender.intX()
-            val y = instance.posRender.intY()
-            val z = instance.posRender.intZ()
+            val x = instance.posRender.x.floorToInt()
+            val y = instance.posRender.y.floorToInt()
+            val z = instance.posRender.z.floorToInt()
             if (terrain.block(x, y, z) {
                 !isSolid(it) || isTransparent(it)
             }) {
@@ -125,10 +125,10 @@ class ParticleEmitterTransparent(
                 buffer.putFloat(terrain.blockLight(x, y, z) / 15.0f)
                 buffer.putFloat(terrain.sunLight(x, y, z) / 15.0f)
                 matrix.values.forEach { buffer.putFloat(it) }
-                buffer.putFloat(instance.textureOffset.floatX())
-                buffer.putFloat(instance.textureOffset.floatY())
-                buffer.putFloat(instance.textureSize.floatX())
-                buffer.putFloat(instance.textureSize.floatY())
+                buffer.putFloat(instance.textureOffset.x.toFloat())
+                buffer.putFloat(instance.textureOffset.y.toFloat())
+                buffer.putFloat(instance.textureSize.x.toFloat())
+                buffer.putFloat(instance.textureSize.y.toFloat())
                 count++
             }
         }
@@ -162,12 +162,12 @@ class ParticleEmitterTransparent(
             if (!instance.physics) {
                 continue
             }
-            aabb.minX = instance.pos.doubleX() - instance.sizeStart
-            aabb.minY = instance.pos.doubleY() - instance.sizeStart
-            aabb.minZ = instance.pos.doubleZ() - instance.sizeStart
-            aabb.maxX = instance.pos.doubleX() + instance.sizeStart
-            aabb.maxY = instance.pos.doubleY() + instance.sizeStart
-            aabb.maxZ = instance.pos.doubleZ() + instance.sizeStart
+            aabb.minX = instance.pos.x - instance.sizeStart
+            aabb.minY = instance.pos.y - instance.sizeStart
+            aabb.minZ = instance.pos.z - instance.sizeStart
+            aabb.maxX = instance.pos.x + instance.sizeStart
+            aabb.maxY = instance.pos.y + instance.sizeStart
+            aabb.maxZ = instance.pos.z + instance.sizeStart
             ParticlePhysics.update(delta, instance, terrain, aabb, gravitation,
                     instance.gravitationMultiplier, instance.airFriction,
                     instance.groundFriction, instance.waterFriction)

@@ -17,13 +17,13 @@
 package org.tobi29.scapes.connection
 
 import kotlinx.coroutines.experimental.runBlocking
-import org.tobi29.scapes.engine.utils.graphics.Image
-import org.tobi29.scapes.engine.utils.graphics.decodePNG
-import org.tobi29.scapes.engine.utils.io.*
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.exists
-import org.tobi29.scapes.engine.utils.io.filesystem.read
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.graphics.Image
+import org.tobi29.graphics.decodePNG
+import org.tobi29.io.*
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.io.filesystem.exists
+import org.tobi29.io.filesystem.read
+import org.tobi29.logging.KLogging
 import kotlin.math.sqrt
 
 class ServerInfo {

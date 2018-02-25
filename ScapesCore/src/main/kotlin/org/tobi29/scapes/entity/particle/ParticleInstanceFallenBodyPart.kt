@@ -16,7 +16,7 @@
 package org.tobi29.scapes.entity.particle
 
 import org.tobi29.scapes.engine.graphics.Texture
-import org.tobi29.scapes.engine.math.vector.MutableVector3d
+import org.tobi29.math.vector.MutableVector3d
 import org.tobi29.scapes.entity.model.Box
 
 class ParticleInstanceFallenBodyPart : ParticleInstance() {

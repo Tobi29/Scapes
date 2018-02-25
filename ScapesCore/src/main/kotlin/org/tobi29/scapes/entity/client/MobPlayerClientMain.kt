@@ -16,6 +16,12 @@
 
 package org.tobi29.scapes.entity.client
 
+import org.tobi29.math.AABB
+import org.tobi29.math.Frustum
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.Vector2d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.length
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldClient
@@ -24,26 +30,21 @@ import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.Frustum
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.Vector2d
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.length
-import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.ListenerRegistrar
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.entity.EntityPhysics
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.particle.ParticleEmitterBlock
 import org.tobi29.scapes.packets.PacketInteraction
+import org.tobi29.stdex.ThreadLocal
+import org.tobi29.stdex.math.TWO_PI
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.toRad
+import org.tobi29.utils.EventDispatcher
+import org.tobi29.utils.ListenerRegistrar
+import org.tobi29.utils.Pool
+import org.tobi29.utils.forAllObjects
 import kotlin.collections.set
 import kotlin.math.abs
 import kotlin.math.cos
@@ -87,10 +88,10 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
 
     override fun move(delta: Double) {
         if (flying) {
-            val goX = clamp(speed.doubleX() * delta, -10.0, 10.0)
-            val goY = clamp(speed.doubleY() * delta, -10.0, 10.0)
-            val goZ = clamp(speed.doubleZ() * delta, -10.0, 10.0)
-            pos.plus(Vector3d(goX, goY, goZ))
+            val goX = clamp(speed.x * delta, -10.0, 10.0)
+            val goY = clamp(speed.y * delta, -10.0, 10.0)
+            val goZ = clamp(speed.z * delta, -10.0, 10.0)
+            pos.add(Vector3d(goX, goY, goZ))
         } else {
             EntityPhysics.updateVelocity(delta, speed, world.gravity,
                     gravitationMultiplier, airFriction, groundFriction,
@@ -102,34 +103,34 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
             EntityPhysics.move(delta, pos, speed, aabb, stepHeight,
                     physicsState, aabbs)
             if (isOnGround) {
-                speed.setZ(speed.doubleZ() / (1.0 + 4.0 * delta))
+                speed.setZ(speed.z / (1.0 + 4.0 * delta))
             }
             EntityPhysics.collide(delta, aabb, aabbs, physicsState) {}
-            isHeadInWater = world.terrain.type(pos.intX(), pos.intY(),
-                    (pos.doubleZ() + 0.7).floorToInt()).isLiquid
+            isHeadInWater = world.terrain.type(pos.x.floorToInt(),
+                    pos.y.floorToInt(), (pos.z + 0.7).floorToInt()).isLiquid
             aabbs.reset()
             aabbs.forAllObjects { it.collision = BlockType.STANDARD_COLLISION }
         }
         sendPositionHandler.submitUpdate(uuid, pos.now(), speed.now(),
                 rot.now(), physicsState.isOnGround, physicsState.slidingWall,
                 physicsState.isInWater, physicsState.isSwimming)
-        val lookX = cos(rot.doubleZ().toRad()) *
-                cos(rot.doubleX().toRad()) * 6.0
-        val lookY = sin(rot.doubleZ().toRad()) *
-                cos(rot.doubleX().toRad()) * 6.0
-        val lookZ = sin(rot.doubleX().toRad()) * 6
+        val lookX = cos(rot.z.toRad()) *
+                cos(rot.x.toRad()) * 6.0
+        val lookY = sin(rot.z.toRad()) *
+                cos(rot.x.toRad()) * 6.0
+        val lookZ = sin(rot.x.toRad()) * 6
         val viewOffset = viewOffset()
-        viewField.setView(pos.doubleX() + viewOffset.x,
-                pos.doubleY() + viewOffset.y,
-                pos.doubleZ() + viewOffset.z,
-                pos.doubleX() + lookX, pos.doubleY() + lookY,
-                pos.doubleZ() + lookZ, 0.0, 0.0, 1.0)
+        viewField.setView(pos.x + viewOffset.x,
+                pos.y + viewOffset.y,
+                pos.z + viewOffset.z,
+                pos.x + lookX, pos.y + lookY,
+                pos.z + lookZ, 0.0, 0.0, 1.0)
         world.getEntities(
                 viewField).filterIsInstance<MobClient>().forEach { entity ->
             val pos2 = entity.getCurrentPos()
-            if (!world.checkBlocked(pos.intX(), pos.intY(),
-                    pos.intZ(), pos2.intX(), pos2.intY(),
-                    pos2.intZ())) {
+            if (!world.checkBlocked(pos.x.floorToInt(), pos.y.floorToInt(),
+                    pos.z.floorToInt(), pos2.x.floorToInt(), pos2.y.floorToInt(),
+                    pos2.z.floorToInt())) {
                 notice(entity)
             }
         }
@@ -139,15 +140,15 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
             val currentSpeed = speed()
             if (max(abs(currentSpeed.x),
                     abs(currentSpeed.y)) > 0.1) {
-                val x = pos.intX()
-                val y = pos.intY()
+                val x = pos.x.floorToInt()
+                val y = pos.y.floorToInt()
                 val block = world.terrain.block(x, y,
-                        (pos.doubleZ() - 0.1).floorToInt())
+                        (pos.z - 0.1).floorToInt())
                 var footStepSound = world.terrain.type(block).footStepSound(
                         world.terrain.data(block))
                 if (footStepSound == null && isOnGround) {
                     val blockBottom = world.terrain.block(x, y,
-                            (pos.doubleZ() - 1.4).floorToInt())
+                            (pos.z - 1.4).floorToInt())
                     footStepSound = world.terrain.type(
                             blockBottom).footStepSound(
                             world.terrain.data(blockBottom))
@@ -193,11 +194,11 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
                         val random = threadLocalRandom()
                         val time = 3.0f
                         instance.pos.set(blockPos)
-                        instance.pos.plus(Vector3d(random.nextDouble(),
+                        instance.pos.add(Vector3d(random.nextDouble(),
                                 random.nextDouble(), random.nextDouble()))
-                        instance.speed.set(-1.0f + random.nextFloat() * 2.0f,
-                                -1.0f + random.nextFloat() * 2.0f,
-                                random.nextFloat() * 2.0f + 1.0f)
+                        instance.speed.setXYZ(-1.0 + random.nextDouble() * 2.0,
+                                -1.0 + random.nextDouble() * 2.0,
+                                random.nextDouble() * 2.0 + 1.0)
                         instance.time = time
                         instance.friction = friction
                         instance.dir = random.nextFloat() * TWO_PI.toFloat()

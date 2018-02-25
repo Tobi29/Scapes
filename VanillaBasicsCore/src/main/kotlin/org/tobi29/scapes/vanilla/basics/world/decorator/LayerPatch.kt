@@ -19,7 +19,7 @@ package org.tobi29.scapes.vanilla.basics.world.decorator
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainMutable
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.Random
+import org.tobi29.math.Random
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 
 class LayerPatch(private val material: BlockType,

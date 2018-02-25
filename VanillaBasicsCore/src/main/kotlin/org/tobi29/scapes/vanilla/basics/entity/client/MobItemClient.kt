@@ -16,22 +16,23 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.toItem
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toMap
+import org.tobi29.math.AABB
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.entity.model.MobModelItem
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.io.tag.TagMap
+import org.tobi29.stdex.atomic.AtomicReference
 
 class MobItemClient(type: EntityType<*, *>,
                     world: WorldClient) : MobClient(
         type, world, Vector3d.ZERO, Vector3d.ZERO,
         AABB(-0.2, -0.2, -0.2, 0.2, 0.2, 0.2)) {
-    private val item = ItemStack(world.plugins)
+    private val item = AtomicReference<Item?>(null)
 
     init {
         attachModel { MobModelItem(this, item) }
@@ -39,10 +40,6 @@ class MobItemClient(type: EntityType<*, *>,
 
     override fun read(map: TagMap) {
         super.read(map)
-        map["Inventory"]?.toMap()?.let { item.read(it) }
-    }
-
-    fun item(): ItemStack {
-        return item
+        map["Inventory"]?.toItem(world.plugins)?.let { item.set(it) }
     }
 }

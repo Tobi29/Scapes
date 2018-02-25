@@ -16,15 +16,15 @@
 
 package org.tobi29.scapes.vanilla.basics.util
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.math.toRad
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.stdex.math.toRad
 import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import kotlin.math.cos
 import kotlin.math.sin
 
-fun MobServer.dropItem(item: ItemStack) {
+fun MobServer.dropItem(item: Item) {
     val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
     val pos = getCurrentPos()
     val rot = rot()
@@ -33,7 +33,7 @@ fun MobServer.dropItem(item: ItemStack) {
         setSpeed(Vector3d(cos(rot.z.toRad()) * 10.0 * cos(rot.x.toRad()),
                 sin(rot.z.toRad()) * 10.0 * cos(rot.x.toRad()),
                 sin(rot.x.toRad()) * 0.3 + 0.3))
-        this.item.set(item)
+        this.item = item
     }
     world.addEntityNew(entity)
 }

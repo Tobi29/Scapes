@@ -18,12 +18,10 @@ package org.tobi29.scapes.vanilla.basics.material.block
 
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.Face
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.EntityClient
-import org.tobi29.scapes.entity.client.EntityContainerClient
-import org.tobi29.scapes.entity.server.EntityContainerServer
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
@@ -74,7 +72,7 @@ abstract class VanillaBlockEntity<out C : EntityClient, out S : EntityServer>(
     }
 }
 
-abstract class VanillaBlockContainer<out C : EntityContainerClient, out S : EntityContainerServer>(
+abstract class VanillaBlockContainer<out C : EntityClient, out S : EntityServer>(
         type: VanillaMaterialType,
         entity: EntityType<C, S>
 ) : VanillaBlockEntity<C, S>(type, entity) {

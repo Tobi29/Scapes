@@ -22,9 +22,9 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
-import org.tobi29.scapes.engine.server.Connection
-import org.tobi29.scapes.engine.server.RemoteAddress
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.server.Connection
+import org.tobi29.server.RemoteAddress
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.packets.PacketServer

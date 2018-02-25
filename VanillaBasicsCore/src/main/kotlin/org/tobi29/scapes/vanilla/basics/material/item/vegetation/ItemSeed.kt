@@ -15,54 +15,56 @@
  */
 package org.tobi29.scapes.vanilla.basics.material.item.vegetation
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.ItemTypeIconKindsI
+import org.tobi29.scapes.block.ItemTypeKindsRegistryI
+import org.tobi29.scapes.block.ItemTypeUseableI
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.*
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityFarmlandServer
 import org.tobi29.scapes.vanilla.basics.material.CropType
+import org.tobi29.scapes.vanilla.basics.material.ItemResearchI
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
-import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
+import org.tobi29.scapes.vanilla.basics.material.item.VanillaItemBase
 
-class ItemSeed(type: VanillaMaterialType) : ItemSimpleData(
-        type) {
-    val cropRegistry = plugins.registry.get<CropType>("VanillaBasics",
-            "CropType")
+class ItemSeed(
+        type: VanillaMaterialType
+) : VanillaItemBase<ItemSeed>(type),
+        ItemTypeKindsRegistryI<ItemSeed, CropType>,
+        ItemTypeNamedI<ItemSeed>,
+        ItemTypeIconKindsI<ItemSeed, CropType>,
+        ItemTypeStackableDefaultI<ItemSeed>,
+        ItemTypeUseableI<ItemSeed>,
+        ItemResearchI<ItemSeed> {
+    override val registry =
+            plugins.registry.get<CropType>("VanillaBasics", kindTag)
+    override val kindTag get() = "CropType"
+
+    override fun textureAsset(kind: CropType) =
+            "${kind.texture}/Seed"
+
+    override fun name(item: TypedItem<ItemSeed>) = "${kind(item).name} Seeds"
+
+    override fun maxStackSize(item: TypedItem<ItemSeed>) = 128
 
     override fun click(entity: MobPlayerServer,
-                       item: ItemStack,
+                       item: TypedItem<ItemSeed>,
                        terrain: TerrainServer,
                        x: Int,
                        y: Int,
                        z: Int,
-                       face: Face): Double {
-        if (face == Face.UP) {
-            item.setAmount(item.amount() - 1)
-            val random = threadLocalRandom()
-            if (random.nextInt(1) == 0) {
+                       face: Face): Pair<Item?, Double?> =
+            if (face == Face.UP) {
                 entity.world.getEntities(x, y,
                         z).filterIsInstance<EntityFarmlandServer>().forEach { farmland ->
                     farmland.seed(materials.plugin.cropTypes.WHEAT)
                 }
-            }
-        }
-        return 0.0
-    }
+                item.copy(amount = item.amount - 1).orNull() to 0.0
+            } else item to 0.0
 
-    override fun types(): Int {
-        return cropRegistry.values().size
-    }
-
-    override fun texture(data: Int): String {
-        return "${cropRegistry[data].texture}/Seed.png"
-    }
-
-    override fun name(item: ItemStack): String {
-        return materials.crop.name(item) + " Seeds"
-    }
-
-    override fun maxStackSize(item: ItemStack): Int {
-        return 128
+    override fun identifiers(item: TypedItem<ItemSeed>): Array<String> {
+        return arrayOf("vanilla.basics.item.Seed",
+                "vanilla.basics.item.Seed." + kind(item).name)
     }
 }

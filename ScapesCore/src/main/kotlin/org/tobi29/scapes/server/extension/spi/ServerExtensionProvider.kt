@@ -16,9 +16,9 @@
 
 package org.tobi29.scapes.server.extension.spi
 
-import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.extension.ServerExtension
+import org.tobi29.io.tag.TagMap
 
 interface ServerExtensionProvider {
     val name: String

@@ -16,30 +16,31 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
-import org.tobi29.scapes.block.Inventory
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.stdex.math.TWO_PI
 import org.tobi29.scapes.entity.EntityType
-import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.scapes.entity.client.GUI_COMPONENT
 import org.tobi29.scapes.entity.particle.ParticleEmitterTransparent
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.gui.GuiForgeInventory
 import kotlin.math.max
 
-class EntityForgeClient(type: EntityType<*, *>,
-                        world: WorldClient) : EntityAbstractFurnaceClient(
-        type, world, Vector3d.ZERO,
-        Inventory(world.plugins, 9), 4, 3) {
+class EntityForgeClient(
+        type: EntityType<*, *>,
+        world: WorldClient
+) : EntityAbstractFurnaceClient(type, world, Vector3d.ZERO, 4, 3) {
     private var particleWait = 0.1
 
-    override fun gui(player: MobPlayerClientMain): Gui? {
-        if (player is MobPlayerClientMainVB) {
-            return GuiForgeInventory(this, player, player.game.engine.guiStyle)
+    init {
+        inventories.add("Container", 9)
+        registerComponent(GUI_COMPONENT) { player ->
+            if (player is MobPlayerClientMainVB) {
+                GuiForgeInventory(this, player, player.game.engine.guiStyle)
+            } else null
         }
-        return null
     }
 
     override fun update(delta: Double) {

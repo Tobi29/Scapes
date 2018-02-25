@@ -18,18 +18,19 @@ package org.tobi29.scapes.packets
 import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.Registries
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
+import org.tobi29.math.vector.Vector2d
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.server.InvalidPacketDataException
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.server.InvalidPacketDataException
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
-class PacketItemUse : PacketAbstract, PacketServer {
+class PacketItemUse : PacketAbstract,
+        PacketServer {
     private var strength = 0.0
     private var side = false
     private lateinit var direction: Vector2d
@@ -78,44 +79,49 @@ class PacketItemUse : PacketAbstract, PacketServer {
             throw InvalidPacketDataException("Invalid direction!")
         }
         player.mob { mob ->
-            mob.inventories().modify("Container") {
-                val world = mob.world
-                val terrain = world.terrain
-                val item: ItemStack
-                if (side) {
-                    mob.attackLeft(strength * strength, direction)
-                    item = mob.leftWeapon()
-                } else {
-                    mob.attackRight(strength * strength, direction)
-                    item = mob.rightWeapon()
+            val world = mob.world
+            val terrain = world.terrain
+            if (side) {
+                mob.attackLeft(strength * strength, direction)
+            } else {
+                mob.attackRight(strength * strength, direction)
+            }
+            val heldSlot = if (side) mob.inventorySelectLeft else mob.inventorySelectRight
+            mob.inventories.modify("Container") { inventory ->
+                inventory[heldSlot] = inventory[heldSlot].click(mob)
+            }
+            mob.punch(strength)
+            val pane = mob.selectedBlock(direction)
+            if (pane != null) {
+                val x = pane.x
+                val y = pane.y
+                val z = pane.z
+                val face = pane.face
+                var flag = false
+                if (strength < 0.9) {
+                    flag = terrain.type(x, y, z).click(terrain, x, y, z, face,
+                            mob)
                 }
-                item.material().click(mob, item)
-                mob.punch(strength)
-                val pane = mob.selectedBlock(direction)
-                if (pane != null) {
-                    val x = pane.x
-                    val y = pane.y
-                    val z = pane.z
-                    val face = pane.face
-                    var flag = false
-                    if (strength < 0.6) {
-                        flag = terrain.type(x, y, z).click(terrain, x, y, z,
-                                face, mob)
-                    }
-                    if (!flag && strength > 0.0) {
-                        launch(world + CoroutineName("Block-Break")) {
-                            delay((item.material().hitWait(
-                                    item) * 0.05).toLong(),
-                                    TimeUnit.MILLISECONDS)
-                            mob.inventories().modify("Container") {
-                                val br = item.material().click(mob, item,
-                                        terrain, x, y, z, face)
-                                if (br > 0.0) {
+                if (!flag && strength > 0.0) {
+                    launch(world + CoroutineName("Block-Break")) {
+                        val weapon = mob.inventories.access(
+                                "Container") { inventory ->
+                            inventory[heldSlot]
+                        }.kind<ItemTypeWeapon>()
+                        delay(((weapon?.hitWait() ?: 500) * 0.05).toLong(),
+                                TimeUnit.MILLISECONDS)
+                        mob.inventories.modify("Container") { inventory ->
+                            val item = inventory[heldSlot]
+                            if (weapon == null || weapon.type == item?.type) {
+                                val (stack, br) = item.click(mob, terrain,
+                                        x, y, z, face)
+                                inventory[heldSlot] = stack
+                                if (br == null || br > 0.0) {
                                     val block = terrain.block(x, y, z)
                                     val type = terrain.type(block)
                                     val data = terrain.data(block)
                                     type.punch(terrain, x, y, z, data, face,
-                                            mob, item, br, strength)
+                                            mob, stack, br ?: 0.1, strength)
                                 }
                             }
                         }

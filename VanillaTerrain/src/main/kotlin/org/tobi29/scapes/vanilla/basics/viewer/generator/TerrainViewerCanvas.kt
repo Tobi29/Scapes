@@ -25,16 +25,16 @@ import org.eclipse.swt.graphics.ImageData
 import org.eclipse.swt.graphics.PaletteData
 import org.eclipse.swt.widgets.Canvas
 import org.eclipse.swt.widgets.Composite
-import org.tobi29.scapes.engine.math.vector.Vector2i
-import org.tobi29.scapes.engine.math.vector.distanceSqr
-import org.tobi29.scapes.engine.swt.util.framework.GuiApplication
-import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
-import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.AtomicInteger
-import org.tobi29.scapes.engine.utils.AtomicLong
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.graphics.hsvToRGB
-import org.tobi29.scapes.engine.utils.math.clamp
+import org.tobi29.math.vector.Vector2i
+import org.tobi29.math.vector.distanceSqr
+import org.tobi29.application.swt.framework.GuiApplication
+import org.tobi29.application.swt.widgets.ifPresent
+import org.tobi29.stdex.atomic.AtomicBoolean
+import org.tobi29.stdex.atomic.AtomicInt
+import org.tobi29.stdex.atomic.AtomicLong
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.graphics.hsvToRGB
+import org.tobi29.stdex.math.clamp
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
@@ -48,7 +48,7 @@ class TerrainViewerCanvas(parent: Composite,
     private val chunks = ConcurrentHashMap<Vector2i, Image>()
     private val emptyImage: Image
     private val cache = AtomicLong()
-    private val renders = AtomicInteger()
+    private val renders = AtomicInt()
     private val drawQueued = AtomicBoolean()
     private var scale = 0.0
     private var cx = 0

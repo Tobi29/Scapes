@@ -20,6 +20,9 @@ import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.loop
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.chunk.MobSpawner
@@ -28,23 +31,21 @@ import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.Vector2i
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.distanceSqr
-import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.task.Timer
-import org.tobi29.scapes.engine.utils.task.loop
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.Vector2i
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.distanceSqr
+import org.tobi29.io.IOException
+import org.tobi29.profiler.profilerSection
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.format.TerrainInfiniteFormat
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManagerDynamic
+import org.tobi29.io.tag.TagMap
+import org.tobi29.stdex.ThreadLocal
+import org.tobi29.stdex.atomic.AtomicBoolean
+import org.tobi29.stdex.math.floorToInt
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -57,7 +58,8 @@ class TerrainInfiniteServer(override val world: WorldServer,
                             internal val populators: Array<ChunkPopulator>,
                             air: BlockType) : TerrainInfinite<EntityServer, TerrainInfiniteChunkServer>(
         zSize, world.taskExecutor, air, world.registry,
-        TerrainInfiniteChunkManagerDynamic<TerrainInfiniteChunkServer>()), TerrainServer {
+        TerrainInfiniteChunkManagerDynamic<TerrainInfiniteChunkServer>()),
+        TerrainServer {
     // TODO: Port away
     private val chunkUnloadQueue = ConcurrentLinkedQueue<TerrainInfiniteChunkServer>()
     private var loadJob: Pair<Job, AtomicBoolean>? = null
@@ -75,8 +77,8 @@ class TerrainInfiniteServer(override val world: WorldServer,
                 while (true) {
                     for (player in world.players()) {
                         val pos = player.getCurrentPos()
-                        val xx = pos.intX() shr 4
-                        val yy = pos.intY() shr 4
+                        val xx = pos.x.floorToInt() shr 4
+                        val yy = pos.y.floorToInt() shr 4
                         val loadingRadius = (player.connection().loadingRadius() shr 4) + 2
                         loader.requireCircle(xx, yy, loadingRadius)
                     }
@@ -112,8 +114,8 @@ class TerrainInfiniteServer(override val world: WorldServer,
     override fun addEntity(entity: EntityServer,
                            spawn: Boolean): Boolean {
         val pos = entity.getCurrentPos()
-        val x = pos.intX() shr 4
-        val y = pos.intY() shr 4
+        val x = pos.x.floorToInt() shr 4
+        val y = pos.y.floorToInt() shr 4
         return chunk(x, y, { chunk ->
             chunk.addEntity(entity)
             true
@@ -268,8 +270,8 @@ class TerrainInfiniteServer(override val world: WorldServer,
         val xx = x shr 4
         val yy = y shr 4
         val pos = player.getCurrentPos()
-        val x2 = pos.intX() shr 4
-        val y2 = pos.intY() shr 4
+        val x2 = pos.x.floorToInt() shr 4
+        val y2 = pos.y.floorToInt() shr 4
         val chunk = chunkNoLoad(xx, yy)
         val dis = max(abs(xx - x2), abs(yy - y2))
         if (chunk != null) {

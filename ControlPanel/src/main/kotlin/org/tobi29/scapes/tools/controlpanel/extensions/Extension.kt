@@ -17,8 +17,8 @@
 package org.tobi29.scapes.tools.controlpanel.extensions
 
 import org.eclipse.swt.widgets.Widget
-import org.tobi29.scapes.engine.server.ControlPanelProtocol
-import org.tobi29.scapes.engine.utils.ComponentRegisteredHolder
+import org.tobi29.server.ControlPanelProtocol
+import org.tobi29.utils.ComponentRegisteredHolder
 import org.tobi29.scapes.tools.controlpanel.ControlPanelDocument
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 

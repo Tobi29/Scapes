@@ -16,35 +16,28 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
-import org.tobi29.scapes.block.Inventory
-import org.tobi29.scapes.block.InventoryContainer
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.inventories
+import org.tobi29.scapes.block.read
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toMap
+import org.tobi29.math.AABB
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.WieldMode
-import org.tobi29.scapes.entity.client.EntityContainerClient
 import org.tobi29.scapes.entity.client.MobPlayerClient
-import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.entity.model.MobLivingModelHuman
 import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toMap
 
-class MobPlayerClientVB(type: EntityType<*, *>,
-                        world: WorldClient) : MobPlayerClient(
-        type, world, Vector3d.ZERO, Vector3d.ZERO,
-        AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
-        ""), EntityContainerClient {
-    private val inventories = InventoryContainer().apply {
-        add("Container", Inventory(world.plugins, 40))
-        add("Hold", Inventory(world.plugins, 1))
-    }
-
+class MobPlayerClientVB(
+        type: EntityType<*, *>,
+        world: WorldClient
+) : MobPlayerClient(type, world, Vector3d.ZERO, Vector3d.ZERO,
+        AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0, "") {
     init {
+        inventories.add("Container", 40)
+        inventories.add("Hold", 1)
         val texture = world.scene.skinStorage()[skin]
         registerComponent(
                 ComponentMobLivingServerCondition.COMPONENT,
@@ -54,15 +47,15 @@ class MobPlayerClientVB(type: EntityType<*, *>,
         }
     }
 
-    override fun leftWeapon(): ItemStack {
-        return inventories.access("Container"
-        ) { inventory -> inventory.item(inventorySelectLeft) }
-    }
+    override fun leftWeapon() =
+            inventories.access("Container") {
+                it[inventorySelectLeft]
+            }
 
-    override fun rightWeapon(): ItemStack {
-        return inventories.access("Container"
-        ) { inventory -> inventory.item(inventorySelectRight) }
-    }
+    override fun rightWeapon() =
+            inventories.access("Container") {
+                it[inventorySelectRight]
+            }
 
     override fun wieldMode(): WieldMode {
         return if (inventorySelectLeft == inventorySelectRight)
@@ -75,21 +68,12 @@ class MobPlayerClientVB(type: EntityType<*, *>,
         return Vector3d(0.0, 0.0, 0.63)
     }
 
-    override fun gui(player: MobPlayerClientMain): Gui? {
-        // TODO: Trade or steal UI maybe?
-        return null
-    }
-
-    override fun inventories(): InventoryContainer {
-        return inventories
-    }
-
     override fun read(map: TagMap) {
         super.read(map)
         map["Inventory"]?.toMap()?.let { inventoryTag ->
             inventories.forEach { id, inventory ->
                 inventoryTag[id]?.toMap()?.let {
-                    inventory.read(it)
+                    inventory.read(world.plugins, it)
                 }
             }
         }

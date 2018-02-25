@@ -16,42 +16,51 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.food
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.ItemTypeIconKindsI
+import org.tobi29.scapes.block.ItemTypeKindsRegistryI
+import org.tobi29.scapes.block.ItemTypeUseableI
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.*
 import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
+import org.tobi29.scapes.vanilla.basics.entity.server.access
 import org.tobi29.scapes.vanilla.basics.material.CropType
+import org.tobi29.scapes.vanilla.basics.material.ItemResearchI
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
-import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
+import org.tobi29.scapes.vanilla.basics.material.item.VanillaItemBase
 
-class ItemBaked(type: VanillaMaterialType) : ItemSimpleData(type) {
-    val cropRegistry = plugins.registry.get<CropType>("VanillaBasics",
-            "CropType")
+class ItemBaked(
+        type: VanillaMaterialType
+) : VanillaItemBase<ItemBaked>(type),
+        ItemTypeKindsRegistryI<ItemBaked, CropType>,
+        ItemTypeNamedI<ItemBaked>,
+        ItemTypeIconKindsI<ItemBaked, CropType>,
+        ItemTypeStackableDefaultI<ItemBaked>,
+        ItemTypeUseableI<ItemBaked>,
+        ItemResearchI<ItemBaked> {
+    override val registry =
+            plugins.registry.get<CropType>("VanillaBasics", kindTag)
+    override val kindTag get() = "CropType"
+
+    override fun textureAsset(kind: CropType) =
+            "${kind.texture}/Baked"
+
+    override fun name(item: TypedItem<ItemBaked>) = kind(item).bakedName
+
+    override fun maxStackSize(item: TypedItem<ItemBaked>) = 16
 
     override fun click(entity: MobPlayerServer,
-                       item: ItemStack) {
-        entity.getOrNull(ComponentMobLivingServerCondition.COMPONENT)?.run {
-            synchronized(this) {
-                stamina -= 0.1
-                hunger += 0.1
-                thirst -= 0.1
-            }
+                       item: TypedItem<ItemBaked>): Item? {
+        entity.getOrNull(ComponentMobLivingServerCondition.COMPONENT)?.access {
+            stamina -= 0.1
+            hunger += 0.1
+            thirst -= 0.1
         }
-        item.setAmount(item.amount() - 1)
+        entity.damage(5.0)
+        return item.copy(amount = item.amount - 1).orNull()
     }
 
-    override fun types(): Int {
-        return cropRegistry.values().size
-    }
-
-    override fun texture(data: Int): String {
-        return "${cropRegistry[data].texture}/Baked.png"
-    }
-
-    override fun name(item: ItemStack): String {
-        return cropRegistry[item.data()].bakedName
-    }
-
-    override fun maxStackSize(item: ItemStack): Int {
-        return 16
+    override fun identifiers(item: TypedItem<ItemBaked>): Array<String> {
+        return arrayOf("vanilla.basics.item.Baked",
+                "vanilla.basics.item.Baked." + kind(item).name)
     }
 }

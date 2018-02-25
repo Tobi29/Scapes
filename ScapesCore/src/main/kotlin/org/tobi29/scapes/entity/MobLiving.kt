@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.entity
 
-import org.tobi29.scapes.engine.utils.ConcurrentMap
+import org.tobi29.stdex.ConcurrentMap
 
 interface MobLiving : Mob {
     val onNotice: ConcurrentMap<ListenerToken, in (Mob) -> Unit>

@@ -21,10 +21,10 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.ControllerButtons
 import org.tobi29.scapes.engine.input.ControllerJoystick
-import org.tobi29.scapes.engine.utils.math.cbrt
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toTag
+import org.tobi29.stdex.math.cbrt
 import kotlin.collections.set
 import kotlin.math.roundToInt
 

@@ -17,7 +17,7 @@
 package org.tobi29.scapes.client.states
 
 import kotlinx.coroutines.experimental.*
-import org.tobi29.scapes.block.Material
+import org.tobi29.scapes.block.ItemTypeTextured
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.client.ChatHistory
 import org.tobi29.scapes.client.Playlist
@@ -33,12 +33,13 @@ import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
 import org.tobi29.scapes.engine.resource.awaitDone
-import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.stdex.atomic.AtomicBoolean
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared
 import org.tobi29.scapes.entity.model.MobLivingModelHumanShared
 import org.tobi29.scapes.entity.particle.ParticleTransparentAtlas
 import org.tobi29.scapes.entity.particle.ParticleTransparentAtlasBuilder
+import org.tobi29.scapes.inventory.ItemType
 
 open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection,
                            private val loadScene: Scene,
@@ -74,9 +75,9 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
             })
         }
         val style = engine.guiStyle
-        hud = GuiHud(this, style)
-        inputGui = GuiState(this, style)
-        debug = GuiState(this, style)
+        hud = GuiHud(style)
+        inputGui = Gui(style)
+        debug = Gui(style)
         debugWidget = debug.add(32.0, 32.0, 160.0, 184.0) {
             GuiWidgetDebugClient(it)
         }
@@ -113,6 +114,9 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
 
     override fun dispose() {
         runBlocking { scene?.dispose() }
+        engine.guiStack.remove(inputGui)
+        engine.guiStack.remove(hud)
+        engine.guiStack.remove(debug)
         client.stop()
         terrainTextureRegistry.texture.markDisposed()
         engine.sounds.stop("music")
@@ -132,15 +136,16 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         client.plugins.plugins.forEach { it.initClient(this) }
         var time = System.currentTimeMillis()
         val registry = client.plugins.registry
-        val materials = registry.get<Material>("Core", "Material")
+        val materials = registry.get<ItemType>("Core", "ItemType")
         for (type in materials.values) {
-            type?.registerTextures(terrainTextureRegistry)
+            (type as? ItemTypeTextured)?.registerTextures(
+                    terrainTextureRegistry)
         }
         val size = terrainTextureRegistry.init()
         terrainTextureRegistry.initTexture(4)
         time = System.currentTimeMillis() - time
         for (type in materials.values) {
-            type?.createModels(terrainTextureRegistry)
+            (type as? ItemTypeTextured)?.createModels(terrainTextureRegistry)
         }
         logger.info { "Loaded terrain models with $size textures in ${time}ms." }
         switchPipeline { gl ->

@@ -16,12 +16,11 @@
 
 package org.tobi29.scapes.server.command
 
-import org.tobi29.scapes.engine.args.CommandOption
-import org.tobi29.scapes.engine.args.InvalidCommandLineException
-import org.tobi29.scapes.engine.math.vector.Vector2d
-import org.tobi29.scapes.engine.math.vector.Vector2i
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.Vector3i
+import org.tobi29.args.*
+import org.tobi29.math.vector.Vector2d
+import org.tobi29.math.vector.Vector2i
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3i
 
 object Command {
     open class Compiled(private val commands: Collection<() -> Unit>) {
@@ -88,87 +87,175 @@ object Command {
 }
 
 /**
- * Reads a 2 dimensional vector from the given strings
- * @param values The string to read from
- * @returns A vector containing the values from the strings
- * @throws InvalidCommandLineException If there were not 2 strings or invalid numbers
+ * Fetches the first argument for the option from the given [CommandLine] and
+ * converts it to a [Vector2d]
+ * @receiver The [CommandLine] to read
+ * @param option The [CommandOption] to look for
+ * @return A [Vector2d] or `null` if the option was not found
  */
-fun getVector2d(values: List<String>): Vector2d {
-    if (values.size != 2) {
-        throw InvalidCommandLineException(
-                "Unable to parse vector2d: ${values.joinToString(
-                        separator = " ")}")
-    }
-    try {
-        return Vector2d(values[0].toDouble(), values[1].toDouble())
-    } catch (e: NumberFormatException) {
-        throw InvalidCommandLineException(
-                "Unable to parse vector2d: ${values.joinToString(
-                        separator = " ")}")
-    }
-}
+fun CommandLine.getVector2d(option: CommandOption) =
+        getList(option)?.let {
+            run {
+                if (it.size != 2) return@run null
+                val x = it[0].toDoubleOrNull() ?: return@run null
+                val y = it[1].toDoubleOrNull() ?: return@run null
+                Vector2d(x, y)
+            } ?: throw InvalidOptionArgumentException(null, this, option, it)
+        }
 
 /**
- * Reads a 3 dimensional vector from the given strings
- * @param values The string to read from
- * @returns A vector containing the values from the strings
- * @throws InvalidCommandLineException If there were not 3 strings or invalid numbers
+ * Fetches the first argument for the option from the given [CommandLine] and
+ * converts it to a [Vector3d]
+ * @receiver The [CommandLine] to read
+ * @param option The [CommandOption] to look for
+ * @return A [Vector3d] or `null` if the option was not found
  */
-fun getVector3d(values: List<String>): Vector3d {
-    if (values.size != 3) {
-        throw InvalidCommandLineException(
-                "Unable to parse vector3d: ${values.joinToString(
-                        separator = " ")}")
-    }
-    try {
-        return Vector3d(values[0].toDouble(), values[1].toDouble(),
-                values[2].toDouble())
-    } catch (e: NumberFormatException) {
-        throw InvalidCommandLineException(
-                "Unable to parse vector3d: ${values.joinToString(
-                        separator = " ")}")
-    }
-}
+fun CommandLine.getVector3d(option: CommandOption) =
+        getList(option)?.let {
+            run {
+                if (it.size != 3) return@run null
+                val x = it[0].toDoubleOrNull() ?: return@run null
+                val y = it[1].toDoubleOrNull() ?: return@run null
+                val z = it[2].toDoubleOrNull() ?: return@run null
+                Vector3d(x, y, z)
+            } ?: throw InvalidOptionArgumentException(null, this, option, it)
+        }
 
 /**
- * Reads a 2 dimensional vector from the given strings
- * @param values The string to read from
- * @returns A vector containing the values from the strings
- * @throws InvalidCommandLineException If there were not 2 strings or invalid numbers
+ * Fetches the first argument for the option from the given [CommandLine] and
+ * converts it to a [Vector2i]
+ * @receiver The [CommandLine] to read
+ * @param option The [CommandOption] to look for
+ * @return A [Vector2i] or `null` if the option was not found
  */
-fun getVector2i(values: List<String>): Vector2i {
-    if (values.size != 2) {
-        throw InvalidCommandLineException(
-                "Unable to parse vector2i: ${values.joinToString(
-                        separator = " ")}")
-    }
-    try {
-        return Vector2i(values[0].toInt(), values[1].toInt())
-    } catch (e: NumberFormatException) {
-        throw InvalidCommandLineException(
-                "Unable to parse vector2i: ${values.joinToString(
-                        separator = " ")}")
-    }
-}
+fun CommandLine.getVector2i(option: CommandOption) =
+        getList(option)?.let {
+            run {
+                if (it.size != 2) return@run null
+                val x = it[0].toIntOrNull() ?: return@run null
+                val y = it[1].toIntOrNull() ?: return@run null
+                Vector2i(x, y)
+            } ?: throw InvalidOptionArgumentException(null, this, option, it)
+        }
 
 /**
- * Reads a 3 dimensional vector from the given strings
- * @param values The string to read from
- * @returns A vector containing the values from the strings
- * @throws InvalidCommandLineException If there were not 3 strings or invalid numbers
+ * Fetches the first argument for the option from the given [CommandLine] and
+ * converts it to a [Vector3i]
+ * @receiver The [CommandLine] to read
+ * @param option The [CommandOption] to look for
+ * @return A [Vector3i] or `null` if the option was not found
  */
-fun getVector3i(values: List<String>): Vector3i {
-    if (values.size != 3) {
-        throw InvalidCommandLineException(
-                "Unable to parse vector3i: ${values.joinToString(
-                        separator = " ")}")
-    }
-    try {
-        return Vector3i(values[0].toInt(), values[1].toInt(),
-                values[2].toInt())
-    } catch (e: NumberFormatException) {
-        throw InvalidCommandLineException(
-                "Unable to parse vector3i: ${values.joinToString(
-                        separator = " ")}")
-    }
-}
+fun CommandLine.getVector3i(option: CommandOption) =
+        getList(option)?.let {
+            run {
+                if (it.size != 3) return@run null
+                val x = it[0].toIntOrNull() ?: return@run null
+                val y = it[1].toIntOrNull() ?: return@run null
+                val z = it[2].toIntOrNull() ?: return@run null
+                Vector3i(x, y, z)
+            } ?: throw InvalidOptionArgumentException(null, this, option, it)
+        }
+
+/**
+ * Fetches the first argument for the option from the given [CommandLine] and
+ * converts it to a [Vector2d]
+ * @receiver The [CommandLine] to read
+ * @param option The [CommandOption] to look for
+ * @return A [Vector2d]
+ * @throws MissingOptionException If the option was not found
+ */
+fun CommandLine.requireVector2d(option: CommandOption): Vector2d =
+        requireVector2d(option) { it }
+
+/**
+ * Fetches the first argument for the option from the given [CommandLine],
+ * converts it to a [Vector2d] and calls [block] with it before returning,
+ * allowing computing default values
+ * @receiver The [CommandLine] to read
+ * @param option The [CommandOption] to look for
+ * @param block Called right after retrieving the value
+ * @return A [Vector2d]
+ * @throws MissingOptionException If the option was not found
+ */
+inline fun <R> CommandLine.requireVector2d(option: CommandOption,
+                                           block: (Vector2d?) -> R?): R =
+        block(getVector2d(option))
+                ?: throw MissingOptionException(null, this, option)
+
+/**
+ * Fetches the first argument for the option from the given [CommandLine] and
+ * converts it to a [Vector3d]
+ * @receiver The [CommandLine] to read
+ * @param option The [CommandOption] to look for
+ * @return A [Vector3d]
+ * @throws MissingOptionException If the option was not found
+ */
+fun CommandLine.requireVector3d(option: CommandOption): Vector3d =
+        requireVector3d(option) { it }
+
+/**
+ * Fetches the first argument for the option from the given [CommandLine],
+ * converts it to a [Vector3d] and calls [block] with it before returning,
+ * allowing computing default values
+ * @receiver The [CommandLine] to read
+ * @param option The [CommandOption] to look for
+ * @param block Called right after retrieving the value
+ * @return A [Vector3d]
+ * @throws MissingOptionException If the option was not found
+ */
+inline fun <R> CommandLine.requireVector3d(option: CommandOption,
+                                           block: (Vector3d?) -> R?): R =
+        block(getVector3d(option))
+                ?: throw MissingOptionException(null, this, option)
+
+/**
+ * Fetches the first argument for the option from the given [CommandLine] and
+ * converts it to a [Vector2i]
+ * @receiver The [CommandLine] to read
+ * @param option The [CommandOption] to look for
+ * @return A [Vector2i]
+ * @throws MissingOptionException If the option was not found
+ */
+fun CommandLine.requireVector2i(option: CommandOption): Vector2i =
+        requireVector2i(option) { it }
+
+/**
+ * Fetches the first argument for the option from the given [CommandLine],
+ * converts it to a [Vector2i] and calls [block] with it before returning,
+ * allowing computing default values
+ * @receiver The [CommandLine] to read
+ * @param option The [CommandOption] to look for
+ * @param block Called right after retrieving the value
+ * @return A [Vector2i]
+ * @throws MissingOptionException If the option was not found
+ */
+inline fun <R> CommandLine.requireVector2i(option: CommandOption,
+                                           block: (Vector2i?) -> R?): R =
+        block(getVector2i(option))
+                ?: throw MissingOptionException(null, this, option)
+
+/**
+ * Fetches the first argument for the option from the given [CommandLine] and
+ * converts it to a [Vector3i]
+ * @receiver The [CommandLine] to read
+ * @param option The [CommandOption] to look for
+ * @return A [Vector3i]
+ * @throws MissingOptionException If the option was not found
+ */
+fun CommandLine.requireVector3i(option: CommandOption): Vector3i =
+        requireVector3i(option) { it }
+
+/**
+ * Fetches the first argument for the option from the given [CommandLine],
+ * converts it to a [Vector3i] and calls [block] with it before returning,
+ * allowing computing default values
+ * @receiver The [CommandLine] to read
+ * @param option The [CommandOption] to look for
+ * @param block Called right after retrieving the value
+ * @return A [Vector3i]
+ * @throws MissingOptionException If the option was not found
+ */
+inline fun <R> CommandLine.requireVector3i(option: CommandOption,
+                                           block: (Vector3i?) -> R?): R =
+        block(getVector3i(option))
+                ?: throw MissingOptionException(null, this, option)

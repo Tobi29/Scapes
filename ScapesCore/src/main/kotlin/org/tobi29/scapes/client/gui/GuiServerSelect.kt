@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.states.GameStateLoadMP
 import org.tobi29.scapes.client.states.scenes.SceneMenu
@@ -27,15 +28,14 @@ import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
-import org.tobi29.scapes.engine.server.*
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.toChannel
-import org.tobi29.scapes.engine.utils.io.view
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.tag.MutableTagList
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.listMut
-import org.tobi29.scapes.engine.utils.tag.toMap
+import org.tobi29.server.*
+import org.tobi29.io.IOException
+import org.tobi29.io.toChannel
+import org.tobi29.io.view
+import org.tobi29.io.tag.MutableTagList
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.listMut
+import org.tobi29.io.tag.toMap
 import java.nio.channels.SelectionKey
 
 class GuiServerSelect(state: GameState,

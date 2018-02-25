@@ -25,10 +25,10 @@ import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.resource.Resource
-import org.tobi29.scapes.engine.utils.graphics.decodePNG
-import org.tobi29.scapes.engine.utils.io.*
-import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.graphics.decodePNG
+import org.tobi29.io.*
+import org.tobi29.io.filesystem.*
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
 import java.util.zip.ZipFile

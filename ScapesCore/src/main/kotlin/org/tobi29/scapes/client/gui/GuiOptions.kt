@@ -24,8 +24,8 @@ import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.setVolume
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.io.IOException
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.engine.volume
 
 class GuiOptions(state: GameState,

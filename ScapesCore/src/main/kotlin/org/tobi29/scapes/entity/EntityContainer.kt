@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.entity
 
-import org.tobi29.scapes.engine.utils.UUID
+import org.tobi29.uuid.Uuid
 
 interface EntityContainer<E : Entity> {
     fun addEntity(entity: E,
@@ -24,13 +24,13 @@ interface EntityContainer<E : Entity> {
 
     fun removeEntity(entity: E): Boolean
 
-    fun hasEntity(uuid: UUID): Boolean {
+    fun hasEntity(uuid: Uuid): Boolean {
         return getEntity(uuid) != null
     }
 
     fun hasEntity(entity: E): Boolean
 
-    fun getEntity(uuid: UUID): E?
+    fun getEntity(uuid: Uuid): E?
 
     fun getEntities(): Sequence<E>
 

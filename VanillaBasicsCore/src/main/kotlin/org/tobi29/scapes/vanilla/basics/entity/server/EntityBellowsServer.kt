@@ -20,22 +20,25 @@ import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.math.Face
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.server.EntityAbstractServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
+import org.tobi29.io.tag.ReadWriteTagMap
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toTag
+import org.tobi29.stdex.math.floorToInt
+import kotlin.collections.set
 
 class EntityBellowsServer(type: EntityType<*, *>,
                           world: WorldServer) : EntityAbstractServer(
         type, world, Vector3d.ZERO) {
     private val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
-    val face get() = parseFace(world.terrain, pos.intX(), pos.intY(),
-            pos.intZ(), plugin.materials.bellows)
+    val face
+        get() = parseFace(world.terrain, pos.x.floorToInt(), pos.y.floorToInt(),
+                pos.z.floorToInt(), plugin.materials.bellows)
     var scale = 0.0
         private set
 
@@ -60,8 +63,8 @@ class EntityBellowsServer(type: EntityType<*, *>,
                             data: Int) {
         val world = terrain.world
         val materials = plugin.materials
-        if (terrain.type(pos.intX(), pos.intY(),
-                pos.intZ()) !== materials.bellows) {
+        if (terrain.type(pos.x.floorToInt(), pos.y.floorToInt(),
+                pos.z.floorToInt()) !== materials.bellows) {
             world.removeEntity(this)
         }
     }

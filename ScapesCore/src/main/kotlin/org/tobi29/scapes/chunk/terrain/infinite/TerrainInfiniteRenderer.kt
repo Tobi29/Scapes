@@ -18,20 +18,21 @@ package org.tobi29.scapes.chunk.terrain.infinite
 
 import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.launch
+import org.tobi29.coroutines.TaskLock
+import org.tobi29.graphics.Cam
+import org.tobi29.math.AABB
+import org.tobi29.math.vector.Vector2i
+import org.tobi29.math.vector.div
+import org.tobi29.profiler.profilerSection
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainRenderer
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.utils.math.sqr
-import org.tobi29.scapes.engine.math.vector.Vector2i
-import org.tobi29.scapes.engine.math.vector.div
-import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.task.TaskLock
+import org.tobi29.stdex.ThreadLocal
+import org.tobi29.stdex.atomic.AtomicBoolean
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.sqr
+import org.tobi29.utils.Pool
 import kotlin.math.min
 import kotlin.math.sqrt
 
@@ -53,6 +54,8 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
     private var cam = Cam(0.1f, 1.0f)
     private var cullingPool1 = Pool({ VisibleUpdate() })
     private var cullingPool2 = Pool({ VisibleUpdate() })
+    @Volatile
+    override var lodDistance: Int = 96
 
     init {
         val min = 0.001f
@@ -73,6 +76,10 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         terrain.loadedChunks().forEach { it.rendererChunk().reset() }
     }
 
+    fun softReloadGeometry() {
+        terrain.loadedChunks().forEach { it.rendererChunk().setGeometryDirty() }
+    }
+
     fun dispose() {
         taskLock.lock()
         disposed = true
@@ -91,7 +98,8 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
             taskLock.increment()
             try {
                 val threadData = THREAD_DATA.get()
-                threadData.process(chunk, i, this@TerrainInfiniteRenderer)
+                threadData.process(chunk, i, this@TerrainInfiniteRenderer,
+                        lodDistance)
             } finally {
                 taskLock.decrement()
             }
@@ -111,7 +119,8 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
             try {
                 val threadData = THREAD_DATA.get()
                 for (i in 0 until chunk.zSections()) {
-                    threadData.process(chunk, i, this@TerrainInfiniteRenderer)
+                    threadData.process(chunk, i, this@TerrainInfiniteRenderer,
+                            lodDistance)
                 }
             } finally {
                 taskLock.decrement()
@@ -156,12 +165,12 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
         }
         this.cam = cam
         val camPos = cam.position.now().div(16.0)
-        val newPlayerX = camPos.intX()
-        val newPlayerY = camPos.intY()
-        val newPlayerZ = camPos.intZ()
+        val newPlayerX = camPos.x.floorToInt()
+        val newPlayerY = camPos.y.floorToInt()
+        val newPlayerZ = camPos.z.floorToInt()
         if (!updatingVisible.get() && (updateVisible.getAndSet(
-                false) || playerX != newPlayerX ||
-                playerY != newPlayerY || playerZ != newPlayerZ)) {
+                        false) || playerX != newPlayerX ||
+                        playerY != newPlayerY || playerZ != newPlayerZ)) {
             updatingVisible.set(true)
             playerX = newPlayerX
             playerY = newPlayerY
@@ -179,8 +188,8 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                 }
             }
         }
-        val camX = camPos.intX()
-        val camY = camPos.intY()
+        val camX = camPos.x.floorToInt()
+        val camY = camPos.y.floorToInt()
         val offsetX = camX - camPos.x
         val offsetY = camY - camPos.y
         chunks.clear()
@@ -360,7 +369,7 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                              pool: Pool<VisibleUpdate>) {
         update.rendererChunk.setPrepareVisible(update.z)
         if (update.rendererChunk.setCulled(update.z,
-                true) && !update.rendererChunk.isSolid(update.z)) {
+                        true) && !update.rendererChunk.isSolid(update.z)) {
             val x = update.x - playerX
             val y = update.y - playerY
             val z = update.z - playerZ
@@ -455,104 +464,117 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
 
         fun process(chunk: TerrainInfiniteRendererChunk,
                     i: Int,
-                    renderer: TerrainInfiniteRenderer) {
+                    renderer: TerrainInfiniteRenderer,
+                    lodDistance: Int) {
             if (!chunk.unsetGeometryDirty(i)) {
                 return
             }
-            var model: TerrainInfiniteChunkModel? = null
             val terrainChunk = chunk.chunk()
-            if (terrainChunk.isEmpty(i)) {
+            val model = if (terrainChunk.isEmpty(i)) {
                 chunk.setSolid(i, false)
+                null
             } else {
-                val terrain = chunk.chunk().terrain
-                val air = terrain.air
+                val terrain = terrainChunk.terrain
                 section.init(terrain, terrainChunk.posBlock.x - 16,
                         terrainChunk.posBlock.y - 16, 0, 48, 48,
                         terrainChunk.zSize, true)
-                val bx = terrainChunk.posBlock.x
-                val by = terrainChunk.posBlock.y
-                val bz = i shl 4
-                var solid = true
-                var empty = true
-                profilerSection("CheckSolid") {
+                renderBlocks(chunk, i, renderer,
+                        lodDistance).also { section.clear() }
+            }
+            chunk.replaceMesh(i, model)
+        }
+
+        private fun renderBlocks(
+                chunk: TerrainInfiniteRendererChunk,
+                i: Int,
+                renderer: TerrainInfiniteRenderer,
+                lodDistance: Int
+        ): TerrainInfiniteChunkModel? {
+            val terrainChunk = chunk.chunk()
+            val terrain = terrainChunk.terrain
+            val air = terrain.air
+            val bx = terrainChunk.posBlock.x
+            val by = terrainChunk.posBlock.y
+            val bz = i shl 4
+            var solid = true
+            var empty = true
+            profilerSection("CheckSolid") {
+                for (xxx in 0..15) {
+                    val bxx = bx + xxx
+                    for (yyy in 0..15) {
+                        val byy = by + yyy
+                        for (zzz in 0..15) {
+                            val bzz = bz + zzz
+                            val type = terrainChunk.typeL(xxx, yyy, bzz)
+                            if (type == air) {
+                                solid = false
+                            } else {
+                                empty = false
+                                if (solid && type.connectStage(section, bxx,
+                                                byy, bzz) < 4) {
+                                    solid = false
+                                }
+                            }
+                            if (!solid && !empty) {
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+            if (chunk.isSolid(i) != solid || !chunk.isLoaded) {
+                chunk.setSolid(i, solid)
+                renderer.updateVisible.set(true)
+            }
+            if (!empty && chunk.isVisible(i)) {
+                val relativeX = terrainChunk.posBlock.x - renderer.cam.position.x
+                val relativeY = terrainChunk.posBlock.y - renderer.cam.position.y
+                val relativeZ = (i shl 4) - renderer.cam.position.z
+                val lod = sqr(relativeX + 8) +
+                        sqr(relativeY + 8) +
+                        sqr(relativeZ + 8) < sqr(lodDistance)
+                val mesh = ChunkMesh(arrays)
+                val meshAlpha = ChunkMesh(arraysAlpha)
+                val info = TerrainRenderInfo(terrain.world.infoLayers())
+                info.init(bx, by, bz, 16, 16, 16)
+                profilerSection("GenerateMesh") {
                     for (xxx in 0..15) {
                         val bxx = bx + xxx
                         for (yyy in 0..15) {
                             val byy = by + yyy
                             for (zzz in 0..15) {
                                 val bzz = bz + zzz
-                                val type = terrainChunk.typeL(xxx, yyy, bzz)
-                                if (type == air) {
-                                    solid = false
-                                } else {
-                                    empty = false
-                                    if (solid && type.connectStage(section, bxx,
-                                            byy, bzz) < 4) {
-                                        solid = false
-                                    }
-                                }
-                                if (!solid && !empty) {
-                                    break
-                                }
+                                val block = terrainChunk.blockL(xxx, yyy,
+                                        bzz)
+                                val type = terrain.type(block)
+                                val data = terrain.data(block)
+                                type.addToChunkMesh(mesh, meshAlpha, data,
+                                        section, info, bxx, byy, bzz,
+                                        xxx.toDouble(), yyy.toDouble(),
+                                        zzz.toDouble(), lod)
                             }
                         }
                     }
                 }
-                if (chunk.isSolid(i) != solid || !chunk.isLoaded) {
-                    chunk.setSolid(i, solid)
-                    renderer.updateVisible.set(true)
-                }
-                if (!empty && chunk.isVisible(i)) {
-                    val relativeX = terrainChunk.posBlock.x - renderer.cam.position.doubleX()
-                    val relativeY = terrainChunk.posBlock.y - renderer.cam.position.doubleY()
-                    val relativeZ = (i shl 4) - renderer.cam.position.doubleZ()
-                    val lod = sqr(relativeX + 8) +
-                            sqr(relativeY + 8) +
-                            sqr(relativeZ + 8) < 9216
-                    val mesh = ChunkMesh(arrays)
-                    val meshAlpha = ChunkMesh(arraysAlpha)
-                    val info = TerrainRenderInfo(terrain.world.infoLayers())
-                    info.init(bx, by, bz, 16, 16, 16)
-                    profilerSection("GenerateMesh") {
-                        for (xxx in 0..15) {
-                            val bxx = bx + xxx
-                            for (yyy in 0..15) {
-                                val byy = by + yyy
-                                for (zzz in 0..15) {
-                                    val bzz = bz + zzz
-                                    val block = terrainChunk.blockL(xxx, yyy,
-                                            bzz)
-                                    val type = terrain.type(block)
-                                    val data = terrain.data(block)
-                                    type.addToChunkMesh(mesh, meshAlpha, data,
-                                            section, info, bxx, byy, bzz,
-                                            xxx.toDouble(), yyy.toDouble(),
-                                            zzz.toDouble(), lod)
-                                }
-                            }
-                        }
+                profilerSection("AssembleMesh") {
+                    val engine = terrain.world.game.engine
+                    val vao: Pair<Model, AABB>?
+                    val vaoAlpha: Pair<Model, AABB>?
+                    if (mesh.size() > 0) {
+                        vao = Pair(mesh.finish(engine), mesh.aabb())
+                    } else {
+                        vao = null
                     }
-                    profilerSection("AssembleMesh") {
-                        val engine = terrain.world.game.engine
-                        val vao: Pair<Model, AABB>?
-                        val vaoAlpha: Pair<Model, AABB>?
-                        if (mesh.size() > 0) {
-                            vao = Pair(mesh.finish(engine), mesh.aabb())
-                        } else {
-                            vao = null
-                        }
-                        if (meshAlpha.size() > 0) {
-                            vaoAlpha = Pair(meshAlpha.finish(engine),
-                                    meshAlpha.aabb())
-                        } else {
-                            vaoAlpha = null
-                        }
-                        model = TerrainInfiniteChunkModel(vao, vaoAlpha, lod)
+                    if (meshAlpha.size() > 0) {
+                        vaoAlpha = Pair(meshAlpha.finish(engine),
+                                meshAlpha.aabb())
+                    } else {
+                        vaoAlpha = null
                     }
+                    return TerrainInfiniteChunkModel(vao, vaoAlpha, lod)
                 }
-                section.clear()
             }
-            chunk.replaceMesh(i, model)
+            return null
         }
     }
 

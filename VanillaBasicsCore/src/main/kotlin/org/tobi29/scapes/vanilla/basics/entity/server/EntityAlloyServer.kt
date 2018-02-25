@@ -13,38 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.tobi29.scapes.vanilla.basics.entity.server
 
-import org.tobi29.scapes.block.Inventory
+import org.tobi29.scapes.block.copy
+import org.tobi29.scapes.block.data
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.Terrain
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
-import org.tobi29.scapes.vanilla.basics.material.item.ItemIngot
-import org.tobi29.scapes.vanilla.basics.util.Alloy
-import org.tobi29.scapes.vanilla.basics.util.readAlloy
-import org.tobi29.scapes.vanilla.basics.util.writeAlloy
+import org.tobi29.scapes.vanilla.basics.material.ItemMetal
+import org.tobi29.scapes.vanilla.basics.material.alloy
+import org.tobi29.scapes.vanilla.basics.material.copy
+import org.tobi29.scapes.vanilla.basics.material.item.tool.ItemMold
+import org.tobi29.scapes.vanilla.basics.material.temperature
+import org.tobi29.scapes.vanilla.basics.util.*
+import org.tobi29.io.tag.ReadWriteTagMap
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toTag
+import kotlin.collections.set
 import kotlin.math.max
 
-class EntityAlloyServer(type: EntityType<*, *>,
-                        world: WorldServer) : EntityAbstractContainerServer(
-        type, world, Vector3d.ZERO, Inventory(world.plugins, 2)) {
+class EntityAlloyServer(
+        type: EntityType<*, *>,
+        world: WorldServer
+) : EntityAbstractContainerServer(type, world, Vector3d.ZERO) {
     private var metals = Alloy()
     private var temperature = 0.0
 
+    init {
+        inventories.add("Container", 2)
+    }
+
     override fun write(map: ReadWriteTagMap) {
         super.write(map)
-        map["Alloy"] = TagMap { writeAlloy(metals, this) }
+        map["Alloy"] = metals.toTag()
         map["Temperature"] = temperature.toTag()
     }
 
     override fun read(map: TagMap) {
         super.read(map)
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
-        map["Alloy"]?.toMap()?.let { metals = readAlloy(plugin, it) }
+        map["Alloy"]?.toAlloy(plugin)?.let { metals = it }
         map["Temperature"]?.toDouble()?.let { temperature = it }
     }
 
@@ -62,34 +76,28 @@ class EntityAlloyServer(type: EntityType<*, *>,
         val materials = plugin.materials
         temperature /= 1.002
         inventories.modify("Container") { inventory ->
-            val input = inventory.item(0)
-            val inputType = input.material()
-            if (inputType is ItemIngot) {
-                val alloy = inputType.alloy(input)
-                val meltingPoint = alloy.meltingPoint()
-                if (inputType.temperature(input) >= meltingPoint) {
-                    val alloyType = alloy.type(plugin)
-                    for ((key, value) in alloyType.ingredients) {
-                        metals.add(key, value)
-                    }
-                    input.metaData("Vanilla")["Temperature"]?.toDouble()?.let {
-                        temperature = max(temperature, it)
-                    }
-                    input.clear()
-                    input.setMaterial(materials.mold, 1)
+            inventory[0].kind<ItemMetal>()?.let { input ->
+                val alloy = input.alloy
+                val meltingPoint = alloy.meltingPoint
+                val inputTemperature = input.temperature
+                if (inputTemperature >= meltingPoint) {
+                    metals += alloy
+                    temperature = max(temperature, inputTemperature)
+                    inventory[0] = null
                     world.send(PacketEntityChange(registry, this))
                 }
             }
-            val output = inventory.item(1)
-            val outputType = output.material()
-            if (outputType == materials.mold && output.data() == 1) {
-                input.metaData("Vanilla")["Temperature"]?.toDouble()?.let {
-                    temperature = max(temperature, it)
+            inventory[1].kind<ItemMold>()?.let { item ->
+                if (item.type == materials.mold && item.data == 1) {
+                    val (drained, _) = metals.drain(1.0)
+                            .also { metals = it.second }
+                    if (drained != null) {
+                        inventory[1] = drained.toIngot(plugin)
+                                .copy(data = 1)
+                                .copy(temperature = temperature)
+                        world.send(PacketEntityChange(registry, this))
+                    }
                 }
-                output.setMaterial(materials.ingot, 0)
-                output.metaData("Vanilla")["Temperature"] = temperature.toTag()
-                materials.ingot.setAlloy(output, metals.drain(1.0))
-                world.send(PacketEntityChange(registry, this))
             }
         }
     }

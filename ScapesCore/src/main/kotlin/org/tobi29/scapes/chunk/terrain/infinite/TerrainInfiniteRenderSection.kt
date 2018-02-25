@@ -18,14 +18,15 @@ package org.tobi29.scapes.chunk.terrain.infinite
 
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainClient
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.math.PointerPane
+import org.tobi29.math.PointerPane
+import org.tobi29.utils.Pool
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.packets.PacketBlockChange
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteSection
+import org.tobi29.uuid.Uuid
 
-class TerrainInfiniteRenderSection : TerrainInfiniteSection<BlockType, TerrainInfiniteChunkClient, TerrainInfiniteClient>(), TerrainClient {
+class TerrainInfiniteRenderSection : TerrainInfiniteSection<BlockType, TerrainInfiniteChunkClient, TerrainInfiniteClient>(),
+        TerrainClient {
     override val blocks get() = terrain.blocks
     override val world get() = terrain.world
     override val renderer get() = terrain.renderer
@@ -51,7 +52,7 @@ class TerrainInfiniteRenderSection : TerrainInfiniteSection<BlockType, TerrainIn
         return terrain.hasEntity(entity)
     }
 
-    override fun getEntity(uuid: UUID): EntityClient? {
+    override fun getEntity(uuid: Uuid): EntityClient? {
 
         return terrain.getEntity(uuid)
     }

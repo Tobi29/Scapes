@@ -16,16 +16,19 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.server
 
-import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.Terrain
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
-class EntityChestServer(type: EntityType<*, *>,
-                        world: WorldServer) : EntityAbstractContainerServer(
-        type, world, Vector3d.ZERO, Inventory(world.plugins, 40)) {
+class EntityChestServer(
+        type: EntityType<*, *>,
+        world: WorldServer
+) : EntityAbstractContainerServer(type, world, Vector3d.ZERO) {
+    init {
+        inventories.add("Container", 40)
+    }
 
     public override fun isValidOn(terrain: Terrain,
                                   x: Int,

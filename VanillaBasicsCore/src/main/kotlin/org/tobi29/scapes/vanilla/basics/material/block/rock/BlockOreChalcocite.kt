@@ -16,16 +16,20 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.block.ItemStackData
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
 class BlockOreChalcocite(type: VanillaMaterialType) : BlockOre(type) {
-    override fun dropsOre(item: ItemStack,
-                          data: Int): List<ItemStack> {
-        return listOf(ItemStack(materials.oreChunk, 1))
+    override fun dropsOre(item: Item?,
+                          data: Int): List<Item> {
+        return listOf(ItemStackData(materials.oreChunk, 1))
     }
 
-    override fun name(item: ItemStack) = "${stoneName(item)} Chalcocite Ore"
+    override fun name(item: TypedItem<BlockType>) = "${stoneName(
+            item)} Chalcocite Ore"
 
     override fun oreTexture() = "Chalcocite"
 }

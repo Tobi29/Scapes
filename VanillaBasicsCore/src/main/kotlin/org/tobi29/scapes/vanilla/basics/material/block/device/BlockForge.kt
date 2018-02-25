@@ -16,9 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.device
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
 import org.tobi29.scapes.chunk.ChunkMesh
@@ -26,7 +24,10 @@ import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.math.Face
+import org.tobi29.math.Face
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityForgeClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityForgeServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
@@ -39,17 +40,16 @@ class BlockForge(type: VanillaMaterialType) : VanillaBlockContainer<EntityForgeC
     private var modelOn: BlockModel? = null
     private var modelOff: BlockModel? = null
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
-        return (if ("Shovel" == item.material().toolType(
-                item)) 4 else 12).toDouble()
+        return (if ("Shovel" == item.kind<ItemTypeTool>()?.toolType()) 4 else 12).toDouble()
     }
 
     override fun footStepSound(data: Int): String {
         return "VanillaBasics:sound/footsteps/Stone.ogg"
     }
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
         return "VanillaBasics:sound/blocks/Stone.ogg"
     }
@@ -102,23 +102,23 @@ class BlockForge(type: VanillaMaterialType) : VanillaBlockContainer<EntityForgeC
                 1.0, 1.0, 1.0, 1.0)
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
         modelOff?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
         modelOff?.renderInventory(gl, shader)
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return "Forge"
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 1
     }
 }

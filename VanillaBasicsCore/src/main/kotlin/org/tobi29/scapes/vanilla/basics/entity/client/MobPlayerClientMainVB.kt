@@ -16,55 +16,54 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toMap
+import org.tobi29.math.AABB
+import org.tobi29.math.Frustum
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.direction
 import org.tobi29.scapes.Debug
-import org.tobi29.scapes.block.Inventory
-import org.tobi29.scapes.block.InventoryContainer
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.ItemTypeWeapon
+import org.tobi29.scapes.block.hitWait
+import org.tobi29.scapes.block.inventories
+import org.tobi29.scapes.block.read
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.Playlist
 import org.tobi29.scapes.client.gui.GuiChatWrite
 import org.tobi29.scapes.client.gui.GuiPause
-import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.client.input.InputModeKeyboard
-import org.tobi29.scapes.engine.gui.Gui
+import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.engine.input.ControllerKey
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.Frustum
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.direction
-import org.tobi29.scapes.engine.utils.ListenerRegistrar
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.remP
-import org.tobi29.scapes.engine.utils.math.toDeg
-import org.tobi29.scapes.engine.utils.math.toRad
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.WieldMode
-import org.tobi29.scapes.entity.client.EntityContainerClient
+import org.tobi29.scapes.entity.client.GUI_COMPONENT
 import org.tobi29.scapes.entity.client.MobLivingClient
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.entity.model.MobLivingModelHuman
 import org.tobi29.scapes.entity.model.RotationSmoothing
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.packets.PacketInteraction
 import org.tobi29.scapes.packets.PacketItemUse
 import org.tobi29.scapes.packets.PacketPlayerJump
 import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
 import org.tobi29.scapes.vanilla.basics.gui.GuiPlayerInventory
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.remP
+import org.tobi29.stdex.math.toDeg
+import org.tobi29.stdex.math.toRad
+import org.tobi29.utils.ListenerRegistrar
+import kotlin.collections.set
 import kotlin.math.*
 
-class MobPlayerClientMainVB(type: EntityType<*, *>,
-                            world: WorldClient) : MobPlayerClientMain(
-        type, world, Vector3d.ZERO, Vector3d.ZERO,
+class MobPlayerClientMainVB(
+        type: EntityType<*, *>,
+        world: WorldClient
+) : MobPlayerClientMain(type, world, Vector3d.ZERO, Vector3d.ZERO,
         AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
-        Frustum(90.0, 1.0, 0.1, 24.0), ""), EntityContainerClient {
-    private val inventories = InventoryContainer().apply {
-        add("Container", Inventory(world.plugins, 40))
-        add("Hold", Inventory(world.plugins, 1))
-    }
+        Frustum(90.0, 1.0, 0.1, 24.0), "") {
     private var punchLeft: Long = -1
     private var punchRight: Long = -1
     private var chargeLeft = 0.0f
@@ -72,6 +71,13 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
     private var flyingPressed = false
 
     init {
+        inventories.add("Container", 40)
+        inventories.add("Hold", 1)
+        registerComponent(GUI_COMPONENT) { player ->
+            if (player is MobPlayerClientMainVB) {
+                GuiPlayerInventory(player, player.game.engine.guiStyle)
+            } else null
+        }
         val texture = world.scene.skinStorage()[skin]
         registerComponent(
                 ComponentMobLivingServerCondition.COMPONENT,
@@ -123,10 +129,10 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
                     } else flyingPressed = false
                     if (flying) {
                         if (controller.isDown(ControllerKey.KEY_Q)) {
-                            speed.plusZ(60.0 * delta)
+                            speed.addZ(60.0 * delta)
                         }
                         if (controller.isDown(ControllerKey.KEY_C)) {
-                            speed.plusZ(-60.0 * delta)
+                            speed.addZ(-60.0 * delta)
                         }
                     }
                 }
@@ -134,7 +140,7 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
             // Movement
             if (input.jump()) {
                 if (isSwimming) {
-                    speed.plusZ(50.0 * delta)
+                    speed.addZ(50.0 * delta)
                 } else if (isOnGround) {
                     speed.setZ(5.1)
                     physicsState.isOnGround = false
@@ -153,10 +159,10 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
                 walkSpeed *= 0.2
             }
             if (walkSpeed > 0.0) {
-                val dir = (walk.direction().toDeg() + rot.doubleZ() - 90.0).toRad()
+                val dir = (walk.direction().toDeg() + rot.z - 90.0).toRad()
                 walkSpeed *= delta
-                speed.plusX(cos(dir) * walkSpeed)
-                speed.plusY(sin(dir) * walkSpeed)
+                speed.addX(cos(dir) * walkSpeed)
+                speed.addY(sin(dir) * walkSpeed)
             }
             // Placement
             if (input.left() && wieldMode() != WieldMode.RIGHT) {
@@ -170,8 +176,7 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
                 val direction = input.hitDirection()
                 breakParticles(world.terrain, 16, direction)
                 world.send(PacketItemUse(registry, min(
-                        (System.currentTimeMillis() - punchLeft).toDouble() / leftWeapon().material().hitWait(
-                                leftWeapon()),
+                        (System.currentTimeMillis() - punchLeft).toDouble() / (leftWeapon().kind<ItemTypeWeapon>()?.hitWait() ?: 500),
                         0.5) * 2.0, true, direction))
                 punchLeft = -1
             }
@@ -186,14 +191,12 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
                 val direction = input.hitDirection()
                 breakParticles(world.terrain, 16, direction)
                 world.send(PacketItemUse(registry, min(
-                        (System.currentTimeMillis() - punchRight).toDouble() / rightWeapon().material().hitWait(
-                                rightWeapon()),
+                        (System.currentTimeMillis() - punchRight).toDouble() / (rightWeapon().kind<ItemTypeWeapon>()?.hitWait() ?: 500),
                         0.5) * 2.0, false, direction))
                 punchRight = -1
             }
             val time = System.currentTimeMillis()
-            var swingTime = leftWeapon().material().hitWait(
-                    leftWeapon()).toFloat()
+            var swingTime = (leftWeapon().kind<ItemTypeWeapon>()?.hitWait() ?: 500).toFloat()
             var punch: Long
             if (punchLeft == -1L) {
                 punch = 0
@@ -211,8 +214,7 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
                     }
                 }
             }
-            swingTime = rightWeapon().material().hitWait(
-                    rightWeapon()).toFloat()
+            swingTime = (rightWeapon().kind<ItemTypeWeapon>()?.hitWait() ?: 500).toFloat()
             if (punchRight == -1L) {
                 punch = 0
             } else {
@@ -236,15 +238,11 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
         return Vector3d(0.0, 0.0, 0.63)
     }
 
-    override fun leftWeapon(): ItemStack {
-        return inventories.access("Container"
-        ) { inventory -> inventory.item(inventorySelectLeft) }
-    }
+    override fun leftWeapon() =
+            inventories.access("Container") { it[inventorySelectLeft] }
 
-    override fun rightWeapon(): ItemStack {
-        return inventories.access("Container"
-        ) { inventory -> inventory.item(inventorySelectRight) }
-    }
+    override fun rightWeapon() =
+            inventories.access("Container") { it[inventorySelectRight] }
 
     override fun wieldMode(): WieldMode {
         return if (inventorySelectLeft == inventorySelectRight)
@@ -261,23 +259,12 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
         return chargeRight
     }
 
-    override fun gui(player: MobPlayerClientMain): Gui? {
-        if (player is MobPlayerClientMainVB) {
-            return GuiPlayerInventory(player, player.game.engine.guiStyle)
-        }
-        return null
-    }
-
-    override fun inventories(): InventoryContainer {
-        return inventories
-    }
-
     override fun read(map: TagMap) {
         super.read(map)
         map["Inventory"]?.toMap()?.let { inventoryTag ->
             inventories.forEach { id, inventory ->
                 inventoryTag[id]?.toMap()?.let {
-                    inventory.read(it)
+                    inventory.read(world.plugins, it)
                 }
             }
         }
@@ -286,9 +273,9 @@ class MobPlayerClientMainVB(type: EntityType<*, *>,
     override fun ListenerRegistrar.inputMode(input: InputModeScapes) {
         listen<InputDirectionEvent> { event ->
             if (!hasGui()) {
-                rot.setZ((rot.doubleZ() - event.direction.x) % 360)
+                rot.setZ((rot.z - event.direction.x) % 360)
                 rot.setX(min(89.0,
-                        max(-89.0, rot.doubleX() - event.direction.y)))
+                        max(-89.0, rot.x - event.direction.y)))
             }
         }
         listen<HotbarChangeLeftEvent> { event ->

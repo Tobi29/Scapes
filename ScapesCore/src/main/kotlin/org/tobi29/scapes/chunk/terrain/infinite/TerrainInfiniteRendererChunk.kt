@@ -16,14 +16,14 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
+import org.tobi29.arrays.fill
+import org.tobi29.graphics.Cam
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Model
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.push
-import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.fill
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.sqr
+import org.tobi29.stdex.atomic.AtomicBoolean
+import org.tobi29.stdex.math.sqr
 
 class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient,
                                    private val renderer: TerrainInfiniteRenderer) {
@@ -59,14 +59,14 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
                shader1: Shader,
                shader2: Shader,
                cam: Cam) {
-        val relativeX = chunk.posBlock.x - cam.position.doubleX()
-        val relativeY = chunk.posBlock.y - cam.position.doubleY()
+        val relativeX = chunk.posBlock.x - cam.position.x
+        val relativeY = chunk.posBlock.y - cam.position.y
         for (i in vao.indices) {
-            val relativeZ = (i shl 4) - cam.position.doubleZ()
+            val relativeZ = (i shl 4) - cam.position.z
             val distance = sqr(relativeX + 8) +
                     sqr(relativeY + 8) +
                     sqr(relativeZ + 8)
-            val newLod = distance < 9216
+            val newLod = distance < sqr(renderer.lodDistance)
             val vao = this.vao[i]
             if (vao != null && vao.model != null) {
                 if (vao.lod != newLod) {
@@ -93,13 +93,13 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
                     shader1: Shader,
                     shader2: Shader,
                     cam: Cam) {
-        val relativeX = chunk.posBlock.x - cam.position.doubleX()
-        val relativeY = chunk.posBlock.y - cam.position.doubleY()
+        val relativeX = chunk.posBlock.x - cam.position.x
+        val relativeY = chunk.posBlock.y - cam.position.y
         for (i in vao.indices) {
             val vao = this.vao[i]
             if (vao != null && vao.modelAlpha != null) {
                 if (cam.frustum.inView(vao.modelAlpha.second) != 0) {
-                    val relativeZ = (i shl 4) - cam.position.doubleZ()
+                    val relativeZ = (i shl 4) - cam.position.z
                     val distance = sqr(relativeX + 8) +
                             sqr(relativeY + 8) +
                             sqr(relativeZ + 8)
@@ -142,9 +142,9 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
                                 1.0f)
                     }
                     matrix.translate(
-                            (vao.model.second.minX - cam.position.doubleX()).toFloat(),
-                            (vao.model.second.minY - cam.position.doubleY()).toFloat(),
-                            (vao.model.second.minZ - cam.position.doubleZ()).toFloat())
+                            (vao.model.second.minX - cam.position.x).toFloat(),
+                            (vao.model.second.minY - cam.position.y).toFloat(),
+                            (vao.model.second.minZ - cam.position.z).toFloat())
                     matrix.scale(
                             (vao.model.second.maxX - vao.model.second.minX).toFloat(),
                             (vao.model.second.maxY - vao.model.second.minY).toFloat(),
@@ -155,8 +155,9 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
         }
     }
 
-    @Synchronized fun replaceMesh(i: Int,
-                                  model: TerrainInfiniteChunkModel?) {
+    @Synchronized
+    fun replaceMesh(i: Int,
+                    model: TerrainInfiniteChunkModel?) {
         if (visible[i] && model != null) {
             model.model?.let { it.first.weak = true }
             model.modelAlpha?.let { it.first.weak = true }

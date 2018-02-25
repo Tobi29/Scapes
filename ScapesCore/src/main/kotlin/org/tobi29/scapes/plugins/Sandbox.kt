@@ -16,10 +16,10 @@
 
 package org.tobi29.scapes.plugins
 
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.io.filesystem.FilePath
 import java.io.FilePermission
 import java.lang.reflect.ReflectPermission
 import java.net.SocketPermission
@@ -29,7 +29,7 @@ import java.util.*
 
 object Sandbox : KLogging() {
     private val whitelist = packageAccess("java.**", "kotlin.**",
-            "kotlinx.**", "org.tobi29.scapes.**", "scapes.plugin.**",
+            "kotlinx.**", "org.tobi29.**", "scapes.plugin.**",
             "org.slf4j.**")
     private val permission = RuntimePermission("scapes.restrictedPkg")
     private var sandboxed = false
@@ -177,6 +177,7 @@ object Sandbox : KLogging() {
                 "java.vm.name",
                 "java.vm.version",
                 "java.vm.vendor",
+                "java.specification.version",
                 "java.library.path",
                 "user.name",
                 "java.io.tmpdir",

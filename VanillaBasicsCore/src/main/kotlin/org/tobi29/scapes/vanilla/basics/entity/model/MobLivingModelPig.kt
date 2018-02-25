@@ -21,12 +21,13 @@ import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.graphics.push
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.math.angleDiff
-import org.tobi29.scapes.engine.math.cosTable
-import org.tobi29.scapes.engine.math.vector.*
+import org.tobi29.math.AABB
+import org.tobi29.math.angleDiff
+import org.tobi29.math.cosTable
+import org.tobi29.math.vector.*
+import org.tobi29.graphics.Cam
+import org.tobi29.stdex.math.TWO_PI
+import org.tobi29.stdex.math.floorToInt
 import org.tobi29.scapes.entity.client.MobLivingClient
 import org.tobi29.scapes.entity.model.Box
 import org.tobi29.scapes.entity.model.MobLivingModel
@@ -66,12 +67,12 @@ class MobLivingModelPig(shared: MobLivingModelPigShared,
     }
 
     override fun shapeAABB(aabb: AABB) {
-        aabb.minX = pos.doubleX() - 0.75
-        aabb.minY = pos.doubleY() - 0.75
-        aabb.minZ = pos.doubleZ() - 0.45
-        aabb.maxX = pos.doubleX() + 0.75
-        aabb.maxY = pos.doubleY() + 0.75
-        aabb.maxZ = pos.doubleZ() + 0.7
+        aabb.minX = pos.x - 0.75
+        aabb.minY = pos.y - 0.75
+        aabb.minZ = pos.z - 0.45
+        aabb.maxX = pos.x + 0.75
+        aabb.maxY = pos.y + 0.75
+        aabb.maxZ = pos.z + 0.7
     }
 
     override fun renderUpdate(delta: Double) {
@@ -82,7 +83,7 @@ class MobLivingModelPig(shared: MobLivingModelPigShared,
         val moveSpeed = min(sqrt(length(speed.x, speed.y)), 2.0)
         pitch -= angleDiff(entity.pitch(), pitch) * factorRot
         yaw -= angleDiff(entity.yaw(), yaw) * factorRot
-        pos.plus(entity.getCurrentPos().minus(pos.now()).times(factorPos))
+        pos.add(entity.getCurrentPos().minus(pos.now()).times(factorPos))
         swing += moveSpeed * 2.0 * delta
         swing %= TWO_PI
         moveSpeedRender += (moveSpeed - moveSpeedRender) * factorSpeed
@@ -94,15 +95,15 @@ class MobLivingModelPig(shared: MobLivingModelPigShared,
                         shader: Shader) {
         val damageColor = (1.0 - min(1.0,
                 max(0.0, entity.invincibleTicks() / 0.8))).toFloat()
-        val posRenderX = (pos.doubleX() - cam.position.doubleX()).toFloat()
-        val posRenderY = (pos.doubleY() - cam.position.doubleY()).toFloat()
-        val posRenderZ = (pos.doubleZ() - cam.position.doubleZ()).toFloat()
+        val posRenderX = (pos.x - cam.position.x).toFloat()
+        val posRenderY = (pos.y - cam.position.y).toFloat()
+        val posRenderZ = (pos.z - cam.position.z).toFloat()
         val swingDir = cosTable(swing) * moveSpeedRender * 0.5
         gl.setAttribute2f(4,
-                world.terrain.blockLight(pos.intX(), pos.intY(),
-                        pos.intZ()) / 15.0f,
-                world.terrain.sunLight(pos.intX(), pos.intY(),
-                        pos.intZ()) / 15.0f)
+                world.terrain.blockLight(pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt()) / 15.0f,
+                world.terrain.sunLight(pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt()) / 15.0f)
         texture.bind(gl)
         gl.matrixStack.push { matrix ->
             matrix.translate(posRenderX, posRenderY, posRenderZ)

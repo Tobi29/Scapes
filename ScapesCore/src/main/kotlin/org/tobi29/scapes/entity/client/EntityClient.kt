@@ -20,22 +20,23 @@ import kotlinx.coroutines.experimental.sync.Mutex
 import kotlinx.coroutines.experimental.sync.withLock
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.tag.TagMap
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.packets.PacketEntityComponentData
 import org.tobi29.scapes.packets.PacketEntityMetaData
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.io.tag.TagMap
+import org.tobi29.stdex.atomic.AtomicBoolean
+import org.tobi29.uuid.Uuid
+import kotlin.collections.set
 
 interface EntityClient : Entity {
     val registry: Registries
-    val world: WorldClient
+    override val world: WorldClient
 
-    fun setEntityID(uuid: UUID)
+    fun setEntityID(uuid: Uuid)
 
     fun read(map: TagMap)
 

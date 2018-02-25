@@ -16,28 +16,30 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.io.tag.TagMap
+import org.tobi29.math.cosTable
+import org.tobi29.math.sinTable
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.normalizedSafe
+import org.tobi29.math.vector.times
+import org.tobi29.scapes.block.ItemStackData
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.math.cosTable
-import org.tobi29.scapes.engine.math.sinTable
-import org.tobi29.scapes.engine.utils.math.toRad
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.normalizeSafe
-import org.tobi29.scapes.engine.math.vector.times
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.math.threadLocalRandom
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.MobPositionReceiver
 import org.tobi29.scapes.entity.client.EntityAbstractClient
 import org.tobi29.scapes.entity.client.MobileEntityClient
 import org.tobi29.scapes.entity.particle.ParticleEmitter3DBlock
 import org.tobi29.scapes.vanilla.basics.entity.particle.ParticleEmitterTornado
+import org.tobi29.stdex.math.TWO_PI
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.toRad
 
 class EntityTornadoClient(type: EntityType<*, *>,
                           world: WorldClient) : EntityAbstractClient(
         type, world,
-        Vector3d.ZERO), MobileEntityClient {
+        Vector3d.ZERO),
+        MobileEntityClient {
     override val positionReceiver: MobPositionReceiver
     private var puff = 0.0
     private var baseSpin = 0.0f
@@ -51,8 +53,8 @@ class EntityTornadoClient(type: EntityType<*, *>,
 
     override fun read(map: TagMap) {
         super.read(map)
-        positionReceiver.receiveMoveAbsolute(pos.doubleX(), pos.doubleY(),
-                pos.doubleZ())
+        positionReceiver.receiveMoveAbsolute(pos.x, pos.y,
+                pos.z)
     }
 
     override fun update(delta: Double) {
@@ -98,9 +100,9 @@ class EntityTornadoClient(type: EntityType<*, *>,
                 }
             }
             val terrain = world.terrain
-            val x = pos.intX() + random.nextInt(9) - 4
-            val y = pos.intY() + random.nextInt(9) - 4
-            val z = pos.intZ() + random.nextInt(7) - 3
+            val x = pos.x.floorToInt() + random.nextInt(9) - 4
+            val y = pos.y.floorToInt() + random.nextInt(9) - 4
+            val z = pos.z.floorToInt() + random.nextInt(7) - 3
             val block = terrain.block(x, y, z)
             val type = terrain.type(block)
             if (type !== world.air) {
@@ -114,15 +116,15 @@ class EntityTornadoClient(type: EntityType<*, *>,
                     val dirSpeedY = sinTable(dir) * cosTable(dir) * dirSpeed
                     val dirSpeedZ = random2.nextDouble() * 6.0 + 24.0
                     instance.pos.set(pos.now())
-                    instance.speed.set(dirSpeedX, dirSpeedY, dirSpeedZ)
+                    instance.speed.setXYZ(dirSpeedX, dirSpeedY, dirSpeedZ)
                     instance.time = 5.0f
-                    instance.rotation.set(0.0f, 0.0f, 0.0f)
+                    instance.rotation.setXYZ(0.0, 0.0, 0.0)
                     instance.rotationSpeed.set(
                             Vector3d(random2.nextDouble() - 0.5,
                                     random2.nextDouble() - 0.5,
-                                    random2.nextDouble() - 0.5).normalizeSafe().times(
+                                    random2.nextDouble() - 0.5).normalizedSafe().times(
                                     480.0))
-                    instance.item = ItemStack(type, terrain.data(block))
+                    instance.item = ItemStackData(type, terrain.data(block))
                 }
             }
         }

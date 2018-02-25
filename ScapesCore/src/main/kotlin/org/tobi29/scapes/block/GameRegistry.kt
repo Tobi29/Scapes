@@ -15,10 +15,14 @@
  */
 package org.tobi29.scapes.block
 
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.utils.readOnly
-import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.io.tag.*
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.assert
+import org.tobi29.stdex.readOnly
+import kotlin.collections.ArrayList
+import kotlin.collections.List
+import kotlin.collections.asSequence
+import kotlin.collections.set
 
 open class Registries(private val idStorage: MutableTagMap) {
     private val registries = ConcurrentHashMap<Pair<String, String>, Registry<*>>()
@@ -64,13 +68,15 @@ open class Registries(private val idStorage: MutableTagMap) {
                                     id: Int? = null,
                                     block: (Int) -> T) = reg(name, id, block)
 
-        @Synchronized fun <T : E> reg(name: String,
-                                      block: (Int) -> T) = reg(name, null,
+        @Synchronized
+        fun <T : E> reg(name: String,
+                        block: (Int) -> T) = reg(name, null,
                 block)
 
-        @Synchronized fun <T : E> reg(name: String,
-                                      id: Int? = null,
-                                      block: (Int) -> T): T {
+        @Synchronized
+        fun <T : E> reg(name: String,
+                        id: Int? = null,
+                        block: (Int) -> T): T {
             if (locked) {
                 throw IllegalStateException("Initializing already ended")
             }
@@ -113,9 +119,10 @@ open class Registries(private val idStorage: MutableTagMap) {
             idFromRange(min..max, name, id)
         }
 
-        @Synchronized fun add(module: String,
-                              type: String,
-                              idSupplier: ReadWriteTagMutableMap.(String, Int?) -> Int) {
+        @Synchronized
+        fun add(module: String,
+                type: String,
+                idSupplier: ReadWriteTagMutableMap.(String, Int?) -> Int) {
             if (lockedTypes) {
                 throw IllegalStateException("Early initializing already ended")
             }

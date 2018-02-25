@@ -16,36 +16,28 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.GuiComponentButtonHeavy
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.gui.GuiRenderer
-import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.math.vector.Vector2d
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.scapes.inventory.Item
 
-class GuiComponentHotbarButton(parent: GuiLayoutData,
-                               item: ItemStack,
-                               private val player: MobPlayerClientMain,
-                               private val slot: Int) : GuiComponentButtonHeavy(
-        parent) {
-    private val item: GuiComponentItem
+class GuiComponentHotbarButton(
+        parent: GuiLayoutData,
+        private val item: () -> Item?,
+        private val player: MobPlayerClientMain,
+        private val slot: Int
+) : GuiComponentButtonHeavy(parent) {
     private var model: Model? = null
     private val textureHotbarLeft = gui.engine.graphics.textures["Scapes:image/gui/HotbarLeft"]
     private val textureHotbarRight = gui.engine.graphics.textures["Scapes:image/gui/HotbarRight"]
 
     init {
-        this.item = addSubHori(0.0, 0.0, -1.0, -1.0) {
+        addSubHori(0.0, 0.0, -1.0, -1.0) {
             GuiComponentItem(it, item)
         }
-    }
-
-    fun item(): ItemStack {
-        return item.item()
-    }
-
-    fun setItem(item: ItemStack) {
-        this.item.setItem(item)
     }
 
     public override fun renderComponent(gl: GL,
@@ -70,9 +62,9 @@ class GuiComponentHotbarButton(parent: GuiLayoutData,
                                    size: Vector2d) {
         super.updateMesh(renderer, size)
         model = engine.graphics.createVCTI(
-                floatArrayOf(0.0f, size.floatY() - 32.0f, 0.0f, size.floatY(),
-                        size.floatY() - 32.0f, 0.0f, 0.0f, -32.0f, 0.0f,
-                        size.floatY(), -32.0f, 0.0f),
+                floatArrayOf(0.0f, size.y.toFloat() - 32.0f, 0.0f,
+                        size.y.toFloat(), size.y.toFloat() - 32.0f, 0.0f, 0.0f,
+                        -32.0f, 0.0f, size.y.toFloat(), -32.0f, 0.0f),
                 floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
                         1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
                 floatArrayOf(0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f),

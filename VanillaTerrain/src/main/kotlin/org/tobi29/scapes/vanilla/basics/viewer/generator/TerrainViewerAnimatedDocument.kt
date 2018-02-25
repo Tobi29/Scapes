@@ -18,10 +18,10 @@ package org.tobi29.scapes.vanilla.basics.viewer.generator
 import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
-import org.tobi29.scapes.engine.swt.util.framework.GuiApplication
-import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
-import org.tobi29.scapes.engine.utils.task.Timer
-import org.tobi29.scapes.engine.utils.task.loop
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.loop
+import org.tobi29.application.swt.framework.GuiApplication
+import org.tobi29.application.swt.widgets.ifPresent
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 

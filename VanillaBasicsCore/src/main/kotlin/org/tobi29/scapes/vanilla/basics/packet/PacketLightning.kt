@@ -18,10 +18,10 @@ package org.tobi29.scapes.vanilla.basics.packet
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.threadLocalRandom
 import org.tobi29.scapes.packets.Packet
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketClient

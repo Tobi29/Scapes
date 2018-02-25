@@ -23,10 +23,10 @@ import org.tobi29.scapes.engine.graphics.Model
 import org.tobi29.scapes.engine.graphics.ModelAttribute
 import org.tobi29.scapes.engine.graphics.RenderType
 import org.tobi29.scapes.engine.graphics.VertexType
-import org.tobi29.scapes.engine.utils.copy
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.math.AABB
+import org.tobi29.math.Face
+import org.tobi29.stdex.copy
+import org.tobi29.stdex.math.floorToInt
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -42,34 +42,222 @@ class ChunkMesh(private val arrays: VertexArrays) {
         remaining = arrays.vertexArray.size / 3
     }
 
-    fun addVertex(terrain: TerrainClient,
-                  side: Face,
-                  x: Double,
-                  y: Double,
-                  z: Double,
-                  xx: Double,
-                  yy: Double,
-                  zz: Double,
-                  tx: Double,
-                  ty: Double,
-                  r: Double,
-                  g: Double,
-                  b: Double,
-                  a: Double,
-                  lod: Boolean,
-                  anim: Byte) {
-        addVertex(terrain, side, x, y, z, xx, yy, zz, Double.NaN,
-                Double.NaN, Double.NaN, tx, ty, r, g, b, a, lod, anim)
+    fun addQuad(terrain: TerrainClient,
+                side: Face,
+                x0: Double,
+                y0: Double,
+                z0: Double,
+                x1: Double,
+                y1: Double,
+                z1: Double,
+                x2: Double,
+                y2: Double,
+                z2: Double,
+                x3: Double,
+                y3: Double,
+                z3: Double,
+                xx0: Double,
+                yy0: Double,
+                zz0: Double,
+                xx1: Double,
+                yy1: Double,
+                zz1: Double,
+                xx2: Double,
+                yy2: Double,
+                zz2: Double,
+                xx3: Double,
+                yy3: Double,
+                zz3: Double,
+                tx0: Double,
+                ty0: Double,
+                tx1: Double,
+                ty1: Double,
+                tx2: Double,
+                ty2: Double,
+                tx3: Double,
+                ty3: Double,
+                r: Double,
+                g: Double,
+                b: Double,
+                a: Double,
+                lod: Boolean,
+                anim: Byte) =
+            addQuad(terrain, side, x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3,
+                    z3, xx0, yy0, zz0, xx1, yy1, zz1, xx2, yy2, zz2, xx3, yy3,
+                    zz3, tx0, ty0, tx1, ty1, tx2, ty2, tx3, ty3, r, g, b, a,
+                    lod, anim, anim, anim, anim)
+
+    fun addQuad(terrain: TerrainClient,
+                side: Face,
+                x0: Double,
+                y0: Double,
+                z0: Double,
+                x1: Double,
+                y1: Double,
+                z1: Double,
+                x2: Double,
+                y2: Double,
+                z2: Double,
+                x3: Double,
+                y3: Double,
+                z3: Double,
+                xx0: Double,
+                yy0: Double,
+                zz0: Double,
+                xx1: Double,
+                yy1: Double,
+                zz1: Double,
+                xx2: Double,
+                yy2: Double,
+                zz2: Double,
+                xx3: Double,
+                yy3: Double,
+                zz3: Double,
+                tx0: Double,
+                ty0: Double,
+                tx1: Double,
+                ty1: Double,
+                tx2: Double,
+                ty2: Double,
+                tx3: Double,
+                ty3: Double,
+                r: Double,
+                g: Double,
+                b: Double,
+                a: Double,
+                lod: Boolean,
+                anim0: Byte,
+                anim1: Byte,
+                anim2: Byte,
+                anim3: Byte) =
+            addQuad(terrain, side, x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3,
+                    z3, xx0, yy0, zz0, xx1, yy1, zz1, xx2, yy2, zz2, xx3, yy3,
+                    zz3, Double.NaN, Double.NaN, Double.NaN, Double.NaN,
+                    Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN,
+                    Double.NaN, Double.NaN, Double.NaN, tx0, ty0, tx1, ty1, tx2,
+                    ty2, tx3, ty3, r, g, b, a, lod, anim0, anim1, anim2, anim3)
+
+    fun addQuad(terrain: TerrainClient,
+                side: Face,
+                x0: Double,
+                y0: Double,
+                z0: Double,
+                x1: Double,
+                y1: Double,
+                z1: Double,
+                x2: Double,
+                y2: Double,
+                z2: Double,
+                x3: Double,
+                y3: Double,
+                z3: Double,
+                xx0: Double,
+                yy0: Double,
+                zz0: Double,
+                xx1: Double,
+                yy1: Double,
+                zz1: Double,
+                xx2: Double,
+                yy2: Double,
+                zz2: Double,
+                xx3: Double,
+                yy3: Double,
+                zz3: Double,
+                nx0: Double,
+                ny0: Double,
+                nz0: Double,
+                nx1: Double,
+                ny1: Double,
+                nz1: Double,
+                nx2: Double,
+                ny2: Double,
+                nz2: Double,
+                nx3: Double,
+                ny3: Double,
+                nz3: Double,
+                tx0: Double,
+                ty0: Double,
+                tx1: Double,
+                ty1: Double,
+                tx2: Double,
+                ty2: Double,
+                tx3: Double,
+                ty3: Double,
+                r: Double,
+                g: Double,
+                b: Double,
+                a: Double,
+                lod: Boolean,
+                anim0: Byte,
+                anim1: Byte,
+                anim2: Byte,
+                anim3: Byte) {
+        if (lod) {
+            addVertexHighLod(terrain, side, x0, y0, z0, xx0, yy0, zz0,
+                    nx0, ny0, nz0, tx0, ty0,
+                    r, g, b, a, anim0)
+            addVertexHighLod(terrain, side, x1, y1, z1, xx1, yy1, zz1,
+                    nx1, ny1, nz1, tx1, ty1,
+                    r, g, b, a, anim1)
+            addVertexHighLod(terrain, side, x2, y2, z2, xx2, yy2, zz2,
+                    nx2, ny2, nz2, tx2, ty2,
+                    r, g, b, a, anim2)
+            addVertexHighLod(terrain, side, x3, y3, z3, xx3, yy3, zz3,
+                    nx3, ny3, nz3, tx3, ty3,
+                    r, g, b, a, anim3)
+        } else {
+            val xxx = ((x0 + x1 + x2 + x3) * 0.25 + side.x).floorToInt()
+            val yyy = ((y0 + y1 + y2 + y3) * 0.25 + side.y).floorToInt()
+            val zzz = ((z0 + z1 + z2 + z3) * 0.25 + side.z).floorToInt()
+            val light = terrain.blockLight(xxx, yyy, zzz) / 15.0
+            val sunLight = terrain.sunLight(xxx, yyy, zzz) / 15.0
+            addVertex(xx0, yy0, zz0, nx0, ny0, nz0, tx0, ty0,
+                    r, g, b, a, light,
+                    sunLight, anim0)
+            addVertex(xx1, yy1, zz1, nx1, ny1, nz1, tx1, ty1,
+                    r, g, b, a, light,
+                    sunLight, anim1)
+            addVertex(xx2, yy2, zz2, nx2, ny2, nz2, tx2, ty2,
+                    r, g, b, a, light,
+                    sunLight, anim2)
+            addVertex(xx3, yy3, zz3, nx3, ny3, nz3, tx3, ty3,
+                    r, g, b, a, light,
+                    sunLight, anim3)
+        }
     }
 
-    fun addVertex(terrain: TerrainClient,
-                  side: Face,
-                  x: Double,
+    fun addVertexHighLod(terrain: TerrainClient,
+                         side: Face,
+                         x: Double,
+                         y: Double,
+                         z: Double,
+                         xx: Double,
+                         yy: Double,
+                         zz: Double,
+                         nx: Double,
+                         ny: Double,
+                         nz: Double,
+                         tx: Double,
+                         ty: Double,
+                         r: Double,
+                         g: Double,
+                         b: Double,
+                         a: Double,
+                         anim: Byte) {
+        SmoothLight.calcLight(triple, side, x, y, z, terrain)
+        val light = triple.a.toDouble()
+        val sunLight = triple.b.toDouble()
+        val r2 = r * triple.c
+        val g2 = g * triple.c
+        val b2 = b * triple.c
+        addVertex(xx, yy, zz, nx, ny, nz, tx, ty, r2, g2, b2, a, light,
+                sunLight,
+                anim)
+    }
+
+    fun addVertex(x: Double,
                   y: Double,
                   z: Double,
-                  xx: Double,
-                  yy: Double,
-                  zz: Double,
                   nx: Double,
                   ny: Double,
                   nz: Double,
@@ -79,30 +267,9 @@ class ChunkMesh(private val arrays: VertexArrays) {
                   g: Double,
                   b: Double,
                   a: Double,
-                  lod: Boolean,
+                  light: Double,
+                  sunLight: Double,
                   anim: Byte) {
-        val r2: Double
-        val g2: Double
-        val b2: Double
-        val light: Double
-        val sunLight: Double
-        if (lod) {
-            SmoothLight.calcLight(triple, side, x, y, z, terrain)
-            light = triple.a.toDouble()
-            sunLight = triple.b.toDouble()
-            r2 = r * triple.c
-            g2 = g * triple.c
-            b2 = b * triple.c
-        } else {
-            val xxx = (x + side.x).floorToInt()
-            val yyy = (y + side.y).floorToInt()
-            val zzz = (z + side.z).floorToInt()
-            light = terrain.blockLight(xxx, yyy, zzz) / 15.0
-            sunLight = terrain.sunLight(xxx, yyy, zzz) / 15.0
-            r2 = r
-            g2 = g
-            b2 = b
-        }
         if (remaining <= 0) {
             val growth: Int
             if (pos == 0) {
@@ -114,17 +281,17 @@ class ChunkMesh(private val arrays: VertexArrays) {
             remaining += growth
         }
         var i = pos * 3
-        arrays.vertexArray[i++] = xx.toFloat()
-        arrays.vertexArray[i++] = yy.toFloat()
-        arrays.vertexArray[i] = zz.toFloat()
+        arrays.vertexArray[i++] = x.toFloat()
+        arrays.vertexArray[i++] = y.toFloat()
+        arrays.vertexArray[i] = z.toFloat()
         i = pos * 3
         arrays.normalArray[i++] = nx.toFloat()
         arrays.normalArray[i++] = ny.toFloat()
         arrays.normalArray[i] = nz.toFloat()
         i = pos shl 2
-        arrays.colorArray[i++] = r2.toFloat()
-        arrays.colorArray[i++] = g2.toFloat()
-        arrays.colorArray[i++] = b2.toFloat()
+        arrays.colorArray[i++] = r.toFloat()
+        arrays.colorArray[i++] = g.toFloat()
+        arrays.colorArray[i++] = b.toFloat()
         arrays.colorArray[i] = a.toFloat()
         i = pos shl 1
         arrays.textureArray[i++] = tx.toFloat()
@@ -133,12 +300,12 @@ class ChunkMesh(private val arrays: VertexArrays) {
         arrays.lightArray[i++] = light.toFloat()
         arrays.lightArray[i] = sunLight.toFloat()
         arrays.animationArray[pos++] = anim.toInt()
-        aabb.minX = if (aabb.minX.isNaN()) xx else min(aabb.minX, xx)
-        aabb.minY = if (aabb.minY.isNaN()) yy else min(aabb.minY, yy)
-        aabb.minZ = if (aabb.minZ.isNaN()) zz else min(aabb.minZ, zz)
-        aabb.maxX = if (aabb.maxX.isNaN()) xx else max(aabb.maxX, xx)
-        aabb.maxY = if (aabb.maxY.isNaN()) yy else max(aabb.maxY, yy)
-        aabb.maxZ = if (aabb.maxZ.isNaN()) zz else max(aabb.maxZ, zz)
+        aabb.minX = if (aabb.minX.isNaN()) x else min(aabb.minX, x)
+        aabb.minY = if (aabb.minY.isNaN()) y else min(aabb.minY, y)
+        aabb.minZ = if (aabb.minZ.isNaN()) z else min(aabb.minZ, z)
+        aabb.maxX = if (aabb.maxX.isNaN()) x else max(aabb.maxX, x)
+        aabb.maxY = if (aabb.maxY.isNaN()) y else max(aabb.maxY, y)
+        aabb.maxZ = if (aabb.maxZ.isNaN()) z else max(aabb.maxZ, z)
         remaining--
     }
 

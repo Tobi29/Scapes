@@ -17,17 +17,18 @@
 package org.tobi29.scapes.chunk.terrain.infinite
 
 import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.terrain.TerrainEntity
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.math.PointerPane
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.math.PointerPane
+import org.tobi29.utils.Pool
+import org.tobi29.utils.toArray
 import org.tobi29.scapes.entity.Entity
+import org.tobi29.scapes.inventory.ItemType
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBase
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteChunkManager
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.uuid.Uuid
 import kotlin.coroutines.experimental.CoroutineContext
 
 abstract class TerrainInfinite<E : Entity, C : TerrainInfiniteChunk<E>>(
@@ -38,13 +39,14 @@ abstract class TerrainInfinite<E : Entity, C : TerrainInfiniteChunk<E>>(
         chunkManager: TerrainInfiniteChunkManager<C>,
         radius: Int = 0x8000000 - 16
 ) : TerrainInfiniteBase<BlockType, C>(zSize, taskExecutor, air,
-        registry.get<Material>("Core",
-                "Material").values.asSequence().map { it as? BlockType }.toArray(),
-        chunkManager, radius), TerrainEntity<E> {
-    protected val materials = registry.get<Material>("Core", "Material")
+        registry.get<ItemType>("Core",
+                "ItemType").values.asSequence().map { it as? BlockType }.toArray(),
+        chunkManager, radius),
+        TerrainEntity<E> {
+    protected val materials = registry.get<ItemType>("Core", "ItemType")
     override val blocks: Array<out BlockType?> = materials.values.asSequence()
             .map { it as? BlockType }.toArray()
-    protected val entityMap: MutableMap<UUID, E> = ConcurrentHashMap()
+    protected val entityMap: MutableMap<Uuid, E> = ConcurrentHashMap()
 
     fun pointerPanes(x: Int,
                      y: Int,
@@ -69,8 +71,8 @@ abstract class TerrainInfinite<E : Entity, C : TerrainInfiniteChunk<E>>(
 
     override fun removeEntity(entity: E): Boolean {
         val pos = entity.getCurrentPos()
-        val x = pos.intX() shr 4
-        val y = pos.intY() shr 4
+        val x = pos.x.floorToInt() shr 4
+        val y = pos.y.floorToInt() shr 4
         if (chunk(x, y, { it.removeEntity(entity) }) ?: false) {
             return true
         }
@@ -86,7 +88,7 @@ abstract class TerrainInfinite<E : Entity, C : TerrainInfiniteChunk<E>>(
         return entityMap.containsValue(entity)
     }
 
-    override fun getEntity(uuid: UUID): E? {
+    override fun getEntity(uuid: Uuid): E? {
         return entityMap[uuid]
     }
 
@@ -101,7 +103,7 @@ abstract class TerrainInfinite<E : Entity, C : TerrainInfiniteChunk<E>>(
         chunk(x shr 4, y shr 4) {
             s += it.entities.values.asSequence().filter { entity ->
                 val pos = entity.getCurrentPos()
-                pos.intX() == x && pos.intY() == y && pos.intZ() == z
+                pos.x.floorToInt() == x && pos.y.floorToInt() == y && pos.z.floorToInt() == z
             }
         }
         return s

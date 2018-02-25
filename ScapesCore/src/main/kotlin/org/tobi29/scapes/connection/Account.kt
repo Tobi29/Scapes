@@ -16,18 +16,18 @@
 
 package org.tobi29.scapes.connection
 
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.server.extractPublic
-import org.tobi29.scapes.engine.server.readPrivate
-import org.tobi29.scapes.engine.server.writePrivate
-import org.tobi29.scapes.engine.utils.UnsupportedJVMException
-import org.tobi29.scapes.engine.utils.io.ByteStreamInputStream
-import org.tobi29.scapes.engine.utils.io.ByteStreamOutputStream
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.exists
-import org.tobi29.scapes.engine.utils.io.filesystem.read
-import org.tobi29.scapes.engine.utils.io.filesystem.write
-import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.io.ByteStreamInputStream
+import org.tobi29.io.ByteStreamOutputStream
+import org.tobi29.io.IOException
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.io.filesystem.exists
+import org.tobi29.io.filesystem.read
+import org.tobi29.io.filesystem.write
+import org.tobi29.logging.KLogging
+import org.tobi29.server.extractPublic
+import org.tobi29.server.readPrivate
+import org.tobi29.server.writePrivate
+import org.tobi29.stdex.UnsupportedJVMException
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.NoSuchAlgorithmException

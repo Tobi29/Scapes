@@ -16,17 +16,17 @@
 
 package org.tobi29.scapes.server.extension.base
 
-import org.tobi29.scapes.engine.args.CommandArgument
-import org.tobi29.scapes.engine.args.CommandOption
-import org.tobi29.scapes.engine.args.get
-import org.tobi29.scapes.engine.args.requireInt
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.wildcard
+import org.tobi29.args.CommandArgument
+import org.tobi29.args.CommandOption
+import org.tobi29.args.get
+import org.tobi29.args.requireInt
+import org.tobi29.io.tag.TagMap
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.extension.ServerExtension
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.spi.ServerExtensionProvider
+import org.tobi29.stdex.wildcard
 
 class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
 

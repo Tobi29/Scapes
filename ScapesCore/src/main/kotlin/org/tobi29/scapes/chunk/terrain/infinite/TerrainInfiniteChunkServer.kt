@@ -22,19 +22,26 @@ import kotlinx.coroutines.experimental.launch
 import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.chunk.generator.ChunkGenerator
 import org.tobi29.scapes.chunk.generator.GeneratorOutput
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.Vector2i
-import org.tobi29.scapes.engine.math.vector.distanceSqr
-import org.tobi29.scapes.engine.utils.andNull
-import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.Vector2i
+import org.tobi29.math.vector.distanceSqr
+import org.tobi29.utils.andNull
+import org.tobi29.profiler.profilerSection
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobServer
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBaseChunk
 import org.tobi29.scapes.terrain.infinite.chunk
+import org.tobi29.io.tag.*
+import org.tobi29.stdex.assert
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.uuid.toTag
+import org.tobi29.uuid.toUuid
+import kotlin.collections.ArrayList
+import kotlin.collections.asSequence
+import kotlin.collections.forEach
+import kotlin.collections.set
 
 class TerrainInfiniteChunkServer(
         pos: Vector2i,
@@ -96,8 +103,8 @@ class TerrainInfiniteChunkServer(
                 }
             }
             val pos = entity.getCurrentPos()
-            val x = pos.intX() shr 4
-            val y = pos.intY() shr 4
+            val x = pos.x.floorToInt() shr 4
+            val y = pos.y.floorToInt() shr 4
             if ((x != this.pos.x || y != this.pos.y) && unmapEntity(
                     entity)) {
                 if (terrain.chunk(x, y) { chunk ->
@@ -218,7 +225,7 @@ class TerrainInfiniteChunkServer(
                     Tag::toMap)?.forEach { tag ->
                 tag["ID"]?.toInt()?.let {
                     val entity = EntityServer.make(it, terrain.world)
-                    tag["UUID"]?.toUUID()?.let { entity.setEntityID(it) }
+                    tag["UUID"]?.toUuid()?.let { entity.setEntityID(it) }
                     tag["Data"]?.toMap()?.let { entity.read(it) }
                     addEntity(entity)
                     val newTick = terrain.world.tick

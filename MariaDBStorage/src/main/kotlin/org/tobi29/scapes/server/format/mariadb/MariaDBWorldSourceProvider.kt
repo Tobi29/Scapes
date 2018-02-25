@@ -16,10 +16,10 @@
 
 package org.tobi29.scapes.server.format.mariadb
 
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.io.filesystem.FilePath
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.spi.WorldSourceProvider
+import org.tobi29.io.tag.TagMap
 import kotlin.coroutines.experimental.CoroutineContext
 
 class MariaDBWorldSourceProvider : WorldSourceProvider {

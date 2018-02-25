@@ -17,14 +17,14 @@ package org.tobi29.scapes.chunk
 
 import kotlinx.coroutines.experimental.CancellationException
 import kotlinx.coroutines.experimental.CoroutineDispatcher
+import org.tobi29.coroutines.TaskChannel
+import org.tobi29.coroutines.offer
+import org.tobi29.coroutines.processCurrent
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.block.Registries
-import org.tobi29.scapes.engine.utils.ComponentHolder
-import org.tobi29.scapes.engine.utils.ComponentStorage
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.math.vector.Vector3i
-import org.tobi29.scapes.engine.utils.task.TaskChannel
-import org.tobi29.scapes.engine.utils.task.offer
-import org.tobi29.scapes.engine.utils.task.processCurrent
+import org.tobi29.math.vector.Vector3i
+import org.tobi29.utils.ComponentHolder
+import org.tobi29.utils.ComponentStorage
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.entity.EntityContainer
 import org.tobi29.scapes.plugins.Plugins
@@ -35,10 +35,13 @@ abstract class World<E : Entity>(
         val taskExecutor: CoroutineContext,
         val registry: Registries,
         val seed: Long
-) : CoroutineDispatcher(), ComponentHolder<Any>, EntityContainer<E> {
+) : CoroutineDispatcher(),
+        ComponentHolder<Any>,
+        EntityContainer<E> {
     override val componentStorage = ComponentStorage<Any>()
     val air = plugins.air
     private val queue = TaskChannel<() -> Unit>()
+    @Volatile
     protected var thread: Thread? = null
     var spawn = Vector3i.ZERO
         protected set

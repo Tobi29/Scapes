@@ -16,24 +16,25 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.toItem
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toMap
+import org.tobi29.math.AABB
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.entity.model.MobModelBlock
+import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import java.util.concurrent.atomic.AtomicReference
 
 class MobBombClient(type: EntityType<*, *>,
                     world: WorldClient) : MobClient(
         type, world, Vector3d.ZERO, Vector3d.ZERO,
         AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
-    private val item = ItemStack(world.plugins)
+    private val item = AtomicReference<Item?>(null)
     private var time = 0.0
     private var exploded = false
 
@@ -43,7 +44,7 @@ class MobBombClient(type: EntityType<*, *>,
 
     override fun read(map: TagMap) {
         super.read(map)
-        map["Block"]?.toMap()?.let { item.read(it) }
+        map["Block"]?.toItem(world.plugins)?.let { item.set(it) }
         map["Time"]?.toDouble()?.let { time = it }
     }
 
@@ -51,8 +52,8 @@ class MobBombClient(type: EntityType<*, *>,
         time -= delta
         if (time < 0.05 && !exploded) {
             // TODO: Replace with proper packet
-            (item.material() as BlockExplosive).explodeClient(world, pos.now(),
-                    speed.now())
+            (item.get()?.type as? BlockExplosive)?.explodeClient(world,
+                    pos.now(), speed.now())
             exploded = true
         }
     }

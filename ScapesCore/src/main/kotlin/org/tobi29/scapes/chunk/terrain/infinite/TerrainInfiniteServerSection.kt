@@ -21,7 +21,7 @@ import org.tobi29.scapes.block.Update
 import org.tobi29.scapes.block.UpdateBlockUpdate
 import org.tobi29.scapes.block.UpdateBlockUpdateUpdateTile
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
-import org.tobi29.scapes.engine.utils.assert
+import org.tobi29.stdex.assert
 import org.tobi29.scapes.packets.PacketBlockChange
 import org.tobi29.scapes.packets.PacketBlockChangeAir
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteMutableSection

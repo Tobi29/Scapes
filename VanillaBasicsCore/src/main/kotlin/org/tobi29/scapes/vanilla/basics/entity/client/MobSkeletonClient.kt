@@ -16,10 +16,9 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
-import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.AABB
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
@@ -50,14 +49,6 @@ class MobSkeletonClient(type: EntityType<*, *>,
 
     override fun viewOffset(): Vector3d {
         return Vector3d(0.0, 0.0, 0.7)
-    }
-
-    override fun leftWeapon(): ItemStack {
-        return ItemStack(world.plugins)
-    }
-
-    override fun rightWeapon(): ItemStack {
-        return ItemStack(world.plugins)
     }
 }
 

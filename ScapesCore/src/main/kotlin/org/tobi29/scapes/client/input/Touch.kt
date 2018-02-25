@@ -15,19 +15,18 @@
  */
 package org.tobi29.scapes.client.input
 
+import org.tobi29.math.angleDiff
+import org.tobi29.math.matrix.Matrix4f
+import org.tobi29.math.vector.*
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.gui.GuiMessage
-import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.ControllerTouch
-import org.tobi29.scapes.engine.math.angleDiff
-import org.tobi29.scapes.engine.math.matrix.Matrix4f
-import org.tobi29.scapes.engine.math.vector.*
-import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.math.toDeg
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.stdex.math.toDeg
+import org.tobi29.utils.EventDispatcher
 
 class InputModeTouch(private val engine: ScapesEngine,
                      private val controller: ControllerTouch) : InputModeScapes {
@@ -130,10 +129,10 @@ class InputModeTouch(private val engine: ScapesEngine,
                     1.0f)
             matrix1.invert(matrix1, matrix2)
             val pos = matrix2.multiply(Vector3d(x, y, 1.0))
-            val rotX = direction((pos as Vector2d).length(),
+            val rotX = direction(pos.xy.length(),
                     pos.z).toDeg() - cam.pitch.toDouble()
-            val rotY = angleDiff(cam.yaw.toDouble(), pos.direction().toDeg())
-            direction.set(rotX, rotY)
+            val rotY = angleDiff(cam.yaw.toDouble(), pos.xy.direction().toDeg())
+            direction.setXY(rotX, rotY)
             val swipeStart = swipeStart
             if (swipeStart != null) {
                 if (!leftHand && !rightHand &&
@@ -141,7 +140,7 @@ class InputModeTouch(private val engine: ScapesEngine,
                     leftHand = true
                 }
                 if (swipeStart.distance(
-                        Vector2d(event.x, event.y)) > 10.0) {
+                                Vector2d(event.x, event.y)) > 10.0) {
                     this.swipeStart = null
                 }
             }

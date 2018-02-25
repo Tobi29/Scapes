@@ -17,25 +17,28 @@
 package org.tobi29.scapes.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.utils.ComponentStorage
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.*
-import org.tobi29.scapes.entity.ComponentEntity
+import org.tobi29.math.vector.MutableVector3d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.utils.ComponentStorage
 import org.tobi29.scapes.entity.ComponentSerializable
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
+import org.tobi29.io.tag.*
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.assert
+import org.tobi29.uuid.Uuid
+import kotlin.collections.forEach
+import kotlin.collections.set
 
-open class EntityAbstractServer(override final val type: EntityType<*, *>,
-                                override final val world: WorldServer,
-                                pos: Vector3d) : EntityServer {
+open class EntityAbstractServer(
+        override final val type: EntityType<*, *>,
+        override final val world: WorldServer,
+        pos: Vector3d
+) : EntityServer {
     override final val registry = world.registry
-    override val componentStorage = ComponentStorage<ComponentEntity>()
+    override val componentStorage = ComponentStorage<Any>()
     protected val pos = MutableVector3d(pos)
-    override final var uuid: UUID = UUID.randomUUID()
+    override final var uuid: Uuid = Uuid.randomUUID()
         protected set
     protected var metaData = MutableTagMap()
     override final val onAddedToWorld = ConcurrentHashMap<ListenerToken, () -> Unit>()
@@ -43,7 +46,7 @@ open class EntityAbstractServer(override final val type: EntityType<*, *>,
     override final val onSpawn = ConcurrentHashMap<ListenerToken, () -> Unit>()
     override final val onUpdate = ConcurrentHashMap<ListenerToken, (Double) -> Unit>()
 
-    override fun setEntityID(uuid: UUID) {
+    override fun setEntityID(uuid: Uuid) {
         this.uuid = uuid
     }
 

@@ -18,7 +18,7 @@ package org.tobi29.scapes.entity.model
 
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.utils.copy
+import org.tobi29.stdex.copy
 
 class Box constructor(engine: ScapesEngine,
                       tbs: Float,

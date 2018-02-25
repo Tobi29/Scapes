@@ -15,8 +15,8 @@
  */
 package org.tobi29.scapes.vanilla.basics.material
 
-import org.tobi29.scapes.block.Material
 import org.tobi29.scapes.block.MaterialType
+import org.tobi29.scapes.inventory.ItemType
 import org.tobi29.scapes.plugins.Plugins
 import org.tobi29.scapes.plugins.reg
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
@@ -37,6 +37,7 @@ import org.tobi29.scapes.vanilla.basics.material.item.tool.*
 import org.tobi29.scapes.vanilla.basics.material.item.vegetation.ItemCropDrop
 import org.tobi29.scapes.vanilla.basics.material.item.vegetation.ItemGrassBundle
 import org.tobi29.scapes.vanilla.basics.material.item.vegetation.ItemSeed
+import org.tobi29.scapes.vanilla.basics.material.item.vegetation.ItemStraw
 
 class VanillaMaterial(val plugin: VanillaBasics,
                       val plugins: Plugins) {
@@ -64,6 +65,7 @@ class VanillaMaterial(val plugin: VanillaBasics,
     val cropDrop = reg("vanilla.basics.item.CropDrop", ::ItemCropDrop)
     val dirt = reg("vanilla.basics.block.Dirt", ::BlockDirt)
     val dough = reg("vanilla.basics.item.Dough", ::ItemDough)
+    val fabric = reg("vanilla.basics.item.Fabric", ::ItemFabric)
     val farmland = reg("vanilla.basics.block.Farmland", ::BlockFarmland)
     val flintAxe = reg("vanilla.basics.item.FlintAxe", ::ItemFlintAxe)
     val flintHammer = reg("vanilla.basics.item.FlintHammer", ::ItemFlintHammer)
@@ -121,17 +123,18 @@ class VanillaMaterial(val plugin: VanillaBasics,
     val stick = reg("vanilla.basics.item.Stick", ::ItemStick)
     val stoneRaw = reg("vanilla.basics.block.StoneRaw", ::BlockStoneRaw)
     val stoneTotem = reg("vanilla.basics.block.StoneTotem", ::BlockStoneTotem)
-    val straw = reg("vanilla.basics.block.Straw", ::BlockStraw)
+    val strawBlock = reg("vanilla.basics.block.Straw", ::BlockStraw)
     val stoneRock = reg("vanilla.basics.block.StoneRock", ::BlockStoneRock)
     val seed = reg("vanilla.basics.item.Seed", ::ItemSeed)
+    val straw = reg("vanilla.basics.item.Straw", ::ItemStraw)
     val string = reg("vanilla.basics.item.String", ::ItemString)
     val torch = reg("vanilla.basics.block.Torch", ::BlockTorch)
     val water = reg("vanilla.basics.block.Water", ::BlockWater)
     val wood = reg("vanilla.basics.block.Wood", ::BlockWood)
 
-    private fun <M : Material> reg(name: String,
+    private fun <M : ItemType> reg(name: String,
                                    block: (VanillaMaterialType) -> M) =
-            plugins.registry.get<Material>("Core", "Material").reg(name,
+            plugins.registry.get<ItemType>("Core", "ItemType").reg(name,
                     plugins) { block(VanillaMaterialType(it, this)) }
 }
 

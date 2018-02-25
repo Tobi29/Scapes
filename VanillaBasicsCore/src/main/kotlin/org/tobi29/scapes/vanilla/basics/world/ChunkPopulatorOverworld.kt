@@ -16,18 +16,14 @@
 
 package org.tobi29.scapes.vanilla.basics.world
 
+import org.tobi29.generation.layer.RandomPermutation
+import org.tobi29.generation.layer.random
+import org.tobi29.generation.layer.randomOffset
+import org.tobi29.generation.value.OpenSimplexNoise
+import org.tobi29.math.Random
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.generator.ChunkPopulator
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.utils.EnumMap
-import org.tobi29.scapes.engine.utils.generation.layer.RandomPermutation
-import org.tobi29.scapes.engine.utils.generation.layer.random
-import org.tobi29.scapes.engine.utils.generation.layer.randomOffset
-import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
-import org.tobi29.scapes.engine.utils.math.ceilToInt
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.terrain.TerrainChunk
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
@@ -35,6 +31,10 @@ import org.tobi29.scapes.vanilla.basics.world.decorator.BiomeDecorator
 import org.tobi29.scapes.vanilla.basics.world.structure.genOre
 import org.tobi29.scapes.vanilla.basics.world.structure.genOreRock
 import org.tobi29.scapes.vanilla.basics.world.structure.placeRandomRuin
+import org.tobi29.stdex.EnumMap
+import org.tobi29.stdex.math.ceilToInt
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.floorToInt
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -147,7 +147,7 @@ class ChunkPopulatorOverworld(world: WorldServer,
     private class BiomeDecoratorChooser(collection: Sequence<BiomeDecorator>,
                                         random: Random) {
         private val base = RandomPermutation(random)
-        private val swirl = SimplexNoise(random.nextLong())
+        private val swirl = OpenSimplexNoise(random.nextLong())
         private val noise = RandomPermutation(random)
         private val decorators: Array<BiomeDecorator>
 

@@ -17,15 +17,16 @@ package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.server.InvalidPacketDataException
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
+import org.tobi29.server.InvalidPacketDataException
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
 import org.tobi29.scapes.entity.client.MobPlayerClient
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.uuid.Uuid
 
-class PacketInteraction : PacketAbstract, PacketBoth {
-    private lateinit var uuid: UUID
+class PacketInteraction : PacketAbstract,
+        PacketBoth {
+    private lateinit var uuid: Uuid
     private var side: Byte = 0
     private var data: Byte = 0
 
@@ -39,7 +40,7 @@ class PacketInteraction : PacketAbstract, PacketBoth {
     }
 
     constructor(type: PacketType,
-                uuid: UUID,
+                uuid: Uuid,
                 side: Byte,
                 data: Byte) : super(type) {
         this.uuid = uuid
@@ -53,7 +54,7 @@ class PacketInteraction : PacketAbstract, PacketBoth {
             Packet.make(registry, "core.packet.Interaction"), side, data)
 
     constructor(registry: Registries,
-                uuid: UUID,
+                uuid: Uuid,
                 side: Byte,
                 data: Byte) : this(
             Packet.make(registry, "core.packet.Interaction"), uuid, side,
@@ -69,7 +70,7 @@ class PacketInteraction : PacketAbstract, PacketBoth {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.getLong(), stream.getLong())
+        uuid = Uuid(stream.getLong(), stream.getLong())
         side = stream.get()
         data = stream.get()
     }
@@ -120,13 +121,11 @@ class PacketInteraction : PacketAbstract, PacketBoth {
                 }
                 OPEN_INVENTORY -> {
                     mob.onOpenInventory()
-                    player.send(
-                            PacketOpenGui(player.server.plugins.registry, mob))
+                    mob.openGui(mob)
                 }
                 CLOSE_INVENTORY -> {
                     mob.onCloseInventory()
-                    player.send(
-                            PacketCloseGui(player.server.plugins.registry))
+                    mob.closeGui()
                 }
                 else -> throw InvalidPacketDataException(
                         "Invalid interaction type!")

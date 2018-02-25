@@ -21,20 +21,21 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
-import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
-import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.graphics.Cam
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
+import org.tobi29.io.tag.binary.readBinary
+import org.tobi29.io.tag.binary.writeBinary
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.io.tag.TagMap
+import org.tobi29.uuid.Uuid
 
-class PacketSetWorld : PacketAbstract, PacketClient {
+class PacketSetWorld : PacketAbstract,
+        PacketClient {
     private lateinit var tag: TagMap
     private var seed = 0L
-    private lateinit var uuid: UUID
+    private lateinit var uuid: Uuid
     private var environment = 0
 
     constructor(type: PacketType) : super(type)
@@ -66,7 +67,7 @@ class PacketSetWorld : PacketAbstract, PacketClient {
                              stream: ReadableByteStream) {
         tag = readBinary(stream)
         seed = stream.getLong()
-        uuid = UUID(stream.getLong(), stream.getLong())
+        uuid = Uuid(stream.getLong(), stream.getLong())
         environment = stream.getInt()
     }
 

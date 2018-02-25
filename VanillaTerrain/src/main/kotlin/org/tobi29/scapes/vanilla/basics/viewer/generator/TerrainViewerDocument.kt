@@ -18,10 +18,10 @@ package org.tobi29.scapes.vanilla.basics.viewer.generator
 
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.FillLayout
-import org.tobi29.scapes.engine.swt.util.framework.Document
-import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
-import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
-import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
+import org.tobi29.application.swt.framework.Document
+import org.tobi29.application.swt.framework.DocumentComposite
+import org.tobi29.application.swt.framework.MultiDocumentApplication
+import org.tobi29.application.swt.widgets.SmartMenuBar
 
 open class TerrainViewerDocument(
         protected val colorSupplier: () -> TerrainViewerCanvas.ColorSupplier) : Document {

@@ -17,13 +17,13 @@
 package org.tobi29.scapes.vanilla.basics.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.EntityAbstractClient
 import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.vanilla.basics.entity.model.EntityModelBlockBreak
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
 
 class EntityBlockBreakClient(type: EntityType<*, *>,
                              world: WorldClient) : EntityAbstractClient(
@@ -32,7 +32,8 @@ class EntityBlockBreakClient(type: EntityType<*, *>,
 
     init {
         attachModel {
-            EntityModelBlockBreak(world.game.modelBlockBreakShared().await(), this)
+            EntityModelBlockBreak(world.game.modelBlockBreakShared().await(),
+                    this)
         }
     }
 

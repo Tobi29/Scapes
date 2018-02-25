@@ -15,8 +15,8 @@
  */
 package org.tobi29.scapes.entity.particle
 
-import org.tobi29.scapes.engine.math.vector.MutableVector2d
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.MutableVector2d
+import org.tobi29.math.vector.Vector3d
 
 class ParticleInstanceTransparent : ParticleInstance() {
     val textureOffset = MutableVector2d()
@@ -67,7 +67,7 @@ class ParticleInstanceTransparent : ParticleInstance() {
         val texMaxX = texture.marginX(tMaxX)
         val texMinY = texture.marginY(tMinY)
         val texMaxY = texture.marginY(tMaxY)
-        textureOffset.set(texMinX, texMinY)
-        textureSize.set(texMaxX - texMinX, texMaxY - texMinY)
+        textureOffset.setXY(texMinX, texMinY)
+        textureSize.setXY(texMaxX - texMinX, texMaxY - texMinY)
     }
 }

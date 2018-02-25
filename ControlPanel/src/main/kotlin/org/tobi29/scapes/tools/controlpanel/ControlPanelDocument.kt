@@ -17,15 +17,15 @@
 package org.tobi29.scapes.tools.controlpanel
 
 import org.eclipse.swt.layout.FillLayout
-import org.tobi29.scapes.engine.server.ControlPanelProtocol
-import org.tobi29.scapes.engine.server.RemoteAddress
-import org.tobi29.scapes.engine.swt.util.Shortcut
-import org.tobi29.scapes.engine.swt.util.framework.Document
-import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
-import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
-import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
-import org.tobi29.scapes.engine.utils.ComponentHolder
-import org.tobi29.scapes.engine.utils.ComponentStorage
+import org.tobi29.server.ControlPanelProtocol
+import org.tobi29.server.RemoteAddress
+import org.tobi29.application.swt.Shortcut
+import org.tobi29.application.swt.framework.Document
+import org.tobi29.application.swt.framework.DocumentComposite
+import org.tobi29.application.swt.framework.MultiDocumentApplication
+import org.tobi29.application.swt.widgets.SmartMenuBar
+import org.tobi29.utils.ComponentHolder
+import org.tobi29.utils.ComponentStorage
 import org.tobi29.scapes.tools.controlpanel.extensions.*
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 

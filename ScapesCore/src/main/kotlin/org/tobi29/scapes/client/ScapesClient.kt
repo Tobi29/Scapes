@@ -13,23 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.tobi29.scapes.client
 
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.engine.ComponentLifecycle
 import org.tobi29.scapes.engine.ComponentStep
 import org.tobi29.scapes.engine.ScapesEngine
-import org.tobi29.scapes.engine.utils.ComponentTypeRegistered
-import org.tobi29.scapes.engine.utils.ComponentTypeRegisteredPermission
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.utils.ComponentTypeRegistered
+import org.tobi29.utils.ComponentTypeRegisteredPermission
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.io.tag.*
+import kotlin.collections.set
 
 class ScapesClient(val engine: ScapesEngine,
                    val home: FilePath,
                    val pluginCache: FilePath,
                    savesSupplier: (ScapesClient) -> SaveStorage,
-                   lightDefaults: Boolean = false) : ComponentLifecycle, ComponentStep {
+                   lightDefaults: Boolean = false) : ComponentLifecycle,
+        ComponentStep {
     val configMap = engine[ScapesEngine.CONFIG_MAP_COMPONENT].mapMut("Scapes")
     val saves = savesSupplier(this)
 

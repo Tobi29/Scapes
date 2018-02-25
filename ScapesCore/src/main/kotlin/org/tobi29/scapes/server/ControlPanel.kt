@@ -16,22 +16,24 @@
 
 package org.tobi29.scapes.server
 
-import org.tobi29.scapes.engine.server.ConnectionWorker
-import org.tobi29.scapes.engine.server.ControlPanelProtocol
-import org.tobi29.scapes.engine.server.PacketBundleChannel
-import org.tobi29.scapes.engine.utils.CPUUtil
-import org.tobi29.scapes.engine.utils.ListenerRegistrar
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.tag.*
-import org.tobi29.scapes.engine.utils.toReplace
+import org.tobi29.logging.KLogging
+import org.tobi29.server.ConnectionWorker
+import org.tobi29.server.ControlPanelProtocol
+import org.tobi29.server.PacketBundleChannel
+import org.tobi29.utils.ListenerRegistrar
+import org.tobi29.profiler.CPUUtil
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.connection.ServerConnection
 import org.tobi29.scapes.server.extension.event.MessageEvent
+import org.tobi29.io.tag.*
+import org.tobi29.stdex.toReplace
+import kotlin.collections.set
 
 class ControlPanel(worker: ConnectionWorker,
                    channel: PacketBundleChannel,
                    private val connection: ServerConnection) : ControlPanelProtocol(
-        worker, channel, connection.server.events), Executor {
+        worker, channel, connection.server.events),
+        Executor {
 
     init {
         initCommands()

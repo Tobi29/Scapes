@@ -19,10 +19,9 @@ package org.tobi29.scapes.vanilla.basics
 import org.tobi29.scapes.vanilla.basics.material.CropType
 
 class VanillaBasicsCrops(reg: (String, (Int) -> CropType) -> CropType) {
-    private val ROOT = "VanillaBasics:image/terrain/crops"
-
     val WHEAT = reg("vanilla.basics.crop.Wheat") {
         CropType(it, "Wheat", "Bread", ROOT, 4000.0, 0)
     }
 }
 
+private const val ROOT = "VanillaBasics:image/terrain/crops"

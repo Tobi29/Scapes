@@ -17,10 +17,10 @@
 package org.tobi29.scapes.server.shell
 
 import kotlinx.coroutines.experimental.CoroutineDispatcher
-import org.tobi29.scapes.engine.utils.ListenerRegistrar
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.utils.ListenerRegistrar
+import org.tobi29.io.IOException
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.Executor

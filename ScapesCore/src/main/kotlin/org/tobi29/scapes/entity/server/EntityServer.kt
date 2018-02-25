@@ -18,23 +18,24 @@ package org.tobi29.scapes.entity.server
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.ConcurrentMap
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.TagMapWrite
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.Entity
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.TagMapWrite
+import org.tobi29.stdex.ConcurrentMap
+import org.tobi29.uuid.Uuid
 
-interface EntityServer : Entity, TagMapWrite {
+interface EntityServer : Entity,
+        TagMapWrite {
     val registry: Registries
-    val world: WorldServer
+    override val world: WorldServer
     val onSpawn: ConcurrentMap<ListenerToken, () -> Unit>
     val onUpdate: ConcurrentMap<ListenerToken, (Double) -> Unit>
 
-    fun setEntityID(uuid: UUID)
+    fun setEntityID(uuid: Uuid)
 
     fun setPos(pos: Vector3d)
 

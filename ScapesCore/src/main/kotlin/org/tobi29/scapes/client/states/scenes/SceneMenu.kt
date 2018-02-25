@@ -18,24 +18,24 @@ package org.tobi29.scapes.client.states.scenes
 
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.run
+import kotlinx.coroutines.experimental.withContext
+import org.tobi29.graphics.Cam
+import org.tobi29.graphics.gaussianBlurOffset
+import org.tobi29.graphics.gaussianBlurWeight
+import org.tobi29.io.IOException
+import org.tobi29.io.use
+import org.tobi29.math.threadLocalRandom
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.resource.Resource
-import org.tobi29.scapes.engine.utils.AtomicReference
-import org.tobi29.scapes.engine.utils.chain
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.graphics.gaussianBlurOffset
-import org.tobi29.scapes.engine.utils.graphics.gaussianBlurWeight
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.use
-import org.tobi29.scapes.engine.utils.math.remP
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.utils.shader.ArrayExpression
-import org.tobi29.scapes.engine.utils.shader.IntegerExpression
+import org.tobi29.scapes.engine.shader.ArrayExpression
+import org.tobi29.scapes.engine.shader.IntegerExpression
 import org.tobi29.scapes.server.format.WorldSource
+import org.tobi29.stdex.atomic.AtomicReference
+import org.tobi29.stdex.math.remP
+import org.tobi29.utils.chain
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -194,7 +194,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                     supplier(i)
                 }
             }.map { it.await() }
-            run(engine.graphics) {
+            withContext(engine.graphics) {
                 textures.withIndex().forEach { (i, texture) ->
                     this@SceneMenu.textures[i]?.markDisposed()
                     this@SceneMenu.textures[i] = texture

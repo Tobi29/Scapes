@@ -18,32 +18,29 @@ package org.tobi29.scapes.tools.controlpanel.extensions
 
 import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Group
-import org.tobi29.scapes.engine.server.ControlPanelProtocol
-import org.tobi29.scapes.engine.swt.util.framework.GuiApplication
-import org.tobi29.scapes.engine.swt.util.widgets.ifPresent
-import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.ComponentTypeRegistered
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toLong
-import org.tobi29.scapes.engine.utils.task.Timer
-import org.tobi29.scapes.engine.utils.task.loop
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.loopUntilCancel
+import org.tobi29.server.ControlPanelProtocol
+import org.tobi29.application.swt.framework.GuiApplication
+import org.tobi29.application.swt.widgets.ifPresent
+import org.tobi29.utils.ComponentTypeRegistered
 import org.tobi29.scapes.tools.controlpanel.ControlPanelDocument
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelGraphs
-import java.util.concurrent.TimeUnit
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toLong
 
 class ExtensionStat(
         application: GuiApplication,
         connection: ControlPanelProtocol
 ) : Extension(connection) {
     override val priority = -100
-    private var job: Pair<Job, AtomicBoolean>? = null
+    private var job: Job? = null
     private var graphs: ControlPanelGraphs? = null
 
     init {
@@ -61,18 +58,12 @@ class ExtensionStat(
     }
 
     override fun init(holder: ControlPanelDocument) {
-        val stop = AtomicBoolean(false)
-        job = launch(holder.application.uiContext + CoroutineName(
-                "Extension-Players")) {
-            Timer().apply { init() }.loop(Timer.toDiff(4.0),
-                    { delay(it, TimeUnit.NANOSECONDS) }) {
-                if (stop.get()) return@loop false
-
+        job = launch(holder.application.uiContext +
+                CoroutineName("Extension-Stat")) {
+            Timer().apply { init() }.loopUntilCancel(Timer.toDiff(1.0)) {
                 connection.send("Stats", TagMap())
-
-                true
             }
-        } to stop
+        }
     }
 
     override fun populate(composite: ControlPanelConnection) {
@@ -85,10 +76,7 @@ class ExtensionStat(
     }
 
     override fun dispose() {
-        job?.let { (_, stop) ->
-            stop.set(true)
-            this.job = null
-        }
+        job?.cancel()
     }
 
     companion object {

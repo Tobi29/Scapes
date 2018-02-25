@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.terrain
 
-import org.tobi29.scapes.engine.utils.assert
+import org.tobi29.stdex.assert
 
 interface TerrainGlobals<out B : VoxelType> {
     val air: B

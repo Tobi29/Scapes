@@ -20,17 +20,17 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.push
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.PointerPane
-import org.tobi29.scapes.engine.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.minus
-import org.tobi29.scapes.engine.math.vector.times
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.math.AABB
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
+import org.tobi29.math.vector.MutableVector3d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.minus
+import org.tobi29.math.vector.times
+import org.tobi29.utils.Pool
+import org.tobi29.graphics.Cam
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.floorToInt
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBlockBreakClient
@@ -50,40 +50,40 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
     }
 
     override fun shapeAABB(aabb: AABB) {
-        aabb.minX = pos.doubleX() - 0.5
-        aabb.minY = pos.doubleY() - 0.5
-        aabb.minZ = pos.doubleZ() - 0.5
-        aabb.maxX = pos.doubleX() + 0.5
-        aabb.maxY = pos.doubleY() + 0.5
-        aabb.maxZ = pos.doubleZ() + 0.5
+        aabb.minX = pos.x - 0.5
+        aabb.minY = pos.y - 0.5
+        aabb.minZ = pos.z - 0.5
+        aabb.maxX = pos.x + 0.5
+        aabb.maxY = pos.y + 0.5
+        aabb.maxZ = pos.z + 0.5
     }
 
     override fun renderUpdate(delta: Double) {
         val factor = min(1.0, delta * 5.0)
-        pos.plus((entity.getCurrentPos() - pos.now()) * factor)
+        pos.add((entity.getCurrentPos() - pos.now()) * factor)
         pointerPanes.reset()
         val terrain = entity.world.terrain
-        val block = terrain.block(pos.intX(), pos.intY(), pos.intZ())
+        val block = terrain.block(pos.x.floorToInt(), pos.y.floorToInt(), pos.z.floorToInt())
         terrain.type(block).addPointerCollision(terrain.data(block),
-                pointerPanes, pos.intX(), pos.intY(), pos.intZ())
+                pointerPanes, pos.x.floorToInt(), pos.y.floorToInt(), pos.z.floorToInt())
     }
 
     override fun render(gl: GL,
                         world: WorldClient,
                         cam: Cam,
                         shader: Shader) {
-        val posRenderX = (pos.doubleX() - cam.position.doubleX()).toFloat()
-        val posRenderY = (pos.doubleY() - cam.position.doubleY()).toFloat()
-        val posRenderZ = (pos.doubleZ() - cam.position.doubleZ()).toFloat()
+        val posRenderX = (pos.x - cam.position.x).toFloat()
+        val posRenderY = (pos.y - cam.position.y).toFloat()
+        val posRenderZ = (pos.z - cam.position.z).toFloat()
         val i = clamp((entity.progress() * 10).floorToInt() + 1, 1, 9)
         if (i < 1 || i > 10) {
             return
         }
         gl.setAttribute2f(4,
-                world.terrain.blockLight(pos.intX(), pos.intY(),
-                        pos.intZ()) / 15.0f,
-                world.terrain.sunLight(pos.intX(), pos.intY(),
-                        pos.intZ()) / 15.0f)
+                world.terrain.blockLight(pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt()) / 15.0f,
+                world.terrain.sunLight(pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt()) / 15.0f)
         textures[i - 1].bind(gl)
         for (pane in pointerPanes) {
             gl.matrixStack.push { matrix ->

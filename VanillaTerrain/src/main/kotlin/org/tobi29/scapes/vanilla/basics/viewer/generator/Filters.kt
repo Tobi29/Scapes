@@ -15,10 +15,10 @@
  */
 package org.tobi29.scapes.vanilla.basics.viewer.generator
 
-import org.tobi29.scapes.engine.utils.math.clamp
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator
+import org.tobi29.stdex.math.clamp
 
 fun terrain(
         terrainGenerator: TerrainGenerator): TerrainViewerCanvas.ColorSupplier {
@@ -211,9 +211,9 @@ fun mix(
             val s = o.s
             val v = o.v
             b.color(x, y, o)
-            o.h = org.tobi29.scapes.engine.utils.math.mix(h, o.h, mix)
-            o.s = org.tobi29.scapes.engine.utils.math.mix(s, o.s, mix)
-            o.v = org.tobi29.scapes.engine.utils.math.mix(v, o.v, mix)
+            o.h = org.tobi29.stdex.math.mix(h, o.h, mix)
+            o.s = org.tobi29.stdex.math.mix(s, o.s, mix)
+            o.v = org.tobi29.stdex.math.mix(v, o.v, mix)
         }
 
         override fun tooltip(x: Double,

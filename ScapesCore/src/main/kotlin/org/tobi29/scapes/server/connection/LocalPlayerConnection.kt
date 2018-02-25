@@ -17,18 +17,14 @@
 package org.tobi29.scapes.server.connection
 
 import kotlinx.coroutines.experimental.yield
+import org.tobi29.checksums.ChecksumAlgorithm
+import org.tobi29.checksums.checksum
+import org.tobi29.graphics.decodePNG
+import org.tobi29.io.IOException
+import org.tobi29.io.filesystem.exists
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.LocalClientConnection
 import org.tobi29.scapes.connection.Account
-import org.tobi29.scapes.engine.server.Connection
-import org.tobi29.scapes.engine.server.ConnectionCloseException
-import org.tobi29.scapes.engine.server.ConnectionWorker
-import org.tobi29.scapes.engine.server.InvalidPacketDataException
-import org.tobi29.scapes.engine.utils.Algorithm
-import org.tobi29.scapes.engine.utils.graphics.decodePNG
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.checksum
-import org.tobi29.scapes.engine.utils.io.filesystem.exists
 import org.tobi29.scapes.entity.skin.ServerSkin
 import org.tobi29.scapes.packets.PacketClient
 import org.tobi29.scapes.packets.PacketDisconnect
@@ -38,6 +34,10 @@ import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.event.PlayerJoinEvent
 import org.tobi29.scapes.server.extension.event.PlayerLeaveEvent
+import org.tobi29.server.Connection
+import org.tobi29.server.ConnectionCloseException
+import org.tobi29.server.ConnectionWorker
+import org.tobi29.server.InvalidPacketDataException
 import java.util.concurrent.ConcurrentLinkedQueue
 
 class LocalPlayerConnection(private val worker: ConnectionWorker,
@@ -84,7 +84,7 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
         nickname = account.nickname()
         skin = ServerSkin(image)
         id = checksum(account.keyPair().public.encoded,
-                Algorithm.SHA1).toString()
+                ChecksumAlgorithm.Sha256).toString()
 
         val response = server.addPlayer(this)
         if (response != null) {

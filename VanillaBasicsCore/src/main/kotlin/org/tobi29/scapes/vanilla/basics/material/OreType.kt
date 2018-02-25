@@ -17,7 +17,7 @@
 package org.tobi29.scapes.vanilla.basics.material
 
 import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.engine.utils.readOnly
+import org.tobi29.stdex.readOnly
 
 class OreType(val type: BlockType,
               val rarity: Int,

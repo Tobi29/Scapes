@@ -16,26 +16,33 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.tool
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.copy
+import org.tobi29.scapes.block.data
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.ItemStack
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
+import org.tobi29.scapes.vanilla.basics.material.item.VanillaItem
 
 class ItemMetalPickaxe(type: VanillaMaterialType) : ItemMetalTool(type) {
     override fun click(entity: MobPlayerServer,
-                       item: ItemStack) {
-        if (item.data() == 0) {
-            val itemHandle = ItemStack(materials.stick, 0)
-            val itemString = ItemStack(materials.string, 0, 2)
-            entity.inventories().modify("Container") { inventory ->
-                if (inventory.canTake(itemHandle) && inventory.canTake(
-                        itemString)) {
-                    inventory.take(itemHandle)
-                    inventory.take(itemString)
-                    item.setData(1)
+                       item: TypedItem<VanillaItem>): Item? =
+            if (item.data == 0) {
+                val itemHandle = ItemStack(type = materials.stick, amount = 1)
+                val itemString = ItemStack(type = materials.string, amount = 2)
+                val assemble = entity.inventories.modify(
+                        "Container") { inventory ->
+                    if (inventory.canTakeAll(itemHandle)
+                            && inventory.canTakeAll(itemString)) {
+                        inventory.take(itemHandle)
+                        inventory.take(itemString)
+                        true
+                    } else false
                 }
-            }
-        }
-    }
+                if (assemble) item.copy(data = 1) else item
+            } else item
 
     override fun type(): String {
         return "Pickaxe"

@@ -17,16 +17,17 @@ package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
 import org.tobi29.scapes.entity.client.MobileEntityClient
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.uuid.Uuid
 import kotlin.experimental.or
 
-class PacketMobChangeState : PacketAbstract, PacketBoth {
-    private lateinit var uuid: UUID
+class PacketMobChangeState : PacketAbstract,
+        PacketBoth {
+    private lateinit var uuid: Uuid
     private var ground = false
     private var slidingWall = false
     private var inWater = false
@@ -35,7 +36,7 @@ class PacketMobChangeState : PacketAbstract, PacketBoth {
     constructor(type: PacketType) : super(type)
 
     constructor(type: PacketType,
-                uuid: UUID,
+                uuid: Uuid,
                 pos: Vector3d?,
                 ground: Boolean,
                 slidingWall: Boolean,
@@ -49,7 +50,7 @@ class PacketMobChangeState : PacketAbstract, PacketBoth {
     }
 
     constructor(registry: Registries,
-                uuid: UUID,
+                uuid: Uuid,
                 pos: Vector3d?,
                 ground: Boolean,
                 slidingWall: Boolean,
@@ -71,7 +72,7 @@ class PacketMobChangeState : PacketAbstract, PacketBoth {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.getLong(), stream.getLong())
+        uuid = Uuid(stream.getLong(), stream.getLong())
         val value = stream.get().toInt()
         ground = value and 1 == 1
         slidingWall = value and 2 == 2

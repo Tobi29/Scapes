@@ -1,3 +1,5 @@
+import kotlin.Pair
+
 /*
  * Copyright 2012-2017 Tobi29
  *
@@ -15,7 +17,7 @@
  */
 
 buildscript {
-    def kotlinVersion = "1.2.10"
+    def kotlinVersion = "1.2.21"
     def scapesEngineBuildVersion = "0.0.6"
     def dokkaVersion = "0.9.15"
     def junitPlatformVersion = "1.0.0"
@@ -26,7 +28,6 @@ buildscript {
         maven {
             url "https://dl.bintray.com/kotlin/kotlin-dev"
         }
-        mavenLocal()
         maven {
             url "https://jitpack.io"
         }
@@ -63,7 +64,6 @@ allprojects {
         maven {
             url "https://maven-eclipse.github.io/maven"
         }
-        mavenLocal()
         maven {
             url "https://jitpack.io"
         }
@@ -71,7 +71,7 @@ allprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "4.2"
+    gradleVersion = "4.4.1"
     distributionUrl =
             "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
@@ -80,11 +80,11 @@ ext {
     slf4jVersion = "1.7.25"
     spekVersion = "1.1.5"
     swtVersion = "4.6"
-    lwjglVersion = "3.1.5"
+    lwjglVersion = "3.1.6"
     log4jVersion = "2.8.1"
     jnaVersion = "4.4.0"
     sqliteJDBCVersion = "3.20.0"
-    scapesEngineVersion = "e8097abaa4"
+    scapesEngineVersion = "0.0.10"
 
     slf4jSimple = "org.slf4j:slf4j-simple:$slf4jVersion"
     lwjgl = "org.lwjgl:lwjgl:$lwjglVersion"
@@ -111,60 +111,80 @@ ext {
 
     sqliteJDBC = "org.xerial:sqlite-jdbc:$sqliteJDBCVersion"
 
-    scapesEngineEngine =
-            "com.github.Tobi29.ScapesEngine:EngineJVM:$scapesEngineVersion"
-    scapesEngineArgumentParser =
-            "com.github.Tobi29.ScapesEngine:ArgumentParserJVM:$scapesEngineVersion"
-    scapesEngineMathUtils =
-            "com.github.Tobi29.ScapesEngine:MathUtilsJVM:$scapesEngineVersion"
-    scapesEnginePlatformIntegration =
-            "com.github.Tobi29.ScapesEngine:PlatformIntegrationJVM:$scapesEngineVersion"
-    scapesEngineApplicationFramework =
-            "com.github.Tobi29.ScapesEngine:ApplicationFrameworkJVM:$scapesEngineVersion"
-    scapesEngineSWTUtils =
-            "com.github.Tobi29.ScapesEngine:SWTUtilsJVM:$scapesEngineVersion"
-    scapesEngineServerFramework =
-            "com.github.Tobi29.ScapesEngine:ServerFrameworkJVM:$scapesEngineVersion"
-    scapesEngineSQLFramework =
-            "com.github.Tobi29.ScapesEngine:SQLFrameworkJVM:$scapesEngineVersion"
-    scapesEngineNIOFileSystem =
-            "com.github.Tobi29.ScapesEngine:NIOFileSystemJVM:$scapesEngineVersion"
-    scapesEngineSQLite =
-            "com.github.Tobi29.ScapesEngine:SQLiteJVM:$scapesEngineVersion"
-    scapesEngineSQLJet =
-            "com.github.Tobi29.ScapesEngine:SQLJetJVM:$scapesEngineVersion"
-    scapesEngineMariaDB =
-            "com.github.Tobi29.ScapesEngine:MariaDBJVM:$scapesEngineVersion"
-    scapesEngineMBeansCPUReader =
-            "com.github.Tobi29.ScapesEngine:MBeansCPUReaderJVM:$scapesEngineVersion"
-    scapesEngineGLFWBackend =
-            "com.github.Tobi29.ScapesEngine:GLFWBackendJVM:$scapesEngineVersion"
-    scapesEngineCodecOGG =
-            "com.github.Tobi29.ScapesEngine:CodecOGGJVM:$scapesEngineVersion"
-    scapesEngineCodecMP3 =
-            "com.github.Tobi29.ScapesEngine:CodecMP3JVM:$scapesEngineVersion"
-    scapesEngineCodecWAV =
-            "com.github.Tobi29.ScapesEngine:CodecWAVJVM:$scapesEngineVersion"
-    scapesEngineFileSystems =
-            "com.github.Tobi29.ScapesEngine:FileSystemsJVM:$scapesEngineVersion"
-    scapesEngineGenerationUtils =
-            "com.github.Tobi29.ScapesEngine:GenerationUtilsJVM:$scapesEngineVersion"
-    scapesEngineGraphicsUtils =
-            "com.github.Tobi29.ScapesEngine:GraphicsUtilsJVM:$scapesEngineVersion"
-    scapesEngineChronoUtils =
-            "com.github.Tobi29.ScapesEngine:ChronoUtilsJVM:$scapesEngineVersion"
-    scapesEngineShaderCLike =
-            "com.github.Tobi29.ScapesEngine:ShaderCLikeJVM:$scapesEngineVersion"
-    scapesEngineThreadUtils =
-            "com.github.Tobi29.ScapesEngine:ThreadUtilsJVM:$scapesEngineVersion"
-    scapesEngineTestAssertions =
-            "com.github.Tobi29.ScapesEngine:TestAssertionsJVM:$scapesEngineVersion"
-    scapesEngineOpenALSounds =
-            "com.github.Tobi29.ScapesEngine:OpenALSoundsJVM:$scapesEngineVersion"
+    scapesEngine = { module ->
+        "com.github.Tobi29.ScapesEngine:${module}:$scapesEngineVersion"
+    }
+    scapesEngineJVM = { module -> scapesEngine("${module}JVM") }
+
+    scapesEngineApplicationFramework = scapesEngineJVM("ApplicationFramework")
+    scapesEngineArgumentParser = scapesEngineJVM("ArgumentParser")
+    scapesEngineChronoUtils = scapesEngineJVM("ChronoUtils")
+    scapesEngineCoroutines = scapesEngineJVM("Coroutines")
+    scapesEngineEngine = scapesEngineJVM("Engine")
+    scapesEngineFileSystems = scapesEngineJVM("FileSystems")
+    scapesEngineGenerationUtils = scapesEngineJVM("GenerationUtils")
+    scapesEngineGraphicsUtils = scapesEngineJVM("GraphicsUtils")
+    scapesEngineMariaDB = scapesEngineJVM("MariaDB")
+    scapesEngineMathUtils = scapesEngineJVM("MathUtils")
+    scapesEnginePlatformIntegration = scapesEngineJVM("PlatformIntegration")
+    scapesEngineProfiler = scapesEngineJVM("Profiler")
+    scapesEngineServerFramework = scapesEngineJVM("ServerFramework")
+    scapesEngineShaderCLike = scapesEngineJVM("ShaderCLike")
+    scapesEngineSQLFramework = scapesEngineJVM("SQLFramework")
+    scapesEngineSQLite = scapesEngineJVM("SQLite")
+    scapesEngineSQLJet = scapesEngineJVM("SQLJet")
+    scapesEngineSWTUtils = scapesEngineJVM("SWTUtils")
+    scapesEngineUuid = scapesEngineJVM("Uuid")
+
+    scapesEngineTestAssertions = scapesEngineJVM("TestAssertions")
+
+    scapesEngineCodecOGG = scapesEngineJVM("CodecOGG")
+    scapesEngineCodecMP3 = scapesEngineJVM("CodecMP3")
+    scapesEngineCodecWAV = scapesEngineJVM("CodecWAV")
+    scapesEngineGLFWBackend = scapesEngineJVM("GLFWBackend")
+    scapesEngineMBeansCPUReader = scapesEngineJVM("MBeansCPUReader")
+    scapesEngineNIOFileSystem = scapesEngineJVM("NIOFileSystem")
 }
 
 idea {
     module {
         excludeDirs += file(".jreCache")
+    }
+}
+
+private static String nodeName(ComponentIdentifier id) {
+    return id.displayName.replaceAll("[^a-zA-Z]", "")
+}
+
+private static String nodeName(ComponentSelector id) {
+    return id.displayName.replaceAll("[^a-zA-Z]", "")
+}
+
+task printDependencies {
+    doLast {
+        def nodes = new HashMap<String, String>()
+        def edges = new HashSet<Pair<String, String>>()
+        allprojects {
+            def configuration = configurations.findByName("compileClasspath")
+            if (configuration == null) {
+                return
+            }
+            def deps = configuration.incoming.resolutionResult
+            deps.allComponents {
+                nodes[nodeName(it.id)] = it.id.displayName
+            }
+            deps.root.dependencies.each {
+                edges.add(new Pair(nodeName(it.from.id),
+                        nodeName(it.requested)))
+            }
+        }
+        println("digraph {")
+        nodes.each {
+            println("    ${it.key} [label=\"${it.value}\"]")
+        }
+        edges.each {
+            println("    ${it.first} -> ${it.second}")
+        }
+        println("}")
     }
 }

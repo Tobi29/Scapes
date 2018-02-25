@@ -18,16 +18,13 @@ package org.tobi29.scapes.vanilla.basics
 
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
+import org.tobi29.checksums.Checksum
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.EnvironmentType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.client.states.GameStateGameMP
-import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.EnumMap
-import org.tobi29.scapes.engine.utils.readOnly
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.server.MobPlayerServer
@@ -47,6 +44,9 @@ import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldClient
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldServer
 import org.tobi29.scapes.vanilla.basics.world.decorator.BiomeDecorator
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.EnumMap
+import org.tobi29.stdex.readOnly
 
 class VanillaBasics : WorldType {
     private val craftingRecipesMut = ArrayList<CraftingRecipeType>()

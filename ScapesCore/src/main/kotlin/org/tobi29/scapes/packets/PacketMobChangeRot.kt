@@ -17,15 +17,16 @@ package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
 import org.tobi29.scapes.entity.client.MobileEntityClient
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.uuid.Uuid
 
-class PacketMobChangeRot : PacketAbstract, PacketBoth {
-    private lateinit var uuid: UUID
+class PacketMobChangeRot : PacketAbstract,
+        PacketBoth {
+    private lateinit var uuid: Uuid
     private var x = 0.0f
     private var y = 0.0f
     private var z = 0.0f
@@ -33,7 +34,7 @@ class PacketMobChangeRot : PacketAbstract, PacketBoth {
     constructor(type: PacketType) : super(type)
 
     constructor(type: PacketType,
-                uuid: UUID,
+                uuid: Uuid,
                 pos: Vector3d?,
                 x: Float,
                 y: Float,
@@ -45,7 +46,7 @@ class PacketMobChangeRot : PacketAbstract, PacketBoth {
     }
 
     constructor(registry: Registries,
-                uuid: UUID,
+                uuid: Uuid,
                 pos: Vector3d?,
                 x: Float,
                 y: Float,
@@ -64,7 +65,7 @@ class PacketMobChangeRot : PacketAbstract, PacketBoth {
 
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.getLong(), stream.getLong())
+        uuid = Uuid(stream.getLong(), stream.getLong())
         x = stream.getFloat()
         y = stream.getFloat()
         z = stream.getFloat()

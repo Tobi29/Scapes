@@ -16,16 +16,20 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.block.ItemStackData
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
 class BlockOreMagnetite(type: VanillaMaterialType) : BlockOre(type) {
-    override fun dropsOre(item: ItemStack,
-                          data: Int): List<ItemStack> {
-        return listOf(ItemStack(materials.oreChunk, 5))
+    override fun dropsOre(item: Item?,
+                          data: Int): List<Item> {
+        return listOf(ItemStackData(materials.oreChunk, 5))
     }
 
-    override fun name(item: ItemStack) = "${stoneName(item)} Magnetite Ore"
+    override fun name(item: TypedItem<BlockType>) = "${stoneName(
+            item)} Magnetite Ore"
 
     override fun oreTexture() = "Magnetite"
 }

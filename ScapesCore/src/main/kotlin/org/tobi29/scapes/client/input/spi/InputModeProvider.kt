@@ -19,7 +19,7 @@ package org.tobi29.scapes.client.input.spi
 import org.tobi29.scapes.client.input.InputModeScapes
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.input.Controller
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
+import org.tobi29.io.tag.MutableTagMap
 
 interface InputModeProvider {
     fun get(engine: ScapesEngine,

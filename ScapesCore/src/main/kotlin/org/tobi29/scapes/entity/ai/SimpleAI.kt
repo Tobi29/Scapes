@@ -16,10 +16,11 @@
 
 package org.tobi29.scapes.entity.ai
 
-import org.tobi29.scapes.engine.utils.math.toDeg
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.direction
-import org.tobi29.scapes.engine.math.vector.distanceSqr
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.direction
+import org.tobi29.math.vector.distanceSqr
+import org.tobi29.math.vector.xy
+import org.tobi29.stdex.math.toDeg
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobServer
 
@@ -33,7 +34,7 @@ class SimpleAI(private val mob: MobLivingServer) : AI {
         mobTarget?.let { target = it.getCurrentPos() }
         target?.let {
             val pos = mob.getCurrentPos()
-            yaw = pos.direction(it).toDeg()
+            yaw = pos.xy.direction(it.xy).toDeg()
             timeout -= delta
             if (timeout <= 0.0) {
                 target = null

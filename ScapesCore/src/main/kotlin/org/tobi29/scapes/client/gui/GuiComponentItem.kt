@@ -16,24 +16,21 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.gui.GuiComponentHeavy
 import org.tobi29.scapes.engine.gui.GuiLayoutData
-import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.math.vector.Vector2d
+import org.tobi29.scapes.inventory.Item
 
-class GuiComponentItem(parent: GuiLayoutData,
-                       private var item: ItemStack) : GuiComponentHeavy(
-        parent) {
-
-    fun item(): ItemStack {
-        return item
-    }
-
-    fun setItem(item: ItemStack) {
-        this.item = item
-    }
+class GuiComponentItem(
+        parent: GuiLayoutData,
+        var item: () -> Item?
+) : GuiComponentHeavy(parent) {
+    constructor(
+            parent: GuiLayoutData,
+            item: Item? = null
+    ) : this(parent, { item })
 
     public override fun renderComponent(gl: GL,
                                         shader: Shader,
@@ -41,7 +38,7 @@ class GuiComponentItem(parent: GuiLayoutData,
                                         pixelSize: Vector2d,
                                         delta: Double) {
         super.renderComponent(gl, shader, size, pixelSize, delta)
-        GuiUtils.items(0.0f, 0.0f, size.floatX(), size.floatY(), item, gl,
-                shader, gui.style.font, pixelSize)
+        GuiUtils.items(0.0f, 0.0f, size.x.toFloat(), size.y.toFloat(), item(),
+                gl, shader, gui.style.font, pixelSize)
     }
 }

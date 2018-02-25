@@ -16,10 +16,10 @@
 
 package org.tobi29.scapes.entity.skin
 
-import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.graphics.Image
-import org.tobi29.scapes.engine.utils.io.checksum
-import org.tobi29.scapes.engine.utils.io.readAsByteBuffer
+import org.tobi29.checksums.Checksum
+import org.tobi29.graphics.Image
+import org.tobi29.io.checksum
+import org.tobi29.io.readAsByteBuffer
 
 class ServerSkin(val image: Image) {
     val checksum: Checksum

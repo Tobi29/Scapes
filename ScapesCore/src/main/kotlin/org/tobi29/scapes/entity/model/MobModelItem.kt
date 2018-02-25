@@ -16,23 +16,26 @@
 
 package org.tobi29.scapes.entity.model
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.render
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.push
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.utils.math.remP
-import org.tobi29.scapes.engine.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.minus
-import org.tobi29.scapes.engine.math.vector.times
+import org.tobi29.math.AABB
+import org.tobi29.math.vector.MutableVector3d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.minus
+import org.tobi29.math.vector.times
+import org.tobi29.stdex.atomic.AtomicReference
+import org.tobi29.graphics.Cam
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.remP
 import org.tobi29.scapes.entity.client.MobClient
+import org.tobi29.scapes.inventory.Item
 import kotlin.math.min
 
 class MobModelItem(override val entity: MobClient,
-                   private val item: ItemStack) : MobModel {
+                   private val item: AtomicReference<Item?>) : MobModel {
     private val pos = MutableVector3d()
     private var dir = 0.0
 
@@ -55,17 +58,17 @@ class MobModelItem(override val entity: MobClient,
     }
 
     override fun shapeAABB(aabb: AABB) {
-        aabb.minX = pos.doubleX() - 0.1
-        aabb.minY = pos.doubleY() - 0.1
-        aabb.minZ = pos.doubleZ() - 0.1
-        aabb.maxX = pos.doubleX() + 0.1
-        aabb.maxY = pos.doubleY() + 0.1
-        aabb.maxZ = pos.doubleZ() + 0.1
+        aabb.minX = pos.x - 0.1
+        aabb.minY = pos.y - 0.1
+        aabb.minZ = pos.z - 0.1
+        aabb.maxX = pos.x + 0.1
+        aabb.maxY = pos.y + 0.1
+        aabb.maxZ = pos.z + 0.1
     }
 
     override fun renderUpdate(delta: Double) {
         val factor = min(1.0, delta * 10.0)
-        pos.plus(entity.getCurrentPos().minus(pos.now()).times(factor))
+        pos.add(entity.getCurrentPos().minus(pos.now()).times(factor))
         dir = (dir + 45.0 * delta) remP 360.0
     }
 
@@ -73,18 +76,19 @@ class MobModelItem(override val entity: MobClient,
                         world: WorldClient,
                         cam: Cam,
                         shader: Shader) {
-        val posRenderX = (pos.doubleX() - cam.position.doubleX()).toFloat()
-        val posRenderY = (pos.doubleY() - cam.position.doubleY()).toFloat()
-        val posRenderZ = (pos.doubleZ() - cam.position.doubleZ()).toFloat()
-        gl.setAttribute2f(4, world.terrain.blockLight(pos.intX(), pos.intY(),
-                pos.intZ()) / 15.0f,
-                world.terrain.sunLight(pos.intX(), pos.intY(),
-                        pos.intZ()) / 15.0f)
+        val posRenderX = (pos.x - cam.position.x).toFloat()
+        val posRenderY = (pos.y - cam.position.y).toFloat()
+        val posRenderZ = (pos.z - cam.position.z).toFloat()
+        gl.setAttribute2f(4,
+                world.terrain.blockLight(pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt()) / 15.0f,
+                world.terrain.sunLight(pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt()) / 15.0f)
         gl.matrixStack.push { matrix ->
             matrix.translate(posRenderX, posRenderY, posRenderZ)
             matrix.scale(0.4f, 0.4f, 0.4f)
             matrix.rotate(dir, 0.0f, 0.0f, 1.0f)
-            item.material().render(item, gl, shader)
+            item.get().render(gl, shader)
         }
     }
 }

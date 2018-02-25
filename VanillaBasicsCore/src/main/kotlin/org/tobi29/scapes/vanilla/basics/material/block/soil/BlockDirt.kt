@@ -16,9 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.soil
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
 import org.tobi29.scapes.chunk.ChunkMesh
@@ -27,8 +25,11 @@ import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.math.Face
+import org.tobi29.math.Face
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
@@ -55,19 +56,19 @@ class BlockDirt(type: VanillaMaterialType) : BlockSoil(type) {
                 1.0, 1.0, 1.0, 1.0)
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
         modelDirt?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
         modelDirt?.renderInventory(gl, shader)
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return "Dirt"
     }
 
@@ -78,11 +79,11 @@ class BlockDirt(type: VanillaMaterialType) : BlockSoil(type) {
                          data: Int,
                          face: Face,
                          player: MobPlayerServer,
-                         item: ItemStack): Boolean {
+                         item: Item?): Boolean {
         if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
             return false
         }
-        if ("Hoe" == item.material().toolType(item)) {
+        if ("Hoe" == item.kind<ItemTypeTool>()?.toolType()) {
             terrain.type(x, y, z, materials.farmland)
             materials.farmland.getEntity(player.world.terrain, x, y, z).nourish(
                     0.1)
@@ -91,10 +92,9 @@ class BlockDirt(type: VanillaMaterialType) : BlockSoil(type) {
         return true
     }
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
-        return (if ("Shovel" == item.material().toolType(
-                item)) 2 else 20).toDouble()
+        return (if ("Shovel" == item.kind<ItemTypeTool>()?.toolType()) 2 else 20).toDouble()
     }
 
     override fun particleTexture(face: Face,

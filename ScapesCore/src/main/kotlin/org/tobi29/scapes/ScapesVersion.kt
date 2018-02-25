@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes
 
-import org.tobi29.scapes.engine.utils.Version
+import org.tobi29.utils.Version
+import org.tobi29.stdex.utf8ToArray
 
 val VERSION = Version(0, 0, 0)

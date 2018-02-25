@@ -16,10 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.device
 
-import org.tobi29.scapes.block.AABBElement
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
 import org.tobi29.scapes.chunk.ChunkMesh
@@ -29,11 +26,14 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.PointerPane
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.AABB
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.utils.Pool
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAnvilClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityAnvilServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
@@ -77,17 +77,17 @@ class BlockAnvil(type: VanillaMaterialType) : VanillaBlockContainer<EntityAnvilC
         return aabbs
     }
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
-        return (if ("Pickaxe" == item.material().toolType(
-                item)) 8 else -1).toDouble()
+        val tool = item.kind<ItemTypeTool>()
+        return (if ("Pickaxe" == tool?.toolType()) 8 else -1).toDouble()
     }
 
     override fun footStepSound(data: Int): String {
         return "VanillaBasics:sound/footsteps/Stone.ogg"
     }
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
         return "VanillaBasics:sound/blocks/Metal.ogg"
     }
@@ -138,7 +138,7 @@ class BlockAnvil(type: VanillaMaterialType) : VanillaBlockContainer<EntityAnvilC
                 val entity = materials.plugin.entityTypes.flyingBlock.createServer(
                         world).apply {
                     setPos(Vector3d(x + 0.5, y + 0.5, z + 0.5))
-                    setType(ItemStack(this@BlockAnvil, data))
+                    setType(ItemStackData(this@BlockAnvil, data))
                 }
                 world.addEntityNew(entity)
                 terrain.typeData(x, y, z, terrain.air, 0)
@@ -165,23 +165,23 @@ class BlockAnvil(type: VanillaMaterialType) : VanillaBlockContainer<EntityAnvilC
         model = BlockModelComplex(registry, shapes, 0.0625)
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
         model?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
         model?.renderInventory(gl, shader)
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return "Anvil"
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 1
     }
 

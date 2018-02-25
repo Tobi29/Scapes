@@ -16,8 +16,8 @@
 package org.tobi29.scapes.block.models
 
 import org.tobi29.scapes.chunk.terrain.Terrain
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.utils.math.clamp
+import org.tobi29.math.Face
+import org.tobi29.stdex.math.clamp
 import kotlin.math.roundToInt
 
 object SmoothLight {

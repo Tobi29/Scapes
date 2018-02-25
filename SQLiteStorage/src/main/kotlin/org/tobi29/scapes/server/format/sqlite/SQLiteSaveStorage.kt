@@ -17,7 +17,7 @@
 package org.tobi29.scapes.server.format.sqlite
 
 import org.tobi29.scapes.client.SaveStorage
-import org.tobi29.scapes.engine.utils.io.filesystem.*
+import org.tobi29.io.filesystem.*
 import org.tobi29.scapes.server.format.WorldSource
 
 class SQLiteSaveStorage(private val path: FilePath) : SaveStorage {

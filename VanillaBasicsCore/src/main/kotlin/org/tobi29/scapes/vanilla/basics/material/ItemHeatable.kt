@@ -16,40 +16,76 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toTag
-import kotlin.collections.set
+import org.tobi29.scapes.block.ItemTypeDataI
+import org.tobi29.scapes.block.copy
+import org.tobi29.scapes.inventory.*
+import org.tobi29.io.tag.Tag
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toTag
 
-interface ItemHeatable {
-    fun heat(item: ItemStack,
+typealias ItemHeatable = TypedItem<ItemTypeHeatable>
+typealias ItemTypeHeatable = ItemTypeHeatableI<*>
+
+interface ItemTypeHeatableI<I : ItemType> : ItemTypeI<I>,
+        ItemTypeStackableI<I>,
+        ItemTypeDataI<I> {
+    fun heat(item: TypedItem<I>,
              temperature: Double,
              transferFactor: Double = 1.0,
-             beforeUpdate: (ItemStack) -> Unit = {})
+             beforeUpdate: (TypedItem<I>) -> Item? = { it }): Item?
 
-    fun temperature(item: ItemStack): Double {
-        return item.metaData("Vanilla")["Temperature"]?.toDouble() ?: 0.0
+    fun temperature(item: TypedItem<I>): Double {
+        return item.metaData["Temperature"]?.toDouble() ?: 0.0
     }
 }
 
-interface ItemDefaultHeatable : ItemHeatable {
-    fun heatTransferFactor(item: ItemStack): Double
+inline fun <T : ItemTypeHeatable> TypedItem<T>.heat(
+        temperature: Double,
+        transferFactor: Double = 1.0,
+        noinline beforeUpdate: (TypedItem<T>) -> Item? = { it }
+): Item? = @Suppress("UNCHECKED_CAST")
+(type as ItemTypeHeatableI<ItemType>).heat(this, temperature, transferFactor,
+        beforeUpdate as (TypedItem<ItemType>) -> Item?)
 
-    fun temperatureUpdated(item: ItemStack)
+inline val ItemHeatable.temperature: Double
+    get() = @Suppress("UNCHECKED_CAST")
+    (type as ItemTypeHeatableI<ItemType>).temperature(this)
 
-    override fun heat(item: ItemStack,
+fun <T : ItemTypeHeatable> TypedItem<T>.copy(
+        temperature: Double,
+        metaData: Map<String, Tag> = this.metaData
+): TypedItem<T> = copy(
+        temperature = temperature,
+        type = this.type,
+        metaData = metaData)
+
+fun <T : ItemTypeHeatable, T2 : ItemTypeHeatable> TypedItem<T>.copy(
+        temperature: Double,
+        type: T2,
+        metaData: Map<String, Tag> = this.metaData
+): TypedItem<T2> = copy(
+        type = type,
+        metaData = (metaData + mapOf("Temperature" to temperature.toTag())))
+
+interface ItemDefaultHeatableI<I : ItemType> : ItemTypeHeatableI<I> {
+    fun heatTransferFactor(item: TypedItem<I>): Double
+
+    fun temperatureUpdated(item: TypedItem<I>): Item?
+
+    override fun heat(item: TypedItem<I>,
                       temperature: Double,
                       transferFactor: Double,
-                      beforeUpdate: (ItemStack) -> Unit) {
+                      beforeUpdate: (TypedItem<I>) -> Item?): Item? {
         val currentTemperature = temperature(item)
         val factor = heatTransferFactor(item).toFloat() * transferFactor
         val newTemperature = currentTemperature * (1.0 - factor) + temperature * factor
-        if (newTemperature < 1.0 && newTemperature < currentTemperature) {
-            item.metaData("Vanilla")["Temperature"] = 0.0.toTag()
-        } else {
-            item.metaData("Vanilla")["Temperature"] = newTemperature.toTag()
+        val heatedItem = (item as TypedItem<ItemTypeHeatable>).copy(
+                temperature = newTemperature) as TypedItem<I>
+        val updateItem = beforeUpdate(heatedItem).let {
+            it.kind<ItemDefaultHeatableI<*>>() ?: return it
         }
-        beforeUpdate(item)
-        temperatureUpdated(item)
+        (updateItem.type as ItemDefaultHeatableI<ItemTypeHeatable>)
+                .temperatureUpdated(updateItem)
+        return updateItem
     }
 }

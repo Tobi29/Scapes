@@ -19,11 +19,11 @@ package org.tobi29.scapes.vanilla.basics.world.structure
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainMutable
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.math.cosTable
-import org.tobi29.scapes.engine.math.sinTable
-import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.math.Random
+import org.tobi29.math.cosTable
+import org.tobi29.math.sinTable
+import org.tobi29.stdex.math.TWO_PI
+import org.tobi29.stdex.math.floorToInt
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterial
 import kotlin.math.abs
 

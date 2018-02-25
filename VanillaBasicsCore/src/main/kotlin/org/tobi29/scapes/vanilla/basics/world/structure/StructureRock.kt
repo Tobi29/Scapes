@@ -18,8 +18,8 @@ package org.tobi29.scapes.vanilla.basics.world.structure
 
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.utils.math.ceilToInt
+import org.tobi29.math.Random
+import org.tobi29.stdex.math.ceilToInt
 
 fun TerrainServer.genOreRock(x: Int,
                              y: Int,

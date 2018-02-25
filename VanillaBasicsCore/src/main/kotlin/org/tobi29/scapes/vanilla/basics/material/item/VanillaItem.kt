@@ -16,10 +16,32 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item
 
-import org.tobi29.scapes.block.Material
+import org.tobi29.scapes.block.*
+import org.tobi29.scapes.inventory.ItemTypeI
+import org.tobi29.scapes.inventory.ItemTypeNamedI
+import org.tobi29.scapes.inventory.ItemTypeStackableDefaultI
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
+import org.tobi29.utils.ComponentStorage
 
-abstract class VanillaItem(type: VanillaMaterialType) : Material(type.type) {
+abstract class VanillaItem(
+        type: VanillaMaterialType
+) : VanillaItemBase<VanillaItem>(type),
+        ItemTypeNamedI<VanillaItem>,
+        ItemTypeUseableI<VanillaItem>,
+        ItemTypeStackableDefaultI<VanillaItem>,
+        ItemTypeToolI<VanillaItem>,
+        ItemTypeWeaponI<VanillaItem>,
+        ItemTypeLightI<VanillaItem>,
+        ItemTypeDataI<VanillaItem>,
+        ItemTypeModelI<VanillaItem>,
+        ItemTypeTexturedI<VanillaItem>
+
+abstract class VanillaItemBase<in I>(type: VanillaMaterialType) : ItemTypeI<I> {
+    override val componentStorage = ComponentStorage<Any>()
+    val plugins = type.plugins
+    override val id = type.id
+    override val nameID = type.name
+
     val materials = type.materials
     val plugin = materials.plugin
 }

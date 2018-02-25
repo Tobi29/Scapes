@@ -18,8 +18,8 @@ package org.tobi29.scapes.block
 
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Texture
-import org.tobi29.scapes.engine.utils.io.ByteViewRO
-import org.tobi29.scapes.engine.math.margin
+import org.tobi29.io.ByteViewRO
+import org.tobi29.math.margin
 
 open class TerrainTexture(var buffer: ByteViewRO?,
                           val width: Int,

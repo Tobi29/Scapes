@@ -16,14 +16,16 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.particle
 
+import org.tobi29.scapes.block.light
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.math.matrix.Matrix4f
-import org.tobi29.scapes.engine.math.vector.times
-import org.tobi29.scapes.engine.utils.AtomicInteger
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.shader.IntegerExpression
+import org.tobi29.math.matrix.Matrix4f
+import org.tobi29.math.vector.times
+import org.tobi29.stdex.atomic.AtomicInt
+import org.tobi29.graphics.Cam
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.scapes.engine.shader.IntegerExpression
 import org.tobi29.scapes.entity.particle.ParticleEmitterInstanced
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.particle.ParticleSystem
@@ -35,7 +37,7 @@ class ParticleEmitterRain(system: ParticleSystem,
         ParticleEmitterRain.createAttributesStream(), RenderType.LINES,
         Array(10240, { ParticleInstance() })) {
     private val matrix = Matrix4f()
-    private val raindrops = AtomicInteger()
+    private val raindrops = AtomicInt()
 
     val andResetRaindrops: Int
         get() = raindrops.getAndSet(0)
@@ -57,10 +59,10 @@ class ParticleEmitterRain(system: ParticleSystem,
                 instance.state = ParticleInstance.State.DEAD
                 continue
             }
-            instance.pos.plus(instance.speed.now().times(delta))
-            val x = instance.pos.intX()
-            val y = instance.pos.intY()
-            val z = instance.pos.intZ()
+            instance.pos.add(instance.speed.now().times(delta))
+            val x = instance.pos.x.floorToInt()
+            val y = instance.pos.y.floorToInt()
+            val z = instance.pos.z.floorToInt()
             if (terrain.block(x, y, z) {
                 isSolid(it) || !isTransparent(it)
             }) {
@@ -88,13 +90,11 @@ class ParticleEmitterRain(system: ParticleSystem,
             val s = shader.getAsync()
             ;{ render ->
             val sunLightReduction = environment.sunLightReduction(
-                    cam.position.doubleX(),
-                    cam.position.doubleY()) / 15.0f
+                    cam.position.x,
+                    cam.position.y) / 15.0f
             val playerLight = max(
-                    player.leftWeapon().material().playerLight(
-                            player.leftWeapon()),
-                    player.rightWeapon().material().playerLight(
-                            player.rightWeapon()))
+                    player.leftWeapon().light,
+                    player.rightWeapon().light).toFloat()
             s.setUniform3f(gl, 4, scene.fogR(), scene.fogG(), scene.fogB())
             s.setUniform1f(gl, 5, scene.fogDistance() * scene.renderDistance())
             s.setUniform1i(gl, 6, 1)
@@ -113,20 +113,20 @@ class ParticleEmitterRain(system: ParticleSystem,
             if (instance.state != ParticleInstance.State.ALIVE) {
                 continue
             }
-            val x = instance.pos.intX()
-            val y = instance.pos.intY()
-            val z = instance.pos.intZ()
+            val x = instance.pos.x.floorToInt()
+            val y = instance.pos.y.floorToInt()
+            val z = instance.pos.z.floorToInt()
             if (terrain.block(x, y, z) {
                 !isSolid(it) || isTransparent(it)
             }) {
-                val posRenderX = (instance.pos.doubleX() - cam.position.doubleX()).toFloat()
-                val posRenderY = (instance.pos.doubleY() - cam.position.doubleY()).toFloat()
-                val posRenderZ = (instance.pos.doubleZ() - cam.position.doubleZ()).toFloat()
+                val posRenderX = (instance.pos.x - cam.position.x).toFloat()
+                val posRenderY = (instance.pos.y - cam.position.y).toFloat()
+                val posRenderZ = (instance.pos.z - cam.position.z).toFloat()
                 matrix.identity()
                 matrix.translate(posRenderX, posRenderY, posRenderZ)
                 // TODO: Add camera speed support
-                matrix.scale(instance.speed.floatX(), instance.speed.floatY(),
-                        instance.speed.floatZ())
+                matrix.scale(instance.speed.x.toFloat(),
+                        instance.speed.y.toFloat(), instance.speed.z.toFloat())
                 buffer.putFloat(terrain.blockLight(x, y, z) / 15.0f)
                 buffer.putFloat(terrain.sunLight(x, y, z) / 15.0f)
                 matrix.values.forEach { buffer.putFloat(it) }

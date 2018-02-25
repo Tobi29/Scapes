@@ -18,11 +18,12 @@ package org.tobi29.scapes.entity.particle
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.GraphicsObjectSupplier
 import org.tobi29.scapes.engine.graphics.Texture
-import org.tobi29.scapes.engine.utils.AtomicInteger
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.graphics.*
-import org.tobi29.scapes.engine.math.margin
-import org.tobi29.scapes.engine.math.vector.MutableVector2i
+import org.tobi29.math.margin
+import org.tobi29.math.vector.MutableVector2i
+import org.tobi29.stdex.atomic.AtomicInt
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.computeAbsent
+import org.tobi29.graphics.*
 
 class ParticleTransparentAtlas internal constructor(
         val texture: Texture,
@@ -70,10 +71,10 @@ inline fun ParticleTransparentEntry.marginY(value: Double,
 
 class ParticleTransparentAtlasBuilder {
     private val textures = ConcurrentHashMap<String, Int>()
-    private val idCounter = AtomicInteger(0)
+    private val idCounter = AtomicInt(0)
 
     fun registerTexture(asset: String): Int =
-            textures.computeIfAbsent(asset) { idCounter.getAndIncrement() }
+            textures.computeAbsent(asset) { idCounter.getAndIncrement() }
 
     suspend fun build(
             engine: ScapesEngine,

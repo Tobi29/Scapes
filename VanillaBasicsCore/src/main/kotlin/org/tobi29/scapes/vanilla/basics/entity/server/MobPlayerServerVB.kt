@@ -15,32 +15,33 @@
  */
 package org.tobi29.scapes.vanilla.basics.entity.server
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.checksums.Checksum
+import org.tobi29.math.*
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.plus
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.math.*
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.Vector3i
-import org.tobi29.scapes.engine.math.vector.plus
-import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.vanilla.basics.util.dropItem
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.toRad
 
-class MobPlayerServerVB(type: EntityType<*, *>,
-                        world: WorldServer,
-                        nickname: String,
-                        skin: Checksum,
-                        connection: PlayerConnection) : MobPlayerServer(
-        type, world,
-        Vector3d.ZERO, Vector3d.ZERO, AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9),
-        100.0, 100.0,
+class MobPlayerServerVB(
+        type: EntityType<*, *>,
+        world: WorldServer,
+        nickname: String,
+        skin: Checksum,
+        connection: PlayerConnection
+) : MobPlayerServer(type, world, Vector3d.ZERO, Vector3d.ZERO,
+        AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
         Frustum(90.0, 1.0, 0.1, 24.0), Frustum(50.0, 1.0, 0.1, 2.0), nickname,
         skin, connection) {
     init {
@@ -48,19 +49,24 @@ class MobPlayerServerVB(type: EntityType<*, *>,
                 ComponentMobLivingServerCondition.COMPONENT,
                 ComponentMobLivingServerCondition(this))
         onDeath[PLAYER_LISTENER_TOKEN] = {
-            inventories.modify<List<ItemStack>>(
-                    "Container") { inventory ->
-                val items = ArrayList<ItemStack>()
+            inventories.modify("Container") { inventory ->
+                val items = ArrayList<Item>(inventory.size())
                 for (i in 0 until inventory.size()) {
-                    inventory.item(i).take()?.let { items.add(it) }
+                    inventory[i]?.let { items.add(it) }
+                    inventory[i] = null
                 }
                 items
-            }.forEach { item -> world.dropItem(item, this.pos.now()) }
-            inventories.modify("Hold") {
-                it.item(0).take()
-            }?.let { world.dropItem(it, this.pos.now()) }
+            }.forEach { world.dropItem(it, this.pos.now()) }
+            inventories.modify("Hold") { inventory ->
+                val items = ArrayList<Item>(inventory.size())
+                for (i in 0 until inventory.size()) {
+                    inventory[i]?.let { items.add(it) }
+                    inventory[i] = null
+                }
+                items
+            }.forEach { world.dropItem(it, this.pos.now()) }
             setSpeed(Vector3d.ZERO)
-            setPos(Vector3d(world.spawn + Vector3i(0, 0, 1)))
+            setPos(Vector3d(world.spawn) + Vector3d(0.5, 0.5, 1.5))
             health = maxHealth
             world.send(PacketEntityChange(registry, this))
             spawn()
@@ -75,27 +81,27 @@ class MobPlayerServerVB(type: EntityType<*, *>,
     }
 
     override fun update(delta: Double) {
-        val lookX = cosTable(rot.doubleZ().toRad()) *
-                cosTable(rot.doubleX().toRad()) * 6.0
-        val lookY = sinTable(rot.doubleZ().toRad()) *
-                cosTable(rot.doubleX().toRad()) * 6.0
-        val lookZ = sinTable(rot.doubleX().toRad()) * 6.0
+        val lookX = cosTable(rot.z.toRad()) *
+                cosTable(rot.x.toRad()) * 6.0
+        val lookY = sinTable(rot.z.toRad()) *
+                cosTable(rot.x.toRad()) * 6.0
+        val lookZ = sinTable(rot.x.toRad()) * 6.0
         val viewOffset = viewOffset()
-        viewField.setView(pos.doubleX() + viewOffset.x,
-                pos.doubleY() + viewOffset.y,
-                pos.doubleZ() + viewOffset.z, pos.doubleX() + lookX,
-                pos.doubleY() + lookY, pos.doubleZ() + lookZ, 0.0, 0.0, 1.0)
+        viewField.setView(pos.x + viewOffset.x,
+                pos.y + viewOffset.y,
+                pos.z + viewOffset.z, pos.x + lookX,
+                pos.y + lookY, pos.z + lookZ, 0.0, 0.0, 1.0)
         world.getEntities(
                 viewField).filterIsInstance<MobServer>().filter { it != this }.forEach { mob ->
             val mobPos = mob.getCurrentPos()
-            if (!world.checkBlocked(pos.intX(), pos.intY(),
-                    pos.intZ(), mobPos.intX(), mobPos.intY(),
-                    mobPos.intZ())) {
+            if (!world.checkBlocked(pos.x.floorToInt(), pos.y.floorToInt(),
+                            pos.z.floorToInt(), mobPos.x.floorToInt(),
+                            mobPos.y.floorToInt(), mobPos.z.floorToInt())) {
                 notice(mob)
             }
         }
-        if (pos.doubleZ() < -100.0) {
-            damage(-pos.doubleZ() - 100.0)
+        if (pos.z < -100.0) {
+            damage(-pos.z - 100.0)
         }
         if (health < 10.0) {
             val random = threadLocalRandom()
@@ -107,12 +113,12 @@ class MobPlayerServerVB(type: EntityType<*, *>,
             }
             if (random.nextInt(20) == 0) {
                 setRot(Vector3d(
-                        rot.doubleX() + random.nextDouble() * 60.0 - 30.0,
-                        rot.doubleY(), rot.doubleZ()))
+                        rot.x + random.nextDouble() * 60.0 - 30.0,
+                        rot.y, rot.z))
             }
             if (random.nextInt(20) == 0) {
-                setRot(Vector3d(rot.doubleX(), rot.doubleY(),
-                        rot.doubleZ() + random.nextDouble() * 60.0 - 30.0))
+                setRot(Vector3d(rot.x, rot.y,
+                        rot.z + random.nextDouble() * 60.0 - 30.0))
             }
         }
     }
@@ -127,9 +133,14 @@ class MobPlayerServerVB(type: EntityType<*, *>,
     }
 
     override fun onCloseInventory(): Boolean {
-        inventories().modify("Hold") { inventory ->
-            inventory.item(0).take()?.let { dropItem(it) }
-        }
+        inventories.modify("Hold") { inventory ->
+            val items = ArrayList<Item>(inventory.size())
+            for (i in 0 until inventory.size()) {
+                inventory[i]?.let { items.add(it) }
+                inventory[i] = null
+            }
+            items
+        }.forEach { world.dropItem(it, this.pos.now()) }
         return true
     }
 }

@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.server.format
 
-import org.tobi29.scapes.engine.utils.graphics.Image
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
+import org.tobi29.graphics.Image
+import org.tobi29.io.filesystem.FilePath
 import org.tobi29.scapes.server.ScapesServer
 
 interface WorldSource : AutoCloseable {

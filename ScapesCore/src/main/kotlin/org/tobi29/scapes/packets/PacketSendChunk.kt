@@ -15,19 +15,20 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteChunkServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
-import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
+import org.tobi29.io.tag.binary.readBinary
+import org.tobi29.io.tag.binary.writeBinary
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.io.tag.TagMap
 
-class PacketSendChunk : PacketAbstract, PacketClient {
+class PacketSendChunk : PacketAbstract,
+        PacketClient {
     private var x = 0
     private var y = 0
     private lateinit var tag: TagMap

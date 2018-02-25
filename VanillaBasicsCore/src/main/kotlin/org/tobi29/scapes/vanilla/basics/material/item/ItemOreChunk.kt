@@ -15,27 +15,32 @@
  */
 package org.tobi29.scapes.vanilla.basics.material.item
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
-import org.tobi29.scapes.vanilla.basics.material.ItemResearch
+import org.tobi29.scapes.block.copy
+import org.tobi29.scapes.block.data
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatableI
+import org.tobi29.scapes.vanilla.basics.material.ItemResearchI
 import org.tobi29.scapes.vanilla.basics.material.MetalType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
-import org.tobi29.scapes.vanilla.basics.util.createIngot
+import org.tobi29.scapes.vanilla.basics.util.Alloy
+import org.tobi29.scapes.vanilla.basics.util.toIngot
 
-class ItemOreChunk(type: VanillaMaterialType) : ItemSimpleData(
-        type), ItemDefaultHeatable, ItemResearch {
-    override fun name(item: ItemStack): String {
+class ItemOreChunk(
+        type: VanillaMaterialType
+) : ItemSimpleData(type),
+        ItemDefaultHeatableI<VanillaItem>,
+        ItemResearchI<VanillaItem> {
+    override fun name(item: TypedItem<VanillaItem>): String {
         val name = StringBuilder(50)
         name.append(oreName(item))
         val temperature = temperature(item)
-        if (temperature > 0.1f) {
-            name.append("\nTemp.:").append(temperature.floorToInt()).append("°C")
-        }
+        name.append("\nTemp.:").append(temperature.floorToInt()).append("°C")
         return name.toString()
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<VanillaItem>): Int {
         return 4
     }
 
@@ -58,8 +63,8 @@ class ItemOreChunk(type: VanillaMaterialType) : ItemSimpleData(
         }
     }
 
-    fun oreName(item: ItemStack): String {
-        when (item.data()) {
+    fun oreName(item: TypedItem<VanillaItem>): String {
+        when (item.data) {
             0 -> return "Bismuthinite"
             1 -> return "Chalcocite"
             2 -> return "Cassiterite"
@@ -71,12 +76,12 @@ class ItemOreChunk(type: VanillaMaterialType) : ItemSimpleData(
             8 -> return "Iron Bloom"
             9 -> return "Worked Iron Bloom"
             else -> throw IllegalArgumentException(
-                    "Unknown data: {}" + item.data())
+                    "Unknown data: {}" + item.data)
         }
     }
 
-    fun meltingPoint(item: ItemStack): Float {
-        when (item.data()) {
+    fun meltingPoint(item: TypedItem<VanillaItem>): Float {
+        when (item.data) {
             0 -> return 271.0f
             1 -> return 1084.0f
             2 -> return 231.0f
@@ -88,29 +93,29 @@ class ItemOreChunk(type: VanillaMaterialType) : ItemSimpleData(
             8 -> return 1538.0f
             9 -> return 1538.0f
             else -> throw IllegalArgumentException(
-                    "Unknown data: {}" + item.data())
+                    "Unknown data: {}" + item.data)
         }
     }
 
-    override fun heatTransferFactor(item: ItemStack) = 0.001
+    override fun heatTransferFactor(item: TypedItem<VanillaItem>) = 0.001
 
-    override fun temperatureUpdated(item: ItemStack) {
+    override fun temperatureUpdated(item: TypedItem<VanillaItem>): Item? {
         val temperature = temperature(item)
         if (temperature >= meltingPoint(item)) {
-            val data = item.data()
+            val data = item.data
             if (data == 4 || data == 5) {
-                item.setData(8)
+                return item.copy(data = 8)
             } else {
                 val metal = metal(item)
                 if (metal != null) {
-                    item.setMaterial(materials.ingot, 1)
-                    createIngot(item, metal)
+                    return Alloy(mapOf(metal to 1.0)).toIngot(plugin)
                 }
             }
         }
+        return item
     }
 
-    fun metal(item: ItemStack): MetalType? = when (item.data()) {
+    fun metal(item: TypedItem<VanillaItem>): MetalType? = when (item.data) {
         0 -> plugin.metalType("Bismuth")
         1 -> plugin.metalType("Copper")
         2 -> plugin.metalType("Tin")
@@ -121,7 +126,7 @@ class ItemOreChunk(type: VanillaMaterialType) : ItemSimpleData(
         else -> null
     }
 
-    override fun identifiers(item: ItemStack): Array<String> {
+    override fun identifiers(item: TypedItem<VanillaItem>): Array<String> {
         return arrayOf("vanilla.basics.item.OreChunk",
                 "vanilla.basics.item.OreChunk." + oreName(item))
     }

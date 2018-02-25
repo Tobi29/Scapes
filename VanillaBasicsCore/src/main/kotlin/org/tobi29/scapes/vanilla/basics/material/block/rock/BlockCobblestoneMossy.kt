@@ -16,15 +16,18 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.block.ItemStackData
 import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.utils.toArray
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
 class BlockCobblestoneMossy(type: VanillaMaterialType) : BlockStone(type) {
-    override fun drops(item: ItemStack,
-                       data: Int): List<ItemStack> {
-        return listOf(ItemStack(materials.stoneRock, data, 9))
+    override fun drops(item: Item?,
+                       data: Int): List<Item> {
+        return listOf(ItemStackData(materials.stoneRock, data, 9))
     }
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
@@ -38,7 +41,7 @@ class BlockCobblestoneMossy(type: VanillaMaterialType) : BlockStone(type) {
         }.toArray()
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return "Mossy ${stoneName(item)} Cobblestone"
     }
 }

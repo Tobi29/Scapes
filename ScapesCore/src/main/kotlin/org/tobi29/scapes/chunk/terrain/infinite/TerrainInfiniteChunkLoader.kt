@@ -16,9 +16,9 @@
 
 package org.tobi29.scapes.chunk.terrain.infinite
 
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.math.sqr
-import org.tobi29.scapes.engine.math.vector.MutableVector2i
+import org.tobi29.utils.Pool
+import org.tobi29.stdex.math.sqr
+import org.tobi29.math.vector.MutableVector2i
 import org.tobi29.scapes.terrain.infinite.TerrainInfiniteBaseChunk
 
 class TerrainInfiniteChunkLoader<out C : TerrainInfiniteBaseChunk<*>>(
@@ -33,7 +33,7 @@ class TerrainInfiniteChunkLoader<out C : TerrainInfiniteBaseChunk<*>>(
     private val heldChunks = HashMap<MutableVector2i, Priority>()
 
     val outsideChunks = chunks.filter {
-        REQUIRED_POSITION.set(it.pos.x, it.pos.y) !in heldChunks
+        REQUIRED_POSITION.setXY(it.pos.x, it.pos.y) !in heldChunks
     }
 
     fun requiredChunks(filter: (MutableVector2i) -> Boolean) =
@@ -44,7 +44,7 @@ class TerrainInfiniteChunkLoader<out C : TerrainInfiniteBaseChunk<*>>(
     fun require(x: Int,
                 y: Int,
                 priority: Int) {
-        REQUIRED_POSITION.set(x, y)
+        REQUIRED_POSITION.setXY(x, y)
         heldChunks[REQUIRED_POSITION]?.also {
             it.value = it.value.coerceAtMost(-priority)
         } ?: run {

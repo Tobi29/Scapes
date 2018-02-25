@@ -15,14 +15,12 @@
  */
 package org.tobi29.scapes.entity.server
 
-import org.tobi29.scapes.block.InventoryContainer
+import org.tobi29.utils.ComponentType
+import org.tobi29.stdex.ConcurrentHashSet
 
-interface EntityContainerServer : EntityServer {
-    val viewers: List<MobPlayerServer>
+typealias ContainerViewers = ConcurrentHashSet<MobPlayerServer>
 
-    fun inventories(): InventoryContainer
+inline val EntityServer.viewers: ContainerViewers
+    get() = this[CONTAINER_VIEWERS_COMPONENT]
 
-    fun addViewer(player: MobPlayerServer)
-
-    fun removeViewer(player: MobPlayerServer)
-}
+val CONTAINER_VIEWERS_COMPONENT = ComponentType.of<EntityServer, ContainerViewers, Any> { ContainerViewers() }

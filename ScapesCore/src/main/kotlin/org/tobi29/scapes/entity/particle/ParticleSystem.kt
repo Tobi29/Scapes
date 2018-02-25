@@ -17,15 +17,15 @@ package org.tobi29.scapes.entity.particle
 
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.launchThread
+import org.tobi29.coroutines.loop
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.utils.AtomicBoolean
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.chain
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.task.Timer
-import org.tobi29.scapes.engine.utils.task.launchThread
-import org.tobi29.scapes.engine.utils.task.loop
+import org.tobi29.utils.chain
+import org.tobi29.graphics.Cam
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.atomic.AtomicBoolean
 import java.util.concurrent.TimeUnit
 
 class ParticleSystem(val world: WorldClient,

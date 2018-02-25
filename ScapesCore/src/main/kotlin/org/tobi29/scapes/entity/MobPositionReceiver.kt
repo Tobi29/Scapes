@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.entity
 
-import org.tobi29.scapes.engine.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.MutableVector3d
+import org.tobi29.math.vector.Vector3d
 
 class MobPositionReceiver(pos: Vector3d,
                           private val positionListener: (Vector3d) -> Unit,
@@ -43,9 +43,9 @@ class MobPositionReceiver(pos: Vector3d,
         val xx = x / 500.0
         val yy = y / 500.0
         val zz = z / 500.0
-        sentPosRelative.plusX(xx)
-        sentPosRelative.plusY(yy)
-        sentPosRelative.plusZ(zz)
+        sentPosRelative.addX(xx)
+        sentPosRelative.addY(yy)
+        sentPosRelative.addZ(zz)
         positionListener(sentPosRelative.now())
     }
 

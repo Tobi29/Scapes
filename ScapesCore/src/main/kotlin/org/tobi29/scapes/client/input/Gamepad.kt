@@ -15,6 +15,9 @@
  */
 package org.tobi29.scapes.client.input
 
+import org.tobi29.io.tag.*
+import org.tobi29.math.vector.Vector2d
+import org.tobi29.math.vector.times
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.gui.GuiControlsGamepad
 import org.tobi29.scapes.engine.GameState
@@ -23,17 +26,15 @@ import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiController
 import org.tobi29.scapes.engine.gui.GuiControllerGamepad
 import org.tobi29.scapes.engine.input.*
-import org.tobi29.scapes.engine.math.vector.Vector2d
-import org.tobi29.scapes.engine.math.vector.times
-import org.tobi29.scapes.engine.utils.EventDispatcher
-import org.tobi29.scapes.engine.utils.listenAlive
-import org.tobi29.scapes.engine.utils.math.mix
-import org.tobi29.scapes.engine.utils.math.sqrNoAbs
-import org.tobi29.scapes.engine.utils.tag.*
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.stdex.math.mix
+import org.tobi29.stdex.math.sqrNoAbs
+import org.tobi29.utils.EventDispatcher
+import org.tobi29.utils.listenAlive
+import kotlin.collections.set
 
 class InputModeGamepad(engine: ScapesEngine,
-                       private val controller: ControllerGamepad,
+                       private val controller: ControllerJoystick,
                        configMap: MutableTagMap) : InputModeScapes {
     val events: EventDispatcher
     private val tagMap: MutableTagMap

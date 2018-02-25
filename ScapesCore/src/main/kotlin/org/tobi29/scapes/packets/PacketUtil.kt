@@ -19,12 +19,12 @@ package org.tobi29.scapes.packets
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.UUID
 import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.uuid.Uuid
 
-fun ClientConnection.getEntity(uuid: UUID?,
+fun ClientConnection.getEntity(uuid: Uuid?,
                                consumer: (EntityClient) -> Unit) {
     if (uuid == null) {
         return
@@ -32,7 +32,7 @@ fun ClientConnection.getEntity(uuid: UUID?,
     mob { it.world.getEntity(uuid, consumer) }
 }
 
-fun WorldClient.getEntity(uuid: UUID?,
+fun WorldClient.getEntity(uuid: Uuid?,
                           consumer: (EntityClient) -> Unit) {
     if (uuid == null) {
         return
@@ -45,7 +45,7 @@ fun WorldClient.getEntity(uuid: UUID?,
     }
 }
 
-fun PlayerConnection.getEntity(uuid: UUID?,
+fun PlayerConnection.getEntity(uuid: Uuid?,
                                consumer: (EntityServer) -> Unit) {
     if (uuid == null) {
         return
@@ -53,7 +53,7 @@ fun PlayerConnection.getEntity(uuid: UUID?,
     mob { it.world.getEntity(uuid, consumer) }
 }
 
-fun WorldServer.getEntity(uuid: UUID?,
+fun WorldServer.getEntity(uuid: Uuid?,
                           consumer: (EntityServer) -> Unit) {
     if (uuid == null) {
         return

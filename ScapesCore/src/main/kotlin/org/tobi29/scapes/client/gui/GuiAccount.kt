@@ -16,17 +16,17 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.checksums.ChecksumAlgorithm
+import org.tobi29.checksums.checksum
+import org.tobi29.io.IOException
+import org.tobi29.io.filesystem.write
+import org.tobi29.io.process
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.utils.Algorithm
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.checksum
-import org.tobi29.scapes.engine.utils.io.filesystem.write
-import org.tobi29.scapes.engine.utils.io.process
-import org.tobi29.scapes.engine.utils.logging.KLogging
 import java.security.KeyPair
 
 class GuiAccount(state: GameState,
@@ -53,7 +53,8 @@ class GuiAccount(state: GameState,
         }
         val id = pane.addVert(16.0, 5.0, -1.0, 12.0) {
             GuiComponentText(it,
-                    "ID: ${checksum(keyPair.public.encoded, Algorithm.SHA1)}")
+                    "ID: ${checksum(keyPair.public.encoded,
+                            ChecksumAlgorithm.Sha256)}")
         }
         pane.addVert(16.0, 5.0, -1.0, 18.0) {
             GuiComponentText(it, "Nickname:")
@@ -80,7 +81,7 @@ class GuiAccount(state: GameState,
             if (keyPair != null) {
                 this.keyPair = keyPair
                 id.text = "ID: ${checksum(keyPair.public.encoded,
-                        Algorithm.SHA1)}"
+                        ChecksumAlgorithm.Sha256)}"
                 error.text = ""
             } else {
                 error.text = "Invalid key!"
@@ -89,7 +90,7 @@ class GuiAccount(state: GameState,
         keyCopyID.on(GuiEvent.CLICK_LEFT) {
             state.engine.container.clipboardCopy(
                     checksum(keyPair.public.encoded,
-                            Algorithm.SHA1).toString())
+                            ChecksumAlgorithm.Sha256).toString())
         }
         nicknameHelp.on(GuiEvent.CLICK_LEFT) {
             state.engine.guiStack.swap(this,

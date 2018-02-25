@@ -19,11 +19,11 @@ import org.tobi29.scapes.block.*
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.utils.math.toRad
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.plus
-import org.tobi29.scapes.engine.math.vector.times
+import org.tobi29.math.Face
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.plus
+import org.tobi29.math.vector.times
+import org.tobi29.stdex.math.toRad
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -327,26 +327,20 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
                 val texMaxX = texTop.marginX(maxX)
                 val texMinY = texTop.marginY(minY)
                 val texMaxY = texTop.marginY(maxY)
-                mesh.addVertex(terrain, Face.UP, x + tllh.x,
-                        y + tllh.y, z + tllh.z,
-                        xx + tllh.x, yy + tllh.y,
-                        zz + tllh.z, texMinX,
-                        texMinY, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.UP, x + thlh.x,
-                        y + thlh.y, z + thlh.z,
-                        xx + thlh.x, yy + thlh.y,
-                        zz + thlh.z, texMaxX,
-                        texMinY, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.UP, x + thhh.x,
-                        y + thhh.y, z + thhh.z,
-                        xx + thhh.x, yy + thhh.y,
-                        zz + thhh.z, texMaxX,
-                        texMaxY, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.UP, x + tlhh.x,
-                        y + tlhh.y, z + tlhh.z,
-                        xx + tlhh.x, yy + tlhh.y,
-                        zz + tlhh.z, texMinX,
-                        texMaxY, r2, g2, b2, a2, lod, anim)
+                mesh.addQuad(terrain, Face.UP,
+                        x + tllh.x, y + tllh.y, z + tllh.z,
+                        x + thlh.x, y + thlh.y, z + thlh.z,
+                        x + thhh.x, y + thhh.y, z + thhh.z,
+                        x + tlhh.x, y + tlhh.y, z + tlhh.z,
+                        xx + tllh.x, yy + tllh.y, zz + tllh.z,
+                        xx + thlh.x, yy + thlh.y, zz + thlh.z,
+                        xx + thhh.x, yy + thhh.y, zz + thhh.z,
+                        xx + tlhh.x, yy + tlhh.y, zz + tlhh.z,
+                        texMaxX, texMinY,
+                        texMinX, texMinY,
+                        texMinX, texMaxY,
+                        texMaxX, texMaxY,
+                        r2, g2, b2, a2, lod, anim)
             }
             if (texBottom != null) {
                 val anim = texBottom.shaderAnimation().id()
@@ -354,26 +348,20 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
                 val texMaxX = texBottom.marginX(maxX)
                 val texMinY = texBottom.marginY(minY)
                 val texMaxY = texBottom.marginY(maxY)
-                mesh.addVertex(terrain, Face.DOWN, x + tlhl.x,
-                        y + tlhl.y, z + tlhl.z,
-                        xx + tlhl.x, yy + tlhl.y,
-                        zz + tlhl.z, texMinX,
-                        texMaxY, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.DOWN, x + thhl.x,
-                        y + thhl.y, z + thhl.z,
-                        xx + thhl.x, yy + thhl.y,
-                        zz + thhl.z, texMaxX,
-                        texMaxY, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.DOWN, x + thll.x,
-                        y + thll.y, z + thll.z,
-                        xx + thll.x, yy + thll.y,
-                        zz + thll.z, texMaxX,
-                        texMinY, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.DOWN, x + tlll.x,
-                        y + tlll.y, z + tlll.z,
-                        xx + tlll.x, yy + tlll.y,
-                        zz + tlll.z, texMinX,
-                        texMinY, r2, g2, b2, a2, lod, anim)
+                mesh.addQuad(terrain, Face.DOWN,
+                        x + tlhl.x, y + tlhl.y, z + tlhl.z,
+                        x + thhl.x, y + thhl.y, z + thhl.z,
+                        x + thll.x, y + thll.y, z + thll.z,
+                        x + tlll.x, y + tlll.y, z + tlll.z,
+                        xx + tlhl.x, yy + tlhl.y, zz + tlhl.z,
+                        xx + thhl.x, yy + thhl.y, zz + thhl.z,
+                        xx + thll.x, yy + thll.y, zz + thll.z,
+                        xx + tlll.x, yy + tlll.y, zz + tlll.z,
+                        texMaxX, texMinY,
+                        texMinX, texMinY,
+                        texMinX, texMaxY,
+                        texMaxX, texMaxY,
+                        r2, g2, b2, a2, lod, anim)
             }
             if (texSide1 != null) {
                 val anim = texSide1.shaderAnimation().id()
@@ -381,26 +369,20 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
                 val texMaxX = texSide1.marginX(maxX)
                 val texMinY = texSide1.marginY(minZ)
                 val texMaxY = texSide1.marginY(maxZ)
-                mesh.addVertex(terrain, Face.NORTH, x + thlh.x,
-                        y + thlh.y, z + thlh.z,
-                        xx + thlh.x, yy + thlh.y,
-                        zz + thlh.z, texMaxX,
-                        texMinY, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.NORTH, x + tllh.x,
-                        y + tllh.y, z + tllh.z,
-                        xx + tllh.x, yy + tllh.y,
-                        zz + tllh.z, texMinX,
-                        texMinY, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.NORTH, x + tlll.x,
-                        y + tlll.y, z + tlll.z,
-                        xx + tlll.x, yy + tlll.y,
-                        zz + tlll.z, texMinX,
-                        texMaxY, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.NORTH, x + thll.x,
-                        y + thll.y, z + thll.z,
-                        xx + thll.x, yy + thll.y,
-                        zz + thll.z, texMaxX,
-                        texMaxY, r2, g2, b2, a2, lod, anim)
+                mesh.addQuad(terrain, Face.NORTH,
+                        x + thlh.x, y + thlh.y, z + thlh.z,
+                        x + tllh.x, y + tllh.y, z + tllh.z,
+                        x + tlll.x, y + tlll.y, z + tlll.z,
+                        x + thll.x, y + thll.y, z + thll.z,
+                        xx + thlh.x, yy + thlh.y, zz + thlh.z,
+                        xx + tllh.x, yy + tllh.y, zz + tllh.z,
+                        xx + tlll.x, yy + tlll.y, zz + tlll.z,
+                        xx + thll.x, yy + thll.y, zz + thll.z,
+                        texMaxX, texMinY,
+                        texMinX, texMinY,
+                        texMinX, texMaxY,
+                        texMaxX, texMaxY,
+                        r2, g2, b2, a2, lod, anim)
             }
             if (texSide2 != null) {
                 val anim = texSide2.shaderAnimation().id()
@@ -408,80 +390,62 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
                 val texMaxX = texSide2.marginX(maxY)
                 val texMinY = texSide2.marginY(minZ)
                 val texMaxY = texSide2.marginY(maxZ)
-                mesh.addVertex(terrain, Face.EAST, x + thhh.x,
-                        y + thhh.y, z + thhh.z,
-                        xx + thhh.x, yy + thhh.y,
-                        zz + thhh.z, texMaxX,
-                        texMinY, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.EAST, x + thlh.x,
-                        y + thlh.y, z + thlh.z,
-                        xx + thlh.x, yy + thlh.y,
-                        zz + thlh.z, texMinX,
-                        texMinY, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.EAST, x + thll.x,
-                        y + thll.y, z + thll.z,
-                        xx + thll.x, yy + thll.y,
-                        zz + thll.z, texMinX,
-                        texMaxY, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.EAST, x + thhl.x,
-                        y + thhl.y, z + thhl.z,
-                        xx + thhl.x, yy + thhl.y,
-                        zz + thhl.z, texMaxX,
-                        texMaxY, r2, g2, b2, a2, lod, anim)
+                mesh.addQuad(terrain, Face.EAST,
+                        x + thhh.x, y + thhh.y, z + thhh.z,
+                        x + thlh.x, y + thlh.y, z + thlh.z,
+                        x + thll.x, y + thll.y, z + thll.z,
+                        x + thhl.x, y + thll.y, z + thhl.z,
+                        xx + thhh.x, yy + thhh.y, zz + thhh.z,
+                        xx + thlh.x, yy + thlh.y, zz + thlh.z,
+                        xx + thll.x, yy + thll.y, zz + thll.z,
+                        xx + thhl.x, yy + thhl.y, zz + thhl.z,
+                        texMaxX, texMinY,
+                        texMinX, texMinY,
+                        texMinX, texMaxY,
+                        texMaxX, texMaxY,
+                        r2, g2, b2, a2, lod, anim)
             }
             if (texSide3 != null) {
                 val anim = texSide3.shaderAnimation().id()
                 val texMinX = texSide3.marginX(minX)
                 val texMaxX = texSide3.marginX(maxX)
-                val texMinZ = texSide3.marginY(minZ)
-                val texMaxZ = texSide3.marginY(maxZ)
-                mesh.addVertex(terrain, Face.SOUTH, x + thhl.x,
-                        y + thhl.y, z + thhl.z,
-                        xx + thhl.x, yy + thhl.y,
-                        zz + thhl.z, texMinX,
-                        texMaxZ, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.SOUTH, x + tlhl.x,
-                        y + tlhl.y, z + tlhl.z,
-                        xx + tlhl.x, yy + tlhl.y,
-                        zz + tlhl.z, texMaxX,
-                        texMaxZ, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.SOUTH, x + tlhh.x,
-                        y + tlhh.y, z + tlhh.z,
-                        xx + tlhh.x, yy + tlhh.y,
-                        zz + tlhh.z, texMaxX,
-                        texMinZ, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.SOUTH, x + thhh.x,
-                        y + thhh.y, z + thhh.z,
-                        xx + thhh.x, yy + thhh.y,
-                        zz + thhh.z, texMinX,
-                        texMinZ, r2, g2, b2, a2, lod, anim)
+                val texMinY = texSide3.marginY(minZ)
+                val texMaxY = texSide3.marginY(maxZ)
+                mesh.addQuad(terrain, Face.SOUTH,
+                        x + thhl.x, y + thhl.y, z + thhl.z,
+                        x + tlhl.x, y + tlhl.y, z + tlhl.z,
+                        x + tlhh.x, y + tlhh.y, z + tlhh.z,
+                        x + thhh.x, y + thhh.y, z + thhh.z,
+                        xx + thhl.x, yy + thhl.y, zz + thhl.z,
+                        xx + tlhl.x, yy + tlhl.y, zz + tlhl.z,
+                        xx + tlhh.x, yy + tlhh.y, zz + tlhh.z,
+                        xx + thhh.x, yy + thhh.y, zz + thhh.z,
+                        texMinX, texMaxY,
+                        texMaxX, texMaxY,
+                        texMaxX, texMinY,
+                        texMinX, texMinY,
+                        r2, g2, b2, a2, lod, anim)
             }
             if (texSide4 != null) {
                 val anim = texSide4.shaderAnimation().id()
                 val texMinX = texSide4.marginX(minY)
                 val texMaxX = texSide4.marginX(maxY)
-                val texMinZ = texSide4.marginY(minZ)
-                val texMaxZ = texSide4.marginY(maxZ)
-                mesh.addVertex(terrain, Face.WEST, x + tlhl.x,
-                        y + tlhl.y, z + tlhl.z,
-                        xx + tlhl.x, yy + tlhl.y,
-                        zz + tlhl.z, texMinX,
-                        texMaxZ, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.WEST, x + tlll.x,
-                        y + tlll.y, z + tlll.z,
-                        xx + tlll.x, yy + tlll.y,
-                        zz + tlll.z, texMaxX,
-                        texMaxZ, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.WEST, x + tllh.x,
-                        y + tllh.y, z + tllh.z,
-                        xx + tllh.x, yy + tllh.y,
-                        zz + tllh.z, texMaxX,
-                        texMinZ, r2, g2, b2, a2, lod, anim)
-                mesh.addVertex(terrain, Face.WEST, x + tlhh.x,
-                        y + tlhh.y, z + tlhh.z,
-                        xx + tlhh.x, yy + tlhh.y,
-                        zz + tlhh.z, texMinX,
-                        texMinZ, r2, g2, b2, a2, lod, anim)
+                val texMinY = texSide4.marginY(minZ)
+                val texMaxY = texSide4.marginY(maxZ)
+                mesh.addQuad(terrain, Face.WEST,
+                        x + tlhl.x, y + tlhl.y, z + tlhl.z,
+                        x + tlll.x, y + tlll.y, z + tlll.z,
+                        x + tllh.x, y + tllh.y, z + tllh.z,
+                        x + tlhh.x, y + tlhh.y, z + tlhh.z,
+                        xx + tlhl.x, yy + tlhl.y, zz + tlhl.z,
+                        xx + tlll.x, yy + tlll.y, zz + tlll.z,
+                        xx + tllh.x, yy + tllh.y, zz + tllh.z,
+                        xx + tlhh.x, yy + tlhh.y, zz + tlhh.z,
+                        texMinX, texMaxY,
+                        texMaxX, texMaxY,
+                        texMaxX, texMinY,
+                        texMinX, texMinY,
+                        r2, g2, b2, a2, lod, anim)
             }
         }
 
@@ -673,54 +637,82 @@ class BlockModelComplex(private val registry: TerrainTextureRegistry,
             val texMaxX = texture.marginX(maxX)
             val texMinY = texture.marginY(minY)
             val texMaxY = texture.marginY(maxY)
-            mesh.addVertex(terrain, Face.NONE, x + tlll.x, y + tlll.y,
-                    z + tlll.z, xx + tlll.x, yy + tlll.y, zz + tlll.z, nx, ny,
-                    nz, texMinX, texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + tlhl.x, y + tlhl.y,
-                    z + tlhl.z, xx + tlhl.x, yy + tlhl.y, zz + tlhl.z, nx, ny,
-                    nz, texMaxX, texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + tlhh.x, y + tlhh.y,
-                    z + tlhh.z, xx + tlhh.x, yy + tlhh.y, zz + tlhh.z, nx, ny,
-                    nz, texMaxX, texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + tllh.x, y + tllh.y,
-                    z + tllh.z, xx + tllh.x, yy + tllh.y, zz + tllh.z, nx, ny,
-                    nz, texMinX, texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + tllh.x, y + tllh.y,
-                    z + tllh.z, xx + tllh.x, yy + tllh.y, zz + tllh.z, nx, ny,
-                    nz, texMaxX, texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + tlhh.x, y + tlhh.y,
-                    z + tlhh.z, xx + tlhh.x, yy + tlhh.y, zz + tlhh.z, nx, ny,
-                    nz, texMinX, texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + tlhl.x, y + tlhl.y,
-                    z + tlhl.z, xx + tlhl.x, yy + tlhl.y, zz + tlhl.z, nx, ny,
-                    nz, texMinX, texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + tlll.x, y + tlll.y,
-                    z + tlll.z, xx + tlll.x, yy + tlll.y, zz + tlll.z, nx, ny,
-                    nz, texMaxX, texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + thll.x, y + thll.y,
-                    z + thll.z, xx + thll.x, yy + thll.y, zz + thll.z, nx, ny,
-                    nz, texMinX, texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + thhl.x, y + thhl.y,
-                    z + thhl.z, xx + thhl.x, yy + thhl.y, zz + thhl.z, nx, ny,
-                    nz, texMaxX, texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + thhh.x, y + thhh.y,
-                    z + thhh.z, xx + thhh.x, yy + thhh.y, zz + thhh.z, nx, ny,
-                    nz, texMaxX, texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + thlh.x, y + thlh.y,
-                    z + thlh.z, xx + thlh.x, yy + thlh.y, zz + thlh.z, nx, ny,
-                    nz, texMinX, texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + thlh.x, y + thlh.y,
-                    z + thlh.z, xx + thlh.x, yy + thlh.y, zz + thlh.z, nx, ny,
-                    nz, texMaxX, texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + thhh.x, y + thhh.y,
-                    z + thhh.z, xx + thhh.x, yy + thhh.y, zz + thhh.z, nx, ny,
-                    nz, texMinX, texMinY, r2, g2, b2, a2, lod, animBottom)
-            mesh.addVertex(terrain, Face.NONE, x + thhl.x, y + thhl.y,
-                    z + thhl.z, xx + thhl.x, yy + thhl.y, zz + thhl.z, nx, ny,
-                    nz, texMinX, texMaxY, r2, g2, b2, a2, lod, animTop)
-            mesh.addVertex(terrain, Face.NONE, x + thll.x, y + thll.y,
-                    z + thll.z, xx + thll.x, yy + thll.y, zz + thll.z, nx, ny,
-                    nz, texMaxX, texMaxY, r2, g2, b2, a2, lod, animTop)
+            mesh.addQuad(terrain, Face.NONE,
+                    x + tlll.x, y + tlll.y, z + tlll.z,
+                    x + tlhl.x, y + tlhl.y, z + tlhl.z,
+                    x + tlhh.x, y + tlhh.y, z + tlhh.z,
+                    x + tllh.x, y + tllh.y, z + tllh.z,
+                    xx + tlll.x, yy + tlll.y, zz + tlll.z,
+                    xx + tlhl.x, yy + tlhl.y, zz + tlhl.z,
+                    xx + tlhh.x, yy + tlhh.y, zz + tlhh.z,
+                    xx + tllh.x, yy + tllh.y, zz + tllh.z,
+                    nx, ny, nz, nx, ny, nz, nx, ny, nz, nx, ny, nz,
+                    texMinX, texMaxY,
+                    texMaxX, texMaxY,
+                    texMaxX, texMinY,
+                    texMinX, texMinY,
+                    r2, g2, b2, a2, lod,
+                    animTop,
+                    animTop,
+                    animBottom,
+                    animBottom)
+            mesh.addQuad(terrain, Face.NONE,
+                    x + tllh.x, y + tllh.y, z + tllh.z,
+                    x + tlhh.x, y + tlhh.y, z + tlhh.z,
+                    x + tlhl.x, y + tlhl.y, z + tlhl.z,
+                    x + tlll.x, y + tlll.y, z + tlll.z,
+                    xx + tllh.x, yy + tllh.y, zz + tllh.z,
+                    xx + tlhh.x, yy + tlhh.y, zz + tlhh.z,
+                    xx + tlhl.x, yy + tlhl.y, zz + tlhl.z,
+                    xx + tlll.x, yy + tlll.y, zz + tlll.z,
+                    nx, ny, nz, nx, ny, nz, nx, ny, nz, nx, ny, nz,
+                    texMinX, texMinY,
+                    texMaxX, texMinY,
+                    texMaxX, texMaxY,
+                    texMinX, texMaxY,
+                    r2, g2, b2, a2, lod,
+                    animBottom,
+                    animBottom,
+                    animTop,
+                    animTop)
+            mesh.addQuad(terrain, Face.NONE,
+                    x + thll.x, y + thll.y, z + thll.z,
+                    x + thhl.x, y + thhl.y, z + thhl.z,
+                    x + thhh.x, y + thhh.y, z + thhh.z,
+                    x + thlh.x, y + thlh.y, z + thlh.z,
+                    xx + thll.x, yy + thll.y, zz + thll.z,
+                    xx + thhl.x, yy + thhl.y, zz + thhl.z,
+                    xx + thhh.x, yy + thhh.y, zz + thhh.z,
+                    xx + thlh.x, yy + thlh.y, zz + thlh.z,
+                    nx, ny, nz, nx, ny, nz, nx, ny, nz, nx, ny, nz,
+                    texMinX, texMaxY,
+                    texMaxX, texMaxY,
+                    texMaxX, texMinY,
+                    texMinX, texMinY,
+                    r2, g2, b2, a2, lod,
+                    animTop,
+                    animTop,
+                    animBottom,
+                    animBottom)
+            mesh.addQuad(terrain, Face.NONE,
+                    x + thlh.x, y + thlh.y, z + thlh.z,
+                    x + thhh.x, y + thhh.y, z + thhh.z,
+                    x + thhl.x, y + thhl.y, z + thhl.z,
+                    x + thll.x, y + thll.y, z + thll.z,
+                    xx + thlh.x, yy + thlh.y, zz + thlh.z,
+                    xx + thhh.x, yy + thhh.y, zz + thhh.z,
+                    xx + thhl.x, yy + thhl.y, zz + thhl.z,
+                    xx + thll.x, yy + thll.y, zz + thll.z,
+                    nx, ny, nz, nx, ny, nz, nx, ny, nz, nx, ny, nz,
+                    texMinX, texMinY,
+                    texMaxX, texMinY,
+                    texMaxX, texMaxY,
+                    texMinX, texMaxY,
+                    r2, g2, b2, a2, lod,
+                    animBottom,
+                    animBottom,
+                    animTop,
+                    animTop)
         }
 
         override fun addToMesh(mesh: Mesh,

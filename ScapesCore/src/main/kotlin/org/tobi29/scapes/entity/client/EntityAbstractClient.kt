@@ -17,27 +17,29 @@
 package org.tobi29.scapes.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.ComponentStorage
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.*
-import org.tobi29.scapes.entity.ComponentEntity
+import org.tobi29.math.vector.MutableVector3d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.utils.ComponentStorage
 import org.tobi29.scapes.entity.ComponentSerializable
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.packets.PacketEntityComponentData
 import org.tobi29.scapes.packets.PacketEntityMetaData
+import org.tobi29.io.tag.*
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.uuid.Uuid
+import kotlin.collections.set
 
-open class EntityAbstractClient(override final val type: EntityType<*, *>,
-                                override final val world: WorldClient,
-                                pos: Vector3d) : EntityClient {
+open class EntityAbstractClient(
+        override final val type: EntityType<*, *>,
+        override final val world: WorldClient,
+        pos: Vector3d
+) : EntityClient {
     override final val registry = world.registry
-    override val componentStorage = ComponentStorage<ComponentEntity>()
+    override val componentStorage = ComponentStorage<Any>()
     protected val pos = MutableVector3d(pos)
-    override final var uuid: UUID = UUID.randomUUID()
+    override final var uuid: Uuid = Uuid.randomUUID()
         protected set
     protected var metaData = MutableTagMap()
     override final val onAddedToWorld = ConcurrentHashMap<ListenerToken, () -> Unit>()
@@ -47,7 +49,7 @@ open class EntityAbstractClient(override final val type: EntityType<*, *>,
         return pos.now()
     }
 
-    override fun setEntityID(uuid: UUID) {
+    override fun setEntityID(uuid: Uuid) {
         this.uuid = uuid
     }
 

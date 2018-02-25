@@ -15,19 +15,17 @@
  */
 package org.tobi29.scapes.chunk
 
-import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.*
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.launchThread
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.chunk.terrain.isTransparent
 import org.tobi29.scapes.connection.PlayConnection
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.distanceSqr
-import org.tobi29.scapes.engine.utils.*
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.utils.profiler.profilerSection
-import org.tobi29.scapes.engine.utils.tag.*
-import org.tobi29.scapes.engine.utils.task.Timer
-import org.tobi29.scapes.engine.utils.task.launchThread
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.distanceSqr
+import org.tobi29.profiler.profilerSection
+import org.tobi29.utils.sleepNanos
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.entity.server.MobLivingServer
@@ -40,32 +38,41 @@ import org.tobi29.scapes.packets.PacketSoundEffect
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.scapes.server.connection.ServerConnection
 import org.tobi29.scapes.server.format.WorldFormat
+import org.tobi29.io.tag.*
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.ConcurrentHashSet
+import org.tobi29.stdex.EnumMap
+import org.tobi29.stdex.atomic.AtomicInt
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.uuid.Uuid
+import java.util.concurrent.locks.LockSupport
+import kotlin.collections.set
 import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.math.sqrt
 
-class WorldServer(worldFormat: WorldFormat,
-                  val id: String,
-                  seed: Long,
-                  val connection: ServerConnection,
-                  taskExecutor: CoroutineContext,
-                  terrainSupplier: (WorldServer) -> TerrainServer,
-                  environmentSupplier: (WorldServer) -> EnvironmentServer) : World<EntityServer>(
-        worldFormat.plugins, taskExecutor,
-        worldFormat.plugins.registry,
-        seed), TagMapWrite, PlayConnection<PacketClient> {
-    private var updateJob: Pair<Job, AtomicBoolean>? = null
+class WorldServer(
+        worldFormat: WorldFormat,
+        val id: String,
+        seed: Long,
+        val connection: ServerConnection,
+        taskExecutor: CoroutineContext,
+        terrainSupplier: (WorldServer) -> TerrainServer,
+        environmentSupplier: (WorldServer) -> EnvironmentServer
+) : World<EntityServer>(worldFormat.plugins, taskExecutor,
+        worldFormat.plugins.registry, seed),
+        TagMapWrite,
+        PlayConnection<PacketClient> {
+    private var updateJob: Job? = null
     private val entityListeners = ConcurrentHashSet<(EntityServer) -> Unit>()
     private val spawners = ConcurrentHashSet<MobSpawner>()
-    val terrain: TerrainServer
-    val environment: EnvironmentServer
     private val players = ConcurrentHashMap<String, MobPlayerServer>()
-    private val entityCounts: Map<CreatureType, AtomicInteger> = EnumMap<CreatureType, AtomicInteger>().apply {
-        CreatureType.values().forEach { put(it, AtomicInteger()) }
+    private val entityCounts: Map<CreatureType, AtomicInt> = EnumMap<CreatureType, AtomicInt>().apply {
+        CreatureType.values().forEach { put(it, AtomicInt()) }
     }
+    val environment: EnvironmentServer = environmentSupplier(this)
+    val terrain: TerrainServer = terrainSupplier(this)
 
     init {
-        environment = environmentSupplier(this)
-        terrain = terrainSupplier(this)
         worldFormat.plugins.plugins.forEach { it.worldInit(this) }
     }
 
@@ -100,7 +107,7 @@ class WorldServer(worldFormat: WorldFormat,
         return getEntity(entity.uuid) != null || terrain.hasEntity(entity)
     }
 
-    override fun getEntity(uuid: UUID): EntityServer? {
+    override fun getEntity(uuid: Uuid): EntityServer? {
         return players.values.asSequence()
                 .filter { entity -> entity.uuid == uuid }
                 .firstOrNull() ?: terrain.getEntity(uuid)
@@ -116,7 +123,7 @@ class WorldServer(worldFormat: WorldFormat,
         return terrain.getEntities(x, y,
                 z) + players.values.asSequence().filter { entity ->
             val pos = entity.getCurrentPos()
-            pos.intX() == x && pos.intY() == y && pos.intZ() == z
+            pos.x.floorToInt() == x && pos.y.floorToInt() == y && pos.z.floorToInt() == z
         }
     }
 
@@ -297,40 +304,47 @@ class WorldServer(worldFormat: WorldFormat,
                 }
             }
         }
-        updateJob?.let { (job, stop) ->
-            stop.set(true)
-            job.join()
-        }
+        updateJob?.cancelAndJoin()
         terrain.dispose()
         clearComponents()
-        taskExecutor[Job]?.cancel()
+        taskExecutor[Job]?.cancelAndJoin()
     }
 
     fun start() {
-        val stop = AtomicBoolean(false)
         updateJob = launchThread("State") {
             thread = Thread.currentThread()
             val timer = Timer()
             val maxDiff = Timer.toDiff(20.0)
             timer.init()
-            while (!stop.get()) {
-                val freewheel = if (!players.isEmpty()) {
-                    profilerSection("Tick") { update(0.05) }
-                    !players.values.asSequence().filter { it.isActive() }.any()
-                } else {
-                    false
+            try {
+                while (true) {
+                    val freewheel = withContext(NonCancellable) {
+                        if (!players.isEmpty()) {
+                            profilerSection("Tick") { update(0.05) }
+                            !players.values.asSequence().filter { it.isActive() }.any()
+                        } else {
+                            false
+                        }
+                    }
+                    if (freewheel) {
+                        timer.tick()
+                    } else {
+                        timer.cap(maxDiff, ::sleepNanos, 5000000000L,
+                                logSkip = { skip ->
+                                    logger.warn { "World $id is skipping $skip nanoseconds!" }
+                                })
+                    }
+                    yield() // Allow cancel after non-standard sleep
                 }
-                if (freewheel) {
-                    timer.tick()
-                } else {
-                    timer.cap(maxDiff, ::sleepNanos, 5000000000L,
-                            logSkip = { skip ->
-                                logger.warn { "World $id is skipping $skip nanoseconds!" }
-                            })
-                }
+            } finally {
+                thread = null
             }
-            thread = null
-        } to stop
+        }.apply {
+            invokeOnCompletion(true, false) {
+                LockSupport.unpark(thread)
+            }
+        }
+        updateJob?.invokeOnCompletion(true, false) {}
     }
 
     override fun send(packet: PacketClient) {

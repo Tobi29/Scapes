@@ -16,11 +16,11 @@
 
 package org.tobi29.scapes.server.extension.base
 
-import org.tobi29.scapes.engine.args.CommandArgument
-import org.tobi29.scapes.engine.args.CommandOption
-import org.tobi29.scapes.engine.args.getBoolean
-import org.tobi29.scapes.engine.args.require
-import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.args.CommandArgument
+import org.tobi29.args.CommandOption
+import org.tobi29.args.getBoolean
+import org.tobi29.args.require
+import org.tobi29.io.tag.TagMap
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.extension.ServerExtension

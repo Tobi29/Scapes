@@ -16,27 +16,28 @@
 
 package org.tobi29.scapes.vanilla.basics.world
 
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toLong
+import org.tobi29.math.Random
+import org.tobi29.math.cosTable
+import org.tobi29.math.sinTable
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.normalizedSafe
+import org.tobi29.math.vector.times
 import org.tobi29.scapes.chunk.EnvironmentClient
 import org.tobi29.scapes.chunk.EnvironmentType
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.utils.math.HALF_PI
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.math.cosTable
-import org.tobi29.scapes.engine.math.sinTable
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.normalizeSafe
-import org.tobi29.scapes.engine.math.vector.times
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toLong
 import org.tobi29.scapes.vanilla.basics.generator.BiomeGenerator
 import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.generator.TerrainGenerator
+import org.tobi29.stdex.math.HALF_PI
+import org.tobi29.stdex.math.clamp
 
 class EnvironmentOverworldClient(override val type: EnvironmentType,
-                                 world: WorldClient) : EnvironmentClient, EnvironmentClimate {
+                                 world: WorldClient) : EnvironmentClient,
+        EnvironmentClimate {
     private val climateGenerator: ClimateGenerator
     private val biomeGenerator: BiomeGenerator
 
@@ -76,7 +77,7 @@ class EnvironmentOverworldClient(override val type: EnvironmentType,
         val rx = cosTable(azimuth) * rd
         val ry = sinTable(azimuth) * rd
         val mix = clamp(elevation * 100.0, -1.0, 1.0)
-        return Vector3d(rx, ry, rz).normalizeSafe().times(mix)
+        return Vector3d(rx, ry, rz).normalizedSafe().times(mix)
     }
 
     override fun createSkybox(world: WorldClient): WorldSkybox {

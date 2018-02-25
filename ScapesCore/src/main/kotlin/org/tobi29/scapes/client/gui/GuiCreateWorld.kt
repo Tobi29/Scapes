@@ -17,19 +17,19 @@
 package org.tobi29.scapes.client.gui
 
 import kotlinx.coroutines.experimental.runBlocking
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.graphics.TextureFilter
 import org.tobi29.scapes.engine.graphics.TextureWrap
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.math.threadLocalRandom
 import org.tobi29.scapes.engine.resource.Resource
-import org.tobi29.scapes.engine.utils.graphics.decodePNG
-import org.tobi29.scapes.engine.utils.hash
-import org.tobi29.scapes.engine.utils.io.*
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.graphics.decodePNG
+import org.tobi29.io.*
+import org.tobi29.io.filesystem.FilePath
 import org.tobi29.scapes.plugins.PluginFile
+import org.tobi29.stdex.longHashCode
 import java.util.zip.ZipFile
 
 class GuiCreateWorld(state: GameState,
@@ -90,7 +90,7 @@ class GuiCreateWorld(state: GameState,
                     try {
                         seed.text.toLong()
                     } catch (e: NumberFormatException) {
-                        hash(seed.text)
+                        seed.text.longHashCode()
                     }
                 }
                 val pluginFiles = ArrayList<FilePath>()

@@ -16,19 +16,21 @@
 
 package org.tobi29.scapes.vanilla.basics.gui
 
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.client.gui.GuiComponentItemButton
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.entity.client.EntityContainerClient
+import org.tobi29.scapes.entity.client.EntityClient
 import org.tobi29.scapes.packets.PacketInventoryInteraction
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 
-open class GuiContainerInventory<out T : EntityContainerClient>(name: String,
-                                                                player: MobPlayerClientMainVB,
-                                                                protected val container: T,
-                                                                style: GuiStyle) : GuiInventory(
-        name, player, style) {
+open class GuiContainerInventory<out T : EntityClient>(
+        name: String,
+        player: MobPlayerClientMainVB,
+        protected val container: T,
+        style: GuiStyle
+) : GuiInventory(name, player, style) {
 
     protected fun buttonContainer(x: Int,
                                   y: Int,
@@ -52,8 +54,8 @@ open class GuiContainerInventory<out T : EntityContainerClient>(name: String,
                         id: String,
                         slot: Int): GuiComponentItemButton {
         parent.selectable = true
-        val inventory = container.inventories().accessUnsafe(id)
-        val button = GuiComponentItemButton(parent, inventory.item(slot))
+        val inventory = container.inventories.accessUnsafe(id)
+        val button = GuiComponentItemButton(parent, inventory.reference(slot))
         button.on(GuiEvent.CLICK_LEFT) { leftClickContainer(id, slot) }
         button.on(GuiEvent.CLICK_RIGHT) { rightClickContainer(id, slot) }
         return button

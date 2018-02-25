@@ -16,20 +16,20 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
-import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.entity.client.EntityAbstractClient
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
 
-abstract class EntityAbstractFurnaceClient(type: EntityType<*, *>,
-                                           world: WorldClient,
-                                           pos: Vector3d,
-                                           inventory: Inventory,
-                                           fuel: Int,
-                                           protected val items: Int) : EntityAbstractContainerClient(
-        type, world, pos, inventory) {
+abstract class EntityAbstractFurnaceClient(
+        type: EntityType<*, *>,
+        world: WorldClient,
+        pos: Vector3d,
+        fuel: Int,
+        protected val items: Int
+) : EntityAbstractClient(type, world, pos) {
     protected val fuel = DoubleArray(fuel)
     protected val fuelTemperature = DoubleArray(fuel)
     var temperature = 0.0

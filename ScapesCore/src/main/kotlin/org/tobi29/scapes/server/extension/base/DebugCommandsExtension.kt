@@ -16,13 +16,19 @@
 
 package org.tobi29.scapes.server.extension.base
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.args.*
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.MemoryViewStreamDefault
-import org.tobi29.scapes.engine.utils.io.asString
-import org.tobi29.scapes.engine.utils.io.tag.json.writeJSON
-import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.args.CommandOption
+import org.tobi29.args.get
+import org.tobi29.args.getInt
+import org.tobi29.args.require
+import org.tobi29.io.IOException
+import org.tobi29.io.MemoryViewStreamDefault
+import org.tobi29.io.asString
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.json.writeJSON
+import org.tobi29.io.tag.toTag
+import org.tobi29.scapes.block.inventories
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.toTag
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.command.getVector3d
@@ -58,9 +64,11 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                             playerName)
                     val material = requireGet({ plugins.materialResolver[it] },
                             materialName)
-                    val item = ItemStack(material, data, amount)
+                    val item = Item(material,
+                            mapOf("Data" to data.toTag(),
+                                    "Amount" to amount.toTag()).toTag())
                     player.mob { mob ->
-                        mob.inventories().modify("Container") { it.add(item) }
+                        mob.inventories.modify("Container") { it.add(item) }
                     }
                 }
             }
@@ -77,7 +85,7 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                     val player = requireGet({ connection.playerByName(it) },
                             playerName)
                     player.mob { mob ->
-                        mob.inventories().modify("Container") { it.clear() }
+                        mob.inventories.modify("Container") { it.clear() }
                     }
                 }
             }
@@ -101,9 +109,8 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                 val playerName = args.require(
                         playerOption) { it ?: executor.playerName() }
                 val worldName = args.get(worldOption)
-                val locationList = args.getList(locationOption)
-                if (locationList != null) {
-                    val location = getVector3d(locationList)
+                val location = args.getVector3d(locationOption)
+                if (location != null) {
                     if (worldName != null) {
                         commands.add {
                             val player = requireGet(
@@ -169,8 +176,8 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
                     player.mob { mob ->
                         try {
                             val stream = MemoryViewStreamDefault()
-                            TagMap { mob.leftWeapon().write(this) }.writeJSON(
-                                    stream)
+                            val item = mob.leftWeapon()
+                            item.toTag().writeJSON(stream)
                             stream.flip()
                             val str = stream.asString()
                             executor.events.fire(MessageEvent(executor,

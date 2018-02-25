@@ -20,7 +20,7 @@ import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.scapes.engine.math.Face
+import org.tobi29.math.Face
 import kotlin.math.max
 
 class BlockModelLiquid(private val block: BlockType,
@@ -71,6 +71,8 @@ class BlockModelLiquid(private val block: BlockType,
         val static01: Boolean
         val static11: Boolean
         val static10: Boolean
+        val x1 = x + 1
+        val y1 = y + 1
         var flag = top !== block
         val noAnim = ShaderAnimation.NONE.id()
         if (flag) {
@@ -104,27 +106,31 @@ class BlockModelLiquid(private val block: BlockType,
             }
             if (flag) {
                 if (texTop != null) {
+                    val xx1 = xx + 1.0
+                    val yy1 = yy + 1.0
                     val texMinX = texTop.marginX(0.0)
                     val texMaxX = texTop.marginX(1.0)
                     val texMinY = texTop.marginY(0.0)
                     val texMaxY = texTop.marginY(1.0)
                     val anim = texTop.shaderAnimation().id()
-                    mesh.addVertex(terrain, Face.UP, x.toDouble(), y.toDouble(),
-                            (z + height00), xx, yy, zz + height00, texMinX,
-                            texMinY, r2, g2, b2, a2, lod,
-                            if (static00) noAnim else anim)
-                    mesh.addVertex(terrain, Face.UP, (x + 1).toDouble(),
-                            y.toDouble(), (z + height10), xx + 1, yy,
-                            zz + height10, texMaxX, texMinY, r2, g2, b2, a2,
-                            lod, if (static10) noAnim else anim)
-                    mesh.addVertex(terrain, Face.UP, (x + 1).toDouble(),
-                            (y + 1).toDouble(), (z + height11), xx + 1, yy + 1,
-                            zz + height11, texMaxX, texMaxY, r2, g2, b2, a2,
-                            lod, if (static11) noAnim else anim)
-                    mesh.addVertex(terrain, Face.UP, x.toDouble(),
-                            (y + 1).toDouble(), (z + height01), xx, yy + 1,
-                            zz + height01, texMinX, texMaxY, r2, g2, b2, a2,
-                            lod, if (static01) noAnim else anim)
+                    mesh.addQuad(terrain, Face.UP,
+                            x.toDouble(), y.toDouble(), z + height00,
+                            x1.toDouble(), y.toDouble(), z + height10,
+                            x1.toDouble(), y1.toDouble(), z + height11,
+                            x.toDouble(), y1.toDouble(), z + height01,
+                            xx, yy, zz + height00,
+                            xx1, yy, zz + height10,
+                            xx1, yy1, zz + height11,
+                            xx, yy1, zz + height01,
+                            texMaxX, texMinY,
+                            texMinX, texMinY,
+                            texMinX, texMaxY,
+                            texMaxX, texMaxY,
+                            r2, g2, b2, a2, lod,
+                            if (static00) noAnim else anim,
+                            if (static10) noAnim else anim,
+                            if (static11) noAnim else anim,
+                            if (static01) noAnim else anim)
                 }
             }
         } else {
@@ -142,99 +148,120 @@ class BlockModelLiquid(private val block: BlockType,
         if (other != block && other.connectStage(terrain, x, y,
                 z - 1) <= connectStage) {
             if (texBottom != null) {
+                val xx1 = xx + 1.0
+                val yy1 = yy + 1.0
                 val texMinX = texBottom.marginX(0.0)
                 val texMaxX = texBottom.marginX(1.0)
                 val texMinY = texBottom.marginY(0.0)
                 val texMaxY = texBottom.marginY(1.0)
-                mesh.addVertex(terrain, Face.DOWN, x.toDouble(),
-                        (y + 1).toDouble(), z.toDouble(), xx, yy + 1, zz,
-                        texMinX, texMaxY, r2, g2, b2, a2, lod, noAnim)
-                mesh.addVertex(terrain, Face.DOWN, (x + 1).toDouble(),
-                        (y + 1).toDouble(), z.toDouble(), xx + 1, yy + 1, zz,
-                        texMaxX, texMaxY, r2, g2, b2, a2, lod, noAnim)
-                mesh.addVertex(terrain, Face.DOWN, (x + 1).toDouble(),
-                        y.toDouble(), z.toDouble(), xx + 1, yy, zz, texMaxX,
-                        texMinY, r2, g2, b2, a2, lod, noAnim)
-                mesh.addVertex(terrain, Face.DOWN, x.toDouble(), y.toDouble(),
-                        z.toDouble(), xx, yy, zz, texMinX, texMinY, r2, g2, b2,
-                        a2, lod, noAnim)
+                mesh.addQuad(terrain, Face.DOWN,
+                        x.toDouble(), y1.toDouble(), z.toDouble(),
+                        x1.toDouble(), y1.toDouble(), z.toDouble(),
+                        x1.toDouble(), y.toDouble(), z.toDouble(),
+                        x.toDouble(), y.toDouble(), z.toDouble(),
+                        xx, yy1, zz,
+                        xx1, yy1, zz,
+                        xx1, yy, zz,
+                        xx, yy, zz,
+                        texMaxX, texMinY,
+                        texMinX, texMinY,
+                        texMinX, texMaxY,
+                        texMaxX, texMaxY,
+                        r2, g2, b2, a2, lod, noAnim)
             }
         }
         other = terrain.type(x, y - 1, z)
         if (other != block && other.connectStage(terrain, x, y - 1,
                 z) <= connectStage) {
             if (texSide1 != null) {
+                val xx1 = xx + 1.0
                 val anim = texSide1.shaderAnimation().id()
                 val texMinX = texSide1.marginX(0.0)
                 val texMaxX = texSide1.marginX(1.0)
                 val texMinY00 = texSide1.marginY(max(1.0 - height00, 0.0))
                 val texMinY10 = texSide1.marginY(max(1.0 - height10, 0.0))
                 val texMaxY = texSide1.marginY(1.0)
-                mesh.addVertex(terrain, Face.NORTH, (x + 1).toDouble(),
-                        y.toDouble(), (z + height10), xx + 1, yy, zz + height10,
-                        texMaxX, texMinY10, r2, g2, b2, a2, lod,
-                        if (static10) noAnim else anim)
-                mesh.addVertex(terrain, Face.NORTH, x.toDouble(), y.toDouble(),
-                        (z + height00), xx, yy, zz + height00, texMinX,
-                        texMinY00, r2, g2, b2, a2, lod,
-                        if (static00) noAnim else anim)
-                mesh.addVertex(terrain, Face.NORTH, x.toDouble(), y.toDouble(),
-                        z.toDouble(), xx, yy, zz, texMinX, texMaxY, r2, g2, b2,
-                        a2, lod, noAnim)
-                mesh.addVertex(terrain, Face.NORTH, (x + 1).toDouble(),
-                        y.toDouble(), z.toDouble(), xx + 1, yy, zz, texMaxX,
-                        texMaxY, r2, g2, b2, a2, lod, noAnim)
+                mesh.addQuad(terrain, Face.NORTH,
+                        x1.toDouble(), y.toDouble(), z + height10,
+                        x.toDouble(), y.toDouble(), z + height00,
+                        x.toDouble(), y.toDouble(), z.toDouble(),
+                        x1.toDouble(), y.toDouble(), z.toDouble(),
+                        xx1, yy, zz + height10,
+                        xx, yy, zz + height00,
+                        xx, yy, zz,
+                        xx1, yy, zz,
+                        texMaxX, texMinY10,
+                        texMinX, texMinY00,
+                        texMinX, texMaxY,
+                        texMaxX, texMaxY,
+                        r2, g2, b2, a2, lod,
+                        if (static10) noAnim else anim,
+                        if (static00) noAnim else anim,
+                        noAnim,
+                        noAnim)
             }
         }
         other = terrain.type(x + 1, y, z)
         if (other != block && other.connectStage(terrain, x + 1, y,
                 z) <= connectStage) {
             if (texSide2 != null) {
+                val xx1 = xx + 1.0
+                val yy1 = yy + 1.0
                 val anim = texSide2.shaderAnimation().id()
                 val texMinX = texSide2.marginX(0.0)
                 val texMaxX = texSide2.marginX(1.0)
-                val texMaxY10 = texSide2.marginY(max(1.0 - height10, 0.0))
-                val texMaxY11 = texSide2.marginY(max(1.0 - height11, 0.0))
+                val texMinY10 = texSide2.marginY(max(1.0 - height10, 0.0))
+                val texMinY11 = texSide2.marginY(max(1.0 - height11, 0.0))
                 val texMaxY = texSide2.marginY(1.0)
-                mesh.addVertex(terrain, Face.EAST, (x + 1).toDouble(),
-                        (y + 1).toDouble(), (z + height11), xx + 1, yy + 1,
-                        zz + height11, texMaxX, texMaxY11, r2, g2, b2, a2, lod,
-                        if (static11) noAnim else anim)
-                mesh.addVertex(terrain, Face.EAST, (x + 1).toDouble(),
-                        y.toDouble(), (z + height10), xx + 1, yy, zz + height10,
-                        texMinX, texMaxY10, r2, g2, b2, a2, lod,
-                        if (static10) noAnim else anim)
-                mesh.addVertex(terrain, Face.EAST, (x + 1).toDouble(),
-                        y.toDouble(), z.toDouble(), xx + 1, yy, zz, texMinX,
-                        texMaxY, r2, g2, b2, a2, lod, noAnim)
-                mesh.addVertex(terrain, Face.EAST, (x + 1).toDouble(),
-                        (y + 1).toDouble(), z.toDouble(), xx + 1, yy + 1, zz,
-                        texMaxX, texMaxY, r2, g2, b2, a2, lod, noAnim)
+                mesh.addQuad(terrain, Face.EAST,
+                        x1.toDouble(), y1.toDouble(), z + height11,
+                        x1.toDouble(), y.toDouble(), z + height10,
+                        x1.toDouble(), y.toDouble(), z.toDouble(),
+                        x1.toDouble(), y1.toDouble(), z.toDouble(),
+                        xx1, yy1, zz + height11,
+                        xx1, yy, zz + height10,
+                        xx1, yy, zz,
+                        xx1, yy1, zz,
+                        texMaxX, texMinY11,
+                        texMinX, texMinY10,
+                        texMinX, texMaxY,
+                        texMaxX, texMaxY,
+                        r2, g2, b2, a2, lod,
+                        if (static11) noAnim else anim,
+                        if (static10) noAnim else anim,
+                        noAnim,
+                        noAnim)
             }
         }
         other = terrain.type(x, y + 1, z)
         if (other != block && other.connectStage(terrain, x, y + 1,
                 z) <= connectStage) {
             if (texSide3 != null) {
+                val xx1 = xx + 1.0
+                val yy1 = yy + 1.0
                 val anim = texSide3.shaderAnimation().id()
                 val texMinX = texSide3.marginX(0.0)
                 val texMaxX = texSide3.marginX(1.0)
-                val texMaxY01 = texSide3.marginY(max(1.0 - height01, 0.0))
-                val texMaxY11 = texSide3.marginY(max(1.0 - height11, 0.0))
+                val texMinY01 = texSide3.marginY(max(1.0 - height01, 0.0))
+                val texMinY11 = texSide3.marginY(max(1.0 - height11, 0.0))
                 val texMaxY = texSide3.marginY(1.0)
-                mesh.addVertex(terrain, Face.SOUTH, (x + 1).toDouble(),
-                        (y + 1).toDouble(), z.toDouble(), xx + 1, yy + 1, zz,
-                        texMinX, texMaxY, r2, g2, b2, a2, lod, noAnim)
-                mesh.addVertex(terrain, Face.SOUTH, x.toDouble(),
-                        (y + 1).toDouble(), z.toDouble(), xx, yy + 1, zz,
-                        texMaxX, texMaxY, r2, g2, b2, a2, lod, noAnim)
-                mesh.addVertex(terrain, Face.SOUTH, x.toDouble(),
-                        (y + 1).toDouble(), (z + height01), xx, yy + 1,
-                        zz + height01, texMaxX, texMaxY01, r2, g2, b2, a2, lod,
-                        if (static01) noAnim else anim)
-                mesh.addVertex(terrain, Face.SOUTH, (x + 1).toDouble(),
-                        (y + 1).toDouble(), (z + height11), xx + 1, yy + 1,
-                        zz + height11, texMinX, texMaxY11, r2, g2, b2, a2, lod,
+                mesh.addQuad(terrain, Face.SOUTH,
+                        x1.toDouble(), y1.toDouble(), z.toDouble(),
+                        x.toDouble(), y1.toDouble(), z.toDouble(),
+                        x.toDouble(), y1.toDouble(), z + height01,
+                        x1.toDouble(), y1.toDouble(), z + height11,
+                        xx1, yy1, zz,
+                        xx, yy1, zz,
+                        xx, yy1, zz + height01,
+                        xx1, yy1, zz + height11,
+                        texMinX, texMaxY,
+                        texMaxX, texMaxY,
+                        texMaxX, texMinY01,
+                        texMinX, texMinY11,
+                        r2, g2, b2, a2, lod,
+                        noAnim,
+                        noAnim,
+                        if (static01) noAnim else anim,
                         if (static11) noAnim else anim)
             }
         }
@@ -242,25 +269,30 @@ class BlockModelLiquid(private val block: BlockType,
         if (other != block && other.connectStage(terrain, x - 1, y,
                 z) <= connectStage) {
             if (texSide4 != null) {
+                val yy1 = yy + 1.0
                 val anim = texSide4.shaderAnimation().id()
                 val texMinX = texSide4.marginX(0.0)
                 val texMaxX = texSide4.marginX(1.0)
                 val texMinY00 = texSide4.marginY(max(1.0 - height00, 0.0))
                 val texMinY01 = texSide4.marginY(max(1.0 - height01, 0.0))
                 val texMaxY = texSide4.marginY(1.0)
-                mesh.addVertex(terrain, Face.WEST, x.toDouble(),
-                        (y + 1).toDouble(), z.toDouble(), xx, yy + 1, zz,
-                        texMinX, texMaxY, r2, g2, b2, a2, lod, noAnim)
-                mesh.addVertex(terrain, Face.WEST, x.toDouble(), y.toDouble(),
-                        z.toDouble(), xx, yy, zz, texMaxX, texMaxY, r2, g2, b2,
-                        a2, lod, noAnim)
-                mesh.addVertex(terrain, Face.WEST, x.toDouble(), y.toDouble(),
-                        (z + height00), xx, yy, zz + height00, texMaxX,
-                        texMinY00, r2, g2, b2, a2, lod,
-                        if (static00) noAnim else anim)
-                mesh.addVertex(terrain, Face.WEST, x.toDouble(),
-                        (y + 1).toDouble(), (z + height01), xx, yy + 1,
-                        zz + height01, texMinX, texMinY01, r2, g2, b2, a2, lod,
+                mesh.addQuad(terrain, Face.WEST,
+                        x.toDouble(), y1.toDouble(), z.toDouble(),
+                        x.toDouble(), y.toDouble(), z.toDouble(),
+                        x.toDouble(), y.toDouble(), z + height00,
+                        x.toDouble(), y1.toDouble(), z + height01,
+                        xx, yy1, zz,
+                        xx, yy, zz,
+                        xx, yy, zz + height00,
+                        xx, yy1, zz + height01,
+                        texMinX, texMaxY,
+                        texMaxX, texMaxY,
+                        texMaxX, texMinY00,
+                        texMinX, texMinY01,
+                        r2, g2, b2, a2, lod,
+                        noAnim,
+                        noAnim,
+                        if (static00) noAnim else anim,
                         if (static01) noAnim else anim)
             }
         }

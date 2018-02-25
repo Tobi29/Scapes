@@ -16,12 +16,12 @@
 
 package org.tobi29.scapes.entity.client
 
+import org.tobi29.checksums.Checksum
+import org.tobi29.checksums.toChecksum
+import org.tobi29.io.tag.TagMap
+import org.tobi29.math.AABB
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.utils.Checksum
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.toChecksum
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 

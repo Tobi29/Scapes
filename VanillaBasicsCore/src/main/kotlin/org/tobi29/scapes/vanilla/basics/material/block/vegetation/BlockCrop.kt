@@ -16,23 +16,23 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation
 
-import org.tobi29.scapes.block.AABBElement
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.*
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.PointerPane
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.math.AABB
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.utils.Pool
+import org.tobi29.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.ItemStack
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.CropType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
@@ -86,27 +86,27 @@ class BlockCrop(type: VanillaMaterialType) : VanillaBlock(type) {
         return false
     }
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
         return 0.0
     }
 
-    override fun drops(item: ItemStack,
-                       data: Int): List<ItemStack> {
-        val dropData = (data / 8).toShort()
+    override fun drops(item: Item?,
+                       data: Int): List<Item> {
+        val dropData = data / 8
+        val kind = cropRegistry[dropData]
         if (data % 8 == 7) {
             val random = threadLocalRandom()
             return listOf(
-                    ItemStack(materials.cropDrop, dropData.toInt()),
-                    ItemStack(materials.seed, dropData.toInt(),
-                            random.nextInt(2) + 1))
+                    Item(materials.cropDrop, kind),
+                    ItemStack(materials.seed, kind, random.nextInt(2) + 1))
         }
         return emptyList()
     }
 
     override fun footStepSound(data: Int) = null
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
         return "VanillaBasics:sound/blocks/Foliage.ogg"
     }
@@ -190,21 +190,21 @@ class BlockCrop(type: VanillaMaterialType) : VanillaBlock(type) {
         }
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
     }
 
-    override fun name(item: ItemStack): String {
-        return cropRegistry[item.data()].name
+    override fun name(item: TypedItem<BlockType>): String {
+        return cropRegistry[item.data].name
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 64
     }
 

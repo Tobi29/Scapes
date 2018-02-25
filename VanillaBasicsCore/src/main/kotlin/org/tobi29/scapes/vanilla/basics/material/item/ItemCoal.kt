@@ -16,50 +16,30 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
-import org.tobi29.scapes.block.models.ItemModel
-import org.tobi29.scapes.block.models.ItemModelSimple
-import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.vanilla.basics.material.ItemFuel
+import org.tobi29.scapes.block.ItemTypeIconI
+import org.tobi29.scapes.inventory.ItemTypeNamedI
+import org.tobi29.scapes.inventory.ItemTypeStackableDefaultI
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.vanilla.basics.material.ItemTypeFuelI
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
-class ItemCoal(type: VanillaMaterialType) : VanillaItem(type), ItemFuel {
-    private var texture: TerrainTexture? = null
-    private var model: ItemModel? = null
+class ItemCoal(
+        type: VanillaMaterialType
+) : VanillaItemBase<ItemCoal>(type),
+        ItemTypeIconI<ItemCoal>,
+        ItemTypeNamedI<ItemCoal>,
+        ItemTypeStackableDefaultI<ItemCoal>,
+        ItemTypeFuelI<ItemCoal> {
+    override val textureAsset
+        get() = "VanillaBasics:image/terrain/ore/coal/Coal"
 
-    override fun registerTextures(registry: TerrainTextureRegistry) {
-        texture = registry.registerTexture(
-                "VanillaBasics:image/terrain/ore/coal/Coal.png")
-    }
+    override fun name(item: TypedItem<ItemCoal>) = "Coal"
 
-    override fun createModels(registry: TerrainTextureRegistry) {
-        model = ItemModelSimple(texture, 1.0, 1.0, 1.0, 1.0)
-    }
+    override fun maxStackSize(item: TypedItem<ItemCoal>) = 128
 
-    override fun render(item: ItemStack,
-                        gl: GL,
-                        shader: Shader) {
-        model?.render(gl, shader)
-    }
+    override fun fuelTemperature(item: TypedItem<ItemCoal>) = 0.8
 
-    override fun renderInventory(item: ItemStack,
-                                 gl: GL,
-                                 shader: Shader) {
-        model?.renderInventory(gl, shader)
-    }
+    override fun fuelTime(item: TypedItem<ItemCoal>) = 20.0
 
-    override fun name(item: ItemStack): String {
-        return "Coal"
-    }
-
-    override fun maxStackSize(item: ItemStack) = 128
-
-    override fun fuelTemperature(item: ItemStack) = 0.8
-
-    override fun fuelTime(item: ItemStack) = 20.0
-
-    override fun fuelTier(item: ItemStack) = 50
+    override fun fuelTier(item: TypedItem<ItemCoal>) = 50
 }

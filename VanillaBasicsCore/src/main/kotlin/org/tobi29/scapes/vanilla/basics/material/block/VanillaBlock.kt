@@ -16,15 +16,21 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block
 
+import org.tobi29.math.Face
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3i
+import org.tobi29.math.vector.plus
 import org.tobi29.scapes.block.BlockType
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.ItemStackData
+import org.tobi29.scapes.block.data
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.Vector3i
-import org.tobi29.scapes.engine.math.vector.plus
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.inventory.amount
+import org.tobi29.scapes.inventory.copy
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityBlockBreakServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.util.dropItems
@@ -34,40 +40,43 @@ abstract class VanillaBlock(type: VanillaMaterialType) : BlockType(type.type) {
     val plugin = materials.plugin
 
     override fun click(entity: MobPlayerServer,
-                       item: ItemStack,
+                       item: TypedItem<BlockType>,
                        terrain: TerrainServer,
                        x: Int,
                        y: Int,
                        z: Int,
-                       face: Face): Double {
-        val place = face.delta + Vector3i(x, y, z)
-        terrain.modify(place.x - 1, place.y - 1, place.z - 1, 3, 3,
-                3) { terrain ->
-            if (terrain.type(place.x, place.y, place.z).isReplaceable(terrain,
-                    place.x, place.y, place.z)) {
-                val aabbs = collision(item.data(), place.x, place.y, place.z)
-                var flag = true
-                val coll = entity.getAABB()
-                for (element in aabbs) {
-                    if (coll.overlay(
-                            element.aabb) && element.collision.isSolid) {
-                        flag = false
-                    }
-                }
-                if (flag) {
-                    entity.inventories().modify("Container") {
-                        terrain.data(place.x, place.y, place.z, item.data())
-                        if (place(terrain, place.x, place.y, place.z, face,
-                                entity)) {
-                            terrain.type(place.x, place.y, place.z, this)
-                            item.setAmount(item.amount() - 1)
+                       face: Face): Pair<Item?, Double?> =
+            (face.delta + Vector3i(x, y, z)).let { place ->
+                terrain.modify(place.x - 1, place.y - 1, place.z - 1, 3, 3,
+                        3) { terrain ->
+                    if (terrain.type(place.x, place.y, place.z).isReplaceable(
+                            terrain, place.x, place.y, place.z)) {
+                        val aabbs = collision(item.data, place.x, place.y,
+                                place.z)
+                        var flag = true
+                        val coll = entity.getAABB()
+                        for (element in aabbs) {
+                            if (coll.overlay(
+                                    element.aabb) && element.collision.isSolid) {
+                                flag = false
+                            }
                         }
-                    }
+                        if (flag) {
+                            entity.inventories.modify("Container") {
+                                terrain.data(place.x, place.y, place.z,
+                                        item.data)
+                                if (place(terrain, place.x, place.y, place.z,
+                                        face, entity)) {
+                                    terrain.type(place.x, place.y, place.z,
+                                            this)
+                                    item.copy(
+                                            amount = item.amount - 1).orNull() to 0.0
+                                } else item to 0.0
+                            }
+                        } else item to 0.0
+                    } else item to 0.0
                 }
             }
-        }
-        return 0.0
-    }
 
     open fun place(terrain: TerrainMutableServer,
                    x: Int,
@@ -85,15 +94,14 @@ abstract class VanillaBlock(type: VanillaMaterialType) : BlockType(type.type) {
                      data: Int,
                      face: Face,
                      player: MobPlayerServer,
-                     item: ItemStack): Boolean {
-        val drops = drops(item, data)
-        player.world.dropItems(drops, x, y, z)
+                     item: Item?): Boolean {
+        player.world.dropItems(drops(item, data), x, y, z)
         return true
     }
 
-    open fun drops(item: ItemStack,
-                   data: Int): List<ItemStack> {
-        return listOf(ItemStack(this, data))
+    open fun drops(item: Item?,
+                   data: Int): List<Item> {
+        return listOf(ItemStackData(this, data))
     }
 
     override fun punch(terrain: TerrainServer,
@@ -103,7 +111,7 @@ abstract class VanillaBlock(type: VanillaMaterialType) : BlockType(type.type) {
                        data: Int,
                        face: Face,
                        player: MobPlayerServer,
-                       item: ItemStack,
+                       item: Item?,
                        br: Double,
                        strength: Double) {
         val punch = br / resistance(item, data) * strength * strength

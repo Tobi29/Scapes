@@ -17,11 +17,11 @@
 package org.tobi29.scapes.vanilla.basics.entity.particle
 
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.graphics.Cam
+import org.tobi29.math.AABB
+import org.tobi29.stdex.math.TWO_PI
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 
@@ -60,12 +60,12 @@ class ParticleEmitterExplosion(system: ParticleSystem) : ParticleEmitter<Particl
                 trail(emitter, instance.pos.now(), instance.speed.now(),
                         plugin.particles.explosion)
             }
-            aabb.minX = instance.pos.doubleX() - SIZE
-            aabb.minY = instance.pos.doubleY() - SIZE
-            aabb.minZ = instance.pos.doubleZ() - SIZE
-            aabb.maxX = instance.pos.doubleX() + SIZE
-            aabb.maxY = instance.pos.doubleY() + SIZE
-            aabb.maxZ = instance.pos.doubleZ() + SIZE
+            aabb.minX = instance.pos.x - SIZE
+            aabb.minY = instance.pos.y - SIZE
+            aabb.minZ = instance.pos.z - SIZE
+            aabb.maxX = instance.pos.x + SIZE
+            aabb.maxY = instance.pos.y + SIZE
+            aabb.maxZ = instance.pos.z + SIZE
             ParticlePhysics.update(delta, instance, terrain, aabb, gravitation,
                     0.01f,
                     0.2f, 0.4f, 8.0f)

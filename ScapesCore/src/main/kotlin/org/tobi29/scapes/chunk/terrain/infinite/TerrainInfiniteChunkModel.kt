@@ -16,7 +16,7 @@
 package org.tobi29.scapes.chunk.terrain.infinite
 
 import org.tobi29.scapes.engine.graphics.Model
-import org.tobi29.scapes.engine.math.AABB
+import org.tobi29.math.AABB
 
 class TerrainInfiniteChunkModel(val model: Pair<Model, AABB>?,
                                 val modelAlpha: Pair<Model, AABB>?,

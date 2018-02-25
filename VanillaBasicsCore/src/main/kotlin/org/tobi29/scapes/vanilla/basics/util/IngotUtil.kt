@@ -16,22 +16,11 @@
 
 package org.tobi29.scapes.vanilla.basics.util
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.vanilla.basics.material.AlloyType
-import org.tobi29.scapes.vanilla.basics.material.ItemMetal
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.MetalType
-import org.tobi29.scapes.vanilla.basics.material.add
+import org.tobi29.scapes.vanilla.basics.material.copy
+import org.tobi29.scapes.vanilla.basics.material.item.ItemIngot
 
-fun createIngot(item: ItemStack,
-                metalType: MetalType) {
-    val alloy = Alloy()
-    alloy.add(metalType)
-    (item.material() as ItemMetal).setAlloy(item, alloy)
-}
-
-fun createIngot(item: ItemStack,
-                alloyType: AlloyType) {
-    val alloy = Alloy()
-    alloy.add(alloyType)
-    (item.material() as ItemMetal).setAlloy(item, alloy)
-}
+fun Map<MetalType, Double>.toIngot(plugin: VanillaBasics): TypedItem<ItemIngot> =
+        TypedItem(plugin.materials.ingot).copy(alloy = normalizeSafe())

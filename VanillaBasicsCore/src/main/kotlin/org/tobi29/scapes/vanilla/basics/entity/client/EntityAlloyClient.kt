@@ -13,41 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.tobi29.scapes.vanilla.basics.entity.client
 
-import org.tobi29.scapes.block.Inventory
+import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.gui.Gui
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toMap
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
-import org.tobi29.scapes.entity.client.MobPlayerClientMain
+import org.tobi29.scapes.entity.client.EntityAbstractClient
+import org.tobi29.scapes.entity.client.GUI_COMPONENT
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.gui.GuiAlloyInventory
 import org.tobi29.scapes.vanilla.basics.util.Alloy
-import org.tobi29.scapes.vanilla.basics.util.readAlloy
+import org.tobi29.scapes.vanilla.basics.util.toAlloy
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toMap
 
-class EntityAlloyClient(type: EntityType<*, *>,
-                        world: WorldClient) : EntityAbstractContainerClient(
-        type, world, Vector3d.ZERO,
-        Inventory(world.plugins, 2)) {
+class EntityAlloyClient(
+        type: EntityType<*, *>,
+        world: WorldClient
+) : EntityAbstractClient(type, world, Vector3d.ZERO) {
     var alloy = Alloy()
         private set
     private var temperature = 0.0
 
-    override fun gui(player: MobPlayerClientMain): Gui? {
-        if (player is MobPlayerClientMainVB) {
-            return GuiAlloyInventory(this, player, player.game.engine.guiStyle)
+    init {
+        inventories.add("Container", 2)
+        registerComponent(GUI_COMPONENT) { player ->
+            if (player is MobPlayerClientMainVB) {
+                GuiAlloyInventory(this, player, player.game.engine.guiStyle)
+            } else null
         }
-        return null
     }
 
     override fun read(map: TagMap) {
         super.read(map)
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
-        map["Alloy"]?.toMap()?.let { alloy = readAlloy(plugin, it) }
+        map["Alloy"]?.toMap()?.toAlloy(plugin)?.let { alloy = it }
         map["Temperature"]?.toDouble()?.let { temperature = it }
     }
 }

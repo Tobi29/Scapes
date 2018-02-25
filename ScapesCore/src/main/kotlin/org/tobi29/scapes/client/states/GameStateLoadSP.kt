@@ -16,6 +16,7 @@
 
 package org.tobi29.scapes.client.states
 
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.LocalClientConnection
 import org.tobi29.scapes.client.gui.GuiLoading
@@ -25,17 +26,16 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
-import org.tobi29.scapes.engine.server.ConnectionManager
-import org.tobi29.scapes.engine.server.SSLHandle
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.logging.KLogging
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toMap
+import org.tobi29.server.ConnectionManager
+import org.tobi29.server.SSLHandle
+import org.tobi29.io.IOException
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.connection.LocalPlayerConnection
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.ssl.dummy.DummyKeyManagerProvider
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toMap
 import kotlin.math.roundToInt
 
 class GameStateLoadSP(private var source: WorldSource?,
@@ -44,9 +44,17 @@ class GameStateLoadSP(private var source: WorldSource?,
     private val scapes = engine[ScapesClient.COMPONENT]
     private var step = 0
     private var server: ScapesServer? = null
-    private var gui: GuiLoading? = null
+    private val gui: GuiLoading = GuiLoading(engine.guiStyle)
+
+    override fun init() {
+        engine.guiStack.add("20-Progress", gui)
+        switchPipeline { gl ->
+            renderScene(gl, scene)
+        }
+    }
 
     override fun dispose() {
+        engine.guiStack.remove(gui)
         try {
             server?.stop(ScapesServer.ShutdownReason.ERROR)
         } catch (e: IOException) {
@@ -60,15 +68,6 @@ class GameStateLoadSP(private var source: WorldSource?,
         }
     }
 
-    override fun init() {
-        gui = GuiLoading(this, engine.guiStyle).apply {
-            engine.guiStack.add("20-Progress", this)
-        }
-        switchPipeline { gl ->
-            renderScene(gl, scene)
-        }
-    }
-
     override val isMouseGrabbed: Boolean
         get() = false
 
@@ -77,7 +76,7 @@ class GameStateLoadSP(private var source: WorldSource?,
         try {
             when (step) {
                 0 -> {
-                    gui?.setProgress("Creating server...", 0.0)
+                    gui.setProgress("Creating server...", 0.0)
                     val serverConfigMap =
                             scapes.configMap["IntegratedServer"]?.toMap() ?: TagMap()
                     val panorama = source.panorama()
@@ -94,13 +93,13 @@ class GameStateLoadSP(private var source: WorldSource?,
                     step++
                 }
                 1 -> {
-                    gui?.setProgress("Starting server...", 0.5)
+                    gui.setProgress("Starting server...", 0.5)
                     val server = server ?: throw IllegalStateException(
                             "Server lost too early")
                     val loadingRadius = (scapes.renderDistance).roundToInt() + 16
                     val account = Account[scapes.home.resolve(
                             "Account.properties")]
-                    gui?.setProgress("Loading world...", 1.0)
+                    gui.setProgress("Loading world...", 1.0)
 
                     server.connections.addConnection { worker, connection ->
                         val player = LocalPlayerConnection(worker,

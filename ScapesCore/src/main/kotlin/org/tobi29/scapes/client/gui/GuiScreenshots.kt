@@ -21,10 +21,10 @@ import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.utils.graphics.decodePNG
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.filesystem.*
-import org.tobi29.scapes.engine.utils.logging.KLogging
+import org.tobi29.graphics.decodePNG
+import org.tobi29.io.IOException
+import org.tobi29.io.filesystem.*
+import org.tobi29.logging.KLogging
 
 class GuiScreenshots(state: GameState,
                      previous: Gui,

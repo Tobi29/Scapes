@@ -18,32 +18,70 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 
 import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.loopUntilCancel
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.math.threadLocalRandom
-import org.tobi29.scapes.engine.math.vector.lengthSqr
-import org.tobi29.scapes.engine.utils.*
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.tag.*
-import org.tobi29.scapes.engine.utils.task.Timer
-import org.tobi29.scapes.engine.utils.task.loop
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.lengthSqr
+import org.tobi29.utils.ComponentRegistered
+import org.tobi29.utils.ComponentRegisteredHolder
+import org.tobi29.utils.ComponentType
 import org.tobi29.scapes.entity.*
 import org.tobi29.scapes.entity.server.MobLivingServer
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.packets.PacketEntityComponentData
+import org.tobi29.scapes.vanilla.basics.generator.ClimateGenerator
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldServer
-import java.util.concurrent.TimeUnit
+import org.tobi29.io.tag.*
+import org.tobi29.stdex.ConcurrentHashSet
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.floorToInt
+import kotlin.collections.set
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.synchronized
+
+abstract class ComponentInstanceHandler : ComponentRegistered {
+    @PublishedApi
+    internal var alive = false
+        private set
+
+    protected abstract fun initInstance()
+    protected abstract fun disposeInstance()
+
+    @Synchronized
+    override fun init() {
+        if (alive) return
+        initInstance()
+        alive = true
+    }
+
+    @Synchronized
+    override fun dispose() {
+        if (!alive) return
+        alive = false
+        disposeInstance()
+    }
+}
+
+inline fun <C : ComponentInstanceHandler, R> C.lock(
+        crossinline block: (C) -> R
+): R? = synchronized(this) {
+    if (!alive) return@synchronized null
+    block(this)
+}
+
+inline fun <C : ComponentInstanceHandler, R> C.access(
+        crossinline block: C.() -> R
+): R? = lock { block(this) }
 
 class ComponentMobLivingServerCondition(
         val entity: MobLiving
-) : ComponentEntity,
-        ComponentRegistered,
-        ComponentSerializable {
+) : ComponentInstanceHandler(),
+        ComponentMapSerializable {
     override val id = "VanillaBasics:Condition"
-    var stamina: Double = 0.0
+    var stamina = 0.0
         @Synchronized get
         @Synchronized set
     var wake = 0.0
@@ -62,6 +100,7 @@ class ComponentMobLivingServerCondition(
         @Synchronized get
         @Synchronized set
 
+    @Synchronized
     override fun read(map: TagMap) {
         map["Stamina"]?.toDouble()?.let { stamina = it }
         map["Wake"]?.toDouble()?.let { wake = it }
@@ -71,6 +110,7 @@ class ComponentMobLivingServerCondition(
         map["Sleeping"]?.toBoolean()?.let { sleeping = it }
     }
 
+    @Synchronized
     override fun write(map: ReadWriteTagMap) {
         map["Stamina"] = stamina.toTag()
         map["Wake"] = wake.toTag()
@@ -80,7 +120,7 @@ class ComponentMobLivingServerCondition(
         map["Sleeping"] = sleeping.toTag()
     }
 
-    override fun init() {
+    override fun initInstance() {
         if (entity is MobLivingServer) {
             entity.onSpawn[CONDITION_LISTENER_TOKEN] = {
                 synchronized(this@ComponentMobLivingServerCondition) {
@@ -115,7 +155,7 @@ class ComponentMobLivingServerCondition(
         }
     }
 
-    override fun dispose() {
+    override fun disposeInstance() {
         if (entity is MobLivingServer) {
             entity.onSpawn.remove(CONDITION_LISTENER_TOKEN)
         }
@@ -133,7 +173,7 @@ class ComponentMobLivingServerCondition(
 }
 
 class ComponentConditionUpdater : ComponentRegisteredHolder<WorldServer> {
-    private var job: Pair<Job, AtomicBoolean>? = null
+    private var job: Job? = null
     val instances = ConcurrentHashSet<Pair<ComponentMobLivingServerCondition, MobLivingServer>>()
 
     @Synchronized
@@ -141,110 +181,100 @@ class ComponentConditionUpdater : ComponentRegisteredHolder<WorldServer> {
         val environment = holder.environment as EnvironmentOverworldServer
         val climateGenerator = environment.climate()
 
-        val stop = AtomicBoolean(false)
         job = launch(holder.taskExecutor + CoroutineName("Condition-Updater")) {
-            val timer = Timer()
-            timer.init()
-            timer.loop(Timer.toDiff(4.0),
-                    { delay(it, TimeUnit.NANOSECONDS) }) {
-                if (stop.get()) return@loop false
-
-                val random = threadLocalRandom()
-                for ((condition, entity) in instances) {
-                    val health = entity.health()
-                    val maxHealth = entity.maxHealth()
-
-                    condition.run {
-                        synchronized(this) {
-                            val ground = entity.isOnGround
-                            val inWater = entity.isInWater
-                            val pos = entity.getCurrentPos()
-                            val temperature = climateGenerator.temperature(
-                                    pos.intX(), pos.intY(), pos.intZ())
-                            val regenFactor = if (sleeping) 1.5 else 1.0
-                            val depleteFactor = if (sleeping) 0.05 else 1.0
-                            if (stamina > 0.2 && health < maxHealth) {
-                                val rate = stamina * 0.5
-                                entity.heal(rate)
-                                stamina -= rate * 0.1
-                            }
-                            if (inWater) {
-                                val rate = clamp(
-                                        entity.speed().lengthSqr() * 0.00125,
-                                        0.0, 0.05)
-                                stamina -= rate
-                                bodyTemperature += rate
-                                thirst -= rate * 0.075
-                            } else if (ground) {
-                                val rate = clamp(
-                                        entity.speed().lengthSqr() * 0.00025,
-                                        0.0, 0.05)
-                                stamina -= rate
-                                bodyTemperature += rate
-                            }
-                            stamina -= depleteFactor * 0.00025
-                            if (inWater && thirst < 1.0) {
-                                thirst += 0.025
-                            }
-                            if (stamina < 1.0) {
-                                val rate = regenFactor * hunger * thirst * 0.05 *
-                                        (1 - stamina)
-                                stamina += rate
-                                wake -= rate * 0.005
-                                hunger -= rate * 0.003
-                                thirst -= rate * 0.01
-                            }
-                            bodyTemperature += (temperature - bodyTemperature) / 2000.0
-                            if (bodyTemperature < 37.0) {
-                                var rate = max(37.0 - bodyTemperature, 0.0)
-                                rate = min(rate * 8.0 * stamina, 1.0) * 0.04
-                                bodyTemperature += rate
-                                stamina -= rate * 0.5
-                            } else if (bodyTemperature > 37.0) {
-                                var rate = max(bodyTemperature - 37.0, 0.0)
-                                rate = min(rate * thirst, 1.0) * 0.06
-                                bodyTemperature -= rate
-                                thirst -= rate * 0.05
-                            }
-                            if (sleeping) {
-                                wake += 0.0002
-                                val wakeChance = 7.0 - wake * 7.0
-                                if (random.nextDouble() > wakeChance) {
-                                    sleeping = false
-                                }
-                            } else {
-                                val sleepChance = wake * 10.0
-                                if (random.nextDouble() > sleepChance) {
-                                    sleeping = true
-                                }
-                            }
-                            stamina = min(stamina, 1.0)
-                            if (stamina <= 0.0) {
-                                entity.damage(5.0)
-                            }
-                            wake = clamp(wake, 0.0, 1.0)
-                            hunger = clamp(hunger, 0.0, 1.0)
-                            thirst = clamp(thirst, 0.0, 1.0)
-                        }
-                    }
-                    if (entity is MobPlayerServer) {
-                        entity.connection().send(
-                                PacketEntityComponentData(holder.registry,
-                                        entity))
-                    }
-                }
-
-                true
+            Timer().apply { init() }.loopUntilCancel(Timer.toDiff(4.0)) {
+                tick(holder, climateGenerator)
             }
-        } to stop
+        }
     }
 
     @Synchronized
     override fun dispose() {
-        job?.let { (job, stop) ->
-            stop.getAndSet(true)
-            // job.join() TODO: Delay world shutdown until job completes
-            this.job = null
+        job?.cancel()
+    }
+
+    private fun tick(holder: WorldServer,
+                     climateGenerator: ClimateGenerator) {
+        val random = threadLocalRandom()
+        for ((condition, entity) in instances) {
+            condition.access {
+                val health = entity.health()
+                val maxHealth = entity.maxHealth()
+                val ground = entity.isOnGround
+                val inWater = entity.isInWater
+                val pos = entity.getCurrentPos()
+                val temperature = climateGenerator.temperature(
+                        pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt())
+                val regenFactor = if (sleeping) 1.5 else 1.0
+                val depleteFactor = if (sleeping) 0.05 else 1.0
+                if (stamina > 0.2 && health < maxHealth) {
+                    val rate = stamina * 0.5
+                    entity.heal(rate)
+                    stamina -= rate * 0.1
+                }
+                if (inWater) {
+                    val rate = clamp(
+                            entity.speed().lengthSqr() * 0.00125,
+                            0.0, 0.05)
+                    stamina -= rate
+                    bodyTemperature += rate
+                    thirst -= rate * 0.075
+                } else if (ground) {
+                    val rate = clamp(
+                            entity.speed().lengthSqr() * 0.00025,
+                            0.0, 0.05)
+                    stamina -= rate
+                    bodyTemperature += rate
+                }
+                stamina -= depleteFactor * 0.00025
+                if (inWater && thirst < 1.0) {
+                    thirst += 0.025
+                }
+                if (stamina < 1.0) {
+                    val rate = regenFactor * hunger * thirst * 0.05 *
+                            (1 - stamina)
+                    stamina += rate
+                    wake -= rate * 0.005
+                    hunger -= rate * 0.003
+                    thirst -= rate * 0.01
+                }
+                bodyTemperature += (temperature - bodyTemperature) / 2000.0
+                if (bodyTemperature < 37.0) {
+                    var rate = max(37.0 - bodyTemperature, 0.0)
+                    rate = min(rate * 8.0 * stamina, 1.0) * 0.04
+                    bodyTemperature += rate
+                    stamina -= rate * 0.5
+                } else if (bodyTemperature > 37.0) {
+                    var rate = max(bodyTemperature - 37.0, 0.0)
+                    rate = min(rate * thirst, 1.0) * 0.06
+                    bodyTemperature -= rate
+                    thirst -= rate * 0.05
+                }
+                if (sleeping) {
+                    wake += 0.0002
+                    val wakeChance = 7.0 - wake * 7.0
+                    if (random.nextDouble() > wakeChance) {
+                        sleeping = false
+                    }
+                } else {
+                    val sleepChance = wake * 10.0
+                    if (random.nextDouble() > sleepChance) {
+                        sleeping = true
+                    }
+                }
+                stamina = min(stamina, 1.0)
+                if (stamina <= 0.0) {
+                    entity.damage(5.0)
+                }
+                wake = clamp(wake, 0.0, 1.0)
+                hunger = clamp(hunger, 0.0, 1.0)
+                thirst = clamp(thirst, 0.0, 1.0)
+                if (entity is MobPlayerServer) {
+                    entity.connection().send(
+                            PacketEntityComponentData(holder.registry, entity))
+                }
+            }
         }
     }
 

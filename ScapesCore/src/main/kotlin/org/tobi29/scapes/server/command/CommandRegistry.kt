@@ -16,9 +16,9 @@
 
 package org.tobi29.scapes.server.command
 
-import org.tobi29.scapes.engine.args.*
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.computeAbsent
+import org.tobi29.args.*
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.computeAbsent
 
 class CommandRegistry : CommandRegistrar {
     private val commands1 = ConcurrentHashMap<List<String>, Pair<CommandConfig, MutableList<CommandElement>>>()
@@ -67,35 +67,25 @@ class CommandRegistry : CommandRegistrar {
         val compiler = block(elements)
         commands3[command.map { it.name }] = compiler(level, helpOption,
                 compiler)
-        println()
-        println()
-        println()
-        println(commands1)
-        println(commands2)
-        println(commands3)
-        println()
-        println()
-        println()
     }
 
     operator fun get(line: String,
                      executor: Executor): Command.Compiled {
         val commandLine = try {
             val tokens = line.tokenize()
-            if (tokens.isEmpty())
-                throw InvalidCommandLineException("Empty command")
+            if (tokens.isEmpty()) throw EmptyCommandException()
             val first = tokens.first()
             val args = tokens.subList(1, tokens.size)
-            val command = commands2[first] ?:
-                    throw InvalidCommandLineException("Unknown command: $first")
+            val command = commands2[first]
+                    ?: throw UnknownCommandException(tokens, listOf(first))
             command.parseCommandLine(args)
-        } catch (e: InvalidCommandLineException) {
+        } catch (e: InvalidTokensException) {
             return Command.Null(Command.Output(255, e.message ?: ""))
         }
         val compiler = commands3[commandLine.command.map { it.name }]
                 ?: return Command.Null(Command.Output(255,
-                "Unknown command: ${commandLine.command.joinToString(
-                        " ") { it.name }}"))
+                        "Unknown command: ${commandLine.command.joinToString(
+                                " ") { it.name }}"))
         return compiler(commandLine, executor)
     }
 
@@ -116,7 +106,7 @@ class CommandRegistry : CommandRegistrar {
                     compiler(Command, commandLine, executor, commands)
                     Command.Compiled(commands)
                 }
-            } catch (e: InvalidCommandLineException) {
+            } catch (e: InvalidTokensException) {
                 Command.Null(Command.Output(255, e.message ?: ""))
             } catch (e: Command.CommandException) {
                 Command.Null(Command.Output(254, e.message ?: ""))

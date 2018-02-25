@@ -21,10 +21,11 @@ import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.math.vector.Vector2d
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityAlloyClient
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
+import org.tobi29.scapes.vanilla.basics.util.type
 import kotlin.math.roundToInt
 
 class GuiAlloyInventory(container: EntityAlloyClient,
@@ -61,11 +62,11 @@ class GuiAlloyInventory(container: EntityAlloyClient,
     private fun updateInfoText() {
         val text = StringBuilder(64)
         val alloy = container.alloy
-        if (alloy.metals.isNotEmpty()) {
+        if (alloy.isNotEmpty()) {
             text.append("Metal: ").append(alloy.type(
                     container.world.plugins.plugin(
                             "VanillaBasics") as VanillaBasics).name)
-            alloy.metals.forEach {
+            alloy.forEach {
                 text.append('\n').append(it.key.name).append(" - ").append(
                         (it.value * 100.0).roundToInt() / 100.0)
             }

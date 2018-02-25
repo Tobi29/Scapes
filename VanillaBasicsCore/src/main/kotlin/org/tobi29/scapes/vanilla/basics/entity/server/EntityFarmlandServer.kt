@@ -18,12 +18,14 @@ package org.tobi29.scapes.vanilla.basics.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.*
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.server.EntityAbstractServer
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.CropType
+import org.tobi29.io.tag.*
+import org.tobi29.stdex.math.floorToInt
+import kotlin.collections.set
 import kotlin.math.max
 import kotlin.math.min
 
@@ -73,16 +75,18 @@ class EntityFarmlandServer(type: EntityType<*, *>,
             val materials = plugin.materials
             val cropType = this.cropType
             if (cropType == null) {
-                world.terrain.modify(pos.intX(), pos.intY(),
-                        pos.intZ() + 1) { handler ->
-                    handler.typeData(pos.intX(), pos.intY(), pos.intZ() + 1,
+                world.terrain.modify(pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt() + 1) { handler ->
+                    handler.typeData(pos.x.floorToInt(), pos.y.floorToInt(),
+                            pos.z.floorToInt() + 1,
                             materials.air, 0)
                 }
             } else {
                 val stage = this.stage.toInt()
-                world.terrain.modify(pos.intX(), pos.intY(),
-                        pos.intZ() + 1) { handler ->
-                    handler.typeData(pos.intX(), pos.intY(), pos.intZ() + 1,
+                world.terrain.modify(pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt() + 1) { handler ->
+                    handler.typeData(pos.x.floorToInt(), pos.y.floorToInt(),
+                            pos.z.floorToInt() + 1,
                             materials.crop,
                             stage + (cropType.id shl 3) - 1)
                 }
@@ -99,11 +103,12 @@ class EntityFarmlandServer(type: EntityType<*, *>,
         val world = terrain.world
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        if (terrain.type(pos.intX(), pos.intY(),
-                pos.intZ()) !== materials.farmland) {
+        if (terrain.type(pos.x.floorToInt(), pos.y.floorToInt(),
+                pos.z.floorToInt()) !== materials.farmland) {
             world.removeEntity(this)
-        } else if (stage > 0 && terrain.type(pos.intX(), pos.intY(),
-                pos.intZ() + 1) !== materials.crop) {
+        } else if (stage > 0 && terrain.type(pos.x.floorToInt(),
+                pos.y.floorToInt(),
+                pos.z.floorToInt() + 1) !== materials.crop) {
             cropType = null
         }
     }

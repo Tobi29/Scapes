@@ -21,15 +21,34 @@ import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.PointerPane
+import org.tobi29.math.AABB
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
+import org.tobi29.utils.ComponentStorage
+import org.tobi29.utils.Pool
 import org.tobi29.scapes.entity.server.MobPlayerServer
-import org.tobi29.scapes.entity.server.MobServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.ItemTypeI
+import org.tobi29.scapes.inventory.ItemTypeNamedI
+import org.tobi29.scapes.inventory.ItemTypeStackableDefaultI
 import org.tobi29.scapes.terrain.VoxelType
 
-abstract class BlockType(type: MaterialType) : Material(type), VoxelType {
+abstract class BlockType(type: MaterialType) : VoxelType,
+        ItemTypeI<BlockType>,
+        ItemTypeNamedI<BlockType>,
+        ItemTypeUseableI<BlockType>,
+        ItemTypeStackableDefaultI<BlockType>,
+        ItemTypeToolI<BlockType>,
+        ItemTypeWeaponI<BlockType>,
+        ItemTypeLightI<BlockType>,
+        ItemTypeDataI<BlockType>,
+        ItemTypeModelI<BlockType>,
+        ItemTypeTexturedI<BlockType> {
+    override val componentStorage = ComponentStorage<Any>()
+    val plugins = type.plugins
+    override val id = type.id
+    override val nameID = type.name
+
     fun block(data: Int): Long {
         return id.toLong() or (data.toLong() shl 32)
     }
@@ -54,16 +73,6 @@ abstract class BlockType(type: MaterialType) : Material(type), VoxelType {
                    face: Face,
                    player: MobPlayerServer): Boolean {
         return false
-    }
-
-    override fun click(entity: MobPlayerServer,
-                       item: ItemStack,
-                       hit: MobServer): Double {
-        return 0.0
-    }
-
-    override fun toolType(item: ItemStack): String {
-        return "Block"
     }
 
     open fun addCollision(aabbs: Pool<AABBElement>,
@@ -100,17 +109,17 @@ abstract class BlockType(type: MaterialType) : Material(type), VoxelType {
                    data: Int,
                    face: Face,
                    player: MobPlayerServer,
-                   item: ItemStack,
+                   item: Item?,
                    br: Double,
                    strength: Double) {
     }
 
-    abstract fun resistance(item: ItemStack,
+    abstract fun resistance(item: Item?,
                             data: Int): Double
 
     abstract fun footStepSound(data: Int): String?
 
-    abstract fun breakSound(item: ItemStack,
+    abstract fun breakSound(item: Item?,
                             data: Int): String?
 
     open fun particleFriction(face: Face,

@@ -16,16 +16,22 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.BlockType
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.ItemStack
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 
 class BlockOreCoal(type: VanillaMaterialType) : BlockOre(type) {
-    override fun dropsOre(item: ItemStack,
-                          data: Int): List<ItemStack> {
-        return listOf(ItemStack(materials.coal, 0))
+    override fun dropsOre(item: Item?,
+                          data: Int): List<Item> {
+        return listOf(ItemStack(materials.coal,
+                threadLocalRandom().nextInt(16) + 16))
     }
 
-    override fun name(item: ItemStack) = "${stoneName(item)} Coal Ore"
+    override fun name(item: TypedItem<BlockType>) = "${stoneName(
+            item)} Coal Ore"
 
     override fun oreTexture() = "Coal"
 }

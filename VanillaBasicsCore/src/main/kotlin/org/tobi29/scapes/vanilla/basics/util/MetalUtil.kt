@@ -16,119 +16,111 @@
 
 package org.tobi29.scapes.vanilla.basics.util
 
-import org.tobi29.scapes.engine.utils.ConcurrentHashMap
-import org.tobi29.scapes.engine.utils.readOnly
-import org.tobi29.scapes.engine.utils.reduceOrNull
-import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.utils.reduceOrNull
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.material.AlloyType
 import org.tobi29.scapes.vanilla.basics.material.MetalType
+import org.tobi29.io.tag.*
+import org.tobi29.stdex.computeAlways
+import kotlin.collections.Map
+import kotlin.collections.asSequence
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.emptyMap
+import kotlin.collections.iterator
+import kotlin.collections.mapKeys
+import kotlin.collections.mapValues
+import kotlin.collections.set
+import kotlin.collections.sum
+import kotlin.collections.toMap
+import kotlin.collections.toMutableMap
 import kotlin.math.abs
 
-fun readAlloy(plugin: VanillaBasics,
-              map: TagMap): Alloy {
-    val alloy = Alloy()
-    map.asSequence().forEach { (key, value) ->
-        value.toDouble()?.let { number ->
-            alloy.add(plugin.metalType(key) ?: plugin.crapMetal, number)
+class Alloy(
+        map: Map<MetalType, Double> = emptyMap()
+) : Map<MetalType, Double> by map.toMap(),
+        TagMapWrite {
+    override fun write(map: ReadWriteTagMap) {
+        for ((key, value) in this) {
+            map[key.id] = value.toTag()
         }
     }
-    return alloy
 }
 
-fun writeAlloy(alloy: Alloy,
-               map: ReadWriteTagMap) {
-    alloy.metals.forEach { (key, value) -> map[key.id] = value.toTag() }
+fun MutableTag.toAlloy(plugin: VanillaBasics): Alloy? {
+    val map = toMap() ?: return null
+    val metals = map.mapKeys {
+        plugin.metalType(it.key) ?: return null
+    }.mapValues { it.value.toDouble() ?: return null }
+    return Alloy(metals)
 }
 
-class Alloy {
-    private val metalsMut = ConcurrentHashMap<MetalType, Double>()
-    val metals = metalsMut.readOnly()
+val Map<MetalType, Double>.amount: Double get() = values.sum()
 
-    fun add(metal: MetalType,
-            amount: Double = 1.0) {
-        var containing: Double? = metalsMut[metal]
-        if (containing == null) {
-            containing = amount
-        } else {
-            containing += amount
-        }
-        metalsMut.put(metal, containing)
-    }
-
-    fun drain(metal: MetalType,
-              maxAmount: Double): Double {
-        var containing = metalsMut[metal] ?: 0.0
-        val drain: Double
-        if (containing <= maxAmount) {
-            drain = containing
-            containing = 0.0
-        } else {
-            drain = maxAmount
-            containing -= maxAmount
-        }
-        if (containing < 0.00001) {
-            metalsMut.remove(metal)
-        } else {
-            metalsMut.put(metal, containing)
-        }
-        return drain
-    }
-
-    fun drain(maxAmount: Double): Alloy {
-        val amount = amount()
-        val alloy = Alloy()
-        for ((key, value) in metalsMut) {
-            val drain = value / amount * maxAmount
-            alloy.add(key, drain(key, drain))
-        }
-        return alloy
-    }
-
-    fun type(plugin: VanillaBasics): AlloyType {
-        val amount = amount()
-        return plugin.alloyTypes.values.asSequence().mapNotNull { alloyType ->
-            val offset = offset(amount, alloyType) ?: return@mapNotNull null
-            Pair(alloyType, offset)
-        }.reduceOrNull { first, second ->
-            if (first.second <= second.second) {
-                first
-            } else {
-                second
-            }
-        }?.first ?: plugin.crapAlloy
-    }
-
-
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun offset(amount: Double,
-                              alloyType: AlloyType): Double? {
-        var offset = 0.0
-        for ((key, value) in metalsMut) {
-            val required = alloyType.ingredients[key] ?: return null
-            offset += abs(value / amount - required)
-        }
-        return offset
-    }
-
-    fun amount(): Double {
-        var amount = 0.0
-        for ((_, value) in metalsMut) {
-            amount += value
-        }
-        return amount
-    }
-
-    fun meltingPoint(): Double {
+val Map<MetalType, Double>.meltingPoint: Double
+    get() {
         var amount = 0.0
         var temperature = 0.0
-        for ((key, metal) in metalsMut) {
+        for ((key, metal) in this) {
             amount += metal
             temperature += metal * key.meltingPoint
         }
         return temperature / amount
     }
+
+fun Map<MetalType, Double>.normalizeSafe() =
+        amount.let { amount ->
+            if (amount <= 0.0) Alloy()
+            else this / amount
+        }
+
+fun Map<MetalType, Double>.split(ratio: Double): Pair<Alloy, Alloy> =
+        (this * ratio) to (this * (1.0 - ratio))
+
+operator fun Map<MetalType, Double>.plus(other: Map<MetalType, Double>): Alloy {
+    val map = toMutableMap()
+    for ((metal, amount) in other) {
+        map.computeAlways(metal) { _, it -> (it ?: 0.0) + amount }
+    }
+    return Alloy(map)
+}
+
+operator fun Map<MetalType, Double>.times(factor: Double): Alloy =
+        Alloy(mapValues { it.value * factor })
+
+operator fun Map<MetalType, Double>.div(divisor: Double): Alloy =
+        Alloy(mapValues { it.value * divisor })
+
+fun Map<MetalType, Double>.drain(amount: Double): Pair<Alloy?, Alloy> =
+        this.amount.let { current ->
+            if (current < amount - 1.0e-10) null to Alloy(this)
+            else split(amount / current).let {
+                it.first.normalizeSafe() * amount to it.second
+            }
+        }
+
+fun Map<MetalType, Double>.type(plugin: VanillaBasics): AlloyType {
+    val amount = amount
+    return plugin.alloyTypes.values.asSequence().mapNotNull { alloyType ->
+        val offset = offset(amount, alloyType) ?: return@mapNotNull null
+        Pair(alloyType, offset)
+    }.reduceOrNull { first, second ->
+        if (first.second <= second.second) {
+            first
+        } else {
+            second
+        }
+    }?.first ?: plugin.crapAlloy
+}
+
+private fun Map<MetalType, Double>.offset(
+        amount: Double,
+        alloyType: AlloyType
+): Double? {
+    var offset = 0.0
+    for ((key, value) in this) {
+        val required = alloyType.ingredients[key] ?: return null
+        offset += abs(value / amount - required)
+    }
+    return offset
 }

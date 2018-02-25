@@ -21,7 +21,7 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.GuiAction
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.stdex.math.floorToInt
 
 class GuiDisconnected(state: GameState,
                       message: String,

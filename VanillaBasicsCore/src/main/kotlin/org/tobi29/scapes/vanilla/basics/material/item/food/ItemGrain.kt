@@ -16,35 +16,37 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.food
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.ItemTypeIconKindsI
+import org.tobi29.scapes.block.ItemTypeKindsRegistryI
+import org.tobi29.scapes.inventory.ItemTypeNamedI
+import org.tobi29.scapes.inventory.ItemTypeStackableDefaultI
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.CropType
-import org.tobi29.scapes.vanilla.basics.material.ItemResearch
+import org.tobi29.scapes.vanilla.basics.material.ItemResearchI
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
-import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
+import org.tobi29.scapes.vanilla.basics.material.item.VanillaItemBase
 
-class ItemGrain(type: VanillaMaterialType) : ItemSimpleData(
-        type), ItemResearch {
-    val cropRegistry = plugins.registry.get<CropType>("VanillaBasics",
-            "CropType")
+class ItemGrain(
+        type: VanillaMaterialType
+) : VanillaItemBase<ItemGrain>(type),
+        ItemTypeKindsRegistryI<ItemGrain, CropType>,
+        ItemTypeNamedI<ItemGrain>,
+        ItemTypeIconKindsI<ItemGrain, CropType>,
+        ItemTypeStackableDefaultI<ItemGrain>,
+        ItemResearchI<ItemGrain> {
+    override val registry =
+            plugins.registry.get<CropType>("VanillaBasics", kindTag)
+    override val kindTag get() = "CropType"
 
-    override fun types(): Int {
-        return cropRegistry.values().size
-    }
+    override fun textureAsset(kind: CropType) =
+            "${kind.texture}/Grain"
 
-    override fun texture(data: Int): String {
-        return "${cropRegistry[data].texture}/Grain.png"
-    }
+    override fun name(item: TypedItem<ItemGrain>) = kind(item).name
 
-    override fun name(item: ItemStack): String {
-        return materials.cropDrop.name(item)
-    }
+    override fun maxStackSize(item: TypedItem<ItemGrain>) = 64
 
-    override fun maxStackSize(item: ItemStack): Int {
-        return 64
-    }
-
-    override fun identifiers(item: ItemStack): Array<String> {
+    override fun identifiers(item: TypedItem<ItemGrain>): Array<String> {
         return arrayOf("vanilla.basics.item.Grain",
-                "vanilla.basics.item.Grain." + materials.crop.name(item))
+                "vanilla.basics.item.Grain." + kind(item).name)
     }
 }

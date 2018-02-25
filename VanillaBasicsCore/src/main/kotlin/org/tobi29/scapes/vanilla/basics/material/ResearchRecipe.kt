@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import org.tobi29.scapes.engine.utils.readOnly
+import org.tobi29.stdex.readOnly
 
 class ResearchRecipe(val name: String,
                      val text: String,

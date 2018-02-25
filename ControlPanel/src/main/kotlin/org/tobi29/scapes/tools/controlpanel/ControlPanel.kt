@@ -18,17 +18,17 @@ package org.tobi29.scapes.tools.controlpanel
 import org.eclipse.swt.SWT
 import org.eclipse.swt.widgets.Spinner
 import org.eclipse.swt.widgets.Text
-import org.tobi29.scapes.engine.application.executeMain
-import org.tobi29.scapes.engine.args.CommandLine
-import org.tobi29.scapes.engine.server.ConnectionManager
-import org.tobi29.scapes.engine.server.RemoteAddress
-import org.tobi29.scapes.engine.swt.util.Shortcut
-import org.tobi29.scapes.engine.swt.util.framework.DocumentComposite
-import org.tobi29.scapes.engine.swt.util.framework.MultiDocumentApplication
-import org.tobi29.scapes.engine.swt.util.widgets.InputDialog
-import org.tobi29.scapes.engine.swt.util.widgets.SmartMenuBar
-import org.tobi29.scapes.engine.utils.Version
-import org.tobi29.scapes.engine.utils.io.IOException
+import org.tobi29.application.executeMain
+import org.tobi29.args.CommandLine
+import org.tobi29.server.ConnectionManager
+import org.tobi29.server.RemoteAddress
+import org.tobi29.application.swt.Shortcut
+import org.tobi29.application.swt.framework.DocumentComposite
+import org.tobi29.application.swt.framework.MultiDocumentApplication
+import org.tobi29.application.swt.widgets.InputDialog
+import org.tobi29.application.swt.widgets.SmartMenuBar
+import org.tobi29.utils.Version
+import org.tobi29.io.IOException
 
 object ControlPanel : MultiDocumentApplication() {
     override val id = "org.tobi29.scapes.controlpanel"

@@ -22,8 +22,8 @@ import org.tobi29.scapes.engine.graphics.FontRenderer
 import org.tobi29.scapes.engine.gui.GuiComponent
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.gui.GuiRenderer
-import org.tobi29.scapes.engine.math.vector.Vector2d
-import org.tobi29.scapes.engine.utils.ListenerRegistrar
+import org.tobi29.math.vector.Vector2d
+import org.tobi29.utils.ListenerRegistrar
 
 class GuiComponentChat(parent: GuiLayoutData,
                        private val chatHistory: ChatHistory) : GuiComponent(
@@ -41,12 +41,12 @@ class GuiComponentChat(parent: GuiLayoutData,
 
     override fun updateMesh(renderer: GuiRenderer,
                             size: Vector2d) {
-        var yy = -16
+        var yy = -16.0
         chatHistory.lines { line ->
             gui.style.font.render(
-                    FontRenderer.to(renderer, 0.0f, yy.toFloat(), 1.0f,
-                            1.0f, 1.0f, 1.0f), line, 16.0f)
-            yy -= 20
+                    FontRenderer.to(renderer, 0.0, yy, 1.0, 1.0, 1.0, 1.0),
+                    line, 16.0)
+            yy -= 20.0
         }
     }
 }

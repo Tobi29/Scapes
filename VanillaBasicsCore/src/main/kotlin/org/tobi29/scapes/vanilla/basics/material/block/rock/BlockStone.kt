@@ -16,7 +16,10 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.*
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.vanilla.basics.generator.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleData
@@ -30,10 +33,11 @@ abstract class BlockStone(type: VanillaMaterialType) : BlockSimpleData(type) {
         return stoneRegistry.values().size
     }
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
-        return if ("Pickaxe" == item.material().toolType(item) && canBeBroken(
-                item.material().toolLevel(item), data))
+        val tool = item.kind<ItemTypeTool>()
+        return if ("Pickaxe" == tool?.toolType() && canBeBroken(
+                tool.toolLevel(), data))
             8.0 * stoneRegistry[data].resistance
         else
             -1.0
@@ -43,7 +47,7 @@ abstract class BlockStone(type: VanillaMaterialType) : BlockSimpleData(type) {
         return "VanillaBasics:sound/footsteps/Stone.ogg"
     }
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
         return "VanillaBasics:sound/blocks/Stone.ogg"
     }
@@ -53,11 +57,11 @@ abstract class BlockStone(type: VanillaMaterialType) : BlockSimpleData(type) {
         return (stoneRegistry[data].resistance).roundToInt() * 10 <= toolLevel
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 16
     }
 
-    protected fun stoneName(item: ItemStack): String {
-        return stoneRegistry[item.data()].name
+    protected fun stoneName(item: TypedItem<BlockType>): String {
+        return stoneRegistry[item.data].name
     }
 }

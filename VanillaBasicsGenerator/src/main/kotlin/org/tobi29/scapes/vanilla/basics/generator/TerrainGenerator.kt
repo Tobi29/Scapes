@@ -16,34 +16,37 @@
 
 package org.tobi29.scapes.vanilla.basics.generator
 
-import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.generation.value.SimplexNoise
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.utils.math.cbe
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.sqr
+import org.tobi29.generation.value.OpenSimplexNoise
+import org.tobi29.generation.value.noiseOctave
+import org.tobi29.math.Random
+import org.tobi29.stdex.ThreadLocal
+import org.tobi29.stdex.math.cbe
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.sqr
 import kotlin.math.abs
 import kotlin.math.min
 
 class TerrainGenerator(random: Random) {
-    private val terrainNoise = SimplexNoise(random.nextLong())
-    private val oceanNoise = SimplexNoise(random.nextLong())
-    private val mountainNoise = SimplexNoise(random.nextLong())
-    private val mountainCarveNoise = SimplexNoise(random.nextLong())
-    private val mountainHeightNoise = SimplexNoise(random.nextLong())
-    private val volcanoNoise = SimplexNoise(random.nextLong())
-    private val volcanoHeightNoise = SimplexNoise(random.nextLong())
-    private val riverNoise = SimplexNoise(random.nextLong())
-    private val canyonNoise = SimplexNoise(random.nextLong())
-    private val canyonDepthNoise = SimplexNoise(random.nextLong())
-    private val caveRiverNoise = SimplexNoise(random.nextLong())
-    private val caveNoise = SimplexNoise(random.nextLong())
-    private val caveHeightNoise = SimplexNoise(random.nextLong())
-    private val magmaNoise = SimplexNoise(random.nextLong())
+    private val terrainNoise = OpenSimplexNoise(random.nextLong())
+    private val oceanNoise = OpenSimplexNoise(random.nextLong())
+    private val mountainNoise = OpenSimplexNoise(random.nextLong())
+    private val mountainCarveNoise = OpenSimplexNoise(random.nextLong())
+    private val mountainHeightNoise = OpenSimplexNoise(random.nextLong())
+    private val volcanoNoise = OpenSimplexNoise(random.nextLong())
+    private val volcanoHeightNoise = OpenSimplexNoise(random.nextLong())
+    private val riverNoise = OpenSimplexNoise(random.nextLong())
+    private val canyonNoise = OpenSimplexNoise(random.nextLong())
+    private val canyonDepthNoise = OpenSimplexNoise(random.nextLong())
+    private val caveRiverNoise = OpenSimplexNoise(random.nextLong())
+    private val caveNoise = OpenSimplexNoise(random.nextLong())
+    private val caveHeightNoise = OpenSimplexNoise(random.nextLong())
+    private val magmaNoise = OpenSimplexNoise(random.nextLong())
 
-    fun generate(x: Double,
-                 y: Double,
-                 output: TerrainGeneratorLayer) {
+    fun generate(
+        x: Double,
+        y: Double,
+        output: TerrainGeneratorLayer
+    ) {
         val terrainFactor = generateTerrainFactorLayer(x, y)
         val terrainHeight = terrainFactor * 128.0 + output.terrainBase
         val mountainFactor = generateMountainFactorLayer(x, y, terrainFactor)
@@ -52,13 +55,20 @@ class TerrainGenerator(random: Random) {
         val mountainHeight: Double
         if (mountainFactor > 0.0) {
             mountain = 1.0 - abs(
-                    mountainNoise.noiseOctave(x / 512.0, y / 512.0, 2, 4.0,
-                            0.2))
+                mountainNoise.noiseOctave(
+                    x / 512.0, y / 512.0, 2, 4.0,
+                    0.2
+                )
+            )
             val mountainCarveFactor = 1.0 - sqr(1.0 - mountain)
             mountainCarve = abs(
-                    mountainCarveNoise.noiseOctave(x / 96.0, y / 96.0, 4, 4.0,
-                            0.2)) * mountainCarveFactor
-            mountainHeight = (mountain - mountainCarve * 0.17) * mountainFactor * 256.0
+                mountainCarveNoise.noiseOctave(
+                    x / 96.0, y / 96.0, 4, 4.0,
+                    0.2
+                )
+            ) * mountainCarveFactor
+            mountainHeight = (mountain - mountainCarve * 0.22) *
+                    mountainFactor * 256.0
         } else {
             mountain = 0.0
             mountainCarve = 0.0
@@ -68,9 +78,14 @@ class TerrainGenerator(random: Random) {
         var volcano: Double
         val volcanoHeight: Double
         if (volcanoFactor > 0.0) {
-            volcano = sqr(clamp(
-                    volcanoNoise.noiseOctave(x / 512.0, y / 512.0, 4, 8.0,
-                            0.08) * 2.0 - 1.0, 0.0, 1.0))
+            volcano = sqr(
+                clamp(
+                    volcanoNoise.noiseOctave(
+                        x / 512.0, y / 512.0, 4, 8.0,
+                        0.08
+                    ) * 2.0 - 1.0, 0.0, 1.0
+                )
+            )
             volcano *= volcano
             if (volcano > 0.5) {
                 volcanoHeight = (1.0 - volcano) * volcanoFactor * 192.0
@@ -81,16 +96,26 @@ class TerrainGenerator(random: Random) {
             volcano = 0.0
             volcanoHeight = 0.0
         }
-        val river = generateRiverLayer(x, y, mountainFactor, 32.0)
+        val river = generateRiverLayer(x, y, mountainFactor, 64.0)
         val canyon: Double
-        val canyonFactor = sqr(clamp(
+        val canyonFactor = sqr(
+            clamp(
                 canyonDepthNoise.noise(x / 4096.0, y / 4096.0) * 5.0 - 3.0, 0.0,
-                1.0))
+                1.0
+            )
+        )
         if (canyonFactor > 0.0) {
-            canyon = clamp(sqr(1.0 - abs(
-                    canyonNoise.noiseOctave(x / 1024.0, y / 1024.0, 2, 8.0,
-                            0.1))) *
-                    4.0 * canyonFactor - 3.0, 0.0, 1.0)
+            canyon = clamp(
+                sqr(
+                    1.0 - abs(
+                        canyonNoise.noiseOctave(
+                            x / 1024.0, y / 1024.0, 2, 8.0,
+                            0.1
+                        )
+                    )
+                ) *
+                        4.0 * canyonFactor - 3.0, 0.0, 1.0
+            )
         } else {
             canyon = 0.0
         }
@@ -111,18 +136,35 @@ class TerrainGenerator(random: Random) {
         output.river = river
     }
 
-    fun generate(x: Double,
-                 y: Double,
-                 layer: TerrainGeneratorLayer,
-                 output: TerrainGeneratorOutput) {
-        val cave = clamp(sqr(1.0 - abs(
-                caveNoise.noiseOctave(x / 128.0, y / 128.0, 2, 8.0,
-                        0.1))) * 8.0 - 6.0, 0.0, 1.0)
+    fun generate(
+        x: Double,
+        y: Double,
+        layer: TerrainGeneratorLayer,
+        output: TerrainGeneratorOutput
+    ) {
+        val cave = clamp(
+            sqr(
+                1.0 - abs(
+                    caveNoise.noiseOctave(
+                        x / 128.0, y / 128.0, 2, 8.0,
+                        0.1
+                    )
+                )
+            ) * 8.0 - 6.0, 0.0, 1.0
+        )
         val caveHeight = output.caveAverageHeight + caveHeightNoise.noise(
-                x / 512.0, y / 512.0) * output.caveHeightVary
-        val caveRiver = clamp(sqr(1.0 - abs(
-                caveRiverNoise.noiseOctave(x / 512.0, y / 512.0, 2, 8.0,
-                        0.1))) * 8.0 - 7.0, 0.0, 1.0)
+            x / 512.0, y / 512.0
+        ) * output.caveHeightVary
+        val caveRiver = clamp(
+            sqr(
+                1.0 - abs(
+                    caveRiverNoise.noiseOctave(
+                        x / 512.0, y / 512.0, 2, 8.0,
+                        0.1
+                    )
+                )
+            ) * 8.0 - 7.0, 0.0, 1.0
+        )
         val magmaHeight = 7.0 + magmaNoise.noise(x / 512.0, y / 512.0) * 5.0
         output.height = layer.height
         output.mountainFactor = layer.mountainFactor
@@ -132,29 +174,45 @@ class TerrainGenerator(random: Random) {
         output.caveRiver = caveRiver
         output.magmaHeight = magmaHeight
         output.river = layer.river
-        output.soiled = layer.mountain - layer.mountainCarve * 0.4 < 1.3 - layer.mountainFactor && layer.volcanoHeight < 18
-        output.beach = layer.height > output.beachMinHeight && layer.height <= output.beachMaxHeight
-        output.lavaChance = if (layer.volcano > 0.5) 10000 else if (layer.volcano > 0.2) 10000 else 0
+        output.soiled = layer.mountain - layer.mountainCarve * 0.4 < 1.3 -
+                layer.mountainFactor && layer.volcanoHeight < 18
+        output.beach = layer.height > output.beachMinHeight && layer.height <=
+                output.beachMaxHeight
+        output.lavaChance =
+                if (layer.volcano > 0.5) 10000 else if (layer.volcano > 0.2) 10000 else 0
     }
 
-    fun generateTerrainFactorLayer(x: Double,
-                                   y: Double): Double {
+    fun generateTerrainFactorLayer(
+        x: Double,
+        y: Double
+    ): Double {
         var terrainFactor = sqr(
-                terrainNoise.noiseOctave(x / 16384.0, y / 16384.0, 4, 8.0, 0.1))
+            terrainNoise.noiseOctave(
+                x / 12288.0,
+                y / 12288.0,
+                4,
+                8.0,
+                0.1
+            )
+        ) + 0.075
         if (terrainFactor > 0.3) {
-            terrainFactor -= (terrainFactor - 0.3) * 0.3
+            terrainFactor -= (terrainFactor - 0.3) * 0.4
             if (terrainFactor > 0.35) {
-                terrainFactor -= (terrainFactor - 0.35) * 0.6
+                terrainFactor -= (terrainFactor - 0.35) * 0.7
                 if (terrainFactor > 0.4) {
                     terrainFactor -= (terrainFactor - 0.4) * 0.9
                 }
             }
         }
         if (terrainFactor < 0.2) {
-            val oceanDepth = oceanNoise.noise(x / 8192.0,
-                    y / 8192.0) * 0.5 + 0.5
-            terrainFactor -= min(0.2 - terrainFactor,
-                    0.02) * oceanDepth * 30.0
+            val oceanDepth = oceanNoise.noise(
+                x / 8192.0,
+                y / 8192.0
+            ) * 0.5 + 0.5
+            terrainFactor -= min(
+                0.2 - terrainFactor,
+                0.02
+            ) * oceanDepth * 30.0
             if (terrainFactor < 0.15) {
                 terrainFactor -= min(0.15 - terrainFactor, 0.04) * 4.0
             }
@@ -162,41 +220,67 @@ class TerrainGenerator(random: Random) {
         return terrainFactor
     }
 
-    fun generateMountainFactorLayer(x: Double,
-                                    y: Double,
-                                    terrainFactor: Double): Double {
-        return cbe(clamp(1.0 - abs(
-                mountainHeightNoise.noise(x / 12288.0, y / 12288.0)) * 1.1, 0.0,
-                1.0) * min(
-                mountainHeightNoise.noise(x / 4096.0, y / 4096.0) * 0.6 + 0.8,
-                0.9)) * clamp(terrainFactor * 4.0 - 0.4, 0.0, 1.0)
+    fun generateMountainFactorLayer(
+        x: Double,
+        y: Double,
+        terrainFactor: Double
+    ): Double {
+        return cbe(
+            clamp(
+                1.2 - abs(
+                    mountainHeightNoise.noise(x / 6144.0, y / 6144.0)
+                ) * 1.4, 0.0,
+                1.0
+            ) * min(
+                mountainHeightNoise.noise(x / 2048.0, y / 2048.0) * 0.6 + 0.7,
+                0.9
+            )
+        ) * clamp(terrainFactor * 4.0 - 0.4, 0.0, 1.0)
     }
 
-    fun generateVolcanoFactorLayer(x: Double,
-                                   y: Double): Double {
-        return sqr(1.0 - clamp(abs(
-                volcanoHeightNoise.noise(x / 16384.0,
-                        y / 16384.0)) * 3.0 - 0.25, 0.0, 1.0))
+    fun generateVolcanoFactorLayer(
+        x: Double,
+        y: Double
+    ): Double {
+        return sqr(
+            1.0 - clamp(
+                abs(
+                    volcanoHeightNoise.noise(
+                        x / 16384.0,
+                        y / 16384.0
+                    )
+                ) * 3.0 - 0.25, 0.0, 1.0
+            )
+        )
     }
 
-    fun generateRiverLayer(x: Double,
-                           y: Double,
-                           mountainFactor: Double,
-                           limit: Double): Double {
+    fun generateRiverLayer(
+        x: Double,
+        y: Double,
+        mountainFactor: Double,
+        limit: Double
+    ): Double {
         val riverFactor = clamp(3.0 - mountainFactor * 10.0, 0.0, 1.0)
         if (riverFactor > 0.0) {
-            val riverN = riverNoise.noiseOctave(x / 4096.0, y / 4096.0, 4, 4.0,
-                    0.2)
-            return clamp(
-                    limit - sqr(1.0 - abs(riverN)) * limit *
-                            riverFactor, 0.0, 1.0)
+            val riverN = riverNoise.noiseOctave(
+                x / 4096.0, y / 4096.0, 4, 4.0,
+                0.2
+            )
+            return 1.0 - sqr(
+                clamp(
+                    1.0 - limit + (1.0 - abs(riverN)) * limit * riverFactor,
+                    0.0, 1.0
+                )
+            )
         } else {
             return 1.0
         }
     }
 
-    fun isValidSpawn(x: Double,
-                     y: Double): Boolean {
+    fun isValidSpawn(
+        x: Double,
+        y: Double
+    ): Boolean {
         val layer = TerrainGeneratorLayer()
         generate(x, y, layer)
         if (layer.mountainFactor > 0.2) {

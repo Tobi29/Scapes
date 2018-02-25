@@ -15,9 +15,7 @@
  */
 package org.tobi29.scapes.vanilla.basics.material.block.device
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.block.TerrainTexture
-import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelSimpleBlock
 import org.tobi29.scapes.chunk.ChunkMesh
@@ -25,7 +23,10 @@ import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.math.Face
+import org.tobi29.math.Face
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityQuernClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityQuernServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
@@ -38,16 +39,15 @@ class BlockQuern(type: VanillaMaterialType) : VanillaBlockContainer<EntityQuernC
     private var textureBottom: TerrainTexture? = null
     private var model: BlockModel? = null
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
-        return (if ("Pickaxe" == item.material().toolType(
-                item)) 12 else -1).toDouble()
+        return (if ("Pickaxe" == item.kind<ItemTypeTool>()?.toolType()) 12 else -1).toDouble()
     }
 
-    override fun drops(item: ItemStack,
-                       data: Int): List<ItemStack> {
-        if ("Pickaxe" == item.material().toolType(item)) {
-            return listOf(ItemStack(this, 0.toShort().toInt()))
+    override fun drops(item: Item?,
+                       data: Int): List<Item> {
+        if ("Pickaxe" == item.kind<ItemTypeTool>()?.toolType()) {
+            return listOf(ItemStackData(this, 0.toShort().toInt()))
         }
         return emptyList()
     }
@@ -56,7 +56,7 @@ class BlockQuern(type: VanillaMaterialType) : VanillaBlockContainer<EntityQuernC
         return "VanillaBasics:sound/footsteps/Stone.ogg"
     }
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
         return "VanillaBasics:sound/blocks/Stone.ogg"
     }
@@ -102,23 +102,23 @@ class BlockQuern(type: VanillaMaterialType) : VanillaBlockContainer<EntityQuernC
                 textureSide, 1.0, 1.0, 1.0, 1.0)
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
         model?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
         model?.renderInventory(gl, shader)
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return "Quern"
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 1
     }
 }

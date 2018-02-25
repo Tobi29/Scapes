@@ -17,7 +17,7 @@
 package org.tobi29.scapes.chunk
 
 import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.utils.graphics.Cam
+import org.tobi29.graphics.Cam
 
 interface WorldSkybox {
     fun update(delta: Double)

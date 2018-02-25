@@ -16,19 +16,24 @@
 
 package org.tobi29.scapes.vanilla.basics.gui
 
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.launch
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.loopUntilCancel
 import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.utils.math.floorToInt
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityForgeClient
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
+import org.tobi29.stdex.math.floorToInt
 
 class GuiForgeInventory(container: EntityForgeClient,
                         player: MobPlayerClientMainVB,
                         style: GuiStyle) : GuiContainerInventory<EntityForgeClient>(
         "Forge", player, container, style) {
     private val temperatureText: GuiComponentText
+    private var updateJob: Job? = null
 
     init {
         topPane.spacer()
@@ -64,9 +69,18 @@ class GuiForgeInventory(container: EntityForgeClient,
         updateTemperatureText()
     }
 
-    override fun updateComponent(delta: Double) {
-        super.updateComponent(delta)
-        updateTemperatureText()
+    override fun init() = updateVisible()
+
+    override fun updateVisible() {
+        synchronized(this) {
+            dispose()
+            if (!isVisible) return@synchronized
+            updateJob = launch(engine.taskExecutor) {
+                Timer().apply { init() }.loopUntilCancel(Timer.toDiff(60.0)) {
+                    updateTemperatureText()
+                }
+            }
+        }
     }
 
     private fun updateTemperatureText() {

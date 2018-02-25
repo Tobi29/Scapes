@@ -15,29 +15,32 @@
  */
 package org.tobi29.scapes.entity.server
 
+import org.tobi29.io.tag.ReadWriteTagMap
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toMap
+import org.tobi29.math.AABB
+import org.tobi29.math.vector.MutableVector3d
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.vector.MutableVector3d
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.assert
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toMap
 import org.tobi29.scapes.entity.EntityPhysics
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.Mob
+import org.tobi29.stdex.ThreadLocal
+import org.tobi29.stdex.assert
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.utils.Pool
+import org.tobi29.utils.forAllObjects
+import kotlin.collections.set
 
 abstract class MobServer(type: EntityType<*, *>,
                          world: WorldServer,
                          pos: Vector3d,
                          speed: Vector3d,
                          protected val collision: AABB) : EntityAbstractServer(
-        type, world, pos), Mob {
+        type, world, pos),
+        Mob {
     protected val speed: MutableVector3d
     protected val rot = MutableVector3d()
     protected val positionSender: MobPositionSenderServer
@@ -64,7 +67,7 @@ abstract class MobServer(type: EntityType<*, *>,
 
     override fun getAABB(): AABB {
         val aabb = AABB(collision)
-        aabb.add(pos.doubleX(), pos.doubleY(), pos.doubleZ())
+        aabb.add(pos.x, pos.y, pos.z)
         return aabb
     }
 
@@ -108,7 +111,7 @@ abstract class MobServer(type: EntityType<*, *>,
                   y: Double,
                   z: Double) {
         assert { world.checkThread() || !world.hasEntity(this) }
-        speed.plusX(x).plusY(y).plusZ(z)
+        speed.addX(x).addY(y).addZ(z)
         positionSender.sendSpeed(uuid, speed.now(), true)
     }
 
@@ -127,7 +130,8 @@ abstract class MobServer(type: EntityType<*, *>,
     }
 
     open fun move(delta: Double) {
-        if (!world.terrain.isBlockTicking(pos.intX(), pos.intY(), pos.intZ())) {
+        if (!world.terrain.isBlockTicking(pos.x.floorToInt(),
+                pos.y.floorToInt(), pos.z.floorToInt())) {
             return
         }
         EntityPhysics.updateVelocity(delta, speed, world.gravity,
@@ -140,13 +144,14 @@ abstract class MobServer(type: EntityType<*, *>,
         EntityPhysics.move(delta, pos, speed, aabb, stepHeight,
                 physicsState, aabbs)
         if (isOnGround) {
-            speed.setZ(speed.doubleZ() / (1.0 + 4.0 * delta))
+            speed.setZ(speed.z / (1.0 + 4.0 * delta))
         }
         EntityPhysics.collide(delta, aabb, aabbs, physicsState) {
             it.collision.inside(this, delta)
         }
-        isHeadInWater = world.terrain.type(pos.intX(), pos.intY(),
-                (pos.doubleZ() + 0.7).floorToInt()).isLiquid
+        isHeadInWater = world.terrain.type(pos.x.floorToInt(),
+                pos.y.floorToInt(),
+                (pos.z + 0.7).floorToInt()).isLiquid
         positionSender.submitUpdate(uuid, pos.now(), speed.now(), rot.now(),
                 physicsState.isOnGround, physicsState.slidingWall,
                 physicsState.isInWater, physicsState.isSwimming)

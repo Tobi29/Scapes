@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.client
 
-import org.tobi29.scapes.engine.utils.EventDispatcher
+import org.tobi29.utils.EventDispatcher
 
 class ChatHistory(private val listenerParent: EventDispatcher) {
     private val lines = ArrayList<ChatLine>()

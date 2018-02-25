@@ -16,34 +16,34 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.server
 
-import org.tobi29.scapes.block.Inventory
-import org.tobi29.scapes.block.ItemStack
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
-import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
+import org.tobi29.scapes.inventory.*
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
-import org.tobi29.scapes.vanilla.basics.material.ItemFuel
-import org.tobi29.scapes.vanilla.basics.material.ItemHeatable
+import org.tobi29.scapes.vanilla.basics.material.*
+import org.tobi29.io.tag.ReadWriteTagMap
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toTag
+import org.tobi29.stdex.math.floorToInt
+import kotlin.collections.indices
+import kotlin.collections.set
 import kotlin.math.max
 
 abstract class EntityAbstractFurnaceServer(
         type: EntityType<*, *>,
         world: WorldServer,
         pos: Vector3d,
-        inventory: Inventory,
         fuel: Int,
         protected val items: Int,
         protected var maximumTemperature: Double,
         protected val temperatureFalloff: Double,
         protected val fuelHeat: Double,
         protected val fuelTier: Int,
-        private val beforeHeatUpdate: (Inventory, ItemStack) -> Unit = { _, _ -> }
-) : EntityAbstractContainerServer(type, world, pos, inventory) {
+        private val beforeHeatUpdate: (Inventory, TypedItem<ItemTypeHeatable>) -> Item? = { _, it -> it }
+) : EntityAbstractContainerServer(type, world, pos) {
     protected val fuel = DoubleArray(fuel)
     protected val fuelTemperature = DoubleArray(fuel)
     var temperature = 0.0
@@ -87,45 +87,41 @@ abstract class EntityAbstractFurnaceServer(
                         temperature += fuelTemperature[i]
                         fuel[i]--
                     } else {
-                        val item = inventory.item(i)
-                        val material = item.material()
-                        if (material is ItemFuel) {
-                            if (material.fuelTier(item) >= fuelTier) {
-                                this.fuel[i] = material.fuelTime(
-                                        item) * fuelHeat
-                                fuelTemperature[i] = material.fuelTemperature(
-                                        item) * fuelHeat
-                                inventory.item(i).take(1)
+                        inventory[i].kind<ItemTypeFuel>()?.let { item ->
+                            if (item.fuelTier >= fuelTier) {
+                                this.fuel[i] = item.fuelTime * fuelHeat
+                                fuelTemperature[i] = item.fuelTemperature * fuelHeat
+                                inventory[i] = inventory[i].split(1).second
                             }
                         }
                     }
                 }
-                val beforeUpdate: (ItemStack) -> Unit = {
+                val beforeUpdate: (TypedItem<ItemTypeHeatable>) -> Item? = {
                     beforeHeatUpdate(inventory, it)
                 }
                 for (i in fuel.size + 1..fuel.size + items) {
-                    if (inventory.item(i).amount() == 1) {
-                        val type = inventory.item(i).material()
-                        if (type is ItemHeatable) {
-                            type.heat(inventory.item(i), temperature,
+                    val item = inventory[i]
+                    item.kind<ItemTypeHeatable>()?.let { itemHeatable ->
+                        if (itemHeatable.amount == 1) {
+                            inventory[i] = itemHeatable.heat(
+                                    temperature = temperature,
                                     beforeUpdate = beforeUpdate)
                         }
-                    } else if (inventory.item(i).isEmpty && !inventory.item(
-                            fuel.size).isEmpty) {
-                        val j = i
-                        inventory.item(fuel.size).take(1)?.let { item ->
-                            inventory.item(j).stack(item)
-                        }
+                    }
+                    if (item.isEmpty()) {
+                        val (stack, remaining) = inventory[fuel.size].split(1)
+                        inventory[i] = stack
+                        inventory[fuel.size] = remaining
                     }
                 }
             }
             if (temperature > maximumTemperature) {
-                world.terrain.modify(pos.intX(), pos.intY(),
-                        pos.intZ()) { terrain ->
-                    if (isValidOn(terrain, pos.intX(), pos.intY(),
-                            pos.intZ())) {
-                        terrain.typeData(pos.intX(), pos.intY(), pos.intZ(),
-                                materials.air, 0)
+                world.terrain.modify(pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt()) { terrain ->
+                    if (isValidOn(terrain, pos.x.floorToInt(),
+                            pos.y.floorToInt(), pos.z.floorToInt())) {
+                        terrain.typeData(pos.x.floorToInt(), pos.y.floorToInt(),
+                                pos.z.floorToInt(), materials.air, 0)
                     }
                 }
             }

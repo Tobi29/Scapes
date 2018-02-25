@@ -27,15 +27,17 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.math.vector.MutableVector3i
-import org.tobi29.scapes.engine.utils.Pool
-import org.tobi29.scapes.engine.utils.ThreadLocal
-import org.tobi29.scapes.engine.utils.math.clamp
-import org.tobi29.scapes.engine.utils.math.mix
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.math.AABB
+import org.tobi29.math.Face
+import org.tobi29.math.Random
+import org.tobi29.math.vector.MutableVector3i
+import org.tobi29.utils.Pool
+import org.tobi29.stdex.ThreadLocal
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.mix
+import org.tobi29.utils.toArray
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.TreeType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.CollisionLeaves
@@ -73,21 +75,21 @@ class BlockLeaves(type: VanillaMaterialType) : VanillaBlock(type) {
         return aabbs
     }
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
         return 0.1
     }
 
-    override fun drops(item: ItemStack,
-                       data: Int): List<ItemStack> {
+    override fun drops(item: Item?,
+                       data: Int): List<Item> {
         val type = treeRegistry[data]
         val random = Random()
-        val drops = ArrayList<ItemStack>()
+        val drops = ArrayList<Item>()
         if (random.nextInt(type.dropChance) == 0) {
             if (random.nextInt(3) == 0) {
-                drops.add(ItemStack(materials.sapling, data))
+                drops.add(ItemStackData(materials.sapling, data))
             } else {
-                drops.add(ItemStack(materials.stick, 0.toShort().toInt()))
+                drops.add(TypedItem(materials.stick))
             }
         }
         return drops
@@ -97,7 +99,7 @@ class BlockLeaves(type: VanillaMaterialType) : VanillaBlock(type) {
         return "VanillaBasics:sound/footsteps/Grass.ogg"
     }
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
         return "VanillaBasics:sound/blocks/Foliage.ogg"
     }
@@ -302,23 +304,23 @@ class BlockLeaves(type: VanillaMaterialType) : VanillaBlock(type) {
         }
     }
 
-    override fun render(item: ItemStack,
+    override fun render(item: TypedItem<BlockType>,
                         gl: GL,
                         shader: Shader) {
-        modelsColored?.get(item.data())?.render(gl, shader)
+        modelsColored?.get(item.data)?.render(gl, shader)
     }
 
-    override fun renderInventory(item: ItemStack,
+    override fun renderInventory(item: TypedItem<BlockType>,
                                  gl: GL,
                                  shader: Shader) {
-        modelsColored?.get(item.data())?.renderInventory(gl, shader)
+        modelsColored?.get(item.data)?.renderInventory(gl, shader)
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return materials.log.name(item) + " Leaves"
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 16
     }
 
@@ -376,8 +378,7 @@ class BlockLeaves(type: VanillaMaterialType) : VanillaBlock(type) {
                     next = checksSwap
                     i++
                 }
-                world.dropItems(drops(ItemStack(materials.air, 0), data), x, y,
-                        z)
+                world.dropItems(drops(null, data), x, y, z)
                 terrain.typeData(x, y, z, materials.air, 0)
             }
         } finally {
@@ -410,7 +411,7 @@ class BlockLeaves(type: VanillaMaterialType) : VanillaBlock(type) {
             return false
         }
         visited[i] = true
-        push().set(x, y, z)
+        push().setXYZ(x, y, z)
         return true
     }
 

@@ -17,23 +17,24 @@ package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.UUID
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.uuid.Uuid
 
-class PacketRequestEntity : PacketAbstract, PacketServer {
-    private lateinit var uuid: UUID
+class PacketRequestEntity : PacketAbstract,
+        PacketServer {
+    private lateinit var uuid: Uuid
 
     constructor(type: PacketType) : super(type)
 
     constructor(type: PacketType,
-                uuid: UUID) : super(type) {
+                uuid: Uuid) : super(type) {
         this.uuid = uuid
     }
 
     constructor(registry: Registries,
-                uuid: UUID) : this(
+                uuid: Uuid) : this(
             Packet.make(registry, "core.packet.RequestEntity"), uuid)
 
     override fun sendServer(client: ClientConnection,
@@ -44,7 +45,7 @@ class PacketRequestEntity : PacketAbstract, PacketServer {
 
     override fun parseServer(player: PlayerConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.getLong(), stream.getLong())
+        uuid = Uuid(stream.getLong(), stream.getLong())
     }
 
     override fun runServer(player: PlayerConnection) {

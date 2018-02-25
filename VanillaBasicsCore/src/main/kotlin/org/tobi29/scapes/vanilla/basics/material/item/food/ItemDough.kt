@@ -16,49 +16,56 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.food
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.scapes.block.ItemTypeIconKindsI
+import org.tobi29.scapes.block.ItemTypeKindsRegistryI
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.ItemTypeNamedI
+import org.tobi29.scapes.inventory.ItemTypeStackableDefaultI
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.CropType
-import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
-import org.tobi29.scapes.vanilla.basics.material.ItemResearch
+import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatableI
+import org.tobi29.scapes.vanilla.basics.material.ItemResearchI
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
-import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
+import org.tobi29.scapes.vanilla.basics.material.item.VanillaItemBase
 
-class ItemDough(type: VanillaMaterialType) : ItemSimpleData(
-        type), ItemDefaultHeatable, ItemResearch {
-    val cropRegistry = plugins.registry.get<CropType>("VanillaBasics",
-            "CropType")
+class ItemDough(
+        type: VanillaMaterialType
+) : VanillaItemBase<ItemDough>(type),
+        ItemTypeKindsRegistryI<ItemDough, CropType>,
+        ItemTypeNamedI<ItemDough>,
+        ItemTypeIconKindsI<ItemDough, CropType>,
+        ItemTypeStackableDefaultI<ItemDough>,
+        ItemDefaultHeatableI<ItemDough>,
+        ItemResearchI<ItemDough> {
+    override val registry =
+            plugins.registry.get<CropType>("VanillaBasics", kindTag)
+    override val kindTag get() = "CropType"
 
-    override fun types(): Int {
-        return cropRegistry.values().size
-    }
+    override fun textureAsset(kind: CropType) =
+            "${kind.texture}/Dough"
 
-    override fun texture(data: Int): String {
-        return "${cropRegistry[data].texture}/Dough.png"
-    }
-
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<ItemDough>): String {
         val name = StringBuilder(40)
-        name.append(materials.crop.name(item)).append("Dough")
+        name.append(kind(item).name).append("Dough")
         val temperature = temperature(item)
         name.append("\nTemp.:").append(temperature.floorToInt()).append("°C")
         return name.toString()
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
-        return 8
-    }
+    override fun maxStackSize(item: TypedItem<ItemDough>) = 8
 
-    override fun heatTransferFactor(item: ItemStack) = 0.001
+    override fun heatTransferFactor(item: TypedItem<ItemDough>) = 0.001
 
-    override fun temperatureUpdated(item: ItemStack) {
+    override fun temperatureUpdated(item: TypedItem<ItemDough>): Item? {
         if (temperature(item) >= 40.0) {
-            item.setMaterial(materials.baked)
+            return item.copy(type = materials.baked)
         }
+        return item
     }
 
-    override fun identifiers(item: ItemStack): Array<String> {
+    override fun identifiers(item: TypedItem<ItemDough>): Array<String> {
         return arrayOf("vanilla.basics.item.Dough",
-                "vanilla.basics.item.Dough." + materials.crop.name(item))
+                "vanilla.basics.item.Dough." + kind(item).name)
     }
 }

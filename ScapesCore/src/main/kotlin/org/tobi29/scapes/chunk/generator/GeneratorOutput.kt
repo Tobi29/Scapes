@@ -19,7 +19,7 @@ package org.tobi29.scapes.chunk.generator
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.block.Update
-import org.tobi29.scapes.engine.utils.ThreadLocal
+import org.tobi29.stdex.ThreadLocal
 
 class GeneratorOutput() {
     var height: Int = 0

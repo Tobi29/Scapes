@@ -16,13 +16,11 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton
 import org.tobi29.scapes.engine.gui.GuiStyle
 
-class GuiLoading(state: GameState,
-                 style: GuiStyle) : GuiDesktop(state, style) {
+class GuiLoading(style: GuiStyle) : GuiScaled(style) {
     private val label: GuiComponentTextButton
     private var progressValue = 0.0
 

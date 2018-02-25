@@ -18,21 +18,11 @@ package org.tobi29.scapes.client.gui
 
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.scapes.engine.math.vector.Vector2d
+import org.tobi29.math.vector.Vector2d
 import kotlin.math.min
 
-open class GuiDesktop(state: GameState,
-                      style: GuiStyle) : GuiState(state,
-        style) {
-
-    override fun baseSize(): Vector2d {
-        val container = engine.container
-        val width = container.containerWidth.toDouble()
-        val height = container.containerHeight.toDouble()
-        val scale = min(540.0 / height, 1.0)
-        return Vector2d(width * scale, height * scale)
-    }
-
+open class GuiDesktop(val state: GameState,
+                      style: GuiStyle) : GuiScaled(style) {
     protected fun row(pane: GuiContainerRow): GuiComponentGroupSlab {
         return pane.addVert(11.0, 0.0, -1.0, 40.0, ::GuiComponentGroupSlab)
     }
@@ -73,4 +63,55 @@ open class GuiDesktop(state: GameState,
         parent.selectable = true
         return GuiComponentSlider(parent, 18, text, value, filter)
     }
+}
+
+open class GuiScaled(style: GuiStyle) : Gui(style) {
+    override fun baseSize(): Vector2d {
+        val container = engine.container
+        val width = container.containerWidth.toDouble()
+        val height = container.containerHeight.toDouble()
+        val scale = min(540.0 / height, 1.0)
+        return Vector2d(width * scale, height * scale)
+    }
+}
+
+fun row(pane: GuiContainerRow): GuiComponentGroupSlab {
+    return pane.addVert(11.0, 0.0, -1.0, 40.0, ::GuiComponentGroupSlab)
+}
+
+fun <T : GuiComponent> row(pane: GuiContainerRow,
+                           component: (GuiLayoutDataFlow) -> T): T {
+    return pane.addVert(16.0, 5.0, -1.0, 30.0, component)
+}
+
+fun <T : GuiComponent> rowCenter(pane: GuiContainerRow,
+                                 component: (GuiLayoutDataFlow) -> T): T {
+    return pane.addVert(112.0, 5.0, 176.0, 30.0, component)
+}
+
+fun button(parent: GuiLayoutData,
+           text: String): GuiComponentTextButton {
+    return button(parent, 18, text)
+}
+
+fun button(parent: GuiLayoutData,
+           textSize: Int,
+           text: String): GuiComponentTextButton {
+    parent.selectable = true
+    return GuiComponentTextButton(parent, textSize, text)
+}
+
+fun slider(parent: GuiLayoutData,
+           text: String,
+           value: Double): GuiComponentSlider {
+    parent.selectable = true
+    return GuiComponentSlider(parent, 18, text, value)
+}
+
+fun slider(parent: GuiLayoutData,
+           text: String,
+           value: Double,
+           filter: (String, Double) -> String): GuiComponentSlider {
+    parent.selectable = true
+    return GuiComponentSlider(parent, 18, text, value, filter)
 }

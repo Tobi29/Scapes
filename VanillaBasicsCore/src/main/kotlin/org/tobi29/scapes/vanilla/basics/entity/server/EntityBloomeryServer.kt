@@ -16,26 +16,31 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.server
 
-import org.tobi29.scapes.block.Inventory
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.ReadWriteTagMap
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toBoolean
-import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.math.Face
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.packets.PacketEntityChange
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
+import org.tobi29.io.tag.ReadWriteTagMap
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toBoolean
+import org.tobi29.io.tag.toTag
+import org.tobi29.stdex.math.floorToInt
 import kotlin.collections.set
 
-class EntityBloomeryServer(type: EntityType<*, *>,
-                           world: WorldServer) : EntityAbstractFurnaceServer(
-        type, world, Vector3d.ZERO, Inventory(world.plugins, 14), 4, 9, 600.0,
-        1.004, 4.0, 50) {
+class EntityBloomeryServer(
+        type: EntityType<*, *>,
+        world: WorldServer
+) : EntityAbstractFurnaceServer(type, world, Vector3d.ZERO, 4, 9, 600.0, 1.004,
+        4.0, 50) {
     private var hasBellows = false
+
+    init {
+        inventories.add("Container", 14)
+    }
 
     override fun write(map: ReadWriteTagMap) {
         super.write(map)
@@ -52,9 +57,9 @@ class EntityBloomeryServer(type: EntityType<*, *>,
         super.update(delta)
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         val materials = plugin.materials
-        val xx = pos.intX()
-        val yy = pos.intY()
-        val zz = pos.intZ()
+        val xx = pos.x.floorToInt()
+        val yy = pos.y.floorToInt()
+        val zz = pos.z.floorToInt()
         val blockOff = materials.bloomery.block(0)
         val blockOn = materials.bloomery.block(1)
         if (temperature > 80.0) {
@@ -88,9 +93,9 @@ class EntityBloomeryServer(type: EntityType<*, *>,
         val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
         val materials = plugin.materials
         var hasBellows = false
-        val xx = pos.intX()
-        val yy = pos.intY()
-        val zz = pos.intZ()
+        val xx = pos.x.floorToInt()
+        val yy = pos.y.floorToInt()
+        val zz = pos.z.floorToInt()
         if (terrain.block(xx, yy - 1, zz) == materials.bellows.block(
                 Face.NORTH.value)) {
             hasBellows = true

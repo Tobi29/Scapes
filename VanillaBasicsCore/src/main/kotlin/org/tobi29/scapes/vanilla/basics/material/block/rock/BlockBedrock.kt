@@ -16,18 +16,20 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimple
 
 class BlockBedrock(type: VanillaMaterialType) : BlockSimple(type) {
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int) = -1.0
 
     override fun footStepSound(data: Int) = "VanillaBasics:sound/footsteps/Stone.ogg"
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int) = "VanillaBasics:sound/blocks/Stone.ogg"
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
@@ -35,7 +37,7 @@ class BlockBedrock(type: VanillaMaterialType) : BlockSimple(type) {
                 "VanillaBasics:image/terrain/Bedrock.png")
     }
 
-    override fun name(item: ItemStack) = "Bedrock"
+    override fun name(item: TypedItem<BlockType>) = "Bedrock"
 
-    override fun maxStackSize(item: ItemStack) = 16
+    override fun maxStackSize(item: TypedItem<BlockType>) = 16
 }

@@ -16,11 +16,15 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.structural
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.block.data
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.math.Face
+import org.tobi29.math.threadLocalRandom
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.ItemStack
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimpleDataTextured
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateStrawDry
@@ -39,35 +43,36 @@ class BlockStraw(type: VanillaMaterialType) : BlockSimpleDataTextured(type) {
         return true
     }
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
         return 0.1
     }
 
-    override fun drops(item: ItemStack,
-                       data: Int): List<ItemStack> {
-        return listOf(ItemStack(materials.grassBundle, data, 2))
+    override fun drops(item: Item?,
+                       data: Int): List<Item> {
+        return if (data == 1) listOf(ItemStack(materials.straw, 2))
+        else listOf(ItemStack(materials.grassBundle, 2))
     }
 
     override fun footStepSound(data: Int): String {
         return "VanillaBasics:sound/footsteps/Grass.ogg"
     }
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int): String {
         return "VanillaBasics:sound/blocks/Foliage.ogg"
     }
 
     override fun lightTrough(data: Int) = (-5).toByte()
 
-    override fun name(item: ItemStack): String {
-        when (item.data()) {
+    override fun name(item: TypedItem<BlockType>): String {
+        when (item.data) {
             1 -> return "Straw"
             else -> return "Wet Straw"
         }
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 16
     }
 

@@ -16,14 +16,19 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.tool
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatable
+import org.tobi29.scapes.block.copy
+import org.tobi29.scapes.block.data
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
+import org.tobi29.scapes.vanilla.basics.material.ItemDefaultHeatableI
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
+import org.tobi29.scapes.vanilla.basics.material.item.VanillaItem
 
 class ItemMold(type: VanillaMaterialType) : ItemSimpleData(
-        type), ItemDefaultHeatable {
+        type),
+        ItemDefaultHeatableI<VanillaItem> {
     override fun types(): Int {
         return 2
     }
@@ -36,9 +41,9 @@ class ItemMold(type: VanillaMaterialType) : ItemSimpleData(
         }
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<VanillaItem>): String {
         val name = StringBuilder(40)
-        when (item.data()) {
+        when (item.data) {
             1 -> {
                 name.append("Ceramic Mold")
                 name.append("Clay Mold")
@@ -50,15 +55,16 @@ class ItemMold(type: VanillaMaterialType) : ItemSimpleData(
         return name.toString()
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<VanillaItem>): Int {
         return 64
     }
 
-    override fun heatTransferFactor(item: ItemStack) = 0.0004
+    override fun heatTransferFactor(item: TypedItem<VanillaItem>) = 0.0004
 
-    override fun temperatureUpdated(item: ItemStack) {
+    override fun temperatureUpdated(item: TypedItem<VanillaItem>): Item? {
         if (temperature(item) >= 1000.0) {
-            item.setData(1)
+            return item.copy(data = 1)
         }
+        return null
     }
 }

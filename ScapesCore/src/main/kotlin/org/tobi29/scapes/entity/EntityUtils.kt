@@ -16,12 +16,12 @@
 
 package org.tobi29.scapes.entity
 
-import org.tobi29.scapes.engine.math.AABB
-import org.tobi29.scapes.engine.math.Frustum
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.vector.distanceSqr
-import org.tobi29.scapes.engine.utils.math.ceilToInt
-import org.tobi29.scapes.engine.utils.math.floorToInt
+import org.tobi29.math.AABB
+import org.tobi29.math.Frustum
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.distanceSqr
+import org.tobi29.stdex.math.ceilToInt
+import org.tobi29.stdex.math.floorToInt
 
 fun <E : Entity> EntityContainer<E>.getEntities(minX: Int,
                                                 minY: Int,
@@ -32,15 +32,15 @@ fun <E : Entity> EntityContainer<E>.getEntities(minX: Int,
     return getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
             maxZ).filter { entity ->
         val pos = entity.getCurrentPos()
-        val x = pos.intX()
+        val x = pos.x.floorToInt()
         if (x in minX..maxX) {
             return@filter false
         }
-        val y = pos.intY()
+        val y = pos.y.floorToInt()
         if (y in minY..maxY) {
             return@filter false
         }
-        val z = pos.intZ()
+        val z = pos.z.floorToInt()
         if (z in minZ..maxZ) {
             return@filter false
         }

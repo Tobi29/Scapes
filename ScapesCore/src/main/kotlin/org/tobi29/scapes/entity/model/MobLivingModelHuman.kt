@@ -16,21 +16,26 @@
 
 package org.tobi29.scapes.entity.model
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.graphics.Cam
+import org.tobi29.math.*
+import org.tobi29.math.vector.*
+import org.tobi29.scapes.block.isTool
+import org.tobi29.scapes.block.isWeapon
+import org.tobi29.scapes.block.render
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.graphics.push
-import org.tobi29.scapes.engine.math.*
-import org.tobi29.scapes.engine.math.vector.*
-import org.tobi29.scapes.engine.utils.graphics.Cam
-import org.tobi29.scapes.engine.utils.math.TWO_PI
-import org.tobi29.scapes.engine.utils.math.toRad
 import org.tobi29.scapes.entity.WieldMode
 import org.tobi29.scapes.entity.client.MobLivingEquippedClient
 import org.tobi29.scapes.entity.particle.ParticleEmitterFallenBodyPart
 import org.tobi29.scapes.entity.particle.ParticleSystem
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.isEmpty
+import org.tobi29.stdex.math.TWO_PI
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.toRad
 import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.min
@@ -101,12 +106,12 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
     }
 
     override fun shapeAABB(aabb: AABB) {
-        aabb.minX = pos.doubleX() - 1.0
-        aabb.minY = pos.doubleY() - 1.0
-        aabb.minZ = pos.doubleZ() - 1.0
-        aabb.maxX = pos.doubleX() + 1.0
-        aabb.maxY = pos.doubleY() + 1.0
-        aabb.maxZ = pos.doubleZ() + 1.2
+        aabb.minX = pos.x - 1.0
+        aabb.minY = pos.y - 1.0
+        aabb.minZ = pos.z - 1.0
+        aabb.maxX = pos.x + 1.0
+        aabb.maxY = pos.y + 1.0
+        aabb.maxZ = pos.z + 1.2
     }
 
     override fun renderUpdate(delta: Double) {
@@ -127,7 +132,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         val factorSpeed = min(1.0, delta * 5.0)
         val speed = entity.speed()
         val moveSpeed = min(sqrt(length(speed.x, speed.y)), 2.0)
-        pos.plus(entity.getCurrentPos().minus(pos.now()).times(factorPos))
+        pos.add(entity.getCurrentPos().minus(pos.now()).times(factorPos))
         swing += moveSpeed * 2.0 * delta
         swing %= TWO_PI
         lazyName += delta
@@ -141,7 +146,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         } else {
             if (armDirLeft > 0.01f) {
                 if (armDirLeft >= 0.45f) {
-                    if (weaponLeft.material().isWeapon(weaponLeft)) {
+                    if (weaponLeft.isWeapon()) {
                         armDirLeftRender = -1.1
                     } else {
                         armDirLeftRender = -1.5
@@ -153,8 +158,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
             }
         }
         armDirLeft = newChargeLeft
-        if (weaponLeft.material().isWeapon(
-                weaponLeft) && armDirLeftRender < -0.6) {
+        if (weaponLeft.isWeapon() && armDirLeftRender < -0.6) {
             armDirLeftRender += (armDirLeft - armDirLeftRender) * factorPos / 12.0
         } else {
             armDirLeftRender += (armDirLeft - armDirLeftRender) * factorPos
@@ -167,7 +171,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         } else {
             if (armDirRight > 0.01) {
                 if (armDirRight >= 0.45) {
-                    if (weaponRight.material().isWeapon(weaponRight)) {
+                    if (weaponRight.isWeapon()) {
                         armDirRightRender = -1.1
                     } else {
                         armDirRightRender = -1.5
@@ -179,8 +183,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
             }
         }
         armDirRight = newChargeRight
-        if (weaponRight.material().isWeapon(
-                weaponRight) && armDirRightRender < -0.6) {
+        if (weaponRight.isWeapon() && armDirRightRender < -0.6) {
             armDirRightRender += ((armDirRight - armDirRightRender) * factorPos / 12.0)
         } else {
             armDirRightRender += ((armDirRight - armDirRightRender) * factorPos)
@@ -193,9 +196,9 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                         shader: Shader) {
         val damageColor = (1.0 - min(1.0,
                 max(0.0, entity.invincibleTicks() / 0.8))).toFloat()
-        var posRenderX = (pos.doubleX() - cam.position.doubleX()).toFloat()
-        var posRenderY = (pos.doubleY() - cam.position.doubleY()).toFloat()
-        val posRenderZ = (pos.doubleZ() - cam.position.doubleZ()).toFloat()
+        var posRenderX = (pos.x - cam.position.x).toFloat()
+        var posRenderY = (pos.y - cam.position.y).toFloat()
+        val posRenderZ = (pos.z - cam.position.z).toFloat()
         val l = pitch * 0.004
         if (l < 0.0) {
             val d = yaw.toRad()
@@ -205,10 +208,11 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         val swingDir = cosTable(swing) * moveSpeedRender * 0.5
         val lazyNameDir = (cosTable(
                 lazyName) * 0.5 + 0.5) * (moveSpeedRender * 0.2 + 0.2)
-        gl.setAttribute2f(4, world.terrain.blockLight(pos.intX(), pos.intY(),
-                pos.intZ()) / 15.0f,
-                world.terrain.sunLight(pos.intX(), pos.intY(),
-                        pos.intZ()) / 15.0f)
+        gl.setAttribute2f(4,
+                world.terrain.blockLight(pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt()) / 15.0f,
+                world.terrain.sunLight(pos.x.floorToInt(), pos.y.floorToInt(),
+                        pos.z.floorToInt()) / 15.0f)
         texture.bind(gl)
         gl.matrixStack.push { matrix ->
             matrix.translate(posRenderX, posRenderY, posRenderZ)
@@ -236,7 +240,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 var rot: Double
                 val charge: Double
                 val charge2: Double
-                val item: ItemStack
+                val item: Item?
                 if (wieldMode == WieldMode.RIGHT) {
                     item = entity.rightWeapon()
                     charge = armDirRightRender
@@ -246,7 +250,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                     charge = armDirLeftRender
                     charge2 = armDirLeft2
                 }
-                if (item.material() == world.air) {
+                if (item.isEmpty()) {
                     matrix.rotate((lazyNameDir * 60.0).toFloat(), 0f, 1f, 0f)
                     matrix.rotate((-swingDir * 60.0).toFloat(), 1f, 0f, 0f)
                     rot = sinTable(charge * PI)
@@ -262,7 +266,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                     } else {
                         matrix.rotate(swingDir.toFloat() * 10, 1f, 0f, 0f)
                     }
-                    if (item.material().isWeapon(item)) {
+                    if (item.isWeapon()) {
                         rot = sinTable(-charge * PI)
                         if (rot < 0 && charge > 0.0) {
                             rot /= 4.0
@@ -295,18 +299,18 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 armLeft.render(1.0f, damageColor, damageColor, 1.0f, gl, shader)
                 if (wieldMode !== WieldMode.RIGHT) {
                     matrix.translate(-0.3f, 0.4f, -0.4f)
-                    if (item.material().isWeapon(item)) {
+                    if (item.isWeapon()) {
                         matrix.translate(0.0f, -0.6f, -0.05f)
                         matrix.rotate((rot * -60.0).toFloat(), 1.0f, 0.0f, 0.0f)
                         matrix.rotate((rot * -50.0).toFloat(), 0.0f, 1.0f, 0.0f)
                         matrix.translate(0.0f, 0.6f, 0.0f)
-                    } else if (!item.material().isTool(item)) {
+                    } else if (!item.isTool()) {
                         matrix.translate(0.31f, -0.3f, -0.2f)
                         matrix.scale(0.3f, 0.3f, 0.3f)
                     }
                     matrix.rotate(120.0f, 0.0f, 0.0f, 1.0f)
                     matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f)
-                    item.material().render(item, gl, shader)
+                    item.render(gl, shader)
                 }
             }
             gl.matrixStack.push { matrix ->
@@ -314,7 +318,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 var rot: Double
                 val charge: Double
                 val charge2: Double
-                val item: ItemStack
+                val item: Item?
                 if (wieldMode == WieldMode.LEFT) {
                     item = entity.leftWeapon()
                     charge = armDirLeftRender
@@ -324,7 +328,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                     charge = armDirRightRender
                     charge2 = armDirRight2
                 }
-                if (item.material() == world.air) {
+                if (item == null) {
                     matrix.rotate((lazyNameDir * -60.0).toFloat(), 0f, 1f, 0f)
                     matrix.rotate((swingDir * 60.0).toFloat(), 1f, 0f, 0f)
                     rot = sinTable(charge * PI)
@@ -340,7 +344,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                     } else {
                         matrix.rotate(swingDir.toFloat() * 10, 1f, 0f, 0f)
                     }
-                    if (item.material().isWeapon(item)) {
+                    if (item.isWeapon()) {
                         rot = sinTable(-charge * PI).toFloat().toDouble()
                         if (rot < 0.0f && charge > 0.0) {
                             rot /= 4.0
@@ -375,18 +379,18 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                         shader)
                 if (wieldMode !== WieldMode.LEFT) {
                     matrix.translate(0.3f, 0.4f, -0.4f)
-                    if (item.material().isWeapon(item)) {
+                    if (item.isWeapon()) {
                         matrix.translate(0.0f, -0.6f, -0.05f)
                         matrix.rotate((rot * -60.0).toFloat(), 1.0f, 0.0f, 0.0f)
                         matrix.rotate((rot * 50.0).toFloat(), 0.0f, 1.0f, 0.0f)
                         matrix.translate(0.0f, 0.6f, 0.0f)
-                    } else if (!item.material().isTool(item)) {
+                    } else if (!item.isTool()) {
                         matrix.translate(-0.31f, -0.3f, -0.2f)
                         matrix.scale(0.3f, 0.3f, 0.3f)
                     }
                     matrix.rotate(60.0f, 0.0f, 0.0f, 1.0f)
                     matrix.rotate(60.0f, 0.0f, 1.0f, 0.0f)
-                    item.material().render(item, gl, shader)
+                    item.render(gl, shader)
                 }
             }
         }
@@ -462,7 +466,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 instance.rotationSpeed.set(
                         Vector3d(random.nextDouble() - 0.5,
                                 random.nextDouble() - 0.5,
-                                random.nextDouble() - 0.5).normalizeSafe().times(
+                                random.nextDouble() - 0.5).normalizedSafe().times(
                                 480.0))
                 instance.time = 6.0f
             }
@@ -478,7 +482,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 instance.rotationSpeed.set(
                         Vector3d(random.nextDouble() - 0.5,
                                 random.nextDouble() - 0.5,
-                                random.nextDouble() - 0.5).normalizeSafe().times(
+                                random.nextDouble() - 0.5).normalizedSafe().times(
                                 480.0))
                 instance.time = 6.0f
             }
@@ -496,7 +500,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 instance.rotationSpeed.set(
                         Vector3d(random.nextDouble() - 0.5,
                                 random.nextDouble() - 0.5,
-                                random.nextDouble() - 0.5).normalizeSafe().times(
+                                random.nextDouble() - 0.5).normalizedSafe().times(
                                 480.0))
                 instance.time = 6.0f
             }
@@ -514,7 +518,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 instance.rotationSpeed.set(
                         Vector3d(random.nextDouble() - 0.5,
                                 random.nextDouble() - 0.5,
-                                random.nextDouble() - 0.5).normalizeSafe().times(
+                                random.nextDouble() - 0.5).normalizedSafe().times(
                                 480.0))
                 instance.time = 6.0f
             }
@@ -532,7 +536,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 instance.rotationSpeed.set(
                         Vector3d(random.nextDouble() - 0.5,
                                 random.nextDouble() - 0.5,
-                                random.nextDouble() - 0.5).normalizeSafe().times(
+                                random.nextDouble() - 0.5).normalizedSafe().times(
                                 480.0))
                 instance.time = 6.0f
             }
@@ -550,7 +554,7 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
                 instance.rotationSpeed.set(
                         Vector3d(random.nextDouble() - 0.5,
                                 random.nextDouble() - 0.5,
-                                random.nextDouble() - 0.5).normalizeSafe().times(
+                                random.nextDouble() - 0.5).normalizedSafe().times(
                                 480.0))
                 instance.time = 6.0f
             }

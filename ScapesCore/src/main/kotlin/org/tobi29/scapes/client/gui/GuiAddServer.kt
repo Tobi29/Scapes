@@ -21,7 +21,7 @@ import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiComponentTextField
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiStyle
-import org.tobi29.scapes.engine.server.RemoteAddress
+import org.tobi29.server.RemoteAddress
 
 class GuiAddServer(state: GameState,
                    previous: GuiServerSelect,

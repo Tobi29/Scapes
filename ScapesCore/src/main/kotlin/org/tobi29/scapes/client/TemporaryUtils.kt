@@ -20,10 +20,10 @@ import org.tobi29.scapes.engine.graphics.GraphicsSystem
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.loadShader
 import org.tobi29.scapes.engine.resource.Resource
-import org.tobi29.scapes.engine.utils.io.asString
-import org.tobi29.scapes.engine.utils.shader.Expression
-import org.tobi29.scapes.engine.utils.shader.frontend.clike.CLikeShader
-import org.tobi29.scapes.engine.utils.shader.frontend.clike.compileCached
+import org.tobi29.io.asString
+import org.tobi29.scapes.engine.shader.Expression
+import org.tobi29.scapes.engine.shader.frontend.clike.CLikeShader
+import org.tobi29.scapes.engine.shader.frontend.clike.compileCached
 
 fun GraphicsSystem.loadShader(
         asset: String,

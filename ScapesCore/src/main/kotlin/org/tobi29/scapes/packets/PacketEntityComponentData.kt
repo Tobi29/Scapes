@@ -18,17 +18,18 @@ package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
-import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
-import org.tobi29.scapes.engine.utils.tag.TagMap
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
+import org.tobi29.io.tag.binary.readBinary
+import org.tobi29.io.tag.binary.writeBinary
 import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.io.tag.TagMap
+import org.tobi29.uuid.Uuid
 
-class PacketEntityComponentData : PacketAbstract, PacketClient {
-    private lateinit var uuid: UUID
+class PacketEntityComponentData : PacketAbstract,
+        PacketClient {
+    private lateinit var uuid: Uuid
     lateinit var tag: TagMap
         private set
 
@@ -55,7 +56,7 @@ class PacketEntityComponentData : PacketAbstract, PacketClient {
     // TODO: @Throws(IOException::class)
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.getLong(), stream.getLong())
+        uuid = Uuid(stream.getLong(), stream.getLong())
         tag = readBinary(stream)
     }
 

@@ -16,12 +16,29 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.inventory.ItemType
+import org.tobi29.scapes.inventory.ItemTypeI
+import org.tobi29.scapes.inventory.TypedItem
 
-interface ItemFuel {
-    fun fuelTemperature(item: ItemStack): Double
+typealias ItemFuel = TypedItem<ItemTypeFuel>
+typealias ItemTypeFuel = ItemTypeFuelI<*>
 
-    fun fuelTime(item: ItemStack): Double
+interface ItemTypeFuelI<in I : ItemType> : ItemTypeI<I> {
+    fun fuelTemperature(item: TypedItem<I>): Double
 
-    fun fuelTier(item: ItemStack): Int
+    fun fuelTime(item: TypedItem<I>): Double
+
+    fun fuelTier(item: TypedItem<I>): Int
 }
+
+inline val ItemFuel.fuelTemperature: Double
+    get() = @Suppress("UNCHECKED_CAST")
+    (type as ItemTypeFuelI<ItemType>).fuelTemperature(this)
+
+inline val ItemFuel.fuelTime: Double
+    get() = @Suppress("UNCHECKED_CAST")
+    (type as ItemTypeFuelI<ItemType>).fuelTime(this)
+
+inline val ItemFuel.fuelTier: Int
+    get() = @Suppress("UNCHECKED_CAST")
+    (type as ItemTypeFuelI<ItemType>).fuelTier(this)

@@ -16,37 +16,23 @@
 
 package org.tobi29.scapes.vanilla.basics.material.item.vegetation
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.vanilla.basics.material.ItemFuel
+import org.tobi29.scapes.block.ItemTypeIconI
+import org.tobi29.scapes.inventory.ItemTypeNamedI
+import org.tobi29.scapes.inventory.ItemTypeStackableDefaultI
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
-import org.tobi29.scapes.vanilla.basics.material.item.ItemSimpleData
+import org.tobi29.scapes.vanilla.basics.material.item.VanillaItemBase
 
-class ItemGrassBundle(type: VanillaMaterialType) : ItemSimpleData(
-        type), ItemFuel {
-    override fun types(): Int {
-        return 2
-    }
+class ItemGrassBundle(
+        type: VanillaMaterialType
+) : VanillaItemBase<ItemGrassBundle>(type),
+        ItemTypeIconI<ItemGrassBundle>,
+        ItemTypeNamedI<ItemGrassBundle>,
+        ItemTypeStackableDefaultI<ItemGrassBundle> {
+    override val textureAsset
+        get() = "VanillaBasics:image/terrain/other/GrassBundle"
 
-    override fun texture(data: Int): String {
-        when (data) {
-            0 -> return "VanillaBasics:image/terrain/other/GrassBundle.png"
-            1 -> return "VanillaBasics:image/terrain/other/Straw.png"
-            else -> throw IllegalArgumentException("Unknown data: {}" + data)
-        }
-    }
+    override fun name(item: TypedItem<ItemGrassBundle>) = "Grass Bundle"
 
-    override fun name(item: ItemStack): String {
-        when (item.data()) {
-            1 -> return "Straw"
-            else -> return "Grass Bundle"
-        }
-    }
-
-    override fun maxStackSize(item: ItemStack) = 128
-
-    override fun fuelTemperature(item: ItemStack) = 0.06
-
-    override fun fuelTime(item: ItemStack) = 10.0
-
-    override fun fuelTier(item: ItemStack) = 0
+    override fun maxStackSize(item: TypedItem<ItemGrassBundle>) = 128
 }

@@ -16,25 +16,34 @@
 
 package org.tobi29.scapes.client.gui
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.gui.GuiComponentButton
+import org.tobi29.scapes.engine.gui.GuiComponentButtonHeavy
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiContainerRow
 import org.tobi29.scapes.engine.gui.GuiLayoutData
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.ItemTypeNamed
+import org.tobi29.scapes.inventory.kind
+import org.tobi29.scapes.inventory.name
 
-class GuiComponentItemButton(parent: GuiLayoutData,
-                             item: ItemStack) : GuiComponentButton(
-        parent) {
-    val item: GuiComponentItem = addSubHori(0.0, 0.0, -1.0, -1.0) {
-        GuiComponentItem(it, item)
+class GuiComponentItemButton(
+        parent: GuiLayoutData,
+        private val item: () -> Item?
+) : GuiComponentButtonHeavy(parent) {
+    init {
+        addSubHori(0.0, 0.0, -1.0, -1.0) {
+            GuiComponentItem(it, item)
+        }
     }
+
+    constructor(parent: GuiLayoutData,
+                item: Item?) : this(parent, { item })
 
     override fun tooltip(p: GuiContainerRow): (() -> Unit)? {
         val text = p.addVert(15.0, 15.0, -1.0, 16.0) {
             GuiComponentText(it, "")
         }
         return {
-            text.text = item.item().name()
+            text.text = item().kind<ItemTypeNamed>()?.name ?: ""
         }
     }
 }

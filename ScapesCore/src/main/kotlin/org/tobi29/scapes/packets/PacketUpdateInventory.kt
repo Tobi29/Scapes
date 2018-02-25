@@ -16,37 +16,39 @@
 package org.tobi29.scapes.packets
 
 import org.tobi29.scapes.block.Registries
+import org.tobi29.scapes.block.inventories
+import org.tobi29.scapes.block.read
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.engine.utils.UUID
-import org.tobi29.scapes.engine.utils.io.ReadableByteStream
-import org.tobi29.scapes.engine.utils.io.WritableByteStream
-import org.tobi29.scapes.engine.utils.io.tag.binary.readBinary
-import org.tobi29.scapes.engine.utils.io.tag.binary.writeBinary
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.entity.client.EntityContainerClient
-import org.tobi29.scapes.entity.server.EntityContainerServer
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
+import org.tobi29.io.tag.binary.readBinary
+import org.tobi29.io.tag.binary.writeBinary
+import org.tobi29.scapes.entity.server.EntityServer
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.io.tag.TagMap
+import org.tobi29.uuid.Uuid
 
-class PacketUpdateInventory : PacketAbstract, PacketClient {
-    private lateinit var uuid: UUID
+class PacketUpdateInventory : PacketAbstract,
+        PacketClient {
+    private lateinit var uuid: Uuid
     private lateinit var id: String
     private lateinit var tag: TagMap
 
     constructor(type: PacketType) : super(type)
 
     constructor(type: PacketType,
-                entity: EntityContainerServer,
+                entity: EntityServer,
                 id: String) : super(type) {
         uuid = entity.uuid
         this.id = id
-        tag = entity.inventories().access(id) { TagMap { it.write(this) } }
+        tag = entity.inventories.access(id) { TagMap { it.write(this) } }
     }
 
-    constructor(registry: Registries,
-                entity: EntityContainerServer,
-                id: String) : this(
-            Packet.make(registry, "core.packet.UpdateInventory"), entity,
-            id)
+    constructor(
+            registry: Registries,
+            entity: EntityServer,
+            id: String
+    ) : this(Packet.make(registry, "core.packet.UpdateInventory"), entity, id)
 
     // TODO: @Throws(IOException::class)
     override fun sendClient(player: PlayerConnection,
@@ -60,17 +62,15 @@ class PacketUpdateInventory : PacketAbstract, PacketClient {
     // TODO: @Throws(IOException::class)
     override fun parseClient(client: ClientConnection,
                              stream: ReadableByteStream) {
-        uuid = UUID(stream.getLong(), stream.getLong())
+        uuid = Uuid(stream.getLong(), stream.getLong())
         id = stream.getString()
         tag = readBinary(stream)
     }
 
     override fun runClient(client: ClientConnection) {
         client.getEntity(uuid) { entity ->
-            if (entity is EntityContainerClient) {
-                entity.inventories().modify(id) { inventory ->
-                    inventory.read(tag)
-                }
+            entity.inventories.modify(id) { inventory ->
+                inventory.read(client.plugins, tag)
             }
         }
     }

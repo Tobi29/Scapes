@@ -17,23 +17,25 @@
 package org.tobi29.scapes.vanilla.basics.entity.client
 
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.utils.tag.toDouble
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.EntityAbstractClient
 import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
 import org.tobi29.scapes.vanilla.basics.entity.model.EntityModelBellows
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityBellowsServer
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.stdex.math.floorToInt
 
 class EntityBellowsClient(type: EntityType<*, *>,
                           world: WorldClient) : EntityAbstractClient(
         type, world, Vector3d.ZERO) {
     private val plugin = world.plugins.plugin("VanillaBasics") as VanillaBasics
     val face
-        get() = EntityBellowsServer.parseFace(world.terrain, pos.intX(),
-                pos.intY(), pos.intZ(), plugin.materials.bellows)
+        get() = EntityBellowsServer.parseFace(world.terrain, pos.x.floorToInt(),
+                pos.y.floorToInt(), pos.z.floorToInt(),
+                plugin.materials.bellows)
     var scale = 0.0
         private set
 

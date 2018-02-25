@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.server.command
 
-import org.tobi29.scapes.engine.utils.EventDispatcher
+import org.tobi29.utils.EventDispatcher
 
 interface Executor {
     val events: EventDispatcher

@@ -17,15 +17,15 @@ package org.tobi29.scapes.block
 
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Texture
-import org.tobi29.scapes.engine.utils.AtomicInteger
-import org.tobi29.scapes.engine.utils.graphics.generateMipMaps
-import org.tobi29.scapes.engine.utils.io.ByteBufferNative
-import org.tobi29.scapes.engine.utils.io.ByteBufferView
-import org.tobi29.scapes.engine.utils.io.ByteViewRO
-import org.tobi29.scapes.engine.utils.io.viewBufferE
-import org.tobi29.scapes.engine.utils.math.floorToInt
-import org.tobi29.scapes.engine.utils.math.remP
-import org.tobi29.scapes.engine.utils.toArray
+import org.tobi29.stdex.atomic.AtomicInt
+import org.tobi29.graphics.generateMipMaps
+import org.tobi29.io.ByteBufferNative
+import org.tobi29.io.ByteBufferView
+import org.tobi29.io.ByteViewRO
+import org.tobi29.io.viewBufferE
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.remP
+import org.tobi29.utils.toArray
 
 class AnimatedTerrainTexture(buffer: ByteViewRO,
                              width: Int,
@@ -35,7 +35,7 @@ class AnimatedTerrainTexture(buffer: ByteViewRO,
                              texture: () -> Texture) : TerrainTexture(
         null, width, width, asset, shaderAnimation, texture) {
     private val frames: Array<Array<ByteBufferView>>
-    private val newFrame = AtomicInteger(-1)
+    private val newFrame = AtomicInt(-1)
     private var spin = 0.0
 
     init {

@@ -16,119 +16,124 @@
 
 package org.tobi29.scapes.vanilla.basics.util
 
-import org.tobi29.scapes.block.ItemStack
-import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toTag
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
-import org.tobi29.scapes.vanilla.basics.material.item.ItemIngot
+import org.tobi29.scapes.vanilla.basics.material.copy
+import org.tobi29.scapes.vanilla.basics.material.item.tool.ItemFlintTool
+import org.tobi29.scapes.vanilla.basics.material.item.tool.ItemMetalTool
 import kotlin.collections.set
 
 fun createTool(plugin: VanillaBasics,
-               item: ItemStack,
-               type: String): Boolean {
-    return createTool(plugin, item, id(type))
-}
+               type: String,
+               alloy: Alloy,
+               temperature: Double = 0.0): TypedItem<ItemMetalTool> =
+        createTool(plugin, id(type), alloy, temperature)
 
 fun createTool(plugin: VanillaBasics,
-               item: ItemStack,
-               id: Int): Boolean {
+               id: Int,
+               alloy: Alloy,
+               temperature: Double = 0.0): TypedItem<ItemMetalTool> {
     val materials = plugin.materials
-    val ingot = item.material() as ItemIngot
-    val alloy = ingot.alloy(item)
     val alloyType = alloy.type(plugin)
     var efficiency = alloyType.toolEfficiency
     var strength = alloyType.toolStrength
     val damage = alloyType.toolDamage
     val level = alloyType.toolLevel
-    when (id) {
+    val type = when (id) {
         1 -> {
-            item.setMaterial(materials.metalPickaxe)
             strength *= 0.1
+            materials.metalPickaxe
         }
         2 -> {
-            item.setMaterial(materials.metalAxe)
             strength *= 1.5
+            materials.metalAxe
         }
         3 -> {
-            item.setMaterial(materials.metalShovel)
             strength *= 0.1
+            materials.metalShovel
         }
         4 -> {
-            item.setMaterial(materials.metalHammer)
             efficiency = 0.0
             strength *= 0.4
+            materials.metalHammer
         }
         5 -> {
-            item.setMaterial(materials.metalSaw)
             strength *= 0.1
+            materials.metalSaw
         }
         6 -> {
-            item.setMaterial(materials.metalHoe)
             strength *= 0.1
+            materials.metalHoe
         }
         7 -> {
-            item.setMaterial(materials.metalSword)
             efficiency = 0.0
+            materials.metalSword
         }
-        else -> return false
+        else -> throw IllegalArgumentException("Invalid tool type: $id")
     }
-    item.metaData("Vanilla")["ToolEfficiency"] = efficiency.toTag()
-    item.metaData("Vanilla")["ToolStrength"] = strength.toTag()
-    item.metaData("Vanilla")["ToolDamageAdd"] = damage.toTag()
-    item.metaData("Vanilla")["ToolLevel"] = level.toTag()
-    return true
+    val metaData = TagMap {
+        this["ToolEfficiency"] = efficiency.toTag()
+        this["ToolStrength"] = strength.toTag()
+        this["ToolDamageAdd"] = damage.toTag()
+        this["ToolLevel"] = level.toTag()
+    }
+    return TypedItem(type, metaData).copy(
+            alloy = alloy,
+            temperature = temperature)
 }
 
 fun createStoneTool(plugin: VanillaBasics,
-                    item: ItemStack,
-                    type: String): Boolean {
-    return createStoneTool(plugin, item, id(type))
-}
+                    type: String): TypedItem<ItemFlintTool> =
+        createStoneTool(plugin, id(type))
 
 fun createStoneTool(plugin: VanillaBasics,
-                    item: ItemStack,
-                    id: Int): Boolean {
+                    id: Int): TypedItem<ItemFlintTool> {
     val materials = plugin.materials
     var efficiency = 1.0
     var strength = 4.0
     val damage = 0.004
     val level = 10
-    when (id) {
+    val type = when (id) {
         1 -> {
-            item.setMaterial(materials.flintPickaxe)
             strength *= 0.1
+            materials.flintPickaxe
         }
         2 -> {
-            item.setMaterial(materials.flintAxe)
             strength *= 1.5
+            materials.flintAxe
         }
         3 -> {
-            item.setMaterial(materials.flintShovel)
             strength *= 0.1
+            materials.flintShovel
         }
         4 -> {
-            item.setMaterial(materials.flintHammer)
             efficiency = 0.0
             strength *= 0.4
+            materials.flintHammer
         }
         5 -> {
-            item.setMaterial(materials.flintSaw)
             strength *= 0.1
+            materials.flintSaw
         }
         6 -> {
-            item.setMaterial(materials.flintHoe)
             strength *= 0.1
+            materials.flintHoe
         }
         7 -> {
-            item.setMaterial(materials.flintSword)
             efficiency = 0.0
+            materials.flintSword
         }
-        else -> return false
+        else -> throw IllegalArgumentException("Invalid tool type: $id")
     }
-    item.metaData("Vanilla")["ToolEfficiency"] = efficiency.toTag()
-    item.metaData("Vanilla")["ToolStrength"] = strength.toTag()
-    item.metaData("Vanilla")["ToolDamageAdd"] = damage.toTag()
-    item.metaData("Vanilla")["ToolLevel"] = level.toTag()
-    return true
+    val metaData = TagMap {
+        this["ToolEfficiency"] = efficiency.toTag()
+        this["ToolStrength"] = strength.toTag()
+        this["ToolDamageAdd"] = damage.toTag()
+        this["ToolLevel"] = level.toTag()
+    }
+    return TypedItem(type, metaData)
 }
 
 fun id(type: String): Int {

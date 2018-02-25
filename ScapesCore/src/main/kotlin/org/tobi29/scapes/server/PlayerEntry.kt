@@ -17,10 +17,10 @@
 package org.tobi29.scapes.server
 
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.engine.utils.tag.TagMap
-import org.tobi29.scapes.engine.math.vector.Vector3d
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.io.tag.TagMap
 
 class PlayerEntry(private val permissions: Int,
                   private val worldName: String? = null,

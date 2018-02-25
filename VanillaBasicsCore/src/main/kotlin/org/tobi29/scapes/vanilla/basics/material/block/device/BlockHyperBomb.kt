@@ -15,15 +15,18 @@
  */
 package org.tobi29.scapes.vanilla.basics.material.block.device
 
-import org.tobi29.scapes.block.ItemStack
+import org.tobi29.scapes.block.BlockType
+import org.tobi29.scapes.block.ItemStackData
 import org.tobi29.scapes.block.TerrainTextureRegistry
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.terrain.TerrainMutableServer
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.engine.math.Face
-import org.tobi29.scapes.engine.math.vector.Vector3d
-import org.tobi29.scapes.engine.math.threadLocalRandom
+import org.tobi29.math.Face
+import org.tobi29.math.threadLocalRandom
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.server.MobPlayerServer
+import org.tobi29.scapes.inventory.Item
+import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.BlockSimple
@@ -58,7 +61,7 @@ class BlockHyperBomb(type: VanillaMaterialType) : BlockSimple(
                     setSpeed(Vector3d(random.nextDouble() * 0.1 - 0.05,
                             random.nextDouble() * 0.1 - 0.05,
                             random.nextDouble() * 0.2 + 0.2))
-                    setType(ItemStack(this@BlockHyperBomb, 0))
+                    setType(ItemStackData(this@BlockHyperBomb, 0))
                     setTime(random.nextDouble() * 2.0)
                 })
     }
@@ -70,7 +73,7 @@ class BlockHyperBomb(type: VanillaMaterialType) : BlockSimple(
                          data: Int,
                          face: Face,
                          player: MobPlayerServer,
-                         item: ItemStack): Boolean {
+                         item: Item?): Boolean {
         if (!super.destroy(terrain, x, y, z, data, face, player, item)) {
             return false
         }
@@ -82,19 +85,19 @@ class BlockHyperBomb(type: VanillaMaterialType) : BlockSimple(
                     setSpeed(Vector3d(random.nextDouble() * 0.1 - 0.05,
                             random.nextDouble() * 0.1 - 0.05,
                             random.nextDouble() * 0.2 + 0.2))
-                    setType(ItemStack(this@BlockHyperBomb, 0))
+                    setType(ItemStackData(this@BlockHyperBomb, 0))
                     setTime(6.0)
                 })
         return true
     }
 
-    override fun resistance(item: ItemStack,
+    override fun resistance(item: Item?,
                             data: Int): Double {
         return 0.0
     }
 
-    override fun drops(item: ItemStack,
-                       data: Int): List<ItemStack> {
+    override fun drops(item: Item?,
+                       data: Int): List<Item> {
         return emptyList()
     }
 
@@ -102,7 +105,7 @@ class BlockHyperBomb(type: VanillaMaterialType) : BlockSimple(
         return "VanillaBasics:sound/footsteps/Wood.ogg"
     }
 
-    override fun breakSound(item: ItemStack,
+    override fun breakSound(item: Item?,
                             data: Int) = null
 
     override fun registerTextures(registry: TerrainTextureRegistry) {
@@ -110,11 +113,11 @@ class BlockHyperBomb(type: VanillaMaterialType) : BlockSimple(
                 "VanillaBasics:image/terrain/HyperBomb.png")
     }
 
-    override fun name(item: ItemStack): String {
+    override fun name(item: TypedItem<BlockType>): String {
         return "HYPER-Bomb"
     }
 
-    override fun maxStackSize(item: ItemStack): Int {
+    override fun maxStackSize(item: TypedItem<BlockType>): Int {
         return 256
     }
 }

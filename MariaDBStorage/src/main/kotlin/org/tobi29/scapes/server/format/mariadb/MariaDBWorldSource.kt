@@ -16,16 +16,16 @@
 package org.tobi29.scapes.server.format.mariadb
 
 import org.mariadb.jdbc.MariaDbDataSource
-import org.tobi29.scapes.engine.sql.mysql.MySQLDatabase
-import org.tobi29.scapes.engine.utils.io.IOException
-import org.tobi29.scapes.engine.utils.io.filesystem.FilePath
-import org.tobi29.scapes.engine.utils.io.filesystem.copy
-import org.tobi29.scapes.engine.utils.io.filesystem.createDirectories
-import org.tobi29.scapes.engine.utils.io.filesystem.path
+import org.tobi29.io.IOException
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.io.filesystem.copy
+import org.tobi29.io.filesystem.createDirectories
+import org.tobi29.io.filesystem.path
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldFormat
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.sql.SQLWorldFormat
+import org.tobi29.sql.mysql.MySQLDatabase
 import java.sql.Connection
 import java.sql.SQLException
 

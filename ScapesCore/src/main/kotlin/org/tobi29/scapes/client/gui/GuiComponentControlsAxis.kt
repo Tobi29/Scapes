@@ -16,14 +16,23 @@
 
 package org.tobi29.scapes.client.gui
 
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.loop
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.io.tag.toInt
+import org.tobi29.io.tag.toTag
 import org.tobi29.scapes.engine.gui.GuiComponentButtonHeavy
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiEvent
 import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.input.ControllerJoystick
-import org.tobi29.scapes.engine.utils.tag.MutableTagMap
-import org.tobi29.scapes.engine.utils.tag.toInt
-import org.tobi29.scapes.engine.utils.tag.toTag
+import org.tobi29.stdex.ConcurrentHashSet
+import org.tobi29.stdex.atomic.AtomicBoolean
+import org.tobi29.stdex.atomic.AtomicLong
+import org.tobi29.stdex.toIntClamped
+import kotlin.collections.set
 
 class GuiComponentControlsAxis(parent: GuiLayoutData,
                                textSize: Int,
@@ -33,65 +42,62 @@ class GuiComponentControlsAxis(parent: GuiLayoutData,
                                private val controller: ControllerJoystick) : GuiComponentButtonHeavy(
         parent) {
     private val text: GuiComponentText
-    private val blacklist = ArrayList<Int>()
-    private var editing: Byte = 0
+    private val blacklist = ConcurrentHashSet<Int>()
+    private val editing = AtomicBoolean(false)
+    private val editingStamp = AtomicLong(Long.MIN_VALUE)
     private var axis = 0
 
     init {
         text = addSubHori(4.0, 0.0, -1.0,
                 textSize.toDouble()) { GuiComponentText(it, "") }
         tagMap[id]?.toInt()?.let { axis = it }
-        on(GuiEvent.CLICK_LEFT) { event ->
-            if (editing.toInt() == 0) {
+        on(GuiEvent.CLICK_LEFT) {
+            if (!editing.getAndSet(true)) {
                 blacklist.clear()
+                val blacklist = ArrayList<Int>()
                 for ((i, value) in controller.axes.withIndex()) {
                     if (value > 0.5) blacklist.add(i)
                 }
-                editing = 1
+                val editStamp = editingStamp.incrementAndGet()
+                launch(engine.taskExecutor) {
+                    Timer().apply { init() }.loop(Timer.toDiff(60.0),
+                            { delay((it / 1000000L).toIntClamped()) }) {
+                        for ((i, value) in controller.axes.withIndex()) {
+                            val blacklisted = blacklist.contains(i)
+                            if (value > 0.5) {
+                                if (!blacklisted) {
+                                    axis = i
+                                    tagMap[id] = axis.toTag()
+                                    editing.set(false)
+                                    updateText()
+                                    break
+                                }
+                            } else if (blacklisted) {
+                                blacklist.remove(i)
+                            }
+                        }
+                        isVisible && editing.get() && editStamp == editingStamp.get()
+                    }
+                }
                 updateText()
             }
         }
-        on(GuiEvent.HOVER_LEAVE) { event ->
-            if (editing > 1) {
-                editing = 0
-                updateText()
-            }
-        }
+        on(GuiEvent.HOVER_LEAVE) { if (editing.getAndSet(false)) updateText() }
         updateText()
     }
 
     private fun updateText() {
         val text = StringBuilder(16)
-        if (editing > 0) {
+        val editing = editing.get()
+        if (editing) {
             text.append('<')
         }
         text.append(name)
         text.append(": Axis ")
         text.append(axis)
-        if (editing > 0) {
+        if (editing) {
             text.append('>')
         }
         this.text.text = text.toString()
-    }
-
-    override fun updateComponent(delta: Double) {
-        if (editing > 1) {
-            for ((i, value) in controller.axes.withIndex()) {
-                val blacklisted = blacklist.contains(i)
-                if (value > 0.5) {
-                    if (!blacklisted) {
-                        axis = i
-                        tagMap[id] = axis.toTag()
-                        editing = 0
-                        updateText()
-                        break
-                    }
-                } else if (blacklisted) {
-                    blacklist.remove(i)
-                }
-            }
-        } else if (editing > 0) {
-            editing = 2
-        }
     }
 }

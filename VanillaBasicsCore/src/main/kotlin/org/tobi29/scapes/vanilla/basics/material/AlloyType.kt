@@ -16,8 +16,7 @@
 
 package org.tobi29.scapes.vanilla.basics.material
 
-import org.tobi29.scapes.engine.utils.readOnly
-import org.tobi29.scapes.vanilla.basics.util.Alloy
+import org.tobi29.stdex.readOnly
 
 class AlloyType(val id: String,
                 val name: String,
@@ -31,11 +30,4 @@ class AlloyType(val id: String,
                 val toolDamage: Double,
                 val toolLevel: Int) {
     val ingredients = ingredients.readOnly()
-}
-
-fun Alloy.add(type: AlloyType,
-              amount: Double = 1.0) {
-    type.ingredients.forEach { type, ratio ->
-        add(type, ratio * amount)
-    }
 }

@@ -18,8 +18,8 @@ package org.tobi29.scapes.entity.particle
 import org.tobi29.scapes.block.TerrainTexture
 import org.tobi29.scapes.block.marginX
 import org.tobi29.scapes.block.marginY
-import org.tobi29.scapes.engine.math.Random
-import org.tobi29.scapes.engine.math.vector.MutableVector2d
+import org.tobi29.math.Random
+import org.tobi29.math.vector.MutableVector2d
 import kotlin.math.roundToInt
 
 class ParticleInstanceBlock : ParticleInstance() {
@@ -66,7 +66,7 @@ class ParticleInstanceBlock : ParticleInstance() {
         val texMaxX = texture.marginX(tMaxX)
         val texMinY = texture.marginY(tMinY)
         val texMaxY = texture.marginY(tMaxY)
-        textureOffset.set(texMinX, texMinY)
-        textureSize.set(texMaxX - texMinX, texMaxY - texMinY)
+        textureOffset.setXY(texMinX, texMinY)
+        textureSize.setXY(texMaxX - texMinX, texMaxY - texMinY)
     }
 }
