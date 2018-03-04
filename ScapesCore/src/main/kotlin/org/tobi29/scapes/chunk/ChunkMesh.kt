@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.chunk
 
+import org.tobi29.math.AABB
+import org.tobi29.math.Face
 import org.tobi29.scapes.block.models.SmoothLight
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.engine.ScapesEngine
@@ -23,8 +25,6 @@ import org.tobi29.scapes.engine.graphics.Model
 import org.tobi29.scapes.engine.graphics.ModelAttribute
 import org.tobi29.scapes.engine.graphics.RenderType
 import org.tobi29.scapes.engine.graphics.VertexType
-import org.tobi29.math.AABB
-import org.tobi29.math.Face
 import org.tobi29.stdex.copy
 import org.tobi29.stdex.math.floorToInt
 import kotlin.math.max
@@ -206,9 +206,9 @@ class ChunkMesh(private val arrays: VertexArrays) {
                     nx3, ny3, nz3, tx3, ty3,
                     r, g, b, a, anim3)
         } else {
-            val xxx = ((x0 + x1 + x2 + x3) * 0.25 + side.x).floorToInt()
-            val yyy = ((y0 + y1 + y2 + y3) * 0.25 + side.y).floorToInt()
-            val zzz = ((z0 + z1 + z2 + z3) * 0.25 + side.z).floorToInt()
+            val xxx = ((x0 + x1 + x2 + x3) * 0.25 + side.x * 0.5).floorToInt()
+            val yyy = ((y0 + y1 + y2 + y3) * 0.25 + side.y * 0.5).floorToInt()
+            val zzz = ((z0 + z1 + z2 + z3) * 0.25 + side.z * 0.5).floorToInt()
             val light = terrain.blockLight(xxx, yyy, zzz) / 15.0
             val sunLight = terrain.sunLight(xxx, yyy, zzz) / 15.0
             addVertex(xx0, yy0, zz0, nx0, ny0, nz0, tx0, ty0,
