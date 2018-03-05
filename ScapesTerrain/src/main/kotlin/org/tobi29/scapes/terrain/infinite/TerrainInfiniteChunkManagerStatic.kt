@@ -16,20 +16,19 @@
 
 package org.tobi29.scapes.terrain.infinite
 
-import org.tobi29.arrays.Array2
+import org.tobi29.arrays.array2OfNulls
+import org.tobi29.arrays.shift
 import org.tobi29.math.vector.MutableVector2i
-import org.tobi29.utils.StampLock
 import org.tobi29.stdex.assert
 import org.tobi29.stdex.atomic.AtomicInt
-import kotlin.math.abs
+import org.tobi29.utils.StampLock
 
 class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
-        private val center: MutableVector2i,
-        private val radius: Int) : TerrainInfiniteChunkManager<C> {
+    private val center: MutableVector2i,
+    private val radius: Int
+) : TerrainInfiniteChunkManager<C> {
     private val size = (radius shl 1) + 1
-    private val arrayFlat =
-            arrayOfNulls<TerrainInfiniteBaseChunk<*>?>(size * size)
-    private val array = Array2(size, size, arrayFlat)
+    private val array = array2OfNulls<TerrainInfiniteBaseChunk<*>?>(size, size)
     private val lock = StampLock()
     private val x = AtomicInt()
     private val y = AtomicInt()
@@ -44,8 +43,10 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         }
     }
 
-    override fun remove(x: Int,
-                        y: Int): C? {
+    override fun remove(
+        x: Int,
+        y: Int
+    ): C? {
         return lock.write {
             val xx = x - this.x.get()
             val yy = y - this.y.get()
@@ -66,8 +67,10 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         }
     }
 
-    override fun get(x: Int,
-                     y: Int): C? {
+    override fun get(
+        x: Int,
+        y: Int
+    ): C? {
         val value = lock.read {
             val xx = x - this.x.get()
             val yy = y - this.y.get()
@@ -85,8 +88,10 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         return value as C?
     }
 
-    override fun has(x: Int,
-                     y: Int): Boolean {
+    override fun has(
+        x: Int,
+        y: Int
+    ): Boolean {
         return get(x, y) != null
     }
 
@@ -104,102 +109,17 @@ class TerrainInfiniteChunkManagerStatic<C : TerrainInfiniteBaseChunk<*>>(
         val yy = y - radius
         if (xx != this.x.get() || yy != this.y.get()) {
             lock.write {
-                var xDiff = this.x.get() - xx
-                var yDiff = this.y.get() - yy
-                val xDiffAbs = abs(xDiff)
-                val yDiffAbs = abs(yDiff)
-                if (xDiffAbs > size || yDiffAbs > size) {
-                    clear()
-                    this.x.set(xx)
-                    this.y.set(yy)
-                } else {
-                    if (xDiffAbs > 0) {
-                        for (i in 0 until xDiff) {
-                            shiftXPositive()
-                        }
-                        xDiff = -xDiff
-                        for (i in 0 until xDiff) {
-                            shiftXNegative()
-                        }
-                        this.x.set(xx)
-                    }
-                    if (yDiffAbs > 0) {
-                        for (i in 0 until yDiff) {
-                            shiftYPositive()
-                        }
-                        yDiff = -yDiff
-                        for (i in 0 until yDiff) {
-                            shiftYNegative()
-                        }
-                        this.y.set(yy)
-                    }
-                }
+                val xDiff = this.x.get() - xx
+                val yDiff = this.y.get() - yy
+                this.x.set(xx)
+                this.y.set(yy)
+                array.shift(
+                    xDiff, yDiff,
+                    { chunk, _, _ -> chunk?.dispose() }, { x, y -> null }
+                )
             }
             return true
         }
         return false
-    }
-
-    private fun clear() {
-        for (i in arrayFlat.indices) {
-            arrayFlat[i]?.dispose()
-            arrayFlat[i] = null
-        }
-    }
-
-    private fun shiftXPositive() {
-        var i = 0
-        while (i < arrayFlat.size) {
-            val chunk = arrayFlat[i]
-            chunk?.let { it.dispose(); arrayFlat[i] = null }
-            i += size
-        }
-        i = size - 1
-        while (i < arrayFlat.size) {
-            val chunk = arrayFlat[i]
-            chunk?.let { it.dispose(); arrayFlat[i] = null }
-            i += size
-        }
-        System.arraycopy(arrayFlat, 0, arrayFlat, 1, arrayFlat.size - 1)
-    }
-
-    private fun shiftXNegative() {
-        var i = 0
-        while (i < arrayFlat.size) {
-            val chunk = arrayFlat[i]
-            chunk?.let { it.dispose(); arrayFlat[i] = null }
-            i += size
-        }
-        i = size - 1
-        while (i < arrayFlat.size) {
-            val chunk = arrayFlat[i]
-            chunk?.let { it.dispose(); arrayFlat[i] = null }
-            i += size
-        }
-        System.arraycopy(arrayFlat, 1, arrayFlat, 0, arrayFlat.size - 1)
-    }
-
-    private fun shiftYPositive() {
-        for (i in 0 until size) {
-            val chunk = arrayFlat[i]
-            chunk?.let { it.dispose(); arrayFlat[i] = null }
-        }
-        for (i in arrayFlat.size - size until arrayFlat.size) {
-            val chunk = arrayFlat[i]
-            chunk?.let { it.dispose(); arrayFlat[i] = null }
-        }
-        System.arraycopy(arrayFlat, 0, arrayFlat, size, arrayFlat.size - size)
-    }
-
-    private fun shiftYNegative() {
-        for (i in 0 until size) {
-            val chunk = arrayFlat[i]
-            chunk?.let { it.dispose(); arrayFlat[i] = null }
-        }
-        for (i in arrayFlat.size - size until arrayFlat.size) {
-            val chunk = arrayFlat[i]
-            chunk?.let { it.dispose(); arrayFlat[i] = null }
-        }
-        System.arraycopy(arrayFlat, size, arrayFlat, 0, arrayFlat.size - size)
     }
 }
