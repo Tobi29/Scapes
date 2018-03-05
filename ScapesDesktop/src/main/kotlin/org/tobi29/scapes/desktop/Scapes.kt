@@ -21,9 +21,7 @@ import kotlinx.coroutines.experimental.runBlocking
 import org.tobi29.application.Application
 import org.tobi29.application.StatusCode
 import org.tobi29.application.executeMain
-import org.tobi29.args.CommandLine
-import org.tobi29.args.get
-import org.tobi29.args.getBoolean
+import org.tobi29.args.*
 import org.tobi29.chrono.*
 import org.tobi29.io.*
 import org.tobi29.io.classpath.ClasspathPath
@@ -75,39 +73,37 @@ object Scapes : Application() {
 
     override val version = Version(0, 0, 0)
 
-    private val modeOption = commandOption(
-            shortNames = setOf('m'),
-            longNames = setOf("mode"),
-            args = listOf("mode"),
-            description = "Specify which mode to run")
-    private val debugOption = commandOption(
-            shortNames = setOf('d'),
-            longNames = setOf("debug"),
-            description = "Run in debug mode")
-    private val glesOption = commandOption(
-            shortNames = setOf('e'),
-            longNames = setOf("gles"),
-            description = "Use OpenGL ES")
-    private val socketspOption = commandOption(
-            shortNames = setOf('r'),
-            longNames = setOf("socketsp"),
-            description = "Use network socket for singleplayer")
-    private val touchOption = commandOption(
-            shortNames = setOf('t'),
-            longNames = setOf("touch"),
-            description = "Emulate touch interface")
-    private val configOption = commandOption(
-            shortNames = setOf('c'),
-            longNames = setOf("config"),
-            args = listOf("directory"),
-            description = "Config directory for server")
-    private val nosandboxOption = commandOption(
-            shortNames = setOf('n'),
-            longNames = setOf("nosandbox"),
-            description = "Disable sandbox")
-    private val runDirArgument = commandArgument(
-            name = "run-dir",
-            count = 0..1)
+    private val modeOption = cli.commandOption(
+        setOf('m'), setOf("mode"), listOf("mode"),
+        "Specify which mode to run"
+    )
+    private val debugOption = cli.commandFlag(
+        setOf('d'), setOf("debug"),
+        "Run in debug mode"
+    )
+    private val glesOption = cli.commandFlag(
+        setOf('e'), setOf("gles"),
+        "Use OpenGL ES"
+    )
+    private val socketspOption = cli.commandFlag(
+        setOf('r'), setOf("socketsp"),
+        "Use network socket for singleplayer"
+    )
+    private val touchOption = cli.commandFlag(
+        setOf('t'), setOf("touch"),
+        "Emulate touch interface"
+    )
+    private val configOption = cli.commandOption(
+        setOf('c'), setOf("config"), listOf("directory"),
+        "Config directory for server"
+    )
+    private val nosandboxOption = cli.commandFlag(
+        setOf('n'), setOf("nosandbox"),
+        "Disable sandbox"
+    )
+    private val runDirArgument = cli.commandArgument(
+        "run-dir", 0..1
+    )
 
     override suspend fun execute(commandLine: CommandLine): StatusCode {
         if (commandLine.getBoolean(debugOption)) {
@@ -118,7 +114,7 @@ object Scapes : Application() {
         }
         val mode = commandLine.get(modeOption) ?: "client"
         val runDir = commandLine.arguments[runDirArgument]
-                ?.firstOrNull()?.let { path(it) }
+            ?.firstOrNull()?.let { path(it) }
 
         when (mode) {
             "client" -> {
@@ -127,8 +123,10 @@ object Scapes : Application() {
                 System.setProperty("user.dir", home.toAbsolutePath().toString())
                 val cache = cacheHome.resolve(appIDForCache(id, name))
 
-                System.setProperty("org.sqlite.lib.path",
-                        System.getProperty("java.library.path"))
+                System.setProperty(
+                    "org.sqlite.lib.path",
+                    System.getProperty("java.library.path")
+                )
 
                 var engineRef = WeakReference<ScapesEngine?>(null)
                 Thread.setDefaultUncaughtExceptionHandler { _, e ->
@@ -136,18 +134,20 @@ object Scapes : Application() {
                         printerrln("Scapes crashed: $e")
                         e.printStackTrace()
                         val report = AccessController.doPrivileged(
-                                PrivilegedAction {
-                                    crashReport(home, { engineRef.get() }, e)
-                                })
+                            PrivilegedAction {
+                                crashReport(home, { engineRef.get() }, e)
+                            })
                         ContainerGLFW.openFile(report)
                     } finally {
                         exitProcess(1)
                     }
                 }
                 val taskExecutor =
-                        ForkJoinPool(ForkJoinPool.getCommonPoolParallelism(),
-                                PermissiveThreadFactory, null, false)
-                                .asCoroutineDispatcher()
+                    ForkJoinPool(
+                        ForkJoinPool.getCommonPoolParallelism(),
+                        PermissiveThreadFactory, null, false
+                    )
+                        .asCoroutineDispatcher()
 
                 if (commandLine.getBoolean(nosandboxOption)) {
                     println("----------------------------------------")
@@ -168,21 +168,31 @@ object Scapes : Application() {
                 val useGLES = commandLine.getBoolean(glesOption)
                 val emulateTouch = commandLine.getBoolean(touchOption)
                 val font = try {
-                    ScapesEngineLWJGL3.loadFont(ClasspathPath(
+                    ScapesEngineLWJGL3.loadFont(
+                        ClasspathPath(
                             ScapesClient::class.java.classLoader,
-                            "assets/scapes/tobi29/font/QuicksandPro-Regular.otf"))
+                            "assets/scapes/tobi29/font/QuicksandPro-Regular.otf"
+                        )
+                    )
                 } catch (e: IOException) {
-                    ScapesEngineLWJGL3.loadFont(ClasspathPath(
+                    ScapesEngineLWJGL3.loadFont(
+                        ClasspathPath(
                             ScapesClient::class.java.classLoader,
-                            "assets/scapes/tobi29/font/QuicksandPro-Regular.ttf"))
+                            "assets/scapes/tobi29/font/QuicksandPro-Regular.ttf"
+                        )
+                    )
                 }
-                val container = ContainerGLFW("Scapes", emulateTouch,
-                        useGLES = useGLES)
+                val container = ContainerGLFW(
+                    "Scapes", emulateTouch,
+                    useGLES = useGLES
+                )
                 val defaultGuiStyle: (ScapesEngine) -> GuiStyle = { engine ->
                     GuiBasicStyle(engine, FontRenderer(engine, font))
                 }
-                val engine = ScapesEngine(container, defaultGuiStyle,
-                        taskExecutor, configMap)
+                val engine = ScapesEngine(
+                    container, defaultGuiStyle,
+                    taskExecutor, configMap
+                )
                 engineRef = WeakReference(engine)
 
                 val playlistsPath = home.resolve("playlists")
@@ -194,29 +204,42 @@ object Scapes : Application() {
                 createDirectories(pluginCache)
                 FileCache.check(pluginCache)
 
-                engine.files.registerFileSystem("Scapes",
-                        ClasspathPath(ScapesClient::class.java.classLoader,
-                                "assets/scapes/tobi29"))
-                engine.registerComponent(DialogProvider.COMPONENT,
-                        DialogProviderDesktop(
-                                engine.container as? ContainerGLFW))
-                engine.registerComponent(InputManagerScapes.COMPONENT,
-                        InputManagerScapes(engine, configMap.mapMut("Scapes")))
+                engine.files.registerFileSystem(
+                    "Scapes",
+                    ClasspathPath(
+                        ScapesClient::class.java.classLoader,
+                        "assets/scapes/tobi29"
+                    )
+                )
+                engine.registerComponent(
+                    DialogProvider.COMPONENT,
+                    DialogProviderDesktop(
+                        engine.container as? ContainerGLFW
+                    )
+                )
+                engine.registerComponent(
+                    InputManagerScapes.COMPONENT,
+                    InputManagerScapes(engine, configMap.mapMut("Scapes"))
+                )
                 engine.registerComponent(ConnectionManager.COMPONENT,
-                        ConnectionManager(engine.taskExecutor, 10)
-                                .apply { workers(1) })
-                engine.registerComponent(ScapesClient.COMPONENT,
-                        ScapesClient(engine, home, pluginCache, saves))
+                    ConnectionManager(engine.taskExecutor, 10)
+                        .apply { workers(1) })
+                engine.registerComponent(
+                    ScapesClient.COMPONENT,
+                    ScapesClient(engine, home, pluginCache, saves)
+                )
                 engine.switchState(
-                        GameStateStartup(engine) { GameStateMenu(engine) })
+                    GameStateStartup(engine) { GameStateMenu(engine) })
                 try {
                     engine.start()
                     try {
                         container.run(engine)
                     } catch (e: GraphicsCheckException) {
-                        container.message(Container.MessageType.ERROR,
-                                "Scapes",
-                                "Unable to initialize graphics:\n${e.message}")
+                        container.message(
+                            Container.MessageType.ERROR,
+                            "Scapes",
+                            "Unable to initialize graphics:\n${e.message}"
+                        )
                         return 1
                     }
                     runBlocking { engine.dispose() }
@@ -246,9 +269,11 @@ object Scapes : Application() {
                     }
                 }
                 val taskExecutor =
-                        ForkJoinPool(ForkJoinPool.getCommonPoolParallelism(),
-                                PermissiveThreadFactory, null, false)
-                                .asCoroutineDispatcher()
+                    ForkJoinPool(
+                        ForkJoinPool.getCommonPoolParallelism(),
+                        PermissiveThreadFactory, null, false
+                    )
+                        .asCoroutineDispatcher()
 
                 if (commandLine.getBoolean(nosandboxOption)) {
                     println("----------------------------------------")
@@ -278,43 +303,51 @@ object Scapes : Application() {
     fun main(args: Array<String>) = executeMain(args)
 }
 
-private object PermissiveThreadFactory : ForkJoinPool.ForkJoinWorkerThreadFactory {
+private object PermissiveThreadFactory :
+    ForkJoinPool.ForkJoinWorkerThreadFactory {
     override fun newThread(pool: ForkJoinPool?) =
-            object : ForkJoinWorkerThread(pool) {}
+        object : ForkJoinWorkerThread(pool) {}
 }
 
 private fun readConfig(path: FilePath) =
-        try {
-            if (exists(path)) {
-                read(path, ::readJSON)
-            } else {
-                TagMap()
-            }
-        } catch (e: IOException) {
-            printerrln("Failed to load config file: $e")
+    try {
+        if (exists(path)) {
+            read(path, ::readJSON)
+        } else {
             TagMap()
         }
+    } catch (e: IOException) {
+        printerrln("Failed to load config file: $e")
+        TagMap()
+    }
 
-private fun writeConfig(path: FilePath,
-                        config: TagMap) =
-        try {
-            write(path) { config.writeJSON(it) }
-        } catch (e: IOException) {
-            printerrln("Failed to store config file: $e")
-        }
+private fun writeConfig(
+    path: FilePath,
+    config: TagMap
+) =
+    try {
+        write(path) { config.writeJSON(it) }
+    } catch (e: IOException) {
+        printerrln("Failed to store config file: $e")
+    }
 
-private fun crashReport(path: FilePath?,
-                        engine: () -> ScapesEngine?,
-                        e: Throwable): FilePath {
+private fun crashReport(
+    path: FilePath?,
+    engine: () -> ScapesEngine?,
+    e: Throwable
+): FilePath {
     val time = timeZoneLocal.encodeWithOffset(systemClock())
-    val crashReportFile = path?.resolve(crashReportName(
+    val crashReportFile = path?.resolve(
+        crashReportName(
             "${
             time.dateTime.date.run {
                 "${isoYear(year)}-${isoMonth(month)}-${isoDay(day)}"
             }}_${
             time.dateTime.time.run {
                 "${isoHour(hour)}-${isoMinute(minute)}-${isoSecond(second)}"
-            }}")) ?: createTempFile("CrashReport", ".txt")
+            }}"
+        )
+    ) ?: createTempFile("CrashReport", ".txt")
     val debug = try {
         engine()?.debugMap()?.let {
             arrayOf(Pair("Debug values", crashReportSectionProperties(it)))
@@ -324,33 +357,42 @@ private fun crashReport(path: FilePath?,
         null
     } ?: emptyArray()
     write(crashReportFile) {
-        it.writeCrashReport(e, "Scapes",
-                crashReportSectionStacktrace(e),
-                crashReportSectionActiveThreads(),
-                crashReportSectionSystemProperties(),
-                *debug,
-                crashReportSectionTime(isoOffsetDateTimeWithMillis(time)))
+        it.writeCrashReport(
+            e, "Scapes",
+            crashReportSectionStacktrace(e),
+            crashReportSectionActiveThreads(),
+            crashReportSectionSystemProperties(),
+            *debug,
+            crashReportSectionTime(isoOffsetDateTimeWithMillis(time))
+        )
     }
     return crashReportFile
 }
 
-private fun crashReport(path: FilePath?,
-                        e: Throwable): FilePath {
+private fun crashReport(
+    path: FilePath?,
+    e: Throwable
+): FilePath {
     val time = timeZoneLocal.encodeWithOffset(systemClock())
-    val crashReportFile = path?.resolve(crashReportName(
+    val crashReportFile = path?.resolve(
+        crashReportName(
             "${
             time.dateTime.date.run {
                 "${isoYear(year)}-${isoMonth(month)}-${isoDay(day)}"
             }}_${
             time.dateTime.time.run {
                 "${isoHour(hour)}-${isoMinute(minute)}-${isoSecond(second)}"
-            }}")) ?: createTempFile("CrashReport", ".txt")
+            }}"
+        )
+    ) ?: createTempFile("CrashReport", ".txt")
     write(crashReportFile) {
-        it.writeCrashReport(e, "Scapes",
-                crashReportSectionStacktrace(e),
-                crashReportSectionActiveThreads(),
-                crashReportSectionSystemProperties(),
-                crashReportSectionTime(isoOffsetDateTimeWithMillis(time)))
+        it.writeCrashReport(
+            e, "Scapes",
+            crashReportSectionStacktrace(e),
+            crashReportSectionActiveThreads(),
+            crashReportSectionSystemProperties(),
+            crashReportSectionTime(isoOffsetDateTimeWithMillis(time))
+        )
     }
     return crashReportFile
 }

@@ -18,7 +18,8 @@ package org.tobi29.scapes.entity.server
 import org.tobi29.io.tag.ReadWriteTagMap
 import org.tobi29.io.tag.TagMap
 import org.tobi29.io.tag.toMap
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
+import org.tobi29.math.add
 import org.tobi29.math.vector.MutableVector3d
 import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.block.AABBElement
@@ -38,7 +39,7 @@ abstract class MobServer(type: EntityType<*, *>,
                          world: WorldServer,
                          pos: Vector3d,
                          speed: Vector3d,
-                         protected val collision: AABB) : EntityAbstractServer(
+                         protected val collision: AABB3) : EntityAbstractServer(
         type, world, pos),
         Mob {
     protected val speed: MutableVector3d
@@ -65,8 +66,8 @@ abstract class MobServer(type: EntityType<*, *>,
         positionSender = createPositionHandler()
     }
 
-    override fun getAABB(): AABB {
-        val aabb = AABB(collision)
+    override fun currentAABB(): AABB3 {
+        val aabb = AABB3(collision)
         aabb.add(pos.x, pos.y, pos.z)
         return aabb
     }
@@ -137,7 +138,7 @@ abstract class MobServer(type: EntityType<*, *>,
         EntityPhysics.updateVelocity(delta, speed, world.gravity,
                 gravitationMultiplier, airFriction, groundFriction,
                 waterFriction, wallFriction, physicsState)
-        val aabb = getAABB()
+        val aabb = currentAABB()
         val aabbs = AABBS.get()
         EntityPhysics.collisions(delta, speed, world.terrain, aabb,
                 stepHeight, aabbs)

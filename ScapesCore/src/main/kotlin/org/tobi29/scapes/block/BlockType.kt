@@ -16,22 +16,22 @@
 
 package org.tobi29.scapes.block
 
+import org.tobi29.math.AABB3
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
 import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.math.AABB
-import org.tobi29.math.Face
-import org.tobi29.math.PointerPane
-import org.tobi29.utils.ComponentStorage
-import org.tobi29.utils.Pool
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.inventory.ItemTypeI
 import org.tobi29.scapes.inventory.ItemTypeNamedI
 import org.tobi29.scapes.inventory.ItemTypeStackableDefaultI
 import org.tobi29.scapes.terrain.VoxelType
+import org.tobi29.utils.ComponentStorage
+import org.tobi29.utils.Pool
 
 abstract class BlockType(type: MaterialType) : VoxelType,
         ItemTypeI<BlockType>,
@@ -90,8 +90,9 @@ abstract class BlockType(type: MaterialType) : VoxelType,
                        z: Int): List<AABBElement> {
         val aabbs = ArrayList<AABBElement>()
         aabbs.add(AABBElement(
-                AABB(x.toDouble(), y.toDouble(), z.toDouble(), x + 1.0, y + 1.0,
-                        z + 1.0)))
+                AABB3(x.toDouble(), y.toDouble(), z.toDouble(), x + 1.0, y + 1.0,
+                        z + 1.0)
+        ))
         return aabbs
     }
 
@@ -197,6 +198,6 @@ abstract class BlockType(type: MaterialType) : VoxelType,
 
     companion object {
         val STANDARD_COLLISION = Collision()
-        private val SELECTION = AABB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
+        private val SELECTION = AABB3(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
     }
 }

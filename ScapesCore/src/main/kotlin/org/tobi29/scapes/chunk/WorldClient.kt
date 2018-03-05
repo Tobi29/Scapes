@@ -18,7 +18,7 @@ package org.tobi29.scapes.chunk
 import org.tobi29.graphics.Cam
 import org.tobi29.io.tag.TagMap
 import org.tobi29.logging.KLogging
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
 import org.tobi29.math.vector.Vector3d
 import org.tobi29.math.vector.floorToInt
 import org.tobi29.profiler.profilerSection
@@ -273,7 +273,7 @@ class WorldClient(val connection: ClientConnection,
             scene.terrainTextureRegistry().texture.bind(gl)
             terrain.renderer.render(gl, sTerrain1, sTerrain2, cam, debug)
             gl.setBlending(BlendingMode.NORMAL)
-            val aabb = AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+            val aabb = AABB3()
             entityModels.values.asSequence().filter {
                 it.shapeAABB(aabb)
                 cam.frustum.inView(aabb) != 0

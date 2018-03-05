@@ -16,6 +16,10 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation
 
+import org.tobi29.math.AABB3
+import org.tobi29.math.Face
+import org.tobi29.math.Random
+import org.tobi29.math.vector.MutableVector3i
 import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
@@ -27,15 +31,6 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.math.AABB
-import org.tobi29.math.Face
-import org.tobi29.math.Random
-import org.tobi29.math.vector.MutableVector3i
-import org.tobi29.utils.Pool
-import org.tobi29.stdex.ThreadLocal
-import org.tobi29.stdex.math.clamp
-import org.tobi29.stdex.math.mix
-import org.tobi29.utils.toArray
 import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.TreeType
@@ -45,6 +40,11 @@ import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.util.dropItems
 import org.tobi29.scapes.vanilla.basics.world.ClimateInfoLayer
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentClimate
+import org.tobi29.stdex.ThreadLocal
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.mix
+import org.tobi29.utils.Pool
+import org.tobi29.utils.toArray
 
 class BlockLeaves(type: VanillaMaterialType) : VanillaBlock(type) {
     private val treeRegistry = plugins.registry.get<TreeType>("VanillaBasics",
@@ -69,7 +69,7 @@ class BlockLeaves(type: VanillaMaterialType) : VanillaBlock(type) {
                            y: Int,
                            z: Int): List<AABBElement> {
         val aabbs = ArrayList<AABBElement>()
-        aabbs.add(AABBElement(AABB(x.toDouble(), y.toDouble(), z.toDouble(),
+        aabbs.add(AABBElement(AABB3(x.toDouble(), y.toDouble(), z.toDouble(),
                 (x + 1).toDouble(), (y + 1).toDouble(), (z + 1).toDouble()),
                 CollisionLeaves.INSTANCE))
         return aabbs

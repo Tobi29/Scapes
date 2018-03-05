@@ -17,7 +17,7 @@ package org.tobi29.scapes.entity.server
 
 import org.tobi29.checksums.Checksum
 import org.tobi29.io.tag.*
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
 import org.tobi29.math.Frustum
 import org.tobi29.math.PointerPane
 import org.tobi29.math.vector.Vector2d
@@ -46,7 +46,7 @@ abstract class MobPlayerServer(
         world: WorldServer,
         pos: Vector3d,
         speed: Vector3d,
-        aabb: AABB,
+        aabb: AABB3,
         lives: Double,
         maxLives: Double,
         viewField: Frustum,
@@ -219,7 +219,7 @@ abstract class MobPlayerServer(
     }
 
     override fun move(delta: Double) {
-        val aabb = getAABB()
+        val aabb = currentAABB()
         val aabbs = AABBS.get()
         // stepHeight is 0.0 as we will not actually move around here, just
         // blocks that we are inside of

@@ -16,24 +16,24 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.model
 
-import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.engine.graphics.GL
-import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.scapes.engine.graphics.push
-import org.tobi29.math.AABB
+import org.tobi29.graphics.Cam
+import org.tobi29.math.AABB3
 import org.tobi29.math.Face
 import org.tobi29.math.PointerPane
 import org.tobi29.math.vector.MutableVector3d
 import org.tobi29.math.vector.Vector3d
 import org.tobi29.math.vector.minus
 import org.tobi29.math.vector.times
-import org.tobi29.utils.Pool
-import org.tobi29.graphics.Cam
-import org.tobi29.stdex.math.clamp
-import org.tobi29.stdex.math.floorToInt
+import org.tobi29.scapes.chunk.WorldClient
+import org.tobi29.scapes.engine.graphics.GL
+import org.tobi29.scapes.engine.graphics.Shader
+import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.entity.model.EntityModel
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared
 import org.tobi29.scapes.vanilla.basics.entity.client.EntityBlockBreakClient
+import org.tobi29.stdex.math.clamp
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.utils.Pool
 import kotlin.math.min
 
 class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
@@ -49,13 +49,13 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
         this.pos.set(pos)
     }
 
-    override fun shapeAABB(aabb: AABB) {
-        aabb.minX = pos.x - 0.5
-        aabb.minY = pos.y - 0.5
-        aabb.minZ = pos.z - 0.5
-        aabb.maxX = pos.x + 0.5
-        aabb.maxY = pos.y + 0.5
-        aabb.maxZ = pos.z + 0.5
+    override fun shapeAABB(aabb: AABB3) {
+        aabb.min.x = pos.x - 0.5
+        aabb.min.y = pos.y - 0.5
+        aabb.min.z = pos.z - 0.5
+        aabb.max.x = pos.x + 0.5
+        aabb.max.y = pos.y + 0.5
+        aabb.max.z = pos.z + 0.5
     }
 
     override fun renderUpdate(delta: Double) {
@@ -88,13 +88,13 @@ class EntityModelBlockBreak(shared: EntityModelBlockBreakShared,
         for (pane in pointerPanes) {
             gl.matrixStack.push { matrix ->
                 matrix.translate(
-                        (posRenderX - 0.5 + (pane.aabb.minX + pane.aabb.maxX) / 2).toFloat(),
-                        (posRenderY - 0.5 + (pane.aabb.minY + pane.aabb.maxY) / 2).toFloat(),
-                        (posRenderZ - 0.5 + (pane.aabb.minZ + pane.aabb.maxZ) / 2).toFloat())
+                        (posRenderX - 0.5 + (pane.aabb.min.x + pane.aabb.max.x) / 2).toFloat(),
+                        (posRenderY - 0.5 + (pane.aabb.min.y + pane.aabb.max.y) / 2).toFloat(),
+                        (posRenderZ - 0.5 + (pane.aabb.min.z + pane.aabb.max.z) / 2).toFloat())
                 matrix.scale(
-                        (pane.aabb.maxX - pane.aabb.minX).toFloat() + 0.01f,
-                        (pane.aabb.maxY - pane.aabb.minY).toFloat() + 0.01f,
-                        (pane.aabb.maxZ - pane.aabb.minZ).toFloat() + 0.01f)
+                        (pane.aabb.max.x - pane.aabb.min.x).toFloat() + 0.01f,
+                        (pane.aabb.max.y - pane.aabb.min.y).toFloat() + 0.01f,
+                        (pane.aabb.max.z - pane.aabb.min.z).toFloat() + 0.01f)
                 when (pane.face) {
                     Face.DOWN -> matrix.rotate(180f, 1f, 0f, 0f)
                     Face.NORTH -> matrix.rotate(90f, 1f, 0f, 0f)

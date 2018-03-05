@@ -21,24 +21,30 @@ import org.tobi29.stdex.ConcurrentHashMap
 import org.tobi29.stdex.computeAbsent
 
 class CommandRegistry : CommandRegistrar {
-    private val commands1 = ConcurrentHashMap<List<String>, Pair<CommandConfig, MutableList<CommandElement>>>()
+    private val commands1 =
+        ConcurrentHashMap<List<String>, Pair<CommandConfig, MutableList<CommandElement>>>()
     private val commands2 = ConcurrentHashMap<String, CommandConfig>()
-    private val commands3 = ConcurrentHashMap<List<String>, (CommandLine, Executor) -> Command.Compiled>()
+    private val commands3 =
+        ConcurrentHashMap<List<String>, (CommandLine, Executor) -> Command.Compiled>()
 
-    private val helpOption = CommandOption(
-            setOf('h'), setOf("help"), "Display this help")
+    private val helpOption = CommandFlag(
+        setOf('h'), setOf("help"),
+        "Display this help"
+    )
 
-    private fun configFor(path: List<String>,
-                          parentAdd: (CommandConfig) -> Unit) =
-            commands1.computeAbsent(path) {
-                ArrayList<CommandElement>().let {
-                    it.add(helpOption)
-                    (CommandConfig(path.last(), it) to it)
-                            .also { (element, _) ->
-                                parentAdd(element)
-                            }
-                }
+    private fun configFor(
+        path: List<String>,
+        parentAdd: (CommandConfig) -> Unit
+    ) =
+        commands1.computeAbsent(path) {
+            ArrayList<CommandElement>().let {
+                it.add(helpOption)
+                (CommandConfig(path.last(), it) to it)
+                    .also { (element, _) ->
+                        parentAdd(element)
+                    }
             }
+        }
 
     fun subcommand(path: Iterable<String>): Pair<List<CommandConfig>, MutableCollection<CommandElement>> {
         val pathList = path.toList()
@@ -48,29 +54,33 @@ class CommandRegistry : CommandRegistrar {
                     commands2[pathList.last()] = element
                 }
                 else subcommand(pathList.dropLast(1))
-                        .let { (parent, parentElements) ->
-                            parent to { element: CommandConfig ->
-                                parentElements.add(element)
-                                Unit
-                            }
+                    .let { (parent, parentElements) ->
+                        parent to { element: CommandConfig ->
+                            parentElements.add(element)
+                            Unit
                         }
+                    }
         val (command, elements) = configFor(pathList, parentElements)
         return (parent + command) to elements
     }
 
     override fun register(
-            path: Iterable<String>,
-            level: Int,
-            block: MutableCollection<CommandElement>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
+        path: Iterable<String>,
+        level: Int,
+        block: MutableCollection<CommandElement>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
     ) {
         val (command, elements) = subcommand(path)
         val compiler = block(elements)
-        commands3[command.map { it.name }] = compiler(level, helpOption,
-                compiler)
+        commands3[command.map { it.name }] = compiler(
+            level, helpOption,
+            compiler
+        )
     }
 
-    operator fun get(line: String,
-                     executor: Executor): Command.Compiled {
+    operator fun get(
+        line: String,
+        executor: Executor
+    ): Command.Compiled {
         val commandLine = try {
             val tokens = line.tokenize()
             if (tokens.isEmpty()) throw EmptyCommandException()
@@ -83,16 +93,21 @@ class CommandRegistry : CommandRegistrar {
             return Command.Null(Command.Output(255, e.message ?: ""))
         }
         val compiler = commands3[commandLine.command.map { it.name }]
-                ?: return Command.Null(Command.Output(255,
+                ?: return Command.Null(
+                    Command.Output(
+                        255,
                         "Unknown command: ${commandLine.command.joinToString(
-                                " ") { it.name }}"))
+                            " "
+                        ) { it.name }}"
+                    )
+                )
         return compiler(commandLine, executor)
     }
 
     private fun compiler(
-            level: Int,
-            helpOption: CommandOption,
-            compiler: Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
+        level: Int,
+        helpOption: CommandOption,
+        compiler: Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
     ): (CommandLine, Executor) -> Command.Compiled {
         return { commandLine, executor ->
             try {
@@ -115,28 +130,31 @@ class CommandRegistry : CommandRegistrar {
     }
 }
 
-class CommandGroupRegistry(private val parent: CommandRegistrar,
-                           private val name: String) : CommandRegistrar {
+class CommandGroupRegistry(
+    private val parent: CommandRegistrar,
+    private val name: String
+) : CommandRegistrar {
     override fun register(
-            path: Iterable<String>,
-            level: Int,
-            block: MutableCollection<CommandElement>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
+        path: Iterable<String>,
+        level: Int,
+        block: MutableCollection<CommandElement>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
     ) = parent.register(listOf(name) + path, level, block)
 
 }
 
 interface CommandRegistrar {
     fun register(
-            path: Iterable<String>,
-            level: Int,
-            block: MutableCollection<CommandElement>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit)
+        path: Iterable<String>,
+        level: Int,
+        block: MutableCollection<CommandElement>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
+    )
 
     fun register(
-            name: String,
-            level: Int,
-            block: MutableCollection<CommandElement>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
+        name: String,
+        level: Int,
+        block: MutableCollection<CommandElement>.() -> Command.(CommandLine, Executor, MutableCollection<() -> Unit>) -> Unit
     ) = register(listOf(name), level, block)
 
     fun group(name: String): CommandGroupRegistry =
-            CommandGroupRegistry(this, name)
+        CommandGroupRegistry(this, name)
 }

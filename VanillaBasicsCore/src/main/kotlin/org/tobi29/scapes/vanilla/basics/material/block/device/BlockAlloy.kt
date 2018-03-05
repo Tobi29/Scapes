@@ -16,6 +16,9 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.device
 
+import org.tobi29.math.AABB3
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
 import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
@@ -25,10 +28,6 @@ import org.tobi29.scapes.chunk.terrain.TerrainClient
 import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.math.AABB
-import org.tobi29.math.Face
-import org.tobi29.math.PointerPane
-import org.tobi29.utils.Pool
 import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.inventory.kind
@@ -36,6 +35,7 @@ import org.tobi29.scapes.vanilla.basics.entity.client.EntityAlloyClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityAlloyServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
+import org.tobi29.utils.Pool
 
 class BlockAlloy(type: VanillaMaterialType) : VanillaBlockContainer<EntityAlloyClient, EntityAlloyServer>(
         type, type.materials.plugin.entityTypes.alloy) {
@@ -70,7 +70,7 @@ class BlockAlloy(type: VanillaMaterialType) : VanillaBlockContainer<EntityAlloyC
                            z: Int): List<AABBElement> {
         val aabbs = ArrayList<AABBElement>()
         aabbs.add(AABBElement(
-                AABB(x + 0.0625, y + 0.0625, z.toDouble(), x + 0.9375,
+                AABB3(x + 0.0625, y + 0.0625, z.toDouble(), x + 0.9375,
                         y + 0.9375, z + 0.5)))
         return aabbs
     }
@@ -165,6 +165,6 @@ class BlockAlloy(type: VanillaMaterialType) : VanillaBlockContainer<EntityAlloyC
     }
 
     companion object {
-        private val SELECTION = AABB(0.0625, 0.0625, 0.0, 0.9375, 0.9375, 0.5)
+        private val SELECTION = AABB3(0.0625, 0.0625, 0.0, 0.9375, 0.9375, 0.5)
     }
 }

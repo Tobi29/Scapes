@@ -15,21 +15,21 @@
  */
 package org.tobi29.scapes.entity.particle
 
-import org.tobi29.scapes.block.light
-import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.client.loadShader
-import org.tobi29.scapes.engine.graphics.*
-import org.tobi29.math.AABB
+import org.tobi29.graphics.Cam
+import org.tobi29.math.AABB3
 import org.tobi29.math.FastMath
 import org.tobi29.math.atan2Fast
 import org.tobi29.math.matrix.Matrix4f
 import org.tobi29.math.vector.distanceSqr
 import org.tobi29.math.vector.length
-import org.tobi29.graphics.Cam
+import org.tobi29.scapes.block.light
+import org.tobi29.scapes.chunk.terrain.block
+import org.tobi29.scapes.client.loadShader
+import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.scapes.engine.shader.IntegerExpression
 import org.tobi29.stdex.math.HALF_PI
 import org.tobi29.stdex.math.floorToInt
 import org.tobi29.stdex.math.mix
-import org.tobi29.scapes.engine.shader.IntegerExpression
 import kotlin.math.max
 
 class ParticleEmitterTransparent(
@@ -145,7 +145,7 @@ class ParticleEmitterTransparent(
         if (!hasAlive) {
             return
         }
-        val aabb = AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        val aabb = AABB3()
         val gravitation = system.world.gravity.toFloat()
         val terrain = system.world.terrain
         var hasAlive = false
@@ -162,12 +162,12 @@ class ParticleEmitterTransparent(
             if (!instance.physics) {
                 continue
             }
-            aabb.minX = instance.pos.x - instance.sizeStart
-            aabb.minY = instance.pos.y - instance.sizeStart
-            aabb.minZ = instance.pos.z - instance.sizeStart
-            aabb.maxX = instance.pos.x + instance.sizeStart
-            aabb.maxY = instance.pos.y + instance.sizeStart
-            aabb.maxZ = instance.pos.z + instance.sizeStart
+            aabb.min.x = instance.pos.x - instance.sizeStart
+            aabb.min.y = instance.pos.y - instance.sizeStart
+            aabb.min.z = instance.pos.z - instance.sizeStart
+            aabb.max.x = instance.pos.x + instance.sizeStart
+            aabb.max.y = instance.pos.y + instance.sizeStart
+            aabb.max.z = instance.pos.z + instance.sizeStart
             ParticlePhysics.update(delta, instance, terrain, aabb, gravitation,
                     instance.gravitationMultiplier, instance.airFriction,
                     instance.groundFriction, instance.waterFriction)

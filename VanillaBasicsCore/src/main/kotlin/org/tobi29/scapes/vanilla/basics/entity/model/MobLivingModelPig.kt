@@ -16,21 +16,21 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.model
 
+import org.tobi29.graphics.Cam
+import org.tobi29.math.AABB3
+import org.tobi29.math.angleDiff
+import org.tobi29.math.cosTable
+import org.tobi29.math.vector.*
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.Texture
 import org.tobi29.scapes.engine.graphics.push
-import org.tobi29.math.AABB
-import org.tobi29.math.angleDiff
-import org.tobi29.math.cosTable
-import org.tobi29.math.vector.*
-import org.tobi29.graphics.Cam
-import org.tobi29.stdex.math.TWO_PI
-import org.tobi29.stdex.math.floorToInt
 import org.tobi29.scapes.entity.client.MobLivingClient
 import org.tobi29.scapes.entity.model.Box
 import org.tobi29.scapes.entity.model.MobLivingModel
+import org.tobi29.stdex.math.TWO_PI
+import org.tobi29.stdex.math.floorToInt
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -66,13 +66,13 @@ class MobLivingModelPig(shared: MobLivingModelPigShared,
         this.pos.set(pos)
     }
 
-    override fun shapeAABB(aabb: AABB) {
-        aabb.minX = pos.x - 0.75
-        aabb.minY = pos.y - 0.75
-        aabb.minZ = pos.z - 0.45
-        aabb.maxX = pos.x + 0.75
-        aabb.maxY = pos.y + 0.75
-        aabb.maxZ = pos.z + 0.7
+    override fun shapeAABB(aabb: AABB3) {
+        aabb.min.x = pos.x - 0.75
+        aabb.min.y = pos.y - 0.75
+        aabb.min.z = pos.z - 0.45
+        aabb.max.x = pos.x + 0.75
+        aabb.max.y = pos.y + 0.75
+        aabb.max.z = pos.z + 0.7
     }
 
     override fun renderUpdate(delta: Double) {

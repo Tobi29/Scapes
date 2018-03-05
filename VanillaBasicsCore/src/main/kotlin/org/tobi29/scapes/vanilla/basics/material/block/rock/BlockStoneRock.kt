@@ -16,6 +16,10 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.rock
 
+import org.tobi29.math.AABB3
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
+import org.tobi29.math.Random
 import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
@@ -25,12 +29,6 @@ import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.*
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.math.AABB
-import org.tobi29.math.Face
-import org.tobi29.math.PointerPane
-import org.tobi29.math.Random
-import org.tobi29.utils.Pool
-import org.tobi29.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.inventory.TypedItem
@@ -38,6 +36,8 @@ import org.tobi29.scapes.vanilla.basics.generator.StoneType
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.util.dropItems
+import org.tobi29.utils.Pool
+import org.tobi29.utils.toArray
 
 class BlockStoneRock(type: VanillaMaterialType) : VanillaBlock(type) {
     private val stoneRegistry = plugins.registry.get<StoneType>("VanillaBasics",
@@ -186,8 +186,8 @@ class BlockStoneRock(type: VanillaMaterialType) : VanillaBlock(type) {
                 SELECTION.asSequence().map { i ->
                     val shapes = ArrayList<BlockModelComplex.Shape>()
                     val shape = BlockModelComplex.ShapeBox(it, it, it, it, it,
-                            it, i.minX - 0.5, i.minY - 0.5, i.minZ - 0.5,
-                            i.maxX - 0.5, i.maxY - 0.5, i.maxZ - 0.5, 1.0, 1.0,
+                            it, i.min.x - 0.5, i.min.y - 0.5, i.min.z - 0.5,
+                            i.max.x - 0.5, i.max.y - 0.5, i.max.z - 0.5, 1.0, 1.0,
                             1.0, 1.0)
                     shapes.add(shape)
                     BlockModelComplex(registry, shapes, 1.0)
@@ -223,14 +223,14 @@ class BlockStoneRock(type: VanillaMaterialType) : VanillaBlock(type) {
 
     companion object {
         private val SELECTION = arrayOf(
-                AABB(0.375, 0.375, 0.0, 0.625, 0.625, 0.0625),
-                AABB(0.375, 0.25, 0.0, 0.625, 0.75, 0.0625),
-                AABB(0.4375, 0.375, 0.0, 0.5625, 0.625, 0.0625),
-                AABB(0.4375, 0.25, 0.0, 0.5625, 0.75, 0.0625),
-                AABB(0.375, 0.375, 0.0, 0.625, 0.625, 0.125),
-                AABB(0.375, 0.25, 0.0, 0.625, 0.75, 0.125),
-                AABB(0.4375, 0.375, 0.0, 0.5625, 0.625, 0.125),
-                AABB(0.4375, 0.25, 0.0, 0.5625, 0.75, 0.125))
+                AABB3(0.375, 0.375, 0.0, 0.625, 0.625, 0.0625),
+                AABB3(0.375, 0.25, 0.0, 0.625, 0.75, 0.0625),
+                AABB3(0.4375, 0.375, 0.0, 0.5625, 0.625, 0.0625),
+                AABB3(0.4375, 0.25, 0.0, 0.5625, 0.75, 0.0625),
+                AABB3(0.375, 0.375, 0.0, 0.625, 0.625, 0.125),
+                AABB3(0.375, 0.25, 0.0, 0.625, 0.75, 0.125),
+                AABB3(0.4375, 0.375, 0.0, 0.5625, 0.625, 0.125),
+                AABB3(0.4375, 0.25, 0.0, 0.5625, 0.75, 0.125))
         private val PERM = IntArray(512)
 
         init {

@@ -19,7 +19,7 @@ package org.tobi29.scapes.entity.client
 import org.tobi29.checksums.Checksum
 import org.tobi29.checksums.toChecksum
 import org.tobi29.io.tag.TagMap
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
 import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.entity.CreatureType
@@ -29,7 +29,7 @@ abstract class MobPlayerClient(type: EntityType<*, *>,
                                world: WorldClient,
                                pos: Vector3d,
                                speed: Vector3d,
-                               aabb: AABB,
+                               aabb: AABB3,
                                lives: Double,
                                maxLives: Double,
                                protected var nickname: String) : MobLivingEquippedClient(

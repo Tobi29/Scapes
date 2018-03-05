@@ -16,14 +16,14 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.particle
 
-import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.graphics.Cam
-import org.tobi29.math.AABB
-import org.tobi29.stdex.math.TWO_PI
+import org.tobi29.math.AABB3
 import org.tobi29.math.threadLocalRandom
 import org.tobi29.math.vector.Vector3d
+import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.entity.particle.*
 import org.tobi29.scapes.vanilla.basics.VanillaBasics
+import org.tobi29.stdex.math.TWO_PI
 
 class ParticleEmitterExplosion(system: ParticleSystem) : ParticleEmitter<ParticleInstanceExplosion>(
         system, Array(256, { ParticleInstanceExplosion() })) {
@@ -34,7 +34,7 @@ class ParticleEmitterExplosion(system: ParticleSystem) : ParticleEmitter<Particl
         }
         val plugin = system.world.plugins.plugin(
                 "VanillaBasics") as VanillaBasics
-        val aabb = AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        val aabb = AABB3()
         val gravitation = system.world.gravity.toFloat()
         val terrain = system.world.terrain
         val emitter = system.emitter(ParticleEmitterTransparent::class.java)
@@ -60,12 +60,12 @@ class ParticleEmitterExplosion(system: ParticleSystem) : ParticleEmitter<Particl
                 trail(emitter, instance.pos.now(), instance.speed.now(),
                         plugin.particles.explosion)
             }
-            aabb.minX = instance.pos.x - SIZE
-            aabb.minY = instance.pos.y - SIZE
-            aabb.minZ = instance.pos.z - SIZE
-            aabb.maxX = instance.pos.x + SIZE
-            aabb.maxY = instance.pos.y + SIZE
-            aabb.maxZ = instance.pos.z + SIZE
+            aabb.min.x = instance.pos.x - SIZE
+            aabb.min.y = instance.pos.y - SIZE
+            aabb.min.z = instance.pos.z - SIZE
+            aabb.max.x = instance.pos.x + SIZE
+            aabb.max.y = instance.pos.y + SIZE
+            aabb.max.z = instance.pos.z + SIZE
             ParticlePhysics.update(delta, instance, terrain, aabb, gravitation,
                     0.01f,
                     0.2f, 0.4f, 8.0f)

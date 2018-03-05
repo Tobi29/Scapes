@@ -20,7 +20,7 @@ import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.launch
 import org.tobi29.coroutines.TaskLock
 import org.tobi29.graphics.Cam
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
 import org.tobi29.math.vector.Vector2i
 import org.tobi29.math.vector.div
 import org.tobi29.profiler.profilerSection
@@ -558,16 +558,16 @@ class TerrainInfiniteRenderer(private val terrain: TerrainInfiniteClient,
                 }
                 profilerSection("AssembleMesh") {
                     val engine = terrain.world.game.engine
-                    val vao: Pair<Model, AABB>?
-                    val vaoAlpha: Pair<Model, AABB>?
+                    val vao: Pair<Model, AABB3>?
+                    val vaoAlpha: Pair<Model, AABB3>?
                     if (mesh.size() > 0) {
-                        vao = Pair(mesh.finish(engine), mesh.aabb())
+                        vao = Pair(mesh.finish(engine), mesh.aabb)
                     } else {
                         vao = null
                     }
                     if (meshAlpha.size() > 0) {
                         vaoAlpha = Pair(meshAlpha.finish(engine),
-                                meshAlpha.aabb())
+                                meshAlpha.aabb)
                     } else {
                         vaoAlpha = null
                     }

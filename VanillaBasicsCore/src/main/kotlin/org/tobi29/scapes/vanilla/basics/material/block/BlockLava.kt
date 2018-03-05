@@ -16,6 +16,10 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block
 
+import org.tobi29.math.AABB3
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
+import org.tobi29.math.threadLocalRandom
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.TerrainTexture
@@ -26,15 +30,11 @@ import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.*
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.math.AABB
-import org.tobi29.math.Face
-import org.tobi29.math.PointerPane
-import org.tobi29.math.threadLocalRandom
-import org.tobi29.utils.Pool
 import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.update.UpdateLavaFlow
+import org.tobi29.utils.Pool
 
 class BlockLava(type: VanillaMaterialType) : VanillaBlock(type) {
     private var textureStill: TerrainTexture? = null
@@ -63,7 +63,7 @@ class BlockLava(type: VanillaMaterialType) : VanillaBlock(type) {
                            y: Int,
                            z: Int): List<AABBElement> {
         val aabbs = ArrayList<AABBElement>()
-        aabbs.add(AABBElement(AABB(x.toDouble(), y.toDouble(), z.toDouble(),
+        aabbs.add(AABBElement(AABB3(x.toDouble(), y.toDouble(), z.toDouble(),
                 (x + 1).toDouble(), (y + 1).toDouble(), (z + 1).toDouble()),
                 CollisionLava.INSTANCE))
         return aabbs

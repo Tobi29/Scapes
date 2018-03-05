@@ -18,6 +18,7 @@ package org.tobi29.scapes.chunk.terrain.infinite
 
 import org.tobi29.arrays.fill
 import org.tobi29.graphics.Cam
+import org.tobi29.math.add
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Model
 import org.tobi29.scapes.engine.graphics.Shader
@@ -142,13 +143,13 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
                                 1.0f)
                     }
                     matrix.translate(
-                            (vao.model.second.minX - cam.position.x).toFloat(),
-                            (vao.model.second.minY - cam.position.y).toFloat(),
-                            (vao.model.second.minZ - cam.position.z).toFloat())
+                            (vao.model.second.min.x - cam.position.x).toFloat(),
+                            (vao.model.second.min.y - cam.position.y).toFloat(),
+                            (vao.model.second.min.z - cam.position.z).toFloat())
                     matrix.scale(
-                            (vao.model.second.maxX - vao.model.second.minX).toFloat(),
-                            (vao.model.second.maxY - vao.model.second.minY).toFloat(),
-                            (vao.model.second.maxZ - vao.model.second.minZ).toFloat())
+                            (vao.model.second.max.x - vao.model.second.min.z).toFloat(),
+                            (vao.model.second.max.y - vao.model.second.min.y).toFloat(),
+                            (vao.model.second.max.z - vao.model.second.min.z).toFloat())
                     frame.render(gl, shader)
                 }
             }

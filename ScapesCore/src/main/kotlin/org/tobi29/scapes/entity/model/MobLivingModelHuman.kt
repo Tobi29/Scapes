@@ -105,13 +105,13 @@ class MobLivingModelHuman(shared: MobLivingModelHumanShared,
         this.pos.set(pos)
     }
 
-    override fun shapeAABB(aabb: AABB) {
-        aabb.minX = pos.x - 1.0
-        aabb.minY = pos.y - 1.0
-        aabb.minZ = pos.z - 1.0
-        aabb.maxX = pos.x + 1.0
-        aabb.maxY = pos.y + 1.0
-        aabb.maxZ = pos.z + 1.2
+    override fun shapeAABB(aabb: AABB3) {
+        aabb.min.x = pos.x - 1.0
+        aabb.min.y = pos.y - 1.0
+        aabb.min.z = pos.z - 1.0
+        aabb.max.x = pos.x + 1.0
+        aabb.max.y = pos.y + 1.0
+        aabb.max.z = pos.z + 1.2
     }
 
     override fun renderUpdate(delta: Double) {

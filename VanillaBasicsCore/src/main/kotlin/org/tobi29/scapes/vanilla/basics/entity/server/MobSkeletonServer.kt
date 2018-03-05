@@ -33,7 +33,7 @@ import org.tobi29.stdex.math.toRad
 class MobSkeletonServer(type: EntityType<*, *>,
                         world: WorldServer) : MobLivingEquippedServer(
         type, world, Vector3d.ZERO, Vector3d.ZERO,
-        AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0,
+        AABB3(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0,
         Frustum(90.0, 1.0, 0.1, 24.0), Frustum(20.0, 0.5, 0.1, 0.2)) {
     private var lookWait = 0.0
     private var walkWait = 0.0

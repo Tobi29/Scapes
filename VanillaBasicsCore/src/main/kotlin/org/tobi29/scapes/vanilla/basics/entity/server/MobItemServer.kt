@@ -16,11 +16,17 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.server
 
+import org.tobi29.io.tag.ReadWriteTagMap
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toTag
+import org.tobi29.math.AABB3
+import org.tobi29.math.grow
+import org.tobi29.math.overlaps
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.block.toItem
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.math.AABB
-import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.entity.server.MobServer
@@ -28,17 +34,15 @@ import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.inventory.isEmpty
 import org.tobi29.scapes.inventory.stack
 import org.tobi29.scapes.inventory.toTag
-import org.tobi29.io.tag.ReadWriteTagMap
-import org.tobi29.io.tag.TagMap
-import org.tobi29.io.tag.toDouble
-import org.tobi29.io.tag.toTag
-import kotlin.collections.asSequence
 import kotlin.collections.set
 
-class MobItemServer(type: EntityType<*, *>,
-                    world: WorldServer) : MobServer(
-        type, world, Vector3d.ZERO, Vector3d.ZERO,
-        AABB(-0.2, -0.2, -0.2, 0.2, 0.2, 0.2)) {
+class MobItemServer(
+    type: EntityType<*, *>,
+    world: WorldServer
+) : MobServer(
+    type, world, Vector3d.ZERO, Vector3d.ZERO,
+    AABB3(-0.2, -0.2, -0.2, 0.2, 0.2, 0.2)
+) {
     var item: Item? = null
     private var pickupwait = 1.0
     private var stackwait = 0.0
@@ -65,9 +69,9 @@ class MobItemServer(type: EntityType<*, *>,
     override fun update(delta: Double) {
         if (pickupwait <= 0) {
             pickupwait = 0.0
-            val aabb = getAABB().grow(0.8, 0.8, 0.4)
+            val aabb = currentAABB().apply { grow(0.8, 0.8, 0.4) }
             world.players().asSequence().filter {
-                aabb.overlay(it.getAABB())
+                aabb overlaps it.currentAABB()
             }.forEach { entity ->
                 world.playSound("Scapes:sound/entity/mob/Item.ogg", this)
                 entity.inventories.modify("Container") { item = it.add(item) }
@@ -75,13 +79,15 @@ class MobItemServer(type: EntityType<*, *>,
             stackwait -= delta
             if (stackwait <= 0) {
                 stackwait += 1.0
-                world.getEntities(pos.now(),
-                        1.0).filterIsInstance<MobItemServer>()
-                        .filter { it != this && !item.isEmpty() }.forEach {
-                    val (new, remaining) = it.item.stack(item)
-                    item = remaining
-                    it.item = new
-                }
+                world.getEntities(
+                    pos.now(),
+                    1.0
+                ).filterIsInstance<MobItemServer>()
+                    .filter { it != this && !item.isEmpty() }.forEach {
+                        val (new, remaining) = it.item.stack(item)
+                        item = remaining
+                        it.item = new
+                    }
             }
         } else {
             pickupwait -= delta

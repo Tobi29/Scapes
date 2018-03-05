@@ -16,24 +16,24 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.math.AABB3
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.block.toItem
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.math.AABB
-import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.entity.client.attachModel
 import org.tobi29.scapes.entity.model.MobModelBlock
 import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.vanilla.basics.material.BlockExplosive
-import org.tobi29.io.tag.TagMap
-import org.tobi29.io.tag.toDouble
 import java.util.concurrent.atomic.AtomicReference
 
 class MobBombClient(type: EntityType<*, *>,
                     world: WorldClient) : MobClient(
         type, world, Vector3d.ZERO, Vector3d.ZERO,
-        AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
+        AABB3(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
     private val item = AtomicReference<Item?>(null)
     private var time = 0.0
     private var exploded = false

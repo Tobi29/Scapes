@@ -20,7 +20,7 @@ import org.tobi29.io.tag.ReadWriteTagMap
 import org.tobi29.io.tag.TagMap
 import org.tobi29.io.tag.toDouble
 import org.tobi29.io.tag.toTag
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
 import org.tobi29.math.threadLocalRandom
 import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.block.BlockType
@@ -40,7 +40,7 @@ import kotlin.math.abs
 class MobFlyingBlockServer(type: EntityType<*, *>,
                            world: WorldServer) : MobServer(
         type, world, Vector3d.ZERO, Vector3d.ZERO,
-        AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
+        AABB3(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)) {
     private val item = AtomicReference<Item?>(null)
     private var time = 0.0
 

@@ -16,32 +16,30 @@
 
 package org.tobi29.scapes.block
 
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
 
-class AABBElement(val aabb: AABB = AABB(0.0, 0.0, 0.0, 0.0, 0.0,
-        0.0),
-                  var collision: Collision = BlockType.STANDARD_COLLISION) {
-
-    fun set(minX: Double,
-            minY: Double,
-            minZ: Double,
-            maxX: Double,
-            maxY: Double,
-            maxZ: Double,
-            collision: Collision = BlockType.STANDARD_COLLISION) {
-        aabb.minX = minX
-        aabb.minY = minY
-        aabb.minZ = minZ
-        aabb.maxX = maxX
-        aabb.maxY = maxY
-        aabb.maxZ = maxZ
+class AABBElement(
+    val aabb: AABB3 = AABB3(),
+    var collision: Collision = BlockType.STANDARD_COLLISION
+) {
+    fun set(
+        minX: Double,
+        minY: Double,
+        minZ: Double,
+        maxX: Double,
+        maxY: Double,
+        maxZ: Double,
+        collision: Collision = BlockType.STANDARD_COLLISION
+    ) {
+        aabb.min.x = minX
+        aabb.min.y = minY
+        aabb.min.z = minZ
+        aabb.max.x = maxX
+        aabb.max.y = maxY
+        aabb.max.z = maxZ
         this.collision = collision
     }
 
     val isSolid: Boolean
         get() = collision.isSolid
-
-    fun aabb(): AABB {
-        return aabb
-    }
 }

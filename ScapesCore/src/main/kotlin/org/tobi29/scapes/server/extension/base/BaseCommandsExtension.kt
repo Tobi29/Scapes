@@ -16,10 +16,7 @@
 
 package org.tobi29.scapes.server.extension.base
 
-import org.tobi29.args.CommandArgument
-import org.tobi29.args.CommandOption
-import org.tobi29.args.getBoolean
-import org.tobi29.args.require
+import org.tobi29.args.*
 import org.tobi29.io.tag.TagMap
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.ScapesServer
@@ -35,64 +32,90 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         val serverGroup = registry.group("server")
 
         registry.register("say", 0) {
-            val nameOption = CommandOption(setOf('n'), setOf("name"),
-                    listOf("name"), "Name used for prefix").also { add(it) }
-            val rawOption = CommandOption(setOf('r'), setOf("raw"),
-                    "Disable prefix").also { add(it) }
-            val messageArgument = CommandArgument(
-                    name = "message",
-                    count = 0..Integer.MAX_VALUE).also { add(it) }
+            val nameOption = commandOption(
+                setOf('n'), setOf("name"), listOf("name"),
+                "Name used for prefix"
+            )
+            val rawOption = commandFlag(
+                setOf('r'), setOf("raw"),
+                "Disable prefix"
+            )
+            val messageArgument = commandArgument(
+                "message", 0..Integer.MAX_VALUE
+            )
             return@register { args, executor, commands ->
                 val message: String
                 if (args.getBoolean(rawOption)) {
                     requirePermission(executor, 8, rawOption)
                     message = args.arguments[messageArgument]?.joinToString(
-                            separator = " ") ?: ""
+                        separator = " "
+                    ) ?: ""
                 } else {
-                    val name = args.parameters[nameOption]?.firstOrNull()?.apply {
-                        requirePermission(executor, 8, nameOption)
-                    } ?: executor.name()
-                    message = "<$name> ${args.arguments[messageArgument]?.joinToString(
-                            separator = " ") ?: ""}"
+                    val name =
+                        args.parameters[nameOption]?.firstOrNull()?.apply {
+                            requirePermission(executor, 8, nameOption)
+                        } ?: executor.name()
+                    message =
+                            "<$name> ${args.arguments[messageArgument]?.joinToString(
+                                separator = " "
+                            ) ?: ""}"
                 }
                 commands.add {
                     server.events.fire(
-                            MessageEvent(executor, MessageLevel.CHAT, message))
+                        MessageEvent(executor, MessageLevel.CHAT, message)
+                    )
                 }
             }
         }
 
         registry.register("tell", 0) {
-            val targetOption = CommandOption(setOf('t'), setOf("target"),
-                    listOf("name"), "Target player").also { add(it) }
-            val nameOption = CommandOption(setOf('n'), setOf("name"),
-                    listOf("name"), "Name used for prefix").also { add(it) }
-            val rawOption = CommandOption(setOf('r'), setOf("raw"),
-                    "Disable prefix").also { add(it) }
-            val messageArgument = CommandArgument(
-                    name = "message",
-                    count = 0..Integer.MAX_VALUE).also { add(it) }
+            val targetOption = commandOption(
+                setOf('t'), setOf("target"), listOf("name"),
+                "Target player"
+            )
+            val nameOption = commandOption(
+                setOf('n'), setOf("name"), listOf("name"),
+                "Name used for prefix"
+            )
+            val rawOption = commandFlag(
+                setOf('r'), setOf("raw"),
+                "Disable prefix"
+            )
+            val messageArgument = commandArgument(
+                name = "message",
+                count = 0..Integer.MAX_VALUE
+            )
             return@register { args, executor, commands ->
                 val targetName = args.require(
-                        targetOption) { it ?: executor.playerName() }
+                    targetOption
+                ) { it ?: executor.playerName() }
                 val message: String
                 if (args.getBoolean(rawOption)) {
                     requirePermission(executor, 8, rawOption)
                     message = args.arguments[messageArgument]?.joinToString(
-                            separator = " ") ?: ""
+                        separator = " "
+                    ) ?: ""
                 } else {
-                    val name = args.parameters[nameOption]?.firstOrNull()?.apply {
-                        requirePermission(executor, 8, nameOption)
-                    } ?: executor.name()
-                    message = "<$name> ${args.arguments[messageArgument]?.joinToString(
-                            separator = " ") ?: ""}"
+                    val name =
+                        args.parameters[nameOption]?.firstOrNull()?.apply {
+                            requirePermission(executor, 8, nameOption)
+                        } ?: executor.name()
+                    message =
+                            "<$name> ${args.arguments[messageArgument]?.joinToString(
+                                separator = " "
+                            ) ?: ""}"
                 }
                 commands.add {
-                    val target = requireGet({ connection.playerByName(it) },
-                            targetName)
+                    val target = requireGet(
+                        { connection.playerByName(it) },
+                        targetName
+                    )
                     server.events.fire(
-                            MessageEvent(executor, MessageLevel.CHAT, message,
-                                    target))
+                        MessageEvent(
+                            executor, MessageLevel.CHAT, message,
+                            target
+                        )
+                    )
                 }
             }
         }
@@ -118,8 +141,10 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
 class BaseCommandsExtensionProvider : ServerExtensionProvider {
     override val name = "Base Commands"
 
-    override fun create(server: ScapesServer,
-                        configMap: TagMap?): ServerExtension? {
+    override fun create(
+        server: ScapesServer,
+        configMap: TagMap?
+    ): ServerExtension? {
         return BaseCommandsExtension(server)
     }
 }

@@ -15,7 +15,7 @@
  */
 package org.tobi29.scapes.entity.particle
 
-import org.tobi29.math.AABB
+import org.tobi29.math.*
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainClient
@@ -30,38 +30,41 @@ import kotlin.math.max
 import kotlin.math.min
 
 object ParticlePhysics {
-    fun update(delta: Double,
-               instance: ParticleInstance,
-               terrain: TerrainClient,
-               aabb: AABB,
-               gravitation: Float,
-               gravitationMultiplier: Float,
-               airFriction: Float,
-               groundFriction: Float,
-               waterFriction: Float): Boolean {
+    fun update(
+        delta: Double,
+        instance: ParticleInstance,
+        terrain: TerrainClient,
+        aabb: AABB3,
+        gravitation: Float,
+        gravitationMultiplier: Float,
+        airFriction: Float,
+        groundFriction: Float,
+        waterFriction: Float
+    ): Boolean {
         val goX = clamp(instance.speed.x * delta, -10.0, 10.0)
         val goY = clamp(instance.speed.y * delta, -10.0, 10.0)
         val goZ = clamp(instance.speed.z * delta, -10.0, 10.0)
         val collisions = AABBS.get()
         terrain.collisions(
-                (aabb.minX + min(goX, 0.0)).floorToInt(),
-                (aabb.minY + min(goY, 0.0)).floorToInt(),
-                (aabb.minZ + min(goZ, 0.0)).floorToInt(),
-                (aabb.maxX + max(goX, 0.0)).floorToInt(),
-                (aabb.maxY + max(goY, 0.0)).floorToInt(),
-                (aabb.maxZ + max(goZ, 0.0)).floorToInt(), collisions)
+            (aabb.min.x + min(goX, 0.0)).floorToInt(),
+            (aabb.min.y + min(goY, 0.0)).floorToInt(),
+            (aabb.min.z + min(goZ, 0.0)).floorToInt(),
+            (aabb.max.x + max(goX, 0.0)).floorToInt(),
+            (aabb.max.y + max(goY, 0.0)).floorToInt(),
+            (aabb.max.z + max(goZ, 0.0)).floorToInt(), collisions
+        )
         val aabbs = EntityPhysics.collisions(collisions)
-        val lastGoZ = aabb.moveOutZ(aabbs, goZ)
+        val lastGoZ = aabb.moveOutZ(goZ, aabbs)
         instance.pos.addZ(lastGoZ)
         aabb.add(0.0, 0.0, lastGoZ)
         val ground = lastGoZ - goZ > 0.0
-        val lastGoX = aabb.moveOutX(aabbs, goX)
+        val lastGoX = aabb.moveOutX(goX, aabbs)
         instance.pos.addX(lastGoX)
         aabb.add(lastGoX, 0.0, 0.0)
         if (lastGoX != goX) {
             instance.speed.setX(0.0)
         }
-        val lastGoY = aabb.moveOutY(aabbs, goY)
+        val lastGoY = aabb.moveOutY(goY, aabbs)
         instance.pos.addY(lastGoY)
         aabb.add(0.0, lastGoY, 0.0)
         if (lastGoY != goY) {
@@ -69,7 +72,7 @@ object ParticlePhysics {
         }
         var inWater = false
         for (element in collisions) {
-            if (aabb.overlay(element.aabb)) {
+            if (aabb overlaps element.aabb) {
                 element.collision.inside(instance, delta)
                 if (element.collision.isLiquid) {
                     inWater = true
@@ -77,14 +80,16 @@ object ParticlePhysics {
             }
         }
         instance.speed.addZ(
-                (-gravitationMultiplier).toDouble() * delta * gravitation.toDouble())
+            (-gravitationMultiplier).toDouble() * delta * gravitation.toDouble()
+        )
         instance.speed.divide(1.0 + airFriction * delta)
         if (inWater) {
             instance.speed.divide(1.0 + waterFriction * delta)
         } else if (ground) {
             instance.speed.setZ(0.0)
             instance.speed.divide(
-                    1.0 + groundFriction.toDouble() * delta * gravitation.toDouble())
+                1.0 + groundFriction.toDouble() * delta * gravitation.toDouble()
+            )
         }
         collisions.reset()
         collisions.forAllObjects { it.collision = BlockType.STANDARD_COLLISION }

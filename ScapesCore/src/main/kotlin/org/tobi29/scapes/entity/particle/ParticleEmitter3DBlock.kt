@@ -16,17 +16,17 @@
 
 package org.tobi29.scapes.entity.particle
 
+import org.tobi29.graphics.Cam
+import org.tobi29.math.AABB3
+import org.tobi29.math.vector.times
 import org.tobi29.scapes.block.light
 import org.tobi29.scapes.block.render
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.push
-import org.tobi29.math.AABB
-import org.tobi29.math.vector.times
-import org.tobi29.graphics.Cam
-import org.tobi29.stdex.math.floorToInt
 import org.tobi29.scapes.engine.shader.IntegerExpression
+import org.tobi29.stdex.math.floorToInt
 import kotlin.math.max
 
 class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleInstance3DBlock>(
@@ -35,7 +35,7 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
         if (!hasAlive) {
             return
         }
-        val aabb = AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        val aabb = AABB3()
         val gravitation = system.world.gravity.toFloat()
         val terrain = system.world.terrain
         var hasAlive = false
@@ -49,12 +49,12 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
                 instance.state = ParticleInstance.State.DEAD
                 continue
             }
-            aabb.minX = instance.pos.x - SIZE
-            aabb.minY = instance.pos.y - SIZE
-            aabb.minZ = instance.pos.z - SIZE
-            aabb.maxX = instance.pos.x + SIZE
-            aabb.maxY = instance.pos.y + SIZE
-            aabb.maxZ = instance.pos.z + SIZE
+            aabb.min.x = instance.pos.x - SIZE
+            aabb.min.y = instance.pos.y - SIZE
+            aabb.min.z = instance.pos.z - SIZE
+            aabb.max.x = instance.pos.x + SIZE
+            aabb.max.y = instance.pos.y + SIZE
+            aabb.max.z = instance.pos.z + SIZE
             if (ParticlePhysics.update(delta, instance, terrain, aabb,
                     gravitation, 1.0f,
                     0.2f, 0.4f, 8.0f)) {

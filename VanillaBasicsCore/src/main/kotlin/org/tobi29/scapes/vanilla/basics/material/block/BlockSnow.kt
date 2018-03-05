@@ -16,6 +16,9 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block
 
+import org.tobi29.math.AABB3
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.block.TerrainTexture
@@ -29,13 +32,10 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.math.AABB
-import org.tobi29.math.Face
-import org.tobi29.math.PointerPane
-import org.tobi29.utils.Pool
 import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
+import org.tobi29.utils.Pool
 
 class BlockSnow(type: VanillaMaterialType) : VanillaBlock(type) {
     private var texture: TerrainTexture? = null
@@ -176,6 +176,6 @@ class BlockSnow(type: VanillaMaterialType) : VanillaBlock(type) {
     }
 
     companion object {
-        private val SELECTION = AABB(0.0, 0.0, 0.0, 1.0, 1.0, 0.5)
+        private val SELECTION = AABB3(0.0, 0.0, 0.0, 1.0, 1.0, 0.5)
     }
 }

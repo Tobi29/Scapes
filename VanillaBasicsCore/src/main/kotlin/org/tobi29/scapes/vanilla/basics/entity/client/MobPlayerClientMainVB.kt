@@ -18,7 +18,7 @@ package org.tobi29.scapes.vanilla.basics.entity.client
 
 import org.tobi29.io.tag.TagMap
 import org.tobi29.io.tag.toMap
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
 import org.tobi29.math.Frustum
 import org.tobi29.math.vector.Vector3d
 import org.tobi29.math.vector.direction
@@ -62,7 +62,7 @@ class MobPlayerClientMainVB(
         type: EntityType<*, *>,
         world: WorldClient
 ) : MobPlayerClientMain(type, world, Vector3d.ZERO, Vector3d.ZERO,
-        AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
+        AABB3(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
         Frustum(90.0, 1.0, 0.1, 24.0), "") {
     private var punchLeft: Long = -1
     private var punchRight: Long = -1

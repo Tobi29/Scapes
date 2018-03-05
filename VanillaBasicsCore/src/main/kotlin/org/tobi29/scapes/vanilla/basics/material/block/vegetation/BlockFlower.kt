@@ -16,6 +16,9 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.vegetation
 
+import org.tobi29.math.AABB3
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
 import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
@@ -25,17 +28,14 @@ import org.tobi29.scapes.chunk.ChunkMesh
 import org.tobi29.scapes.chunk.terrain.*
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.math.AABB
-import org.tobi29.math.Face
-import org.tobi29.math.PointerPane
-import org.tobi29.utils.Pool
-import org.tobi29.utils.toArray
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlock
 import org.tobi29.scapes.vanilla.basics.util.dropItems
+import org.tobi29.utils.Pool
+import org.tobi29.utils.toArray
 
 class BlockFlower(type: VanillaMaterialType) : VanillaBlock(type) {
     private var textures: Array<TerrainTexture>? = null
@@ -233,7 +233,7 @@ class BlockFlower(type: VanillaMaterialType) : VanillaBlock(type) {
     }
 
     companion object {
-        private val SELECTION = AABB(0.15, 0.15, 0.0, 0.85, 0.85, 0.95)
+        private val SELECTION = AABB3(0.15, 0.15, 0.0, 0.85, 0.85, 0.95)
 
         private fun color(color: Int): String {
             when (color) {

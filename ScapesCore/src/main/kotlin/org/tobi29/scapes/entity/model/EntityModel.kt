@@ -16,15 +16,15 @@
 
 package org.tobi29.scapes.entity.model
 
+import org.tobi29.graphics.Cam
+import org.tobi29.math.AABB3
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.math.AABB
-import org.tobi29.math.vector.Vector3d
-import org.tobi29.utils.ComponentRegistered
-import org.tobi29.graphics.Cam
 import org.tobi29.scapes.entity.ComponentTypeRegisteredEntity
 import org.tobi29.scapes.entity.client.EntityClient
+import org.tobi29.utils.ComponentRegistered
 
 interface EntityModel : ComponentRegistered {
     val entity: EntityClient
@@ -41,7 +41,7 @@ interface EntityModel : ComponentRegistered {
 
     fun setPos(pos: Vector3d)
 
-    fun shapeAABB(aabb: AABB)
+    fun shapeAABB(aabb: AABB3)
 
     fun renderUpdate(delta: Double)
 

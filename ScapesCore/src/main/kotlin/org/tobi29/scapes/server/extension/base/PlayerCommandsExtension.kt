@@ -16,8 +16,8 @@
 
 package org.tobi29.scapes.server.extension.base
 
-import org.tobi29.args.CommandArgument
-import org.tobi29.args.CommandOption
+import org.tobi29.args.commandArgument
+import org.tobi29.args.commandOption
 import org.tobi29.args.get
 import org.tobi29.args.requireInt
 import org.tobi29.io.tag.TagMap
@@ -35,27 +35,32 @@ class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         val connection = server.connection
 
         group.register("list", 9) {
-            val matchArgument = CommandArgument(
-                    name = "match",
-                    count = 0..1).also { add(it) }
+            val matchArgument = commandArgument(
+                "match", 0..1
+            )
             ;{ args, executor, commands ->
             val exp = args.arguments[matchArgument]?.firstOrNull() ?: "*"
             val pattern = wildcard(exp)
             commands.add {
-                server.connection.players.asSequence().map { it.name() }.filter { nickname ->
-                    pattern.matches(nickname)
-                }.forEach { message ->
-                    executor.events.fire(MessageEvent(executor,
-                            MessageLevel.FEEDBACK_INFO, message, executor))
-                }
+                server.connection.players.asSequence().map { it.name() }
+                    .filter { nickname ->
+                        pattern.matches(nickname)
+                    }.forEach { message ->
+                        executor.events.fire(
+                            MessageEvent(
+                                executor,
+                                MessageLevel.FEEDBACK_INFO, message, executor
+                            )
+                        )
+                    }
             }
         }
         }
 
         group.register("add", 9) {
-            val playerArgument = CommandArgument(
-                    name = "player-id",
-                    count = 0..Integer.MAX_VALUE).also { add(it) }
+            val playerArgument = commandArgument(
+                "player-id", 0..Integer.MAX_VALUE
+            )
             ;{ args, _, commands ->
             args.arguments[playerArgument]?.forEach {
                 commands.add { server.addPlayer(it) }
@@ -64,9 +69,9 @@ class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         }
 
         group.register("remove", 9) {
-            val playerArgument = CommandArgument(
-                    name = "player-id",
-                    count = 0..Integer.MAX_VALUE).also { add(it) }
+            val playerArgument = commandArgument(
+                "player-id", 0..Integer.MAX_VALUE
+            )
             ;{ args, _, commands ->
             args.arguments[playerArgument]?.forEach {
                 commands.add { server.removePlayer(it) }
@@ -75,19 +80,23 @@ class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         }
 
         group.register("kick", 9) {
-            val messageOption = CommandOption(setOf('m'), setOf("message"),
-                    listOf("message"),
-                    "Message to display when kicked").also { add(it) }
-            val playerArgument = CommandArgument(
-                    name = "player",
-                    count = 0..Integer.MAX_VALUE).also { add(it) }
+            val messageOption = commandOption(
+                setOf('m'), setOf("message"), listOf("message"),
+                "Message to display when kicked"
+            )
+            val playerArgument = commandArgument(
+                "player", 0..Integer.MAX_VALUE
+            )
             ;{ args, _, commands ->
             args.arguments[playerArgument]?.forEach {
                 commands.add {
-                    val player = requireGet({ connection.playerByName(it) },
-                            it)
+                    val player = requireGet(
+                        { connection.playerByName(it) },
+                        it
+                    )
                     val message = args.get(
-                            messageOption) ?: "Kick by an Admin!"
+                        messageOption
+                    ) ?: "Kick by an Admin!"
                     player.disconnect(message)
                 }
             }
@@ -95,17 +104,21 @@ class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
         }
 
         group.register("op", 9) {
-            val levelOption = CommandOption(setOf('l'), setOf("level"),
-                    listOf("value"),
-                    "Permission level (0-10)").also { add(it) }
-            val playerArgument = CommandArgument(
-                    name = "player",
-                    count = 0..Integer.MAX_VALUE).also { add(it) }
+            val levelOption = commandOption(
+                setOf('l'), setOf("level"), listOf("value"),
+                "Permission level (0-10)"
+            )
+            val playerArgument = commandArgument(
+                name = "player",
+                count = 0..Integer.MAX_VALUE
+            )
             ;{ args, _, commands ->
             args.arguments[playerArgument]?.forEach {
                 commands.add {
-                    val player = requireGet({ connection.playerByName(it) },
-                            it)
+                    val player = requireGet(
+                        { connection.playerByName(it) },
+                        it
+                    )
                     val level = args.requireInt(levelOption)
                     player.permissionLevel = level
                 }
@@ -118,8 +131,10 @@ class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
 class PlayerCommandsExtensionProvider : ServerExtensionProvider {
     override val name = "Player Commands"
 
-    override fun create(server: ScapesServer,
-                        configMap: TagMap?): ServerExtension? {
+    override fun create(
+        server: ScapesServer,
+        configMap: TagMap?
+    ): ServerExtension? {
         return PlayerCommandsExtension(server)
     }
 }

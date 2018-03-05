@@ -16,23 +16,24 @@
 
 package org.tobi29.scapes.entity.client
 
-import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.math.AABB
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toMap
+import org.tobi29.math.AABB3
+import org.tobi29.math.add
 import org.tobi29.math.vector.MutableVector3d
 import org.tobi29.math.vector.Vector3d
+import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.entity.EntityPhysics
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.Mob
 import org.tobi29.scapes.entity.MobPositionReceiver
-import org.tobi29.io.tag.TagMap
-import org.tobi29.io.tag.toMap
 import org.tobi29.stdex.math.floorToInt
 
 abstract class MobClient(type: EntityType<*, *>,
                          world: WorldClient,
                          pos: Vector3d,
                          speed: Vector3d,
-                         protected val collision: AABB) : EntityAbstractClient(
+                         protected val collision: AABB3) : EntityAbstractClient(
         type, world, pos),
         Mob,
         MobileEntityClient {
@@ -63,16 +64,15 @@ abstract class MobClient(type: EntityType<*, *>,
                 })
     }
 
-    override fun getAABB(): AABB {
-        val aabb = AABB(collision)
+    override fun currentAABB(): AABB3 {
+        val aabb = AABB3(collision)
         aabb.add(pos.x, pos.y, pos.z)
         return aabb
     }
 
     override fun read(map: TagMap) {
         super.read(map)
-        positionReceiver.receiveMoveAbsolute(pos.x, pos.y,
-                pos.z)
+        positionReceiver.receiveMoveAbsolute(pos.x, pos.y, pos.z)
         map["Speed"]?.toMap()?.let { speed.set(it) }
         map["Rot"]?.toMap()?.let { rot.set(it) }
     }

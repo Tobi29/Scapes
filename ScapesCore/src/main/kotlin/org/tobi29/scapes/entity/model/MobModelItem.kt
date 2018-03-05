@@ -16,22 +16,22 @@
 
 package org.tobi29.scapes.entity.model
 
+import org.tobi29.graphics.Cam
+import org.tobi29.math.AABB3
+import org.tobi29.math.vector.MutableVector3d
+import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.minus
+import org.tobi29.math.vector.times
 import org.tobi29.scapes.block.render
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
 import org.tobi29.scapes.engine.graphics.push
-import org.tobi29.math.AABB
-import org.tobi29.math.vector.MutableVector3d
-import org.tobi29.math.vector.Vector3d
-import org.tobi29.math.vector.minus
-import org.tobi29.math.vector.times
-import org.tobi29.stdex.atomic.AtomicReference
-import org.tobi29.graphics.Cam
-import org.tobi29.stdex.math.floorToInt
-import org.tobi29.stdex.math.remP
 import org.tobi29.scapes.entity.client.MobClient
 import org.tobi29.scapes.inventory.Item
+import org.tobi29.stdex.atomic.AtomicReference
+import org.tobi29.stdex.math.floorToInt
+import org.tobi29.stdex.math.remP
 import kotlin.math.min
 
 class MobModelItem(override val entity: MobClient,
@@ -57,13 +57,13 @@ class MobModelItem(override val entity: MobClient,
         this.pos.set(pos)
     }
 
-    override fun shapeAABB(aabb: AABB) {
-        aabb.minX = pos.x - 0.1
-        aabb.minY = pos.y - 0.1
-        aabb.minZ = pos.z - 0.1
-        aabb.maxX = pos.x + 0.1
-        aabb.maxY = pos.y + 0.1
-        aabb.maxZ = pos.z + 0.1
+    override fun shapeAABB(aabb: AABB3) {
+        aabb.min.x = pos.x - 0.1
+        aabb.min.y = pos.y - 0.1
+        aabb.min.z = pos.z - 0.1
+        aabb.max.x = pos.x + 0.1
+        aabb.max.y = pos.y + 0.1
+        aabb.max.z = pos.z + 0.1
     }
 
     override fun renderUpdate(delta: Double) {

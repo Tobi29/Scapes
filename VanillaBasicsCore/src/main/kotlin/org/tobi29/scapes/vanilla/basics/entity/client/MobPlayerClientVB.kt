@@ -19,7 +19,6 @@ package org.tobi29.scapes.vanilla.basics.entity.client
 import org.tobi29.scapes.block.inventories
 import org.tobi29.scapes.block.read
 import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.math.AABB
 import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.WieldMode
@@ -29,12 +28,13 @@ import org.tobi29.scapes.entity.model.MobLivingModelHuman
 import org.tobi29.scapes.vanilla.basics.entity.server.ComponentMobLivingServerCondition
 import org.tobi29.io.tag.TagMap
 import org.tobi29.io.tag.toMap
+import org.tobi29.math.AABB3
 
 class MobPlayerClientVB(
         type: EntityType<*, *>,
         world: WorldClient
 ) : MobPlayerClient(type, world, Vector3d.ZERO, Vector3d.ZERO,
-        AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0, "") {
+        AABB3(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0, "") {
     init {
         inventories.add("Container", 40)
         inventories.add("Hold", 1)

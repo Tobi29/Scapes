@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.entity.client
 
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
 import org.tobi29.math.Frustum
 import org.tobi29.math.threadLocalRandom
 import org.tobi29.math.vector.Vector2d
@@ -55,7 +55,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
                                    world: WorldClient,
                                    pos: Vector3d,
                                    speed: Vector3d,
-                                   aabb: AABB,
+                                   aabb: AABB3,
                                    lives: Double,
                                    maxLives: Double,
                                    private val viewField: Frustum,
@@ -96,7 +96,7 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
             EntityPhysics.updateVelocity(delta, speed, world.gravity,
                     gravitationMultiplier, airFriction, groundFriction,
                     waterFriction, wallFriction, physicsState)
-            val aabb = getAABB()
+            val aabb = currentAABB()
             val aabbs = AABBS.get()
             EntityPhysics.collisions(delta, speed, world.terrain, aabb,
                     stepHeight, aabbs)

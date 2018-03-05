@@ -16,18 +16,18 @@
 
 package org.tobi29.scapes.entity.client
 
-import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.scapes.chunk.terrain.selectBlock
-import org.tobi29.math.AABB
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.math.AABB3
 import org.tobi29.math.PointerPane
 import org.tobi29.math.threadLocalRandom
 import org.tobi29.math.vector.*
+import org.tobi29.scapes.chunk.WorldClient
+import org.tobi29.scapes.chunk.terrain.selectBlock
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.MobLiving
 import org.tobi29.scapes.packets.PacketMobDamage
-import org.tobi29.io.tag.TagMap
-import org.tobi29.io.tag.toDouble
 import org.tobi29.stdex.ConcurrentHashMap
 import org.tobi29.stdex.ConcurrentMap
 import org.tobi29.stdex.math.clamp
@@ -39,7 +39,7 @@ abstract class MobLivingClient(type: EntityType<*, *>,
                                world: WorldClient,
                                pos: Vector3d,
                                speed: Vector3d,
-                               aabb: AABB,
+                               aabb: AABB3,
                                protected var health: Double,
                                protected var maxHealth: Double) : MobClient(
         type, world, pos, speed, aabb),

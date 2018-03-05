@@ -16,9 +16,9 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.client
 
-import org.tobi29.scapes.chunk.WorldClient
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
 import org.tobi29.math.vector.Vector3d
+import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.entity.CreatureType
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
@@ -29,7 +29,7 @@ import org.tobi29.scapes.entity.model.MobLivingModelHuman
 class MobZombieClient(type: EntityType<*, *>,
                       world: WorldClient) : MobLivingEquippedClient(
         type, world, Vector3d.ZERO, Vector3d.ZERO,
-        AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0) {
+        AABB3(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 20.0, 30.0) {
     init {
         val texture = world.game.engine.graphics.textures["VanillaBasics:image/entity/mob/Zombie"]
         registerComponent(CreatureType.COMPONENT, CreatureType.MONSTER)

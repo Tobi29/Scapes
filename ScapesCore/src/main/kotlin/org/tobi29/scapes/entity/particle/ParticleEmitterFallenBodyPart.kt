@@ -16,16 +16,16 @@
 
 package org.tobi29.scapes.entity.particle
 
+import org.tobi29.graphics.Cam
+import org.tobi29.math.AABB3
+import org.tobi29.math.vector.times
 import org.tobi29.scapes.block.light
 import org.tobi29.scapes.chunk.terrain.block
 import org.tobi29.scapes.client.loadShader
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.push
-import org.tobi29.math.AABB
-import org.tobi29.math.vector.times
-import org.tobi29.graphics.Cam
-import org.tobi29.stdex.math.floorToInt
 import org.tobi29.scapes.engine.shader.IntegerExpression
+import org.tobi29.stdex.math.floorToInt
 import kotlin.math.max
 
 class ParticleEmitterFallenBodyPart(system: ParticleSystem) : ParticleEmitter<ParticleInstanceFallenBodyPart>(
@@ -34,7 +34,7 @@ class ParticleEmitterFallenBodyPart(system: ParticleSystem) : ParticleEmitter<Pa
         if (!hasAlive) {
             return
         }
-        val aabb = AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        val aabb = AABB3()
         val gravitation = system.world.gravity.toFloat()
         val terrain = system.world.terrain
         var hasAlive = false
@@ -48,12 +48,12 @@ class ParticleEmitterFallenBodyPart(system: ParticleSystem) : ParticleEmitter<Pa
                 instance.state = ParticleInstance.State.DEAD
                 continue
             }
-            aabb.minX = instance.pos.x + instance.box.minX
-            aabb.minY = instance.pos.y + instance.box.minY
-            aabb.minZ = instance.pos.z + instance.box.minZ
-            aabb.maxX = instance.pos.x + instance.box.maxX
-            aabb.maxY = instance.pos.y + instance.box.maxY
-            aabb.maxZ = instance.pos.z + instance.box.maxZ
+            aabb.min.x = instance.pos.x - instance.box.minX
+            aabb.min.y = instance.pos.y - instance.box.minY
+            aabb.min.z = instance.pos.z - instance.box.minZ
+            aabb.max.x = instance.pos.x + instance.box.maxX
+            aabb.max.y = instance.pos.y + instance.box.maxY
+            aabb.max.z = instance.pos.z + instance.box.maxZ
             if (ParticlePhysics.update(delta, instance, terrain, aabb,
                     gravitation, 1.0f,
                     0.2f, 0.4f, 8.0f)) {

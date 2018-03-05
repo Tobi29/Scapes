@@ -16,8 +16,9 @@
 
 package org.tobi29.scapes.entity
 
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
 import org.tobi29.math.Frustum
+import org.tobi29.math.overlaps
 import org.tobi29.math.vector.Vector3d
 import org.tobi29.math.vector.distanceSqr
 import org.tobi29.stdex.math.ceilToInt
@@ -63,15 +64,15 @@ fun <E : Entity> EntityContainer<E>.getEntities(pos: Vector3d,
     }
 }
 
-fun <E : Entity> EntityContainer<E>.getEntities(aabb: AABB): Sequence<E> {
-    val minX = aabb.minX.floorToInt() - EntityContainer.MAX_ENTITY_SIZE
-    val minY = aabb.minY.floorToInt() - EntityContainer.MAX_ENTITY_SIZE
-    val minZ = aabb.minZ.floorToInt() - EntityContainer.MAX_ENTITY_SIZE
-    val maxX = aabb.maxX.ceilToInt() + EntityContainer.MAX_ENTITY_SIZE
-    val maxY = aabb.maxY.ceilToInt() + EntityContainer.MAX_ENTITY_SIZE
-    val maxZ = aabb.maxZ.ceilToInt() + EntityContainer.MAX_ENTITY_SIZE
+fun <E : Entity> EntityContainer<E>.getEntities(aabb: AABB3): Sequence<E> {
+    val minX = aabb.min.x.floorToInt() - EntityContainer.MAX_ENTITY_SIZE
+    val minY = aabb.min.y.floorToInt() - EntityContainer.MAX_ENTITY_SIZE
+    val minZ = aabb.min.z.floorToInt() - EntityContainer.MAX_ENTITY_SIZE
+    val maxX = aabb.max.x.ceilToInt() + EntityContainer.MAX_ENTITY_SIZE
+    val maxY = aabb.max.y.ceilToInt() + EntityContainer.MAX_ENTITY_SIZE
+    val maxZ = aabb.max.z.ceilToInt() + EntityContainer.MAX_ENTITY_SIZE
     return getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
-            maxZ).filter { entity -> aabb.overlay(entity.getAABB()) }
+            maxZ).filter { entity -> aabb overlaps entity.currentAABB() }
 }
 
 fun <E : Entity> EntityContainer<E>.getEntities(frustum: Frustum): Sequence<E> {
@@ -86,5 +87,5 @@ fun <E : Entity> EntityContainer<E>.getEntities(frustum: Frustum): Sequence<E> {
     val maxY = (y + range).ceilToInt()
     val maxZ = (z + range).ceilToInt()
     return getEntitiesAtLeast(minX, minY, minZ, maxX, maxY,
-            maxZ).filter { entity -> frustum.inView(entity.getAABB()) > 0 }
+            maxZ).filter { entity -> frustum.inView(entity.currentAABB()) > 0 }
 }

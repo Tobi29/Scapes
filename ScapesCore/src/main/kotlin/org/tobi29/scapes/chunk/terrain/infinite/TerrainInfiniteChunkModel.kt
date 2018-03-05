@@ -15,9 +15,9 @@
  */
 package org.tobi29.scapes.chunk.terrain.infinite
 
+import org.tobi29.math.AABB3
 import org.tobi29.scapes.engine.graphics.Model
-import org.tobi29.math.AABB
 
-class TerrainInfiniteChunkModel(val model: Pair<Model, AABB>?,
-                                val modelAlpha: Pair<Model, AABB>?,
+class TerrainInfiniteChunkModel(val model: Pair<Model, AABB3>?,
+                                val modelAlpha: Pair<Model, AABB3>?,
                                 val lod: Boolean)

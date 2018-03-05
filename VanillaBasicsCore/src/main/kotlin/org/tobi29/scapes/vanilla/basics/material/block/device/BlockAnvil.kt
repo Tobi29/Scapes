@@ -16,6 +16,10 @@
 
 package org.tobi29.scapes.vanilla.basics.material.block.device
 
+import org.tobi29.math.AABB3
+import org.tobi29.math.Face
+import org.tobi29.math.PointerPane
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.block.*
 import org.tobi29.scapes.block.models.BlockModel
 import org.tobi29.scapes.block.models.BlockModelComplex
@@ -26,11 +30,6 @@ import org.tobi29.scapes.chunk.terrain.TerrainRenderInfo
 import org.tobi29.scapes.chunk.terrain.TerrainServer
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.Shader
-import org.tobi29.math.AABB
-import org.tobi29.math.Face
-import org.tobi29.math.PointerPane
-import org.tobi29.math.vector.Vector3d
-import org.tobi29.utils.Pool
 import org.tobi29.scapes.inventory.Item
 import org.tobi29.scapes.inventory.TypedItem
 import org.tobi29.scapes.inventory.kind
@@ -38,6 +37,7 @@ import org.tobi29.scapes.vanilla.basics.entity.client.EntityAnvilClient
 import org.tobi29.scapes.vanilla.basics.entity.server.EntityAnvilServer
 import org.tobi29.scapes.vanilla.basics.material.VanillaMaterialType
 import org.tobi29.scapes.vanilla.basics.material.block.VanillaBlockContainer
+import org.tobi29.utils.Pool
 
 class BlockAnvil(type: VanillaMaterialType) : VanillaBlockContainer<EntityAnvilClient, EntityAnvilServer>(
         type, type.materials.plugin.entityTypes.anvil) {
@@ -72,7 +72,7 @@ class BlockAnvil(type: VanillaMaterialType) : VanillaBlockContainer<EntityAnvilC
                            z: Int): List<AABBElement> {
         val aabbs = ArrayList<AABBElement>()
         aabbs.add(AABBElement(
-                AABB(x + 0.125, y.toDouble(), z.toDouble(), x + 0.875,
+                AABB3(x + 0.125, y.toDouble(), z.toDouble(), x + 0.875,
                         y + 1.0, z + 1.0)))
         return aabbs
     }
@@ -186,6 +186,6 @@ class BlockAnvil(type: VanillaMaterialType) : VanillaBlockContainer<EntityAnvilC
     }
 
     companion object {
-        private val SELECTION = AABB(0.125, 0.0, 0.0, 0.875, 1.0, 1.0)
+        private val SELECTION = AABB3(0.125, 0.0, 0.0, 0.875, 1.0, 1.0)
     }
 }

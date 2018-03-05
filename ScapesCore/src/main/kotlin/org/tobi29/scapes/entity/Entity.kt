@@ -15,17 +15,18 @@
  */
 package org.tobi29.scapes.entity
 
+import org.tobi29.io.tag.*
+import org.tobi29.math.AABB3
+import org.tobi29.math.add
+import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.World
-import org.tobi29.math.AABB
-import org.tobi29.math.vector.Vector3d
+import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.ConcurrentMap
 import org.tobi29.utils.ComponentHolder
 import org.tobi29.utils.ComponentStorage
 import org.tobi29.utils.ComponentType
 import org.tobi29.utils.ComponentTypeRegistered
-import org.tobi29.io.tag.*
-import org.tobi29.stdex.ConcurrentHashMap
-import org.tobi29.stdex.ConcurrentMap
 import org.tobi29.uuid.Uuid
 
 interface Entity : ComponentHolder<Any> {
@@ -39,8 +40,8 @@ interface Entity : ComponentHolder<Any> {
 
     fun getCurrentPos(): Vector3d
 
-    fun getAABB(): AABB {
-        val aabb = AABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)
+    fun currentAABB(): AABB3 {
+        val aabb = AABB3(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)
         val pos = getCurrentPos()
         aabb.add(pos.x, pos.y, pos.z)
         return aabb
@@ -55,13 +56,17 @@ interface Entity : ComponentHolder<Any> {
     }
 
     companion object {
-        fun of(registry: Registries,
-               id: Int) =
-                registry.get<EntityType<*, *>>("Core", "Entity")[id]
+        fun of(
+            registry: Registries,
+            id: Int
+        ) =
+            registry.get<EntityType<*, *>>("Core", "Entity")[id]
 
-        fun of(registry: Registries,
-               id: String) =
-                registry.get<EntityType<*, *>>("Core", "Entity")[id]
+        fun of(
+            registry: Registries,
+            id: String
+        ) =
+            registry.get<EntityType<*, *>>("Core", "Entity")[id]
     }
 }
 
@@ -74,7 +79,7 @@ interface ComponentSerializable : TagWrite {
 }
 
 interface ComponentMapSerializable : ComponentSerializable,
-        TagMapWrite {
+    TagMapWrite {
     override fun read(tag: Tag) {
         if (tag is TagMap) read(tag)
     }
@@ -83,7 +88,7 @@ interface ComponentMapSerializable : ComponentSerializable,
 }
 
 interface ComponentListSerializable : ComponentSerializable,
-        TagListWrite {
+    TagListWrite {
     override fun read(tag: Tag) {
         if (tag is TagList) read(tag)
     }
@@ -98,7 +103,7 @@ class ListenerToken(val id: String) {
 typealias ComponentEventListeners<E> = ConcurrentHashMap<ListenerToken, (E) -> Unit>
 
 fun <H : Entity, E> ComponentEventListenersType(): ComponentType<H, ComponentEventListeners<E>, Any> =
-        ComponentType.of { ComponentEventListeners() }
+    ComponentType.of { ComponentEventListeners() }
 
 fun <E> ComponentEventListeners<E>.fireEvent(event: E) {
     values.forEach { it(event) }

@@ -15,14 +15,18 @@
  */
 package org.tobi29.scapes.entity.server
 
-import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.scapes.chunk.terrain.TerrainServer
-import org.tobi29.scapes.chunk.terrain.selectBlock
+import org.tobi29.io.tag.ReadWriteTagMap
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toTag
 import org.tobi29.math.*
 import org.tobi29.math.vector.Vector2d
 import org.tobi29.math.vector.Vector3d
 import org.tobi29.math.vector.plus
 import org.tobi29.math.vector.xz
+import org.tobi29.scapes.chunk.WorldServer
+import org.tobi29.scapes.chunk.terrain.TerrainServer
+import org.tobi29.scapes.chunk.terrain.selectBlock
 import org.tobi29.scapes.entity.EntityType
 import org.tobi29.scapes.entity.ListenerToken
 import org.tobi29.scapes.entity.MobLiving
@@ -30,10 +34,6 @@ import org.tobi29.scapes.entity.ai.AI
 import org.tobi29.scapes.entity.ai.SimpleAI
 import org.tobi29.scapes.entity.getEntities
 import org.tobi29.scapes.packets.PacketMobDamage
-import org.tobi29.io.tag.ReadWriteTagMap
-import org.tobi29.io.tag.TagMap
-import org.tobi29.io.tag.toDouble
-import org.tobi29.io.tag.toTag
 import org.tobi29.stdex.ConcurrentHashMap
 import org.tobi29.stdex.ConcurrentMap
 import org.tobi29.stdex.math.floorToInt
@@ -47,7 +47,7 @@ abstract class MobLivingServer(type: EntityType<*, *>,
                                world: WorldServer,
                                pos: Vector3d,
                                speed: Vector3d,
-                               aabb: AABB,
+                               aabb: AABB3,
                                protected var health: Double,
                                protected var maxHealth: Double,
                                protected val viewField: Frustum,

@@ -29,22 +29,31 @@ import org.tobi29.scapes.vanilla.basics.util.toIngot
 import org.tobi29.scapes.vanilla.basics.world.EnvironmentOverworldServer
 import org.tobi29.stdex.longHashCode
 
-internal fun registerCommands(server: ScapesServer,
-                              plugin: VanillaBasics) {
+internal fun registerCommands(
+    server: ScapesServer,
+    plugin: VanillaBasics
+) {
     val materials = plugin.materials
     val registry = server.commandRegistry()
     val connection = server.connection
 
     registry.register("time", 8) {
-        val worldOption = CommandOption(setOf('w'), setOf("world"),
-                listOf("value"), "World that is targeted").also { add(it) }
-        val dayOption = CommandOption(setOf('d'), setOf("day"), listOf("value"),
-                "Day that time will be set to").also { add(it) }
-        val timeOption = CommandOption(setOf('t'), setOf("time"),
-                listOf("value"),
-                "Time of day that time will be set to").also { add(it) }
-        val relativeOption = CommandOption(setOf('r'), setOf("relative"),
-                "Add time instead of setting it").also { add(it) }
+        val worldOption = commandOption(
+            setOf('w'), setOf("world"), listOf("value"),
+            "World that is targeted"
+        )
+        val dayOption = commandOption(
+            setOf('d'), setOf("day"), listOf("value"),
+            "Day that time will be set to"
+        )
+        val timeOption = commandOption(
+            setOf('t'), setOf("time"), listOf("value"),
+            "Time of day that time will be set to"
+        )
+        val relativeOption = commandFlag(
+            setOf('r'), setOf("relative"),
+            "Add time instead of setting it"
+        )
         return@register { args, executor, commands ->
             val worldName = args.require(worldOption)
             val relative = args.getBoolean(relativeOption)
@@ -56,7 +65,8 @@ internal fun registerCommands(server: ScapesServer,
                     if (environment is EnvironmentOverworldServer) {
                         val climateGenerator = environment.climate()
                         climateGenerator.setDay(
-                                day + if (relative) climateGenerator.day() else 0)
+                            day + if (relative) climateGenerator.day() else 0
+                        )
                     } else {
                         error("Unsupported environment")
                     }
@@ -85,25 +95,36 @@ internal fun registerCommands(server: ScapesServer,
     }
 
     registry.register("hunger", 8) {
-        val playerOption = CommandOption(setOf('p'), setOf("player"),
-                listOf("name"),
-                "Player whose hunger values will be changed").also { add(it) }
-        val wakeOption = CommandOption(setOf('w'), setOf("wake"),
-                listOf("value"), "Wake value (0.0-1.0)").also { add(it) }
-        val saturationOption = CommandOption(setOf('s'), setOf("saturation"),
-                listOf("value"), "Saturation value (0.0-1.0)").also { add(it) }
-        val thirstOption = CommandOption(setOf('t'), setOf("thirst"),
-                listOf("value"), "Thirst value (0.0-1.0)").also { add(it) }
+        val playerOption = commandOption(
+            setOf('p'), setOf("player"), listOf("name"),
+            "Player whose hunger values will be changed"
+        )
+        val wakeOption = commandOption(
+            setOf('w'), setOf("wake"), listOf("value"),
+            "Wake value (0.0-1.0)"
+        )
+        val saturationOption = commandOption(
+            setOf('s'), setOf("saturation"), listOf("value"),
+            "Saturation value (0.0-1.0)"
+        )
+        val thirstOption = commandOption(
+            setOf('t'), setOf("thirst"), listOf("value"),
+            "Thirst value (0.0-1.0)"
+        )
         return@register { args, executor, commands ->
             val playerName = args.require(
-                    playerOption) { it ?: executor.playerName() }
+                playerOption
+            ) { it ?: executor.playerName() }
             args.getDouble(wakeOption)?.let { wake ->
                 commands.add {
-                    val player = requireGet({ connection.playerByName(it) },
-                            playerName)
+                    val player = requireGet(
+                        { connection.playerByName(it) },
+                        playerName
+                    )
                     player.mob { mob ->
                         mob.getOrNull(
-                                ComponentMobLivingServerCondition.COMPONENT)?.let {
+                            ComponentMobLivingServerCondition.COMPONENT
+                        )?.let {
                             it.wake = wake
                         }
                     }
@@ -111,11 +132,14 @@ internal fun registerCommands(server: ScapesServer,
             }
             args.getDouble(saturationOption)?.let { saturation ->
                 commands.add {
-                    val player = requireGet({ connection.playerByName(it) },
-                            playerName)
+                    val player = requireGet(
+                        { connection.playerByName(it) },
+                        playerName
+                    )
                     player.mob { mob ->
                         mob.getOrNull(
-                                ComponentMobLivingServerCondition.COMPONENT)?.let {
+                            ComponentMobLivingServerCondition.COMPONENT
+                        )?.let {
                             it.hunger = saturation
                         }
                     }
@@ -123,11 +147,14 @@ internal fun registerCommands(server: ScapesServer,
             }
             args.getDouble(thirstOption)?.let { thirst ->
                 commands.add {
-                    val player = requireGet({ connection.playerByName(it) },
-                            playerName)
+                    val player = requireGet(
+                        { connection.playerByName(it) },
+                        playerName
+                    )
                     player.mob { mob ->
                         mob.getOrNull(
-                                ComponentMobLivingServerCondition.COMPONENT)?.let {
+                            ComponentMobLivingServerCondition.COMPONENT
+                        )?.let {
                             it.thirst = thirst
                         }
                     }
@@ -137,30 +164,40 @@ internal fun registerCommands(server: ScapesServer,
     }
 
     registry.register("giveingot", 8) {
-        val playerOption = CommandOption(setOf('p'), setOf("player"),
-                listOf("name"),
-                "Player that the item will be given to").also { add(it) }
-        val metalOption = CommandOption(setOf('m'), setOf("metal"),
-                listOf("name"), "Metal type").also { add(it) }
-        val dataOption = CommandOption(setOf('d'), setOf("data"),
-                listOf("value"), "Data value of item").also { add(it) }
-        val temperatureOption = CommandOption(setOf('t'), setOf("temperature"),
-                listOf("value"), "Temperature of metal").also { add(it) }
+        val playerOption = commandOption(
+            setOf('p'), setOf("player"), listOf("name"),
+            "Player that the item will be given to"
+        )
+        val metalOption = commandOption(
+            setOf('m'), setOf("metal"), listOf("name"),
+            "Metal type"
+        )
+        val dataOption = commandOption(
+            setOf('d'), setOf("data"), listOf("value"),
+            "Data value of item"
+        )
+        val temperatureOption = commandOption(
+            setOf('t'), setOf("temperature"), listOf("value"),
+            "Temperature of metal"
+        )
         return@register { args, executor, commands ->
             val playerName = args.require(
-                    playerOption) { it ?: executor.playerName() }
+                playerOption
+            ) { it ?: executor.playerName() }
             val metal = args.require(metalOption)
             val data = args.getInt(dataOption) ?: 0
             val temperature = args.getDouble(temperatureOption) ?: 0.0
             commands.add {
-                val player = requireGet({ connection.playerByName(it) },
-                        playerName)
+                val player = requireGet(
+                    { connection.playerByName(it) },
+                    playerName
+                )
                 val alloyType = requireGet({ plugin.alloyType(metal) }, metal)
                 val ingot = alloyType.ingredients.toIngot(plugin)
                 val item = ingot.copy(
-                        temperature = temperature,
-                        metaData = (ingot.metaData +
-                                ("Data" to data.toTag())).toTag()
+                    temperature = temperature,
+                    metaData = (ingot.metaData +
+                            ("Data" to data.toTag())).toTag()
                 )
                 player.mob { mob ->
                     mob.inventories.modify("Container") { it.add(item) }
@@ -170,35 +207,49 @@ internal fun registerCommands(server: ScapesServer,
     }
 
     registry.register("givetool", 8) {
-        val playerOption = CommandOption(setOf('p'), setOf("player"),
-                listOf("name"),
-                "Player that the item will be given to").also { add(it) }
-        val metalOption = CommandOption(setOf('m'), setOf("metal"),
-                listOf("name"), "Metal type").also { add(it) }
-        val dataOption = CommandOption(setOf('d'), setOf("data"),
-                listOf("value"), "Data value of item").also { add(it) }
-        val temperatureOption = CommandOption(setOf('t'), setOf("temperature"),
-                listOf("value"), "Temperature of metal").also { add(it) }
-        val kindOption = CommandOption(setOf('k'), setOf("kind"),
-                listOf("value"), "Kind of tool").also { add(it) }
+        val playerOption = commandOption(
+            setOf('p'), setOf("player"), listOf("name"),
+            "Player that the item will be given to"
+        )
+        val metalOption = commandOption(
+            setOf('m'), setOf("metal"), listOf("name"),
+            "Metal type"
+        )
+        val dataOption = commandOption(
+            setOf('d'), setOf("data"), listOf("value"),
+            "Data value of item"
+        )
+        val temperatureOption = commandOption(
+            setOf('t'), setOf("temperature"), listOf("value"),
+            "Temperature of metal"
+        )
+        val kindOption = commandOption(
+            setOf('k'), setOf("kind"), listOf("value"),
+            "Kind of tool"
+        )
         return@register { args, executor, commands ->
             val playerName = args.require(
-                    playerOption) { it ?: executor.playerName() }
+                playerOption
+            ) { it ?: executor.playerName() }
             val metal = args.require(metalOption)
             val kind = args.require(kindOption)
             val data = args.getInt(dataOption) ?: 0
             val temperature = args.getDouble(temperatureOption) ?: 0.0
             commands.add {
-                val player = requireGet({ connection.playerByName(it) },
-                        playerName)
+                val player = requireGet(
+                    { connection.playerByName(it) },
+                    playerName
+                )
                 val alloyType = requireGet({ plugin.alloyType(metal) }, metal)
                 val kindId = id(kind)
                 if (kindId < 0) error("Unknown tool kind: " + kind)
-                val tool = createTool(plugin, kindId,
-                        Alloy(alloyType.ingredients), temperature)
+                val tool = createTool(
+                    plugin, kindId,
+                    Alloy(alloyType.ingredients), temperature
+                )
                 val item = tool.copy(
-                        metaData = (tool.metaData +
-                                ("Data" to data.toTag())).toTag()
+                    metaData = (tool.metaData +
+                            ("Data" to data.toTag())).toTag()
                 )
                 player.mob { mob ->
                     mob.inventories.modify("Container") {
@@ -212,23 +263,25 @@ internal fun registerCommands(server: ScapesServer,
     val worldGroup = registry.group("world")
 
     worldGroup.register("new", 9) {
-        val worldArgument = CommandArgument(
-                name = "world",
-                count = 0..Integer.MAX_VALUE).also { add(it) }
+        val worldArgument = commandArgument(
+            "world", 0..Integer.MAX_VALUE
+        )
         return@register { args, _, commands ->
             args.arguments[worldArgument]?.forEach {
                 commands.add {
-                    server.registerWorld({ plugin.createEnvironment(it) }, it,
-                            it.longHashCode(server.seed))
+                    server.registerWorld(
+                        { plugin.createEnvironment(it) }, it,
+                        it.longHashCode(server.seed)
+                    )
                 }
             }
         }
     }
 
     worldGroup.register("remove", 9) {
-        val worldArgument = CommandArgument(
-                name = "world",
-                count = 0..Integer.MAX_VALUE).also { add(it) }
+        val worldArgument = commandArgument(
+            "world", 0..Integer.MAX_VALUE
+        )
         return@register { args, _, commands ->
             args.arguments[worldArgument]?.forEach {
                 commands.add {
@@ -241,9 +294,9 @@ internal fun registerCommands(server: ScapesServer,
     }
 
     worldGroup.register("delete", 9) {
-        val worldArgument = CommandArgument(
-                name = "world",
-                count = 0..Integer.MAX_VALUE).also { add(it) }
+        val worldArgument = commandArgument(
+            "world", 0..Integer.MAX_VALUE
+        )
         return@register { args, _, commands ->
             args.arguments[worldArgument]?.forEach {
                 commands.add { server.deleteWorld(it) }

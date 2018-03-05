@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.chunk
 
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
 import org.tobi29.math.Face
 import org.tobi29.scapes.block.models.SmoothLight
 import org.tobi29.scapes.chunk.terrain.TerrainClient
@@ -33,7 +33,7 @@ import kotlin.math.sqrt
 
 class ChunkMesh(private val arrays: VertexArrays) {
     private val triple = SmoothLight.FloatTriple()
-    private val aabb = AABB(Double.NaN, Double.NaN, Double.NaN, Double.NaN,
+    val aabb = AABB3(Double.NaN, Double.NaN, Double.NaN, Double.NaN,
             Double.NaN, Double.NaN)
     private var pos = 0
     private var remaining = 0
@@ -300,12 +300,12 @@ class ChunkMesh(private val arrays: VertexArrays) {
         arrays.lightArray[i++] = light.toFloat()
         arrays.lightArray[i] = sunLight.toFloat()
         arrays.animationArray[pos++] = anim.toInt()
-        aabb.minX = if (aabb.minX.isNaN()) x else min(aabb.minX, x)
-        aabb.minY = if (aabb.minY.isNaN()) y else min(aabb.minY, y)
-        aabb.minZ = if (aabb.minZ.isNaN()) z else min(aabb.minZ, z)
-        aabb.maxX = if (aabb.maxX.isNaN()) x else max(aabb.maxX, x)
-        aabb.maxY = if (aabb.maxY.isNaN()) y else max(aabb.maxY, y)
-        aabb.maxZ = if (aabb.maxZ.isNaN()) z else max(aabb.maxZ, z)
+        aabb.min.x = if (aabb.min.x.isNaN()) x else min(aabb.min.x, x)
+        aabb.min.y = if (aabb.min.y.isNaN()) y else min(aabb.min.y, y)
+        aabb.min.z = if (aabb.min.z.isNaN()) z else min(aabb.min.z, z)
+        aabb.max.x = if (aabb.max.x.isNaN()) x else max(aabb.max.x, x)
+        aabb.max.y = if (aabb.max.y.isNaN()) y else max(aabb.max.y, y)
+        aabb.max.z = if (aabb.max.z.isNaN()) z else max(aabb.max.z, z)
         remaining--
     }
 
@@ -425,7 +425,7 @@ class ChunkMesh(private val arrays: VertexArrays) {
         return (pos * 1.5).toInt()
     }
 
-    fun aabb(): AABB {
+    fun aabb(): AABB3 {
         return aabb
     }
 

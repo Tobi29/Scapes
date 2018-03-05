@@ -41,7 +41,7 @@ class MobPlayerServerVB(
         skin: Checksum,
         connection: PlayerConnection
 ) : MobPlayerServer(type, world, Vector3d.ZERO, Vector3d.ZERO,
-        AABB(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
+        AABB3(-0.4, -0.4, -1.0, 0.4, 0.4, 0.9), 100.0, 100.0,
         Frustum(90.0, 1.0, 0.1, 24.0), Frustum(50.0, 1.0, 0.1, 2.0), nickname,
         skin, connection) {
     init {

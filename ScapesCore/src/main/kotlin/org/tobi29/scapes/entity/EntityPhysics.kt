@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.entity
 
-import org.tobi29.math.AABB
+import org.tobi29.math.*
 import org.tobi29.math.vector.MutableVector3d
 import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.block.AABBElement
@@ -30,42 +30,48 @@ import kotlin.math.max
 import kotlin.math.min
 
 object EntityPhysics {
-    fun collisions(aabbs: Pool<AABBElement>): Sequence<AABB> {
-        return aabbs.asSequence().filter { it.isSolid }.map { it.aabb() }
+    fun collisions(aabbs: Pool<AABBElement>): Iterable<AABB3> {
+        return aabbs.asSequence().filter { it.isSolid }.map { it.aabb }
+            .asIterable()
     }
 
-    fun collisions(delta: Double,
-                   speed: MutableVector3d,
-                   terrain: Terrain,
-                   aabb: AABB,
-                   stepHeight: Double,
-                   aabbs: Pool<AABBElement>) {
+    fun collisions(
+        delta: Double,
+        speed: MutableVector3d,
+        terrain: Terrain,
+        aabb: AABB3,
+        stepHeight: Double,
+        aabbs: Pool<AABBElement>
+    ) {
         val goX = clamp(speed.x * delta, -10.0, 10.0)
         val goY = clamp(speed.y * delta, -10.0, 10.0)
         val goZ = clamp(speed.z * delta, -10.0, 10.0)
         terrain.collisions(
-                (aabb.minX + min(goX, 0.0)).floorToInt(),
-                (aabb.minY + min(goY, 0.0)).floorToInt(),
-                (aabb.minZ + min(goZ, 0.0)).floorToInt(),
-                (aabb.maxX + max(goX, 0.0)).floorToInt(),
-                (aabb.maxY + max(goY, 0.0)).floorToInt(),
-                (aabb.maxZ + max(goZ, stepHeight)).floorToInt(), aabbs)
+            (aabb.min.x + min(goX, 0.0)).floorToInt(),
+            (aabb.min.y + min(goY, 0.0)).floorToInt(),
+            (aabb.min.z + min(goZ, 0.0)).floorToInt(),
+            (aabb.max.x + max(goX, 0.0)).floorToInt(),
+            (aabb.max.y + max(goY, 0.0)).floorToInt(),
+            (aabb.max.z + max(goZ, stepHeight)).floorToInt(), aabbs
+        )
     }
 
-    fun move(delta: Double,
-             pos: MutableVector3d,
-             speed: MutableVector3d,
-             aabb: AABB,
-             stepHeight: Double,
-             state: PhysicsState,
-             collisions: Pool<AABBElement>) {
+    fun move(
+        delta: Double,
+        pos: MutableVector3d,
+        speed: MutableVector3d,
+        aabb: AABB3,
+        stepHeight: Double,
+        state: PhysicsState,
+        collisions: Pool<AABBElement>
+    ) {
         val aabbs = collisions(collisions)
         var goX = clamp(speed.x * delta, -10.0, 10.0)
         var goY = clamp(speed.y * delta, -10.0, 10.0)
         val goZ = clamp(speed.z * delta, -10.0, 10.0)
         var ground = false
         var slidingWall = false
-        val lastGoZ = aabb.moveOutZ(aabbs, goZ)
+        val lastGoZ = aabb.moveOutZ(goZ, aabbs)
         pos.addZ(lastGoZ)
         aabb.add(0.0, 0.0, lastGoZ)
         if (lastGoZ - goZ > 0) {
@@ -76,7 +82,7 @@ object EntityPhysics {
         while (walking) {
             walking = false
             if (goX != 0.0) {
-                val lastGoX = aabb.moveOutX(aabbs, goX)
+                val lastGoX = aabb.moveOutX(goX, aabbs)
                 if (lastGoX != 0.0) {
                     pos.addX(lastGoX)
                     aabb.add(lastGoX, 0.0, 0.0)
@@ -85,7 +91,7 @@ object EntityPhysics {
                 }
             }
             if (goY != 0.0) {
-                val lastGoY = aabb.moveOutY(aabbs, goY)
+                val lastGoY = aabb.moveOutY(goY, aabbs)
                 if (lastGoY != 0.0) {
                     pos.addY(lastGoY)
                     aabb.add(0.0, lastGoY, 0.0)
@@ -101,25 +107,31 @@ object EntityPhysics {
             if (stepHeight > 0.0 && (state.isOnGround || state.isInWater)) {
                 // Step
                 // Calculate step height
-                var aabbStep = AABB(aabb).add(goX, 0.0, 0.0)
-                val stepX = aabbStep.moveOutZ(aabbs, stepHeight)
-                aabbStep = AABB(aabb).add(0.0, goY, 0.0)
-                val stepY = aabbStep.moveOutZ(aabbs, stepHeight)
+                var aabbStep = AABB3(aabb).apply { add(goX, 0.0, 0.0) }
+                val stepX = aabbStep.moveOutZ(stepHeight, aabbs)
+                aabbStep = AABB3(aabb).apply { add(0.0, goY, 0.0) }
+                val stepY = aabbStep.moveOutZ(stepHeight, aabbs)
                 var step = max(stepX, stepY)
-                aabbStep = AABB(aabb).add(goX, goY, step)
-                step += aabbStep.moveOutZ(aabbs, -step)
+                aabbStep = AABB3(aabb).apply { add(goX, goY, step) }
+                step += aabbStep.moveOutZ(-step, aabbs)
                 // Check step height
-                aabbStep.copy(aabb).add(0.0, 0.0, step)
-                step = aabb.moveOutZ(aabbs, step)
+                aabbStep.apply {
+                    set(aabb)
+                    add(0.0, 0.0, step)
+                }
+                step = aabb.moveOutZ(step, aabbs)
                 // Attempt walk at new height
-                val lastGoX = aabbStep.moveOutX(aabbs, goX)
+                val lastGoX = aabbStep.moveOutX(goX, aabbs)
                 aabbStep.add(lastGoX, 0.0, 0.0)
-                val lastGoY = aabbStep.moveOutY(aabbs, goY)
+                val lastGoY = aabbStep.moveOutY(goY, aabbs)
                 // Check if walk was successful
                 if (lastGoX != 0.0 || lastGoY != 0.0) {
                     pos.addX(lastGoX)
                     pos.addY(lastGoY)
-                    aabb.copy(aabbStep).add(0.0, lastGoY, 0.0)
+                    aabb.apply {
+                        set(aabbStep)
+                        add(0.0, lastGoY, 0.0)
+                    }
                     pos.addZ(step)
                 } else {
                     // Collide
@@ -146,15 +158,17 @@ object EntityPhysics {
         state.slidingWall = slidingWall
     }
 
-    fun updateVelocity(delta: Double,
-                       speed: MutableVector3d,
-                       gravitation: Double,
-                       gravitationMultiplier: Double,
-                       airFriction: Double,
-                       groundFriction: Double,
-                       waterFriction: Double,
-                       wallFriction: Double,
-                       state: PhysicsState) {
+    fun updateVelocity(
+        delta: Double,
+        speed: MutableVector3d,
+        gravitation: Double,
+        gravitationMultiplier: Double,
+        airFriction: Double,
+        groundFriction: Double,
+        waterFriction: Double,
+        wallFriction: Double,
+        state: PhysicsState
+    ) {
         speed.divide(1.0 + airFriction * delta)
         if (state.isInWater) {
             speed.divide(1.0 + waterFriction * delta)
@@ -174,24 +188,26 @@ object EntityPhysics {
         speed.addZ(-gravitation * gravitationMultiplier * delta)
     }
 
-    fun collide(delta: Double,
-                aabb: AABB,
-                collisions: Pool<AABBElement>,
-                state: PhysicsState,
-                inside: (AABBElement) -> Unit) {
+    fun collide(
+        delta: Double,
+        aabb: AABB3,
+        collisions: Pool<AABBElement>,
+        state: PhysicsState,
+        inside: (AABBElement) -> Unit
+    ) {
         var inWater = false
         val swimming: Boolean
         for (element in collisions) {
-            if (aabb.overlay(element.aabb)) {
+            if (aabb overlaps element.aabb) {
                 inside(element)
                 if (element.collision.isLiquid) {
                     inWater = true
                 }
             }
         }
-        aabb.minZ = mix(aabb.minZ, aabb.maxZ, 0.6)
+        aabb.min.z = mix(aabb.min.z, aabb.max.z, 0.6)
         val water = collisions.any {
-            aabb.overlay(it.aabb) && it.collision.isLiquid
+            aabb overlaps it.aabb && it.collision.isLiquid
         }
         if (water) {
             state.swim += 20.0 * delta
@@ -204,10 +220,12 @@ object EntityPhysics {
         state.isSwimming = swimming
     }
 
-    class PhysicsState(var isOnGround: Boolean = false,
-                       var isInWater: Boolean = false,
-                       var slidingWall: Boolean = false,
-                       var isSwimming: Boolean = false) {
+    class PhysicsState(
+        var isOnGround: Boolean = false,
+        var isInWater: Boolean = false,
+        var slidingWall: Boolean = false,
+        var isSwimming: Boolean = false
+    ) {
         internal var swim = 0.0
     }
 }

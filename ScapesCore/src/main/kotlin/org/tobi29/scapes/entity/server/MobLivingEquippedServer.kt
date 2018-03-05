@@ -17,7 +17,7 @@
 package org.tobi29.scapes.entity.server
 
 import org.tobi29.scapes.chunk.WorldServer
-import org.tobi29.math.AABB
+import org.tobi29.math.AABB3
 import org.tobi29.math.Frustum
 import org.tobi29.math.vector.Vector3d
 import org.tobi29.scapes.entity.EntityType
@@ -26,7 +26,7 @@ abstract class MobLivingEquippedServer(type: EntityType<*, *>,
                                        world: WorldServer,
                                        pos: Vector3d,
                                        speed: Vector3d,
-                                       aabb: AABB,
+                                       aabb: AABB3,
                                        lives: Double,
                                        maxLives: Double,
                                        viewField: Frustum,
