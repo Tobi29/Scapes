@@ -19,14 +19,15 @@ package org.tobi29.scapes.server
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.cancelAndJoin
 import kotlinx.coroutines.experimental.runBlocking
+import org.tobi29.io.IOException
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toInt
+import org.tobi29.io.tag.toMap
 import org.tobi29.logging.KLogging
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.connection.ServerInfo
-import org.tobi29.server.ConnectionManager
-import org.tobi29.server.SSLHandle
-import org.tobi29.utils.EventDispatcher
-import org.tobi29.io.IOException
+import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.plugins.Dimension
 import org.tobi29.scapes.plugins.Plugins
@@ -36,18 +37,28 @@ import org.tobi29.scapes.server.extension.ServerExtensions
 import org.tobi29.scapes.server.format.PlayerData
 import org.tobi29.scapes.server.format.WorldFormat
 import org.tobi29.scapes.server.format.WorldSource
-import org.tobi29.io.tag.TagMap
-import org.tobi29.io.tag.toInt
-import org.tobi29.io.tag.toMap
+import org.tobi29.server.ConnectionManager
+import org.tobi29.server.SSLHandle
 import org.tobi29.stdex.ConcurrentHashMap
+import org.tobi29.stdex.ConcurrentHashSet
 import org.tobi29.stdex.assert
+import org.tobi29.stdex.atomic.AtomicReference
+import org.tobi29.utils.ComponentRegistered
+import org.tobi29.utils.ComponentTypeRegisteredPermission
+import org.tobi29.utils.EventDispatcher
+import org.tobi29.utils.sleepNanos
+import java.security.AccessController
+import java.security.PrivilegedAction
 import kotlin.coroutines.experimental.CoroutineContext
 
-class ScapesServer(source: WorldSource,
-                   configMap: TagMap,
-                   val serverInfo: ServerInfo,
-                   ssl: SSLHandle,
-                   taskExecutor: CoroutineContext) {
+class ScapesServer(
+    source: WorldSource,
+    configMap: TagMap,
+    val serverInfo: ServerInfo,
+    ssl: SSLHandle,
+    taskExecutor: CoroutineContext,
+    private val serverExecutor: ScapesServerExecutor = DummyScapesServerExecutor()
+) {
     val taskExecutor = taskExecutor + Job(taskExecutor[Job])
     val connections: ConnectionManager
     val connection: ServerConnection
@@ -62,9 +73,10 @@ class ScapesServer(source: WorldSource,
     private val worlds = ConcurrentHashMap<String, WorldServer>()
     var stopped = false
         private set
-    private var shutdownReason = ShutdownReason.RUNNING
+    private val shutdownReason = AtomicReference(ShutdownReason.RUNNING)
 
     init {
+        serverExecutor.onServerStart(this)
         format = source.open(this)
         playerData = format.playerData
         plugins = format.plugins
@@ -85,7 +97,7 @@ class ScapesServer(source: WorldSource,
     }
 
     fun shutdownReason(): ShutdownReason {
-        return shutdownReason
+        return shutdownReason.get()
     }
 
     fun maxLoadingRadius(): Int {
@@ -116,9 +128,10 @@ class ScapesServer(source: WorldSource,
 
     @Synchronized
     fun registerWorld(
-            environmentSupplier: (WorldServer) -> EnvironmentServer,
-            name: String,
-            seed: Long): WorldServer? {
+        environmentSupplier: (WorldServer) -> EnvironmentServer,
+        name: String,
+        seed: Long
+    ): WorldServer? {
         removeWorld(name)
         logger.info { "Adding world: $name" }
         val world: WorldServer
@@ -152,9 +165,11 @@ class ScapesServer(source: WorldSource,
         return playerData.player(id)
     }
 
-    fun savePlayer(id: String,
-                   entity: MobPlayerServer,
-                   permissions: Int) {
+    fun savePlayer(
+        id: String,
+        entity: MobPlayerServer,
+        permissions: Int
+    ) {
         playerData.save(id, entity, permissions)
     }
 
@@ -171,11 +186,14 @@ class ScapesServer(source: WorldSource,
     }
 
     fun scheduleStop(shutdownReason: ShutdownReason) {
-        this.shutdownReason = shutdownReason
+        this.shutdownReason.compareAndSet(
+            ShutdownReason.RUNNING,
+            shutdownReason
+        )
     }
 
     fun stop(shutdownReason: ShutdownReason) {
-        this.shutdownReason = shutdownReason
+        scheduleStop(shutdownReason)
         stop()
     }
 
@@ -192,10 +210,11 @@ class ScapesServer(source: WorldSource,
             taskExecutor[Job]?.cancelAndJoin()
             format.dispose()
         }
+        serverExecutor.onServerStop(this)
     }
 
     fun shouldStop(): Boolean {
-        return shutdownReason != ShutdownReason.RUNNING
+        return shutdownReason.get() != ShutdownReason.RUNNING
     }
 
     private suspend fun stopWorld(world: WorldServer) {
@@ -213,3 +232,65 @@ class ScapesServer(source: WorldSource,
 
     companion object : KLogging()
 }
+
+interface ScapesServerExecutor {
+    fun onServerStart(server: ScapesServer)
+
+    fun onServerStop(server: ScapesServer)
+
+    companion object {
+        val COMPONENT =
+            ComponentTypeRegisteredPermission<ScapesEngine, ScapesServerExecutor, Any>(
+                "scapes.server"
+            )
+    }
+}
+
+private class DummyScapesServerExecutor : ScapesServerExecutor {
+    override fun onServerStart(server: ScapesServer) {}
+
+    override fun onServerStop(server: ScapesServer) {}
+}
+
+object ShutdownSafeScapesServerExecutor : ScapesServerExecutor,
+    ComponentRegistered {
+    private val servers = ConcurrentHashSet<ScapesServer>()
+    private var refCount = 0
+    private var shutdownHook: Thread? = null
+
+    @Synchronized
+    override fun init() {
+        if (refCount++ == 0) {
+            shutdownHook = Thread {
+                while (servers.isNotEmpty()) {
+                    servers.forEach { it.scheduleStop(ScapesServer.ShutdownReason.STOP) }
+                    sleepNanos(1000L)
+                }
+            }
+            AccessController.doPrivileged(PrivilegedAction {
+                Runtime.getRuntime().addShutdownHook(shutdownHook)
+            })
+        }
+    }
+
+    @Synchronized
+    override fun dispose() {
+        if (--refCount == 0) {
+            shutdownHook?.let {
+                AccessController.doPrivileged(PrivilegedAction {
+                    Runtime.getRuntime().removeShutdownHook(it)
+                })
+                shutdownHook = null
+            }
+        }
+    }
+
+    override fun onServerStart(server: ScapesServer) {
+        servers.add(server)
+    }
+
+    override fun onServerStop(server: ScapesServer) {
+        servers.remove(server)
+    }
+}
+

@@ -16,6 +16,10 @@
 
 package org.tobi29.scapes.client.states
 
+import org.tobi29.io.IOException
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.toMap
+import org.tobi29.io.toChannel
 import org.tobi29.logging.KLogging
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.NewClientConnection
@@ -27,15 +31,12 @@ import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
 import org.tobi29.scapes.engine.graphics.renderScene
-import org.tobi29.server.*
-import org.tobi29.io.IOException
-import org.tobi29.io.toChannel
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.server.ScapesServer
+import org.tobi29.scapes.server.ScapesServerExecutor
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.ssl.dummy.DummyKeyManagerProvider
-import org.tobi29.io.tag.TagMap
-import org.tobi29.io.tag.toMap
+import org.tobi29.server.*
 import java.net.InetSocketAddress
 import java.nio.channels.SelectionKey
 import kotlin.math.roundToInt
@@ -92,7 +93,8 @@ class GameStateLoadSocketSP(private var source: WorldSource?,
                     }
                     val ssl = SSLHandle(DummyKeyManagerProvider.get())
                     this.server = ScapesServer(source, serverConfigMap,
-                            serverInfo, ssl, engine.taskExecutor)
+                            serverInfo, ssl, engine.taskExecutor,
+                            engine[ScapesServerExecutor.COMPONENT])
                     step++
                 }
                 1 -> {

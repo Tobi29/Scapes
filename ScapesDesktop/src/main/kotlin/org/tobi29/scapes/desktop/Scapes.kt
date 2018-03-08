@@ -51,7 +51,11 @@ import org.tobi29.scapes.engine.graphics.FontRenderer
 import org.tobi29.scapes.engine.graphics.GraphicsCheckException
 import org.tobi29.scapes.engine.gui.GuiBasicStyle
 import org.tobi29.scapes.engine.gui.GuiStyle
+import org.tobi29.scapes.engine.sound.DefaultSoundManager
+import org.tobi29.scapes.engine.sound.SoundManager
 import org.tobi29.scapes.plugins.Sandbox
+import org.tobi29.scapes.server.ScapesServerExecutor
+import org.tobi29.scapes.server.ShutdownSafeScapesServerExecutor
 import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
 import org.tobi29.scapes.server.shell.ScapesServerHeadless
 import org.tobi29.server.ConnectionManager
@@ -212,6 +216,10 @@ object Scapes : Application() {
                     )
                 )
                 engine.registerComponent(
+                    ScapesServerExecutor.COMPONENT,
+                    ShutdownSafeScapesServerExecutor
+                )
+                engine.registerComponent(
                     DialogProvider.COMPONENT,
                     DialogProviderDesktop(
                         engine.container as? ContainerGLFW
@@ -220,6 +228,10 @@ object Scapes : Application() {
                 engine.registerComponent(
                     InputManagerScapes.COMPONENT,
                     InputManagerScapes(engine, configMap.mapMut("Scapes"))
+                )
+                engine.registerComponent(
+                    SoundManager.COMPONENT,
+                    DefaultSoundManager(engine.sounds)
                 )
                 engine.registerComponent(ConnectionManager.COMPONENT,
                     ConnectionManager(engine.taskExecutor, 10)
