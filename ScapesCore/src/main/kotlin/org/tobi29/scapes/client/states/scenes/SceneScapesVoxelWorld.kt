@@ -30,7 +30,7 @@ import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
 import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.gui.GuiComponentChat
-import org.tobi29.scapes.client.loadShader
+import org.tobi29.scapes.engine.graphics.loadShader
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.client.states.GameStateGameSP
 import org.tobi29.scapes.engine.graphics.*
@@ -116,7 +116,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         val scene = render(gl)
         val render: suspend () -> (Double) -> Unit = if (fxaa) {
             val shaderFXAA = engine.graphics.loadShader(
-                    "Scapes:shader/FXAA", mapOf(
+                    "Scapes:shader/FXAA.stag", mapOf(
                     "SCENE_WIDTH" to IntegerExpression(width),
                     "SCENE_HEIGHT" to IntegerExpression(height)
             ))
@@ -155,7 +155,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         val pp: suspend () -> (Double) -> Unit = if (bloom) {
             val blurSamples = 5
             val shaderComposite1 = engine.graphics.loadShader(
-                    "Scapes:shader/Composite1", mapOf(
+                    "Scapes:shader/Composite1.stag", mapOf(
                     "BLUR_LENGTH" to IntegerExpression(blurSamples),
                     "BLUR_OFFSET" to ArrayExpression(
                             gaussianBlurOffset(blurSamples, 0.01)),
@@ -165,7 +165,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
                             })
             ))
             val shaderComposite2 = engine.graphics.loadShader(
-                    "Scapes:shader/Composite2", mapOf(
+                    "Scapes:shader/Composite2.stag", mapOf(
                     "BLUR_LENGTH" to IntegerExpression(blurSamples),
                     "BLUR_OFFSET" to ArrayExpression(
                             gaussianBlurOffset(blurSamples, 0.01)),
@@ -200,7 +200,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         } else {
             val blurSamples = 5
             val shaderComposite = engine.graphics.loadShader(
-                    "Scapes:shader/Composite2", mapOf(
+                    "Scapes:shader/Composite2.stag", mapOf(
                     "BLUR_LENGTH" to IntegerExpression(blurSamples),
                     "BLUR_OFFSET" to ArrayExpression(
                             gaussianBlurOffset(blurSamples, 0.01)),
@@ -228,7 +228,7 @@ class SceneScapesVoxelWorld(private val world: WorldClient,
         if (exposureFBO != null) {
             val blurSamples = 11
             val shaderExposure = engine.graphics.loadShader(
-                    "Scapes:shader/Exposure", mapOf(
+                    "Scapes:shader/Exposure.stag", mapOf(
                     "BLUR_LENGTH" to IntegerExpression(blurSamples),
                     "BLUR_OFFSET" to ArrayExpression(
                             gaussianBlurOffset(blurSamples, 0.5).also {

@@ -22,3 +22,10 @@ dependencies {
     compile project(":ScapesCore")
     compile project(":VanillaBasicsGenerator")
 }
+
+task compileShaders(type: ShaderCompileTask)
+
+jar {
+    dependsOn tasks.compileShaders
+    from tasks.compileShaders.outputs
+}

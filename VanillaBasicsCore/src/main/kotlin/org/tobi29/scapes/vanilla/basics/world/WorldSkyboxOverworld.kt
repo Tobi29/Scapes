@@ -26,7 +26,7 @@ import org.tobi29.math.threadLocalRandom
 import org.tobi29.math.vector.*
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
-import org.tobi29.scapes.client.loadShader
+import org.tobi29.scapes.engine.graphics.loadShader
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
@@ -393,19 +393,19 @@ class WorldSkyboxOverworld(
     ): suspend () -> (Double) -> Unit {
         val scene = world.scene
         val shaderSkybox = world.game.engine.graphics.loadShader(
-            "VanillaBasics:shader/Skybox"
+            "VanillaBasics:shader/Skybox.stag"
         )
         val shaderGlow = world.game.engine.graphics.loadShader(
-            "VanillaBasics:shader/Glow"
+            "VanillaBasics:shader/Glow.stag"
         )
         val shaderClouds1 = world.game.engine.graphics.loadShader(
-            "VanillaBasics:shader/Clouds", mapOf(
+            "VanillaBasics:shader/Clouds.stag", mapOf(
                 "RESOLUTION" to IntegerExpression(CLOUD_TILE_SIZE),
                 "TEXTURES" to IntegerExpression(1)
             )
         )
         val shaderClouds2 = world.game.engine.graphics.loadShader(
-            "VanillaBasics:shader/Clouds", mapOf(
+            "VanillaBasics:shader/Clouds.stag", mapOf(
                 "RESOLUTION" to IntegerExpression(CLOUD_TILE_SIZE),
                 "TEXTURES" to IntegerExpression(2)
             )

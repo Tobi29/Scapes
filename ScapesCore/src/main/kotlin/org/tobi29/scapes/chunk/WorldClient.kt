@@ -30,7 +30,7 @@ import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.client.input.InputManagerScapes
 import org.tobi29.scapes.client.input.InputModeChangeEvent
-import org.tobi29.scapes.client.loadShader
+import org.tobi29.scapes.engine.graphics.loadShader
 import org.tobi29.scapes.client.states.scenes.SceneScapesVoxelWorld
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.graphics.BlendingMode
@@ -199,7 +199,7 @@ class WorldClient(val connection: ClientConnection,
         val animations = scapes.animations
 
         val shaderTerrain1 = game.engine.graphics.loadShader(
-                "Scapes:shader/Terrain", mapOf(
+                "Scapes:shader/Terrain.stag", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height),
                 "ENABLE_ANIMATIONS" to BooleanExpression(animations),
@@ -207,7 +207,7 @@ class WorldClient(val connection: ClientConnection,
                 "LOD_HIGH" to BooleanExpression(true)
         ))
         val shaderTerrain2 = game.engine.graphics.loadShader(
-                "Scapes:shader/Terrain", mapOf(
+                "Scapes:shader/Terrain.stag", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height),
                 "ENABLE_ANIMATIONS" to BooleanExpression(false),
@@ -215,7 +215,7 @@ class WorldClient(val connection: ClientConnection,
                 "LOD_HIGH" to BooleanExpression(false)
         ))
         val shaderEntity = game.engine.graphics.loadShader(
-                "Scapes:shader/Entity", mapOf(
+                "Scapes:shader/Entity.stag", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
         ))

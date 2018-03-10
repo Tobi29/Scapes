@@ -16,19 +16,19 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.particle
 
-import org.tobi29.scapes.block.light
-import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.client.loadShader
-import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.graphics.Cam
 import org.tobi29.math.matrix.Matrix4f
 import org.tobi29.math.vector.times
-import org.tobi29.stdex.atomic.AtomicInt
-import org.tobi29.graphics.Cam
-import org.tobi29.stdex.math.floorToInt
+import org.tobi29.scapes.block.light
+import org.tobi29.scapes.chunk.terrain.block
+import org.tobi29.scapes.engine.graphics.loadShader
+import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.shader.IntegerExpression
 import org.tobi29.scapes.entity.particle.ParticleEmitterInstanced
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.particle.ParticleSystem
+import org.tobi29.stdex.atomic.AtomicInt
+import org.tobi29.stdex.math.floorToInt
 import kotlin.math.max
 
 class ParticleEmitterRain(system: ParticleSystem,
@@ -78,7 +78,7 @@ class ParticleEmitterRain(system: ParticleSystem,
                                height: Int,
                                cam: Cam): suspend () -> ((Shader) -> Unit) -> Unit {
         val shader = system.world.game.engine.graphics.loadShader(
-                "VanillaBasics:shader/ParticleRain", mapOf(
+                "VanillaBasics:shader/ParticleRain.stag", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
         ))

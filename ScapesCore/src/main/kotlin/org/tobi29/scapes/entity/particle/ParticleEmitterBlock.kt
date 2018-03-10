@@ -22,7 +22,7 @@ import org.tobi29.math.matrix.Matrix4f
 import org.tobi29.math.vector.length
 import org.tobi29.scapes.block.light
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.client.loadShader
+import org.tobi29.scapes.engine.graphics.loadShader
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.shader.IntegerExpression
 import org.tobi29.stdex.math.HALF_PI
@@ -71,7 +71,7 @@ class ParticleEmitterBlock(system: ParticleSystem,
                                height: Int,
                                cam: Cam): suspend () -> ((Shader) -> Unit) -> Unit {
         val shader = system.world.game.engine.graphics.loadShader(
-                "Scapes:shader/ParticleBlock", mapOf(
+                "Scapes:shader/ParticleBlock.stag", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
         ))

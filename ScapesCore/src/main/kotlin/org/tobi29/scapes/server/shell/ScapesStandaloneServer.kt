@@ -16,34 +16,33 @@
 package org.tobi29.scapes.server.shell
 
 import kotlinx.coroutines.experimental.CoroutineDispatcher
-import org.tobi29.logging.KLogging
-import org.tobi29.scapes.connection.ServerInfo
-import org.tobi29.server.SSLHandle
-import org.tobi29.utils.EventDispatcher
-import org.tobi29.utils.ListenerRegistrar
 import org.tobi29.io.IOException
 import org.tobi29.io.filesystem.FilePath
 import org.tobi29.io.filesystem.exists
 import org.tobi29.io.filesystem.read
 import org.tobi29.io.filesystem.write
+import org.tobi29.io.tag.*
 import org.tobi29.io.tag.json.readJSON
 import org.tobi29.io.tag.json.writeJSON
 import org.tobi29.io.use
-import org.tobi29.utils.sleep
-import org.tobi29.utils.sleepNanos
+import org.tobi29.logging.KLogging
+import org.tobi29.scapes.connection.ServerInfo
 import org.tobi29.scapes.server.ScapesServer
+import org.tobi29.scapes.server.ShutdownSafeScapesServerExecutor
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.spi.WorldSourceProvider
 import org.tobi29.scapes.server.ssl.spi.KeyManagerProvider
-import org.tobi29.io.tag.*
-import org.tobi29.stdex.atomic.AtomicBoolean
+import org.tobi29.server.SSLHandle
+import org.tobi29.utils.EventDispatcher
+import org.tobi29.utils.ListenerRegistrar
+import org.tobi29.utils.sleep
 import java.util.*
 import kotlin.collections.set
 
 abstract class ScapesStandaloneServer(
-        protected val taskExecutor: CoroutineDispatcher,
-        protected val config: FilePath
+    protected val taskExecutor: CoroutineDispatcher,
+    protected val config: FilePath
 ) {
     protected lateinit var server: ScapesServer
 
@@ -53,62 +52,55 @@ abstract class ScapesStandaloneServer(
 
     // TODO: @Throws(IOException::class)
     fun run(path: FilePath) {
-        val stopped = AtomicBoolean(false)
-        val running = AtomicBoolean(true)
-        val shutdownHook = Thread {
-            running.set(false)
-            while (!stopped.get()) {
-                sleepNanos(1000L)
-            }
-        }
-        RUNTIME.addShutdownHook(shutdownHook)
-        try {
-            while (running.get()) {
-                val configMap = loadConfig(config.resolve("Server.json"))
-                val keyManagerConfig = configMap["KeyManager"]?.toMap() ?: TagMap()
-                val keyManagerProvider = loadKeyManager(
-                        keyManagerConfig["ID"].toString())
-                val ssl = SSLHandle(
-                        keyManagerProvider[config, keyManagerConfig])
-                val worldSourceConfig = configMap["WorldSource"]?.toMap() ?: TagMap()
-                val worldSourceProvider = loadWorldSource(
-                        worldSourceConfig["ID"].toString())
-                worldSourceProvider[path, worldSourceConfig, taskExecutor].use { source ->
-                    val loop = start(source, configMap, ssl)
-                    while (running.get() && !server.shouldStop()) {
-                        loop()
-                        sleep(100L)
-                    }
-                    if (!running.get()) {
-                        server.scheduleStop(ScapesServer.ShutdownReason.STOP)
-                    }
-                    server.stop()
+        while (true) {
+            val configMap = loadConfig(config.resolve("Server.json"))
+            val keyManagerConfig =
+                configMap["KeyManager"]?.toMap() ?: TagMap()
+            val keyManagerProvider = loadKeyManager(
+                keyManagerConfig["ID"].toString()
+            )
+            val ssl = SSLHandle(
+                keyManagerProvider[config, keyManagerConfig]
+            )
+            val worldSourceConfig =
+                configMap["WorldSource"]?.toMap() ?: TagMap()
+            val worldSourceProvider = loadWorldSource(
+                worldSourceConfig["ID"].toString()
+            )
+            worldSourceProvider[path, worldSourceConfig, taskExecutor].use { source ->
+                val loop = start(source, configMap, ssl)
+                while (!server.shouldStop()) {
+                    loop()
+                    sleep(100L)
                 }
-                if (server.shutdownReason() != ScapesServer.ShutdownReason.RELOAD) {
-                    break
-                }
+                server.stop()
             }
-        } finally {
-            stopped.set(true)
-            try {
-                RUNTIME.removeShutdownHook(shutdownHook)
-            } catch (e: IllegalStateException) {
+            if (server.shutdownReason() != ScapesServer.ShutdownReason.RELOAD) {
+                break
             }
         }
     }
 
     // TODO: @Throws(IOException::class)
-    protected fun start(source: WorldSource,
-                        configMap: TagMap,
-                        ssl: SSLHandle): () -> Unit {
+    protected fun start(
+        source: WorldSource,
+        configMap: TagMap,
+        ssl: SSLHandle
+    ): () -> Unit {
         val serverTag = configMap["Server"]?.toMap()
-        val serverInfo = ServerInfo(serverTag?.get("ServerName").toString(),
-                config.resolve(serverTag?.get("ServerIcon").toString()))
-        server = ScapesServer(source, configMap, serverInfo, ssl, taskExecutor)
+        val serverInfo = ServerInfo(
+            serverTag?.get("ServerName").toString(),
+            config.resolve(serverTag?.get("ServerIcon").toString())
+        )
+        server = ScapesServer(
+            source, configMap, serverInfo, ssl, taskExecutor,
+            ShutdownSafeScapesServerExecutor
+        )
         val connection = server.connection
         val executor = object : Executor {
             override val events = EventDispatcher(
-                    server.events) { listeners() }.apply { enable() }
+                server.events
+            ) { listeners() }.apply { enable() }
 
             override fun playerName(): String? {
                 return null
@@ -124,7 +116,8 @@ abstract class ScapesStandaloneServer(
         }
         connection.addExecutor(executor)
         connection.setAllowsCreation(
-                configMap["AllowAccountCreation"]?.toBoolean() ?: false)
+            configMap["AllowAccountCreation"]?.toBoolean() ?: false
+        )
         server.connection.start(configMap["ServerPort"]?.toInt() ?: -1)
         return init(executor)
     }
@@ -164,7 +157,8 @@ abstract class ScapesStandaloneServer(
         // TODO: @Throws(IOException::class)
         private fun loadWorldSource(id: String): WorldSourceProvider {
             for (provider in ServiceLoader.load(
-                    WorldSourceProvider::class.java)) {
+                WorldSourceProvider::class.java
+            )) {
                 try {
                     if (provider.available() && id == provider.configID()) {
                         logger.debug { "Loaded world source: ${provider::class.java.name}" }
@@ -181,7 +175,8 @@ abstract class ScapesStandaloneServer(
         // TODO: @Throws(IOException::class)
         private fun loadKeyManager(id: String): KeyManagerProvider {
             for (provider in ServiceLoader.load(
-                    KeyManagerProvider::class.java)) {
+                KeyManagerProvider::class.java
+            )) {
                 try {
                     if (provider.available() && id == provider.configID()) {
                         logger.debug { "Loaded key manager: ${provider::class.java.name}" }

@@ -26,7 +26,7 @@ import org.tobi29.io.IOException
 import org.tobi29.io.use
 import org.tobi29.math.threadLocalRandom
 import org.tobi29.scapes.client.ScapesClient
-import org.tobi29.scapes.client.loadShader
+import org.tobi29.scapes.engine.graphics.loadShader
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.resource.Resource
@@ -69,7 +69,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
 
         // Shaders
         val shaderBlur1 = engine.graphics.loadShader(
-                "Scapes:shader/Menu1", mapOf(
+                "Scapes:shader/Menu1.stag", mapOf(
                 "BLUR_LENGTH" to IntegerExpression(blurSamples),
                 "BLUR_OFFSET" to ArrayExpression(
                         gaussianBlurOffset(blurSamples, 0.04)),
@@ -77,7 +77,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                         gaussianBlurWeight(blurSamples) { cos(it * PI) })
         ))
         val shaderBlur2 = engine.graphics.loadShader(
-                "Scapes:shader/Menu2", mapOf(
+                "Scapes:shader/Menu2.stag", mapOf(
                 "BLUR_LENGTH" to IntegerExpression(blurSamples),
                 "BLUR_OFFSET" to ArrayExpression(
                         gaussianBlurOffset(blurSamples, 0.04)),

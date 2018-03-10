@@ -23,7 +23,7 @@ import org.tobi29.math.matrix.Matrix4f
 import org.tobi29.math.vector.length
 import org.tobi29.scapes.block.light
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.client.loadShader
+import org.tobi29.scapes.engine.graphics.loadShader
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.shader.IntegerExpression
 import org.tobi29.scapes.entity.particle.ParticleEmitterInstanced
@@ -77,7 +77,7 @@ class ParticleEmitterSnow(system: ParticleSystem,
                                height: Int,
                                cam: Cam): suspend () -> ((Shader) -> Unit) -> Unit {
         val shader = system.world.game.engine.graphics.loadShader(
-                "VanillaBasics:shader/ParticleSnow", mapOf(
+                "VanillaBasics:shader/ParticleSnow.stag", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
         ))

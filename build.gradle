@@ -127,7 +127,6 @@ ext {
     scapesEnginePlatformIntegration = scapesEngineJVM("PlatformIntegration")
     scapesEngineProfiler = scapesEngineJVM("Profiler")
     scapesEngineServerFramework = scapesEngineJVM("ServerFramework")
-    scapesEngineShaderCLike = scapesEngineJVM("ShaderCLike")
     scapesEngineSQLFramework = scapesEngineJVM("SQLFramework")
     scapesEngineSQLite = scapesEngineJVM("SQLite")
     scapesEngineSQLJet = scapesEngineJVM("SQLJet")

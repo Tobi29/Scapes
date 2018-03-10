@@ -26,8 +26,14 @@ dependencies {
     compile rootProject.ext.scapesEngineArgumentParser
     compile rootProject.ext.scapesEngineServerFramework
     compile rootProject.ext.scapesEngineUuid
-    compile rootProject.ext.scapesEngineShaderCLike
     compile rootProject.ext.scapesEngineSQLFramework
     compile rootProject.ext.scapesEngineGenerationUtils
     compile rootProject.ext.scapesEngineChronoUtils
+}
+
+task compileShaders(type: ShaderCompileTask)
+
+jar {
+    dependsOn tasks.compileShaders
+    from tasks.compileShaders.outputs
 }

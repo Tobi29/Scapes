@@ -16,18 +16,18 @@
 
 package org.tobi29.scapes.vanilla.basics.entity.particle
 
-import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.client.loadShader
-import org.tobi29.scapes.engine.graphics.*
+import org.tobi29.graphics.Cam
 import org.tobi29.math.threadLocalRandom
 import org.tobi29.math.vector.Vector3d
-import org.tobi29.graphics.Cam
-import org.tobi29.stdex.math.TWO_PI
-import org.tobi29.stdex.math.floorToInt
+import org.tobi29.scapes.chunk.terrain.block
+import org.tobi29.scapes.engine.graphics.loadShader
+import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.shader.IntegerExpression
 import org.tobi29.scapes.entity.particle.ParticleEmitter
 import org.tobi29.scapes.entity.particle.ParticleInstance
 import org.tobi29.scapes.entity.particle.ParticleSystem
+import org.tobi29.stdex.math.TWO_PI
+import org.tobi29.stdex.math.floorToInt
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
@@ -169,7 +169,7 @@ class ParticleEmitterLightning(system: ParticleSystem) : ParticleEmitter<Particl
                                height: Int,
                                cam: Cam): suspend () -> (Double) -> Unit {
         val shader = system.world.game.engine.graphics.loadShader(
-                "VanillaBasics:shader/ParticleLightning", mapOf(
+                "VanillaBasics:shader/ParticleLightning.stag", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
         ))

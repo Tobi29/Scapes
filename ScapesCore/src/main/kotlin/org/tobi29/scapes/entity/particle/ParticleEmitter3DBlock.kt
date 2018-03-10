@@ -22,7 +22,7 @@ import org.tobi29.math.vector.times
 import org.tobi29.scapes.block.light
 import org.tobi29.scapes.block.render
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.client.loadShader
+import org.tobi29.scapes.engine.graphics.loadShader
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.shader.IntegerExpression
@@ -71,7 +71,7 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
                                height: Int,
                                cam: Cam): suspend () -> (Double) -> Unit {
         val shader = system.world.game.engine.graphics.loadShader(
-                "Scapes:shader/Entity", mapOf(
+                "Scapes:shader/Entity.stag", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
         ))
