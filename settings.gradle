@@ -16,17 +16,20 @@
 
 // Scapes core
 include "ScapesCore"
+include "ScapesStandaloneServer"
+include "ScapesFrontend"
 include "ScapesInventory"
 include "ScapesTerrain"
 include "MariaDBStorage"
 include "SQLiteStorage"
 include "SQLJetStorage"
-include "ScapesDesktop"
+
+include "ScapesDesktop" // WTF
 
 // Vanilla basics
 include "VanillaBasics"
-include "VanillaBasicsCore"
 include "VanillaBasicsGenerator"
+include "VanillaBasicsDesktop"
 
 // Tools
 include "ControlPanel"

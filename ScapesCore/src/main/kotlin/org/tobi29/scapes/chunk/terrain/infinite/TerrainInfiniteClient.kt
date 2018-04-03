@@ -20,6 +20,7 @@ import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.SendChannel
 import kotlinx.coroutines.experimental.channels.actor
 import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.delayNanos
 import org.tobi29.coroutines.loop
 import org.tobi29.io.tag.TagMap
 import org.tobi29.logging.KLogging
@@ -39,32 +40,40 @@ import org.tobi29.stdex.ConcurrentHashSet
 import org.tobi29.stdex.ThreadLocal
 import org.tobi29.stdex.math.floorToInt
 import org.tobi29.stdex.math.sqr
-import java.util.concurrent.TimeUnit
 import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.coroutines.experimental.buildSequence
 
-class TerrainInfiniteClient private constructor(override val world: WorldClient,
-                                                private val loadingRadius: Int,
-                                                zSize: Int,
-                                                private val taskExecutor: CoroutineContext,
-                                                air: BlockType,
-                                                private val center: MutableVector2i) : TerrainInfinite<EntityClient, TerrainInfiniteChunkClient>(
-        zSize, taskExecutor, air, world.registry,
-        TerrainInfiniteChunkManagerStatic(center,
-                loadingRadius)),
-        TerrainClient {
+class TerrainInfiniteClient private constructor(
+    override val world: WorldClient,
+    private val loadingRadius: Int,
+    zSize: Int,
+    private val taskExecutor: CoroutineContext,
+    air: BlockType,
+    private val center: MutableVector2i
+) : TerrainInfinite<EntityClient, TerrainInfiniteChunkClient>(
+    zSize, taskExecutor, air, world.registry,
+    TerrainInfiniteChunkManagerStatic(
+        center,
+        loadingRadius
+    )
+),
+    TerrainClient {
     override val renderer: TerrainInfiniteRenderer
     private val sortedLocations: List<Vector2i>
     private var requestJob: Job? = null
     private var requestActor: SendChannel<Unit>? = null
     private val chunkRequests = ConcurrentHashSet<Vector2i>()
 
-    constructor(world: WorldClient,
-                loadingRadius: Int,
-                zSize: Int,
-                taskExecutor: CoroutineContext,
-                air: BlockType) : this(world, loadingRadius, zSize,
-            taskExecutor, air, MutableVector2i())
+    constructor(
+        world: WorldClient,
+        loadingRadius: Int,
+        zSize: Int,
+        taskExecutor: CoroutineContext,
+        air: BlockType
+    ) : this(
+        world, loadingRadius, zSize,
+        taskExecutor, air, MutableVector2i()
+    )
 
     init {
         sortedLocations = buildSequence {
@@ -74,11 +83,14 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
                 }
             }
         }.sortedBy { it.distanceSqr(Vector2i.ZERO) }.toList()
-        renderer = TerrainInfiniteRenderer(this, loadingRadius.toDouble(),
-                sortedLocations)
+        renderer = TerrainInfiniteRenderer(
+            this, loadingRadius.toDouble(),
+            sortedLocations
+        )
     }
 
-    override fun getThreadContext(): TerrainInfiniteClientSection = SECTION.get()
+    override fun getThreadContext(): TerrainInfiniteClientSection =
+        SECTION.get()
 
     override fun update(delta: Double) {
         profilerSection("Chunks") {
@@ -117,8 +129,10 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
     override fun init() {
         val loadingRadiusSqr = sqr(loadingRadius)
         requestJob = Job()
-        requestActor = actor(taskExecutor + CoroutineName("Load-Requests"),
-                parent = requestJob) {
+        requestActor = actor(
+            taskExecutor + CoroutineName("Load-Requests"),
+            parent = requestJob
+        ) {
             withContext(NonCancellable) {
                 for (msg in channel) {
                     var isLoading = false
@@ -133,12 +147,14 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
                             if (chunk == null && !isLoading) {
                                 val p = Vector2i(xx, yy)
                                 if (chunkRequests.size < 3
-                                        && !chunkRequests.contains(p)) {
+                                    && !chunkRequests.contains(p)) {
                                     chunkRequests.add(p)
                                     world.send(
-                                            PacketRequestChunk(
-                                                    world.plugins.registry, xx,
-                                                    yy))
+                                        PacketRequestChunk(
+                                            world.plugins.registry, xx,
+                                            yy
+                                        )
+                                    )
                                 } else {
                                     isLoading = true
                                 }
@@ -150,13 +166,15 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
                 }
             }
         }
-        launch(taskExecutor + CoroutineName("Load-Requests-Heartbeat"),
-                parent = requestJob) {
-            Timer().apply { init() }.loop(Timer.toDiff(100.0),
-                    { delay(it, TimeUnit.NANOSECONDS) }) {
-                requestActor?.offer(Unit)
-                true
-            }
+        launch(
+            taskExecutor + CoroutineName("Load-Requests-Heartbeat"),
+            parent = requestJob
+        ) {
+            Timer().apply { init() }
+                .loop(Timer.toDiff(100.0), { delayNanos(it) }) {
+                    requestActor?.offer(Unit)
+                    true
+                }
         }
     }
 
@@ -168,8 +186,10 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
         renderer.dispose()
     }
 
-    override fun entityAdded(entity: EntityClient,
-                             spawn: Boolean) {
+    override fun entityAdded(
+        entity: EntityClient,
+        spawn: Boolean
+    ) {
         super.entityAdded(entity, spawn)
         world.entityAdded(entity, spawn)
     }
@@ -179,19 +199,25 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
         world.entityRemoved(entity)
     }
 
-    override fun addChunk(x: Int,
-                          y: Int) = null
+    override fun addChunk(
+        x: Int,
+        y: Int
+    ) = null
 
-    fun loadChunk(x: Int,
-                  y: Int,
-                  tagMap: TagMap) {
+    fun loadChunk(
+        x: Int,
+        y: Int,
+        tagMap: TagMap
+    ) {
         synchronized(chunkManager) {
             if (chunkManager[x, y] != null) {
                 logger.warn { "Chunk received twice: $x/$y" }
                 chunkManager.remove(x, y)
             }
-            val chunk = TerrainInfiniteChunkClient(Vector2i(x, y), this, zSize,
-                    renderer)
+            val chunk = TerrainInfiniteChunkClient(
+                Vector2i(x, y), this, zSize,
+                renderer
+            )
             chunk.lockWrite {
                 chunk.read(tagMap)
                 chunk.setLoaded()
@@ -208,8 +234,10 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
         chunkRequests.remove(Vector2i(x, y))
     }
 
-    fun failedChunk(x: Int,
-                    y: Int) {
+    fun failedChunk(
+        x: Int,
+        y: Int
+    ) {
         chunkRequests.remove(Vector2i(x, y))
     }
 
@@ -220,14 +248,20 @@ class TerrainInfiniteClient private constructor(override val world: WorldClient,
         chunk.dispose()
     }
 
-    override fun sunLightReduction(x: Int,
-                                   y: Int): Int {
-        return world.environment.sunLightReduction(x.toDouble(),
-                y.toDouble()).toInt()
+    override fun sunLightReduction(
+        x: Int,
+        y: Int
+    ): Int {
+        return world.environment.sunLightReduction(
+            x.toDouble(),
+            y.toDouble()
+        ).toInt()
     }
 
-    override fun addEntity(entity: EntityClient,
-                           spawn: Boolean): Boolean {
+    override fun addEntity(
+        entity: EntityClient,
+        spawn: Boolean
+    ): Boolean {
         val pos = entity.getCurrentPos()
         val x = pos.x.floorToInt() shr 4
         val y = pos.y.floorToInt() shr 4

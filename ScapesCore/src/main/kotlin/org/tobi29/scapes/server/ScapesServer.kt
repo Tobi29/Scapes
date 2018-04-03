@@ -68,8 +68,8 @@ class ScapesServer(
     val events = EventDispatcher()
     private val format: WorldFormat
     private val playerData: PlayerData
-    private val commandRegistry: CommandRegistry
-    private val maxLoadingRadius: Int
+    val commandRegistry: CommandRegistry
+    val maxLoadingRadius: Int
     private val worlds = ConcurrentHashMap<String, WorldServer>()
     var stopped = false
         private set
@@ -100,31 +100,14 @@ class ScapesServer(
         return shutdownReason.get()
     }
 
-    fun maxLoadingRadius(): Int {
-        return maxLoadingRadius
-    }
+    fun world(name: String): WorldServer? = worlds[name]
 
-    fun taskExecutor(): CoroutineContext {
-        return taskExecutor
-    }
+    fun defaultWorld(): WorldServer? = worlds[plugins.worldType.id]
 
-    fun commandRegistry(): CommandRegistry {
-        return commandRegistry
-    }
-
-    fun world(name: String): WorldServer? {
-        return worlds[name]
-    }
-
-    fun defaultWorld(): WorldServer? {
-        return worlds[plugins.worldType.id()]
-    }
-
-    fun registerWorld(dimension: Dimension): WorldServer? {
-        return registerWorld({
+    fun registerWorld(dimension: Dimension): WorldServer? =
+        registerWorld({
             dimension.createEnvironment(it)
-        }, dimension.id(), seed)
-    }
+        }, dimension.id, seed)
 
     @Synchronized
     fun registerWorld(

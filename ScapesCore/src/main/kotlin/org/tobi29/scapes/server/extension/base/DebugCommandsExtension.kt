@@ -41,7 +41,7 @@ class DebugCommandsExtension(server: ScapesServer) : ServerExtension(server) {
     override fun init() {
         val plugins = server.plugins
         val connection = server.connection
-        val group = server.commandRegistry().group("debug")
+        val group = server.commandRegistry.group("debug")
 
         group.register("give", 8) {
             val playerOption = commandOption(

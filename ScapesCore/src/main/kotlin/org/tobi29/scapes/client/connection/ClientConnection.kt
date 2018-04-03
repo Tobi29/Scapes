@@ -18,22 +18,24 @@ package org.tobi29.scapes.client.connection
 
 import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.launch
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
-import org.tobi29.server.Connection
-import org.tobi29.server.RemoteAddress
-import org.tobi29.logging.KLogging
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
+import org.tobi29.server.Connection
+import org.tobi29.server.RemoteAddress
 
-abstract class ClientConnection(val game: GameStateGameMP,
-                                val plugins: Plugins,
-                                val loadingDistance: Int,
-                                val skinStorage: ClientSkinStorage) : PlayConnection<PacketServer> {
+abstract class ClientConnection(
+    val game: GameStateGameMP,
+    val plugins: Plugins,
+    val loadingDistance: Int,
+    val skinStorage: ClientSkinStorage
+) : PlayConnection<PacketServer> {
     val profilerSent = ConnectionProfiler()
     val profilerReceived = ConnectionProfiler()
     protected val pingDebug: GuiWidgetDebugValues.Element

@@ -27,14 +27,13 @@ import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Label
 import org.eclipse.swt.widgets.MenuItem
 import org.eclipse.swt.widgets.ProgressBar
-import org.tobi29.server.ConnectionManager
-import org.tobi29.server.RemoteAddress
 import org.tobi29.application.swt.framework.Document
 import org.tobi29.application.swt.framework.DocumentComposite
 import org.tobi29.application.swt.framework.MultiDocumentApplication
 import org.tobi29.application.swt.widgets.SmartMenuBar
 import org.tobi29.application.swt.widgets.ifPresent
-import java.util.concurrent.TimeUnit
+import org.tobi29.server.ConnectionManager
+import org.tobi29.server.RemoteAddress
 
 class ReconnectDocument(private val application: MultiDocumentApplication,
                         private val address: RemoteAddress,
@@ -50,7 +49,7 @@ class ReconnectDocument(private val application: MultiDocumentApplication,
     init {
         job = launch(application.uiContext + CoroutineName("Reconnect-Timer")) {
             for (timer in 4 downTo 0) {
-                delay(1L, TimeUnit.SECONDS)
+                delay(1000)
                 text.ifPresent { it.text = "Reconnecting in $timer..." }
             }
             application.compositeFor(this@ReconnectDocument)?.let { composite ->

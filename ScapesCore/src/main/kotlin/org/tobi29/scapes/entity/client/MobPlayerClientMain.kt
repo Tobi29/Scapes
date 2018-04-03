@@ -21,6 +21,7 @@ import org.tobi29.math.Frustum
 import org.tobi29.math.threadLocalRandom
 import org.tobi29.math.vector.Vector2d
 import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.add
 import org.tobi29.math.vector.length
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
@@ -51,16 +52,20 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
-abstract class MobPlayerClientMain(type: EntityType<*, *>,
-                                   world: WorldClient,
-                                   pos: Vector3d,
-                                   speed: Vector3d,
-                                   aabb: AABB3,
-                                   lives: Double,
-                                   maxLives: Double,
-                                   private val viewField: Frustum,
-                                   nickname: String) : MobPlayerClient(type,
-        world, pos, speed, aabb, lives, maxLives, nickname) {
+abstract class MobPlayerClientMain(
+    type: EntityType<*, *>,
+    world: WorldClient,
+    pos: Vector3d,
+    speed: Vector3d,
+    aabb: AABB3,
+    lives: Double,
+    maxLives: Double,
+    private val viewField: Frustum,
+    nickname: String
+) : MobPlayerClient(
+    type,
+    world, pos, speed, aabb, lives, maxLives, nickname
+) {
     val game = world.game
     protected lateinit var input: InputModeScapes
     protected var flying = false
@@ -70,8 +75,10 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
     protected var wallFriction = 2.0
     protected var waterFriction = 8.0
     protected var stepHeight = 1.0
-    protected val sendPositionHandler = MobPositionSenderClient(registry,
-            this.pos.now()) { world.connection.send(it) }
+    protected val sendPositionHandler = MobPositionSenderClient(
+        registry,
+        this.pos.now()
+    ) { world.connection.send(it) }
     private var inputEventDispatcherwner: EventDispatcher? = null
 
     init {
@@ -81,9 +88,11 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
     }
 
     fun updatePosition() {
-        sendPositionHandler.submitUpdate(uuid, pos.now(), speed.now(),
-                rot.now(), physicsState.isOnGround, physicsState.slidingWall,
-                physicsState.isInWater, physicsState.isSwimming, true)
+        sendPositionHandler.submitUpdate(
+            uuid, pos.now(), speed.now(),
+            rot.now(), physicsState.isOnGround, physicsState.slidingWall,
+            physicsState.isInWater, physicsState.isSwimming, true
+        )
     }
 
     override fun move(delta: Double) {
@@ -93,44 +102,62 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
             val goZ = clamp(speed.z * delta, -10.0, 10.0)
             pos.add(Vector3d(goX, goY, goZ))
         } else {
-            EntityPhysics.updateVelocity(delta, speed, world.gravity,
-                    gravitationMultiplier, airFriction, groundFriction,
-                    waterFriction, wallFriction, physicsState)
+            EntityPhysics.updateVelocity(
+                delta, speed, world.gravity,
+                gravitationMultiplier, airFriction, groundFriction,
+                waterFriction, wallFriction, physicsState
+            )
             val aabb = currentAABB()
             val aabbs = AABBS.get()
-            EntityPhysics.collisions(delta, speed, world.terrain, aabb,
-                    stepHeight, aabbs)
-            EntityPhysics.move(delta, pos, speed, aabb, stepHeight,
-                    physicsState, aabbs)
+            EntityPhysics.collisions(
+                delta, speed, world.terrain, aabb,
+                stepHeight, aabbs
+            )
+            EntityPhysics.move(
+                delta, pos, speed, aabb, stepHeight,
+                physicsState, aabbs
+            )
             if (isOnGround) {
                 speed.setZ(speed.z / (1.0 + 4.0 * delta))
             }
             EntityPhysics.collide(delta, aabb, aabbs, physicsState) {}
-            isHeadInWater = world.terrain.type(pos.x.floorToInt(),
-                    pos.y.floorToInt(), (pos.z + 0.7).floorToInt()).isLiquid
+            isHeadInWater = world.terrain.type(
+                pos.x.floorToInt(),
+                pos.y.floorToInt(), (pos.z + 0.7).floorToInt()
+            ).isLiquid
             aabbs.reset()
             aabbs.forAllObjects { it.collision = BlockType.STANDARD_COLLISION }
         }
-        sendPositionHandler.submitUpdate(uuid, pos.now(), speed.now(),
-                rot.now(), physicsState.isOnGround, physicsState.slidingWall,
-                physicsState.isInWater, physicsState.isSwimming)
+        sendPositionHandler.submitUpdate(
+            uuid, pos.now(), speed.now(),
+            rot.now(), physicsState.isOnGround, physicsState.slidingWall,
+            physicsState.isInWater, physicsState.isSwimming
+        )
         val lookX = cos(rot.z.toRad()) *
                 cos(rot.x.toRad()) * 6.0
         val lookY = sin(rot.z.toRad()) *
                 cos(rot.x.toRad()) * 6.0
         val lookZ = sin(rot.x.toRad()) * 6
         val viewOffset = viewOffset()
-        viewField.setView(pos.x + viewOffset.x,
-                pos.y + viewOffset.y,
-                pos.z + viewOffset.z,
-                pos.x + lookX, pos.y + lookY,
-                pos.z + lookZ, 0.0, 0.0, 1.0)
+        viewField.setView(
+            pos.x + viewOffset.x,
+            pos.y + viewOffset.y,
+            pos.z + viewOffset.z,
+            pos.x + lookX, pos.y + lookY,
+            pos.z + lookZ, 0.0, 0.0, 1.0
+        )
         world.getEntities(
-                viewField).filterIsInstance<MobClient>().forEach { entity ->
+            viewField
+        ).filterIsInstance<MobClient>().forEach { entity ->
             val pos2 = entity.getCurrentPos()
-            if (!world.checkBlocked(pos.x.floorToInt(), pos.y.floorToInt(),
-                    pos.z.floorToInt(), pos2.x.floorToInt(), pos2.y.floorToInt(),
-                    pos2.z.floorToInt())) {
+            if (!world.checkBlocked(
+                    pos.x.floorToInt(),
+                    pos.y.floorToInt(),
+                    pos.z.floorToInt(),
+                    pos2.x.floorToInt(),
+                    pos2.y.floorToInt(),
+                    pos2.z.floorToInt()
+                )) {
                 notice(entity)
             }
         }
@@ -138,25 +165,36 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
         if (footStep <= 0.0) {
             footStep = 0.0
             val currentSpeed = speed()
-            if (max(abs(currentSpeed.x),
-                    abs(currentSpeed.y)) > 0.1) {
+            if (max(
+                    abs(currentSpeed.x),
+                    abs(currentSpeed.y)
+                ) > 0.1) {
                 val x = pos.x.floorToInt()
                 val y = pos.y.floorToInt()
-                val block = world.terrain.block(x, y,
-                        (pos.z - 0.1).floorToInt())
+                val block = world.terrain.block(
+                    x, y,
+                    (pos.z - 0.1).floorToInt()
+                )
                 var footStepSound = world.terrain.type(block).footStepSound(
-                        world.terrain.data(block))
+                    world.terrain.data(block)
+                )
                 if (footStepSound == null && isOnGround) {
-                    val blockBottom = world.terrain.block(x, y,
-                            (pos.z - 1.4).floorToInt())
+                    val blockBottom = world.terrain.block(
+                        x, y,
+                        (pos.z - 1.4).floorToInt()
+                    )
                     footStepSound = world.terrain.type(
-                            blockBottom).footStepSound(
-                            world.terrain.data(blockBottom))
+                        blockBottom
+                    ).footStepSound(
+                        world.terrain.data(blockBottom)
+                    )
                 }
                 if (footStepSound != null) {
                     val random = threadLocalRandom()
-                    game.engine.sounds.playSound(footStepSound, "sound.World",
-                            0.9 + random.nextDouble() * 0.2, 1.0)
+                    game.engine.sounds.playSound(
+                        footStepSound, "sound.World",
+                        0.9 + random.nextDouble() * 0.2, 1.0
+                    )
                     footStep = 1.0 / clamp(speed.now().length(), 1.0, 4.0)
                 }
             }
@@ -166,39 +204,60 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
         }
     }
 
-    protected fun breakParticles(terrain: TerrainClient,
-                                 amount: Int,
-                                 direction: Vector2d) {
+    protected fun breakParticles(
+        terrain: TerrainClient,
+        amount: Int,
+        direction: Vector2d
+    ) {
         val pane = block(6.0, direction)
         if (pane != null) {
             val block = terrain.block(pane.x, pane.y, pane.z)
             val type = terrain.type(block)
             val data = terrain.data(block)
-            val texture = type.particleTexture(pane.face, terrain, pane.x,
-                    pane.y, pane.z, data)
+            val texture = type.particleTexture(
+                pane.face, terrain, pane.x,
+                pane.y, pane.z, data
+            )
             if (texture != null) {
-                val blockPos = Vector3d(pane.x.toDouble(), pane.y.toDouble(),
-                        pane.z.toDouble())
+                val blockPos = Vector3d(
+                    pane.x.toDouble(), pane.y.toDouble(),
+                    pane.z.toDouble()
+                )
                 val emitter = world.scene.particles().emitter(
-                        ParticleEmitterBlock::class.java)
-                val friction = type.particleFriction(pane.face, terrain,
-                        pane.x, pane.y, pane.z, data)
-                val r = type.particleColorR(pane.face, terrain, pane.x, pane.y,
-                        pane.z, data)
-                val g = type.particleColorG(pane.face, terrain, pane.x, pane.y,
-                        pane.z, data)
-                val b = type.particleColorB(pane.face, terrain, pane.x, pane.y,
-                        pane.z, data)
+                    ParticleEmitterBlock::class.java
+                )
+                val friction = type.particleFriction(
+                    pane.face, terrain,
+                    pane.x, pane.y, pane.z, data
+                )
+                val r = type.particleColorR(
+                    pane.face, terrain, pane.x, pane.y,
+                    pane.z, data
+                )
+                val g = type.particleColorG(
+                    pane.face, terrain, pane.x, pane.y,
+                    pane.z, data
+                )
+                val b = type.particleColorB(
+                    pane.face, terrain, pane.x, pane.y,
+                    pane.z, data
+                )
                 for (i in 0 until amount) {
                     emitter.add { instance ->
                         val random = threadLocalRandom()
                         val time = 3.0f
                         instance.pos.set(blockPos)
-                        instance.pos.add(Vector3d(random.nextDouble(),
-                                random.nextDouble(), random.nextDouble()))
-                        instance.speed.setXYZ(-1.0 + random.nextDouble() * 2.0,
-                                -1.0 + random.nextDouble() * 2.0,
-                                random.nextDouble() * 2.0 + 1.0)
+                        instance.pos.add(
+                            Vector3d(
+                                random.nextDouble(),
+                                random.nextDouble(), random.nextDouble()
+                            )
+                        )
+                        instance.speed.setXYZ(
+                            -1.0 + random.nextDouble() * 2.0,
+                            -1.0 + random.nextDouble() * 2.0,
+                            random.nextDouble() * 2.0 + 1.0
+                        )
                         instance.time = time
                         instance.friction = friction
                         instance.dir = random.nextFloat() * TWO_PI.toFloat()
@@ -228,8 +287,12 @@ abstract class MobPlayerClientMain(type: EntityType<*, *>,
     fun closeGui(): Boolean {
         if (game.engine.guiStack.remove("10-Menu") != null) {
             game.setHudVisible(true)
-            world.send(PacketInteraction(world.plugins.registry,
-                    PacketInteraction.CLOSE_INVENTORY, 0))
+            world.send(
+                PacketInteraction(
+                    world.plugins.registry,
+                    PacketInteraction.CLOSE_INVENTORY, 0
+                )
+            )
             return true
         }
         return false

@@ -17,23 +17,32 @@
 package org.tobi29.scapes.client.states
 
 import kotlinx.coroutines.experimental.runBlocking
+import org.tobi29.io.IOException
+import org.tobi29.logging.KLogging
+import org.tobi29.scapes.chunk.WorldClient
+import org.tobi29.scapes.client.Playlist
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.engine.ScapesEngine
 import org.tobi29.scapes.engine.graphics.Scene
-import org.tobi29.io.IOException
-import org.tobi29.logging.KLogging
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldSource
+import org.tobi29.server.RemoteAddress
 
-class GameStateGameSP(clientSupplier: (GameStateGameMP) -> ClientConnection,
-                      loadScene: Scene,
-                      val source: WorldSource,
-                      val server: ScapesServer,
-                      engine: ScapesEngine) : GameStateGameMP(clientSupplier,
-        loadScene, engine) {
+class GameStateGameSP(
+    clientSupplier: (GameStateGameMP) -> ClientConnection,
+    config: WorldClient.Config,
+    playlist: Playlist,
+    loadScene: Scene,
+    val source: WorldSource,
+    val server: ScapesServer,
+    onClose: () -> Unit,
+    onError: (String, RemoteAddress?, Double?) -> Unit,
+    engine: ScapesEngine
+) : GameStateGameMP(
+    clientSupplier, config, playlist, loadScene, onClose, onError, engine
+) {
     override fun dispose() {
         runBlocking { scene?.dispose() }
-        client.plugins.removeFileSystems(engine.files)
         try {
             server.stop(ScapesServer.ShutdownReason.ERROR)
         } catch (e: IOException) {
@@ -56,8 +65,7 @@ class GameStateGameSP(clientSupplier: (GameStateGameMP) -> ClientConnection,
     override fun step(delta: Double) {
         super.step(delta)
         if (server.shouldStop()) {
-            engine.switchState(
-                    GameStateServerDisconnect("Server stopping", engine))
+            onError("Server stopping", null, null)
         }
     }
 

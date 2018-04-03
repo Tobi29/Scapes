@@ -17,11 +17,12 @@
 package org.tobi29.scapes.client.states
 
 import kotlinx.coroutines.experimental.*
+import org.tobi29.logging.KLogging
 import org.tobi29.scapes.block.ItemTypeTextured
 import org.tobi29.scapes.block.TerrainTextureRegistry
+import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.client.ChatHistory
 import org.tobi29.scapes.client.Playlist
-import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.client.gui.GuiHud
 import org.tobi29.scapes.client.gui.GuiWidgetConnectionProfiler
@@ -33,19 +34,24 @@ import org.tobi29.scapes.engine.graphics.renderScene
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.gui.debug.GuiWidgetDebugValues
 import org.tobi29.scapes.engine.resource.awaitDone
-import org.tobi29.stdex.atomic.AtomicBoolean
-import org.tobi29.logging.KLogging
 import org.tobi29.scapes.entity.model.EntityModelBlockBreakShared
 import org.tobi29.scapes.entity.model.MobLivingModelHumanShared
 import org.tobi29.scapes.entity.particle.ParticleTransparentAtlas
 import org.tobi29.scapes.entity.particle.ParticleTransparentAtlasBuilder
 import org.tobi29.scapes.inventory.ItemType
+import org.tobi29.server.RemoteAddress
+import org.tobi29.stdex.atomic.AtomicBoolean
 
-open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection,
-                           private val loadScene: Scene,
-                           engine: ScapesEngine) : GameState(engine) {
-    internal val client: ClientConnection
-    val playlist: Playlist
+open class GameStateGameMP(
+    clientSupplier: (GameStateGameMP) -> ClientConnection,
+    val config: WorldClient.Config,
+    val playlist: Playlist,
+    private val loadScene: Scene,
+    val onClose: () -> Unit,
+    val onError: (String, RemoteAddress?, Double?) -> Unit,
+    engine: ScapesEngine
+) : GameState(engine) {
+    val client: ClientConnection
     val chatHistory: ChatHistory
     val hud: GuiHud
     val inputGui: Gui
@@ -54,7 +60,8 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     protected val terrainTextureRegistry: TerrainTextureRegistry
     var particleTransparentAtlas: ParticleTransparentAtlas? = null
         private set
-    protected var particleTransparentAtlasBuilder: ParticleTransparentAtlasBuilder? = ParticleTransparentAtlasBuilder()
+    protected var particleTransparentAtlasBuilder: ParticleTransparentAtlasBuilder? =
+        ParticleTransparentAtlasBuilder()
     protected var scene: SceneScapesVoxelWorld? = null
     private val connectionSentProfiler: GuiWidgetDebugValues
     private val connectionReceivedProfiler: GuiWidgetDebugValues
@@ -63,9 +70,7 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
     private val init = AtomicBoolean(false)
 
     init {
-        val scapes = engine[ScapesClient.COMPONENT]
         chatHistory = ChatHistory(engine.events)
-        playlist = Playlist(scapes.home.resolve("playlists"), engine)
         client = clientSupplier(this)
         terrainTextureRegistry = TerrainTextureRegistry(engine)
         modelHumanShared = MobLivingModelHumanShared(engine)
@@ -120,8 +125,6 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         client.stop()
         terrainTextureRegistry.texture.markDisposed()
         engine.sounds.stop("music")
-        client.plugins.removeFileSystems(engine.files)
-        client.plugins.dispose()
         engine.graphics.textures.clearCache()
         engine.sounds.clearCache()
         logger.info { "Stopped game!" }
@@ -131,7 +134,6 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         engine.guiStack.addUnfocused("04-Input", inputGui)
         engine.guiStack.addUnfocused("05-HUD", hud)
         engine.guiStack.addUnfocused("99-SceneDebug", debug)
-        client.plugins.addFileSystems(engine.files)
         client.plugins.init()
         client.plugins.plugins.forEach { it.initClient(this) }
         var time = System.currentTimeMillis()
@@ -139,7 +141,8 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         val materials = registry.get<ItemType>("Core", "ItemType")
         for (type in materials.values) {
             (type as? ItemTypeTextured)?.registerTextures(
-                    terrainTextureRegistry)
+                terrainTextureRegistry
+            )
         }
         val size = terrainTextureRegistry.init()
         terrainTextureRegistry.initTexture(4)
@@ -188,12 +191,14 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
 
     fun particleTransparentAtlas(): ParticleTransparentAtlas {
         return particleTransparentAtlas ?: throw IllegalStateException(
-                "Particle atlas not initialized yet")
+            "Particle atlas not initialized yet"
+        )
     }
 
     fun particleTransparentAtlasBuilder(): ParticleTransparentAtlasBuilder {
         return particleTransparentAtlasBuilder ?: throw IllegalStateException(
-                "Particle atlas already initialized")
+            "Particle atlas already initialized"
+        )
     }
 
     fun modelHumanShared(): MobLivingModelHumanShared {
@@ -209,8 +214,10 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
         inputGui.visible = visible
     }
 
-    private inner class GuiWidgetDebugClient(parent: GuiLayoutData) : GuiComponentWidget(
-            parent, "Debug Values") {
+    private inner class GuiWidgetDebugClient(parent: GuiLayoutData) :
+        GuiComponentWidget(
+            parent, "Debug Values"
+        ) {
         init {
             val geometry = addVert(10.0, 10.0, 10.0, 2.0, -1.0, 15.0) {
                 GuiComponentTextButton(it, 12, "Geometry")
@@ -250,13 +257,20 @@ open class GameStateGameMP(clientSupplier: (GameStateGameMP) -> ClientConnection
                 client.mob { it.world.terrain.reloadGeometry() }
             }
             connSent.on(
-                    GuiEvent.CLICK_LEFT) { event -> connectionSentProfiler.visible = !connectionSentProfiler.visible }
+                GuiEvent.CLICK_LEFT
+            ) { event ->
+                connectionSentProfiler.visible = !connectionSentProfiler.visible
+            }
             connSentReset.on(GuiEvent.CLICK_LEFT) { event ->
                 client.profilerSent.clear()
                 connectionSentProfiler.clear()
             }
-            connReceived.on(GuiEvent.CLICK_LEFT
-            ) { event -> connectionReceivedProfiler.visible = !connectionReceivedProfiler.visible }
+            connReceived.on(
+                GuiEvent.CLICK_LEFT
+            ) { event ->
+                connectionReceivedProfiler.visible =
+                        !connectionReceivedProfiler.visible
+            }
             connReceivedReset.on(GuiEvent.CLICK_LEFT) { event ->
                 client.profilerReceived.clear()
                 connectionReceivedProfiler.clear()

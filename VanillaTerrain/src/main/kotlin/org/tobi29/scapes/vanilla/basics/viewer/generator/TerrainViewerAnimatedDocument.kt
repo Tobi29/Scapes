@@ -16,35 +16,34 @@
 package org.tobi29.scapes.vanilla.basics.viewer.generator
 
 import kotlinx.coroutines.experimental.CoroutineName
-import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
-import org.tobi29.coroutines.Timer
-import org.tobi29.coroutines.loop
 import org.tobi29.application.swt.framework.GuiApplication
 import org.tobi29.application.swt.widgets.ifPresent
-import java.util.concurrent.TimeUnit
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.delayNanos
+import org.tobi29.coroutines.loop
 import java.util.concurrent.atomic.AtomicBoolean
 
 class TerrainViewerAnimatedDocument(
-        application: GuiApplication,
-        colorSupplier: () -> TerrainViewerCanvas.ColorSupplier,
-        private val progress: () -> Unit
+    application: GuiApplication,
+    colorSupplier: () -> TerrainViewerCanvas.ColorSupplier,
+    private val progress: () -> Unit
 ) : TerrainViewerDocument(colorSupplier) {
     val job = AtomicBoolean(false).let { stop ->
         launch(application.uiContext + CoroutineName("Animation-Progress")) {
-            Timer().apply { init() }.loop(Timer.toDiff(4.0),
-                    { delay(it, TimeUnit.NANOSECONDS) }) {
-                if (stop.get()) return@loop false
+            Timer().apply { init() }
+                .loop(Timer.toDiff(4.0), { delayNanos(it) }) {
+                    if (stop.get()) return@loop false
 
-                canvas.ifPresent {
-                    if (!it.isRendering) {
-                        progress()
-                        it.render()
+                    canvas.ifPresent {
+                        if (!it.isRendering) {
+                            progress()
+                            it.render()
+                        }
                     }
-                }
 
-                true
-            }
+                    true
+                }
         } to stop
     }
 

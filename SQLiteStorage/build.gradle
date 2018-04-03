@@ -20,6 +20,6 @@ apply from: "$rootDir/resources/scapesenginemodulekotlinjvm.gradle"
 version = "0.0.0"
 
 dependencies {
-    compile project(":ScapesCore")
+    compile project(":ScapesFrontend")
     compile rootProject.ext.scapesEngineSQLite
 }

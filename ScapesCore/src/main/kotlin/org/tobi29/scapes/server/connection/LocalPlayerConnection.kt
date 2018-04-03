@@ -21,8 +21,8 @@ import org.tobi29.checksums.ChecksumAlgorithm
 import org.tobi29.checksums.checksum
 import org.tobi29.graphics.decodePNG
 import org.tobi29.io.IOException
+import org.tobi29.io.filesystem.FilePath
 import org.tobi29.io.filesystem.exists
-import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.client.connection.LocalClientConnection
 import org.tobi29.scapes.connection.Account
 import org.tobi29.scapes.entity.skin.ServerSkin
@@ -40,10 +40,12 @@ import org.tobi29.server.ConnectionWorker
 import org.tobi29.server.InvalidPacketDataException
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class LocalPlayerConnection(private val worker: ConnectionWorker,
-                            server: ServerConnection,
-                            loadingDistance: Int) : PlayerConnection(
-        server) {
+class LocalPlayerConnection(
+    private val worker: ConnectionWorker,
+    server: ServerConnection,
+    private val skinPath: FilePath,
+    loadingDistance: Int
+) : PlayerConnection(server) {
     // TODO: Port away
     private val queue = ConcurrentLinkedQueue<PacketServer>()
     // TODO: Port away
@@ -64,15 +66,15 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
         workerClient?.wake()
     }
 
-    suspend fun start(client: LocalClientConnection,
-                      workerClient: ConnectionWorker,
-                      account: Account): String? {
+    suspend fun start(
+        client: LocalClientConnection,
+        workerClient: ConnectionWorker,
+        account: Account
+    ): String? {
         this.workerClient = workerClient
         val engine = client.game.engine
-        val scapes = engine[ScapesClient.COMPONENT]
-        val path = scapes.home.resolve("Skin.png")
-        val image = if (exists(path)) {
-            path.readAsync { decodePNG(it) }
+        val image = if (exists(skinPath)) {
+            skinPath.readAsync { decodePNG(it) }
         } else {
             engine.files["Scapes:image/entity/mob/Player.png"].readAsync {
                 decodePNG(it)
@@ -83,8 +85,10 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
         }
         nickname = account.nickname()
         skin = ServerSkin(image)
-        id = checksum(account.keyPair().public.encoded,
-                ChecksumAlgorithm.Sha256).toString()
+        id = checksum(
+            account.keyPair().public.encoded,
+            ChecksumAlgorithm.Sha256
+        ).toString()
 
         val response = server.addPlayer(this)
         if (response != null) {
@@ -100,9 +104,12 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
         try {
             events.fire(PlayerJoinEvent(this@LocalPlayerConnection))
             events.fire(
-                    MessageEvent(this@LocalPlayerConnection,
-                            MessageLevel.SERVER_INFO,
-                            "Player connected: $id ($nickname) locally"))
+                MessageEvent(
+                    this@LocalPlayerConnection,
+                    MessageLevel.SERVER_INFO,
+                    "Player connected: $id ($nickname) locally"
+                )
+            )
             while (!connection.shouldClose) {
                 connection.increaseTimeout(10000)
                 while (queue.isNotEmpty()) {
@@ -114,19 +121,28 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
             }
         } catch (e: ConnectionCloseException) {
             events.fire(
-                    MessageEvent(this@LocalPlayerConnection,
-                            MessageLevel.SERVER_INFO,
-                            "Disconnecting player: $nickname"))
+                MessageEvent(
+                    this@LocalPlayerConnection,
+                    MessageLevel.SERVER_INFO,
+                    "Disconnecting player: $nickname"
+                )
+            )
         } catch (e: InvalidPacketDataException) {
             events.fire(
-                    MessageEvent(this@LocalPlayerConnection,
-                            MessageLevel.SERVER_INFO,
-                            "Disconnecting player: $nickname"))
+                MessageEvent(
+                    this@LocalPlayerConnection,
+                    MessageLevel.SERVER_INFO,
+                    "Disconnecting player: $nickname"
+                )
+            )
         } catch (e: IOException) {
             events.fire(
-                    MessageEvent(this@LocalPlayerConnection,
-                            MessageLevel.SERVER_INFO,
-                            "Player disconnected: $nickname ($e)"))
+                MessageEvent(
+                    this@LocalPlayerConnection,
+                    MessageLevel.SERVER_INFO,
+                    "Player disconnected: $nickname ($e)"
+                )
+            )
         } finally {
             events.fire(PlayerLeaveEvent(this@LocalPlayerConnection))
             isClosed = true
@@ -140,8 +156,11 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
 
     fun error(e: Exception) {
         events.fire(
-                MessageEvent(this, MessageLevel.SERVER_INFO,
-                        "Player disconnected: $nickname ($e)"))
+            MessageEvent(
+                this, MessageLevel.SERVER_INFO,
+                "Player disconnected: $nickname ($e)"
+            )
+        )
     }
 
     override fun transmit(packet: PacketClient) {
@@ -151,8 +170,10 @@ class LocalPlayerConnection(private val worker: ConnectionWorker,
         }
     }
 
-    override fun disconnect(reason: String,
-                            time: Double) {
+    override fun disconnect(
+        reason: String,
+        time: Double
+    ) {
         removeEntity()
         receiveClient(PacketDisconnect(registry, reason, time))
         receiveServer(PacketDisconnectSelf(registry, reason))

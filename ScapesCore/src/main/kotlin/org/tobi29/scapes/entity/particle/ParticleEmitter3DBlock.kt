@@ -18,19 +18,23 @@ package org.tobi29.scapes.entity.particle
 
 import org.tobi29.graphics.Cam
 import org.tobi29.math.AABB3
+import org.tobi29.math.vector.add
+import org.tobi29.math.vector.divide
 import org.tobi29.math.vector.times
 import org.tobi29.scapes.block.light
 import org.tobi29.scapes.block.render
 import org.tobi29.scapes.chunk.terrain.block
-import org.tobi29.scapes.engine.graphics.loadShader
 import org.tobi29.scapes.engine.graphics.GL
+import org.tobi29.scapes.engine.graphics.loadShader
 import org.tobi29.scapes.engine.graphics.push
 import org.tobi29.scapes.engine.shader.IntegerExpression
 import org.tobi29.stdex.math.floorToInt
 import kotlin.math.max
 
-class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleInstance3DBlock>(
-        system, Array(256, { ParticleInstance3DBlock() })) {
+class ParticleEmitter3DBlock(system: ParticleSystem) :
+    ParticleEmitter<ParticleInstance3DBlock>(
+        system, Array(256, { ParticleInstance3DBlock() })
+    ) {
     override fun update(delta: Double) {
         if (!hasAlive) {
             return
@@ -55,29 +59,35 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
             aabb.max.x = instance.pos.x + SIZE
             aabb.max.y = instance.pos.y + SIZE
             aabb.max.z = instance.pos.z + SIZE
-            if (ParticlePhysics.update(delta, instance, terrain, aabb,
+            if (ParticlePhysics.update(
+                    delta, instance, terrain, aabb,
                     gravitation, 1.0f,
-                    0.2f, 0.4f, 8.0f)) {
+                    0.2f, 0.4f, 8.0f
+                )) {
                 instance.rotationSpeed.divide(
-                        1.0 + 0.4 * delta * gravitation.toDouble())
+                    1.0 + 0.4 * delta * gravitation.toDouble()
+                )
             }
             instance.rotation.add(instance.rotationSpeed.now().times(delta))
         }
         this.hasAlive = hasAlive
     }
 
-    override fun addToPipeline(gl: GL,
-                               width: Int,
-                               height: Int,
-                               cam: Cam): suspend () -> (Double) -> Unit {
+    override fun addToPipeline(
+        gl: GL,
+        width: Int,
+        height: Int,
+        cam: Cam
+    ): suspend () -> (Double) -> Unit {
         val shader = system.world.game.engine.graphics.loadShader(
-                "Scapes:shader/Entity.stag", mapOf(
+            "Scapes:shader/Entity.stag", mapOf(
                 "SCENE_WIDTH" to IntegerExpression(width),
                 "SCENE_HEIGHT" to IntegerExpression(height)
-        ))
+            )
+        )
         return {
             val s = shader.getAsync()
-            ;render@ {
+            ;render@{
             if (!hasAlive) {
                 return@render
             }
@@ -91,10 +101,11 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
             val cz = cam.position.z
             val time = gl.timer.toFloat()
             val sunLightReduction =
-                    environment.sunLightReduction(cx, cy) / 15.0f
+                environment.sunLightReduction(cx, cy) / 15.0f
             val playerLight = max(
-                    player.leftWeapon().light,
-                    player.rightWeapon().light).toFloat()
+                player.leftWeapon().light,
+                player.rightWeapon().light
+            ).toFloat()
             val sunlightNormal = environment.sunLightNormal(cx, cy)
             val snx = sunlightNormal.x.toFloat()
             val sny = sunlightNormal.y.toFloat()
@@ -119,8 +130,8 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
                 val y = instance.pos.y.floorToInt()
                 val z = instance.pos.z.floorToInt()
                 if (terrain.block(x, y, z) {
-                    !isSolid(it) || isTransparent(it)
-                }) {
+                        !isSolid(it) || isTransparent(it)
+                    }) {
                     val posRenderX = (instance.pos.x - cx).toFloat()
                     val posRenderY = (instance.pos.y - cy).toFloat()
                     val posRenderZ = (instance.pos.z - cz).toFloat()
@@ -128,9 +139,11 @@ class ParticleEmitter3DBlock(system: ParticleSystem) : ParticleEmitter<ParticleI
                         matrix.translate(posRenderX, posRenderY, posRenderZ)
                         matrix.rotate(instance.rotation.z.toFloat(), 0f, 0f, 1f)
                         matrix.rotate(instance.rotation.x.toFloat(), 1f, 0f, 0f)
-                        gl.setAttribute2f(4,
-                                terrain.blockLight(x, y, z) / 15.0f,
-                                terrain.sunLight(x, y, z) / 15.0f)
+                        gl.setAttribute2f(
+                            4,
+                            terrain.blockLight(x, y, z) / 15.0f,
+                            terrain.sunLight(x, y, z) / 15.0f
+                        )
                         instance.item.render(gl, s)
                     }
                 }

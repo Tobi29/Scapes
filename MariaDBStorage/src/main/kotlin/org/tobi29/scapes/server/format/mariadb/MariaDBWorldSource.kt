@@ -18,9 +18,7 @@ package org.tobi29.scapes.server.format.mariadb
 import org.mariadb.jdbc.MariaDbDataSource
 import org.tobi29.io.IOException
 import org.tobi29.io.filesystem.FilePath
-import org.tobi29.io.filesystem.copy
-import org.tobi29.io.filesystem.createDirectories
-import org.tobi29.io.filesystem.path
+import org.tobi29.scapes.plugins.spi.PluginReference
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldFormat
 import org.tobi29.scapes.server.format.WorldSource
@@ -29,29 +27,31 @@ import org.tobi29.sql.mysql.MySQLDatabase
 import java.sql.Connection
 import java.sql.SQLException
 
-class MariaDBWorldSource(private val path: FilePath,
-                         private val connection: Connection) : WorldSource {
+class MariaDBWorldSource(
+    private val path: FilePath,
+    private val connection: Connection
+) : WorldSource {
     private val database: MySQLDatabase
 
-    constructor(path: FilePath,
-                url: String,
-                user: String,
-                password: String) : this(path,
-            openDatabase(url, user, password))
+    constructor(
+        path: FilePath,
+        url: String,
+        user: String,
+        password: String
+    ) : this(
+        path,
+        openDatabase(url, user, password)
+    )
 
     init {
         database = MySQLDatabase(connection)
     }
 
-    override fun init(seed: Long,
-                      plugins: List<FilePath>) {
-        SQLWorldFormat.initDatabase(database, seed)
-        val pluginsDir = path.resolve("plugins")
-        createDirectories(pluginsDir)
-        for (plugin in plugins) {
-            copy(plugin,
-                    pluginsDir.resolve(plugin.fileName ?: path("Plugin.jar")))
-        }
+    override fun init(
+        seed: Long,
+        plugins: List<PluginReference>
+    ) {
+        SQLWorldFormat.initDatabase(database, seed, plugins)
     }
 
     override fun panorama(images: WorldSource.Panorama) {
@@ -75,9 +75,11 @@ class MariaDBWorldSource(private val path: FilePath,
     }
 
     companion object {
-        fun openDatabase(url: String,
-                         user: String,
-                         password: String): Connection {
+        fun openDatabase(
+            url: String,
+            user: String,
+            password: String
+        ): Connection {
             try {
                 val source = MariaDbDataSource(url)
                 return source.getConnection(user, password)

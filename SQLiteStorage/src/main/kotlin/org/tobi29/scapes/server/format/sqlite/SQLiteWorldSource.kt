@@ -19,34 +19,33 @@ package org.tobi29.scapes.server.format.sqlite
 import kotlinx.coroutines.experimental.runBlocking
 import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteDataSource
-import org.tobi29.sql.sqlite.SQLiteDatabase
 import org.tobi29.graphics.decodePNG
 import org.tobi29.graphics.encodePNG
 import org.tobi29.io.IOException
 import org.tobi29.io.filesystem.*
+import org.tobi29.scapes.plugins.spi.PluginReference
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.WorldFormat
 import org.tobi29.scapes.server.format.WorldSource
 import org.tobi29.scapes.server.format.newPanorama
 import org.tobi29.scapes.server.format.sql.SQLWorldFormat
+import org.tobi29.sql.sqlite.SQLiteDatabase
 import java.sql.Connection
 import java.sql.SQLException
 
-class SQLiteWorldSource(private val path: FilePath,
-                        private val connection: Connection) : WorldSource {
+class SQLiteWorldSource(
+    private val path: FilePath,
+    private val connection: Connection
+) : WorldSource {
     private val database = SQLiteDatabase(connection)
 
     constructor(path: FilePath) : this(path, openSave(path))
 
-    override fun init(seed: Long,
-                      plugins: List<FilePath>) {
-        SQLWorldFormat.initDatabase(database, seed)
-        val pluginsDir = path.resolve("plugins")
-        createDirectories(pluginsDir)
-        for (plugin in plugins) {
-            copy(plugin,
-                    pluginsDir.resolve(plugin.fileName ?: path("Plugin.jar")))
-        }
+    override fun init(
+        seed: Long,
+        plugins: List<PluginReference>
+    ) {
+        SQLWorldFormat.initDatabase(database, seed, plugins)
     }
 
     override fun panorama(images: WorldSource.Panorama) {

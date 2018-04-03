@@ -28,7 +28,7 @@ class BaseCommandsExtension(server: ScapesServer) : ServerExtension(server) {
 
     override fun init() {
         val connection = server.connection
-        val registry = server.commandRegistry()
+        val registry = server.commandRegistry
         val serverGroup = registry.group("server")
 
         registry.register("say", 0) {

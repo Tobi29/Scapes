@@ -16,13 +16,12 @@
 
 package org.tobi29.scapes.packets
 
-import org.tobi29.scapes.block.Registries
-import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.scapes.client.states.GameStateServerDisconnect
-import org.tobi29.server.ConnectionEndException
 import org.tobi29.io.ReadableByteStream
 import org.tobi29.io.WritableByteStream
+import org.tobi29.scapes.block.Registries
+import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.server.connection.PlayerConnection
+import org.tobi29.server.ConnectionEndException
 
 class PacketDisconnect : PacketAbstract, PacketClient {
     private lateinit var reason: String
@@ -30,26 +29,35 @@ class PacketDisconnect : PacketAbstract, PacketClient {
 
     constructor(type: PacketType) : super(type)
 
-    constructor(type: PacketType,
-                reason: String,
-                time: Double) : super(type) {
+    constructor(
+        type: PacketType,
+        reason: String,
+        time: Double
+    ) : super(type) {
         this.reason = reason
         this.time = time
     }
 
-    constructor(registry: Registries,
-                reason: String,
-                time: Double) : this(
-            Packet.make(registry, "core.packet.Disconnect"), reason, time)
+    constructor(
+        registry: Registries,
+        reason: String,
+        time: Double
+    ) : this(
+        Packet.make(registry, "core.packet.Disconnect"), reason, time
+    )
 
-    override fun sendClient(player: PlayerConnection,
-                            stream: WritableByteStream) {
+    override fun sendClient(
+        player: PlayerConnection,
+        stream: WritableByteStream
+    ) {
         stream.putString(reason)
         stream.putDouble(time)
     }
 
-    override fun parseClient(client: ClientConnection,
-                             stream: ReadableByteStream) {
+    override fun parseClient(
+        client: ClientConnection,
+        stream: ReadableByteStream
+    ) {
         reason = stream.getString()
         time = stream.getDouble()
     }
@@ -57,12 +65,9 @@ class PacketDisconnect : PacketAbstract, PacketClient {
     override fun runClient(client: ClientConnection) {
         val address = client.address()
         if (time >= 0) {
-            client.game.engine.switchState(
-                    GameStateServerDisconnect(reason, address,
-                            client.game.engine, time))
+            client.game.onError(reason, address, time)
         } else {
-            client.game.engine.switchState(GameStateServerDisconnect(reason,
-                    client.game.engine))
+            client.game.onError(reason, null, null)
         }
         throw ConnectionEndException(reason)
     }

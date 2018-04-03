@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.io.tag.toTag
 import org.tobi29.scapes.engine.gui.GuiComponentButtonHeavy
 import org.tobi29.scapes.engine.gui.GuiComponentText
 import org.tobi29.scapes.engine.gui.GuiEvent
@@ -23,11 +25,9 @@ import org.tobi29.scapes.engine.gui.GuiLayoutData
 import org.tobi29.scapes.engine.input.ControllerButtons
 import org.tobi29.scapes.engine.input.ControllerKey
 import org.tobi29.scapes.engine.input.ControllerKeyReference
+import org.tobi29.stdex.atomic.AtomicBoolean
 import org.tobi29.utils.ListenerRegistrar
 import org.tobi29.utils.listenAlive
-import org.tobi29.io.tag.MutableTagMap
-import org.tobi29.io.tag.toTag
-import org.tobi29.stdex.atomic.AtomicBoolean
 import kotlin.collections.set
 
 class GuiComponentControlsButton(

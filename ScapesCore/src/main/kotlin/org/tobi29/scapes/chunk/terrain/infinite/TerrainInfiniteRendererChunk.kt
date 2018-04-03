@@ -147,7 +147,7 @@ class TerrainInfiniteRendererChunk(private val chunk: TerrainInfiniteChunkClient
                             (vao.model.second.min.y - cam.position.y).toFloat(),
                             (vao.model.second.min.z - cam.position.z).toFloat())
                     matrix.scale(
-                            (vao.model.second.max.x - vao.model.second.min.z).toFloat(),
+                            (vao.model.second.max.x - vao.model.second.min.x).toFloat(),
                             (vao.model.second.max.y - vao.model.second.min.y).toFloat(),
                             (vao.model.second.max.z - vao.model.second.min.z).toFloat())
                     frame.render(gl, shader)

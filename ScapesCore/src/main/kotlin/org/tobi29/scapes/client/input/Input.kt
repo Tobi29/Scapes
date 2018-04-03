@@ -100,9 +100,9 @@ class InputManagerScapes(
         private fun loadService(engine: ScapesEngine,
                                 controller: Controller): ((MutableTagMap) -> InputModeScapes)? {
             spiLoad(spiLoad<InputModeProvider>(
-                    InputModeProvider::class.java.classLoader), { e ->
+                    InputModeProvider::class.java.classLoader)) { e ->
                 logger.warn { "Unable to load input mode provider: $e" }
-            }).asSequence().mapNotNull {
+            }.asSequence().mapNotNull {
                 it.get(engine, controller)
             }.firstOrNull()?.let { return it }
             if (controller is ControllerDesktop) {

@@ -18,10 +18,7 @@ package org.tobi29.scapes.entity.model
 
 import org.tobi29.graphics.Cam
 import org.tobi29.math.AABB3
-import org.tobi29.math.vector.MutableVector3d
-import org.tobi29.math.vector.Vector3d
-import org.tobi29.math.vector.minus
-import org.tobi29.math.vector.times
+import org.tobi29.math.vector.*
 import org.tobi29.scapes.block.render
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.engine.graphics.GL
@@ -34,8 +31,8 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.min
 
 class MobModelBlock(
-        override val entity: MobClient,
-        private val item: AtomicReference<Item?>
+    override val entity: MobClient,
+    private val item: AtomicReference<Item?>
 ) : MobModel {
     private val pos = MutableVector3d()
 
@@ -71,18 +68,26 @@ class MobModelBlock(
         pos.add(entity.getCurrentPos().minus(pos.now()).times(factor))
     }
 
-    override fun render(gl: GL,
-                        world: WorldClient,
-                        cam: Cam,
-                        shader: Shader) {
+    override fun render(
+        gl: GL,
+        world: WorldClient,
+        cam: Cam,
+        shader: Shader
+    ) {
         val posRenderX = (pos.x - cam.position.x).toFloat()
         val posRenderY = (pos.y - cam.position.y).toFloat()
         val posRenderZ = (pos.z - cam.position.z).toFloat()
-        gl.setAttribute2f(4,
-                world.terrain.blockLight(pos.x.floorToInt(), pos.y.floorToInt(),
-                        pos.z.floorToInt()) / 15.0f,
-                world.terrain.sunLight(pos.x.floorToInt(), pos.y.floorToInt(),
-                        pos.z.floorToInt()) / 15.0f)
+        gl.setAttribute2f(
+            4,
+            world.terrain.blockLight(
+                pos.x.floorToInt(), pos.y.floorToInt(),
+                pos.z.floorToInt()
+            ) / 15.0f,
+            world.terrain.sunLight(
+                pos.x.floorToInt(), pos.y.floorToInt(),
+                pos.z.floorToInt()
+            ) / 15.0f
+        )
         gl.matrixStack.push { matrix ->
             matrix.translate(posRenderX, posRenderY, posRenderZ)
             item.get().render(gl, shader)

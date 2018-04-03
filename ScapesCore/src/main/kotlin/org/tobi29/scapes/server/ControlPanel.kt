@@ -16,17 +16,17 @@
 
 package org.tobi29.scapes.server
 
+import org.tobi29.io.tag.*
 import org.tobi29.logging.KLogging
-import org.tobi29.server.ConnectionWorker
-import org.tobi29.server.ControlPanelProtocol
-import org.tobi29.server.PacketBundleChannel
-import org.tobi29.utils.ListenerRegistrar
 import org.tobi29.profiler.CPUUtil
 import org.tobi29.scapes.server.command.Executor
 import org.tobi29.scapes.server.connection.ServerConnection
 import org.tobi29.scapes.server.extension.event.MessageEvent
-import org.tobi29.io.tag.*
+import org.tobi29.server.ConnectionWorker
+import org.tobi29.server.ControlPanelProtocol
+import org.tobi29.server.PacketBundleChannel
 import org.tobi29.stdex.toReplace
+import org.tobi29.utils.ListenerRegistrar
 import kotlin.collections.set
 
 class ControlPanel(worker: ConnectionWorker,
@@ -59,7 +59,7 @@ class ControlPanel(worker: ConnectionWorker,
         }
         addCommand("Command") { payload ->
             payload["Command"]?.toString()?.let { command ->
-                connection.server.commandRegistry()[command, this].execute().forEach { output ->
+                connection.server.commandRegistry[command, this].execute().forEach { output ->
                     events.fire(
                             MessageEvent(this, MessageLevel.FEEDBACK_ERROR,
                                     output.toString(), this))
@@ -67,7 +67,7 @@ class ControlPanel(worker: ConnectionWorker,
             }
             payload["Commands"]?.toList()?.asSequence()?.mapNotNull(
                     Tag::toString)?.forEach { command ->
-                connection.server.commandRegistry()[command, this].execute().forEach { output ->
+                connection.server.commandRegistry[command, this].execute().forEach { output ->
                     events.fire(
                             MessageEvent(this, MessageLevel.FEEDBACK_ERROR,
                                     output.toString(), this))

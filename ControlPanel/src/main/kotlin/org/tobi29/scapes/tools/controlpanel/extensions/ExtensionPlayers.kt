@@ -22,20 +22,20 @@ import kotlinx.coroutines.experimental.launch
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Group
-import org.tobi29.coroutines.Timer
-import org.tobi29.coroutines.loopUntilCancel
-import org.tobi29.server.ControlPanelProtocol
 import org.tobi29.application.swt.framework.GuiApplication
 import org.tobi29.application.swt.widgets.ifPresent
-import org.tobi29.utils.ComponentTypeRegistered
-import org.tobi29.utils.toArray
-import org.tobi29.scapes.tools.controlpanel.ControlPanelDocument
-import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
-import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelPlayers
+import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.loopUntilCancel
 import org.tobi29.io.tag.Tag
 import org.tobi29.io.tag.TagMap
 import org.tobi29.io.tag.toList
 import org.tobi29.io.tag.toMap
+import org.tobi29.scapes.tools.controlpanel.ControlPanelDocument
+import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
+import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelPlayers
+import org.tobi29.server.ControlPanelProtocol
+import org.tobi29.utils.ComponentTypeRegistered
+import org.tobi29.utils.toArray
 
 class ExtensionPlayers(
         application: GuiApplication,
@@ -78,7 +78,7 @@ class ExtensionPlayers(
         this.players = players
     }
 
-    override fun dispose() {
+    override fun dispose(holder: ControlPanelDocument) {
         job?.cancel()
     }
 

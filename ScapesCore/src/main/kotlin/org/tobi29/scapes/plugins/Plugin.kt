@@ -39,8 +39,4 @@ interface Plugin {
     fun worldInit(world: WorldServer)
 
     fun worldInit(world: WorldClient)
-
-    fun id(): String
-
-    fun assetRoot(): String
 }

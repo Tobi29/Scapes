@@ -16,108 +16,58 @@
 
 package org.tobi29.scapes.plugins
 
-import org.tobi29.logging.KLogging
-import org.tobi29.scapes.block.*
 import org.tobi29.io.FileSystemContainer
 import org.tobi29.io.IOException
-import org.tobi29.io.classpath.ClasspathPath
-import org.tobi29.io.filesystem.FilePath
-import org.tobi29.io.filesystem.isNotHidden
-import org.tobi29.io.filesystem.isRegularFile
-import org.tobi29.io.filesystem.listRecursive
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.logging.KLogging
+import org.tobi29.scapes.block.*
 import org.tobi29.scapes.inventory.ItemType
 import org.tobi29.scapes.packets.*
-import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.scapes.plugins.spi.PluginHandle
+import org.tobi29.scapes.plugins.spi.PluginProvider
 import org.tobi29.stdex.readOnly
-import java.net.URLClassLoader
+import org.tobi29.utils.spiLoad
+import kotlin.reflect.KClass
 
-class Plugins(files: List<PluginFile>,
-              idStorage: MutableTagMap) {
+class Plugins(
+    files: List<PluginHandle>,
+    idStorage: MutableTagMap
+) {
     val files = files.readOnly()
-    private val pluginsMut = ArrayList<Plugin>()
-    val plugins = pluginsMut.readOnly()
-    private val dimensionsMut = ArrayList<Dimension>()
-    val dimensions = dimensionsMut.readOnly()
+    @PublishedApi
+    internal val _plugins: Map<KClass<out Plugin>, Plugin>
+    val plugins: Collection<Plugin> get() = _plugins.values
+    val dimensions: List<Dimension>
+    val worldType: WorldType
     val registry: Registries
     lateinit var air: BlockAir
         private set
     lateinit var materialResolver: Map<String, ItemType>
         private set
-    private val classLoader: URLClassLoader?
-    private var worldTypeMut: WorldType? = null
-    val worldType: WorldType
-        get() = worldTypeMut ?: throw IllegalStateException(
-                "No world type loaded")
     private var init = false
 
     init {
-        val paths = files.asSequence().mapNotNull { it.file() }.toList()
-        if (paths.isEmpty()) {
-            classLoader = null
-            val classLoader = Plugins::class.java.classLoader
-            val file = PluginFile.load(
-                    ClasspathPath(classLoader, "scapes/plugin/Plugin.json"))
-            load(file.plugin(classLoader))
-        } else {
-            classLoader = PluginClassLoader(paths)
-            for (file in files) {
-                load(file.plugin(classLoader))
+        val plugins = HashMap<KClass<out Plugin>, Plugin>()
+        val dimensions = ArrayList<Dimension>()
+        var worldType: WorldType? = null
+        for (handle in files) {
+            val plugin = handle.second()
+            plugins[plugin::class] = plugin
+            if (plugin is Dimension) {
+                dimensions.add(plugin)
+            }
+            if (plugin is WorldType) {
+                if (worldType != null) {
+                    throw IOException("Found 2nd world type: $plugin")
+                }
+                worldType = plugin
             }
         }
-        if (worldTypeMut == null) {
-            throw IOException("No world type found")
-        }
+        if (worldType == null) throw IOException("No world type found")
+        this._plugins = plugins.readOnly()
+        this.dimensions = dimensions.readOnly()
+        this.worldType = worldType
         registry = Registries(idStorage)
-    }
-
-    // TODO: @Throws(IOException::class)
-    private fun load(plugin: Plugin) {
-        pluginsMut.add(plugin)
-        if (plugin is Dimension) {
-            dimensionsMut.add(plugin)
-        }
-        if (plugin is WorldType) {
-            if (worldTypeMut != null) {
-                throw IOException("Found 2nd world type: " + plugin)
-            }
-            worldTypeMut = plugin
-        }
-    }
-
-    fun dispose() {
-        pluginsMut.clear()
-        dimensionsMut.clear()
-        worldTypeMut = null
-        if (classLoader != null) {
-            try {
-                classLoader.close()
-            } catch (e: IOException) {
-                logger.error { "Failed to close plugin classloader: $e" }
-            }
-        }
-    }
-
-    fun plugin(name: String): Plugin {
-        for (plugin in pluginsMut) {
-            if (plugin.id() == name) {
-                return plugin
-            }
-        }
-        throw IllegalArgumentException("Unknown plugin")
-    }
-
-    fun addFileSystems(files: FileSystemContainer) {
-        for (plugin in pluginsMut) {
-            files.registerFileSystem(plugin.id(),
-                    ClasspathPath(plugin::class.java.classLoader,
-                            plugin.assetRoot()))
-        }
-    }
-
-    fun removeFileSystems(files: FileSystemContainer) {
-        for (plugin in pluginsMut) {
-            files.removeFileSystem(plugin.id())
-        }
     }
 
     fun init() {
@@ -128,7 +78,7 @@ class Plugins(files: List<PluginFile>,
                 registry.add("Core", "Environment", 0, Int.MAX_VALUE)
                 registry.add("Core", "Packet", 0, Short.MAX_VALUE.toInt())
                 registry.add("Core", "Update", 0, Short.MAX_VALUE.toInt())
-                pluginsMut.forEach { it.registryType(registry) }
+                plugins.forEach { it.registryType(registry) }
             })
             init(registry)
             registry.get<ItemType>("Core", "ItemType").run {
@@ -136,45 +86,32 @@ class Plugins(files: List<PluginFile>,
                     BlockAir(MaterialType(this@Plugins, it, "core.block.Air"))
                 }
             }
-            pluginsMut.forEach { it.register(this) }
-            pluginsMut.forEach { it.init(registry) }
+            plugins.forEach { it.register(this) }
+            plugins.forEach { it.init(registry) }
             registry.lock()
             materialResolver = assembleMaterialResolver(
-                    registry.get<ItemType>("Core", "ItemType"))
+                registry.get<ItemType>("Core", "ItemType")
+            )
             init = true
         }
     }
 
+    inline fun <reified P : Plugin> plugin(): P =
+        _plugins[P::class] as? P
+                ?: throw IllegalArgumentException("Unknown plugin: ${P::class}")
+
     companion object : KLogging() {
-        // TODO: @Throws(IOException::class)
-        suspend fun installed(path: FilePath): List<PluginFile> {
-            val paths = ArrayList<FilePath>()
-            listRecursive(path) {
-                filter {
-                    isRegularFile(it) && isNotHidden(it)
-                }.forEach { paths.add(it) }
-            }
-            return paths.mapNotNull {
-                try {
-                    PluginFile.loadFile(it)
-                } catch (e: IOException) {
-                    logger.warn { "Failed to read plugins: $e" }
-                    null
-                }
-            } + embedded()
-        }
+        private val spiPlugins =
+            spiLoad(spiLoad<PluginProvider>()) { e ->
+                logger.warn { "Unable to load plugin provider: $e" }
+            }.flatMap { it.plugins }.toList()
 
-        // TODO: @Throws(IOException::class)
-        suspend fun embedded(): List<PluginFile> {
-            val embedded = ClasspathPath(Plugins::class.java.classLoader,
-                    "scapes/plugin/Plugin.json")
-            val list = ArrayList<PluginFile>()
+        fun available(): List<PluginHandle> = spiPlugins
 
-            try {
-                list.add(PluginFile.load(embedded))
-            } catch (e: IOException) {
+        fun setupAssets(files: FileSystemContainer) {
+            available().forEach {
+                files.registerFileSystem(it.first.id, it.first.assetRoot)
             }
-            return list.readOnly()
         }
 
         fun init(registry: Registries) {
@@ -269,7 +206,8 @@ class Plugins(files: List<PluginFile>,
                 reg("core.packet.DisconnectSelf") {
                     PacketType(it, {
                         throw IOException(
-                                "This packet should never be received")
+                            "This packet should never be received"
+                        )
                     })
                 }
                 reg("core.packet.SetWorld") {
@@ -288,17 +226,23 @@ class Plugins(files: List<PluginFile>,
         }
 
         fun assembleMaterialResolver(registry: Registries.Registry<ItemType>) =
-                registry.values.asSequence().filterNotNull().flatMap { material ->
-                    val nameID = material.nameID
-                    sequenceOf(Pair(nameID, material),
-                            Pair(nameID.substring(nameID.lastIndexOf('.') + 1,
-                                    nameID.length), material))
-                }.toMap()
+            registry.values.asSequence().filterNotNull().flatMap { material ->
+                val nameID = material.nameID
+                sequenceOf(
+                    Pair(nameID, material),
+                    Pair(
+                        nameID.substring(
+                            nameID.lastIndexOf('.') + 1,
+                            nameID.length
+                        ), material
+                    )
+                )
+            }.toMap()
     }
 }
 
 fun <T : ItemType> Registries.Registry<ItemType>.reg(
-        name: String,
-        plugins: Plugins,
-        block: (MaterialType) -> T
+    name: String,
+    plugins: Plugins,
+    block: (MaterialType) -> T
 ) = reg(name) { block(MaterialType(plugins, it, name)) }

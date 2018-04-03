@@ -21,13 +21,13 @@ import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 import org.eclipse.swt.SWT
 import org.eclipse.swt.widgets.Text
+import org.tobi29.application.swt.widgets.ifPresent
 import org.tobi29.coroutines.Timer
 import org.tobi29.coroutines.loopUntilCancel
-import org.tobi29.server.ControlPanelProtocol
-import org.tobi29.application.swt.widgets.ifPresent
-import org.tobi29.utils.ComponentTypeRegistered
 import org.tobi29.scapes.tools.controlpanel.ControlPanelDocument
 import org.tobi29.scapes.tools.controlpanel.ui.ControlPanelConnection
+import org.tobi29.server.ControlPanelProtocol
+import org.tobi29.utils.ComponentTypeRegistered
 
 class ExtensionPing(
         connection: ControlPanelProtocol
@@ -50,7 +50,7 @@ class ExtensionPing(
         this.label = label
     }
 
-    override fun dispose() {
+    override fun dispose(holder: ControlPanelDocument) {
         job?.cancel()
     }
 

@@ -16,6 +16,10 @@
 package org.tobi29.scapes.entity.particle
 
 import org.tobi29.math.*
+import org.tobi29.math.vector.addX
+import org.tobi29.math.vector.addY
+import org.tobi29.math.vector.addZ
+import org.tobi29.math.vector.divide
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.terrain.TerrainClient

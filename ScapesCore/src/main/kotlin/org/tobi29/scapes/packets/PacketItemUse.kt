@@ -26,36 +26,42 @@ import org.tobi29.scapes.client.connection.ClientConnection
 import org.tobi29.scapes.inventory.kind
 import org.tobi29.scapes.server.connection.PlayerConnection
 import org.tobi29.server.InvalidPacketDataException
-import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 class PacketItemUse : PacketAbstract,
-        PacketServer {
+    PacketServer {
     private var strength = 0.0
     private var side = false
     private lateinit var direction: Vector2d
 
     constructor(type: PacketType) : super(type)
 
-    constructor(type: PacketType,
-                strength: Double,
-                side: Boolean,
-                direction: Vector2d) : super(type) {
+    constructor(
+        type: PacketType,
+        strength: Double,
+        side: Boolean,
+        direction: Vector2d
+    ) : super(type) {
         this.strength = strength
         this.side = side
         this.direction = direction
     }
 
-    constructor(registry: Registries,
-                strength: Double,
-                side: Boolean,
-                direction: Vector2d) : this(
-            Packet.make(registry, "core.packet.ItemUse"),
-            strength, side, direction)
+    constructor(
+        registry: Registries,
+        strength: Double,
+        side: Boolean,
+        direction: Vector2d
+    ) : this(
+        Packet.make(registry, "core.packet.ItemUse"),
+        strength, side, direction
+    )
 
     // TODO: @Throws(IOException::class)
-    override fun sendServer(client: ClientConnection,
-                            stream: WritableByteStream) {
+    override fun sendServer(
+        client: ClientConnection,
+        stream: WritableByteStream
+    ) {
         stream.putDouble(strength)
         stream.putBoolean(side)
         stream.putDouble(direction.x)
@@ -63,8 +69,10 @@ class PacketItemUse : PacketAbstract,
     }
 
     // TODO: @Throws(IOException::class)
-    override fun parseServer(player: PlayerConnection,
-                             stream: ReadableByteStream) {
+    override fun parseServer(
+        player: PlayerConnection,
+        stream: ReadableByteStream
+    ) {
         strength = stream.getDouble()
         side = stream.getBoolean()
         direction = Vector2d(stream.getDouble(), stream.getDouble())
@@ -75,7 +83,8 @@ class PacketItemUse : PacketAbstract,
             throw InvalidPacketDataException("Invalid item use strength!")
         }
         if (abs(direction.x) > 90.0 || abs(
-                direction.y) > 180.0) {
+                direction.y
+            ) > 180.0) {
             throw InvalidPacketDataException("Invalid direction!")
         }
         player.mob { mob ->
@@ -86,7 +95,8 @@ class PacketItemUse : PacketAbstract,
             } else {
                 mob.attackRight(strength * strength, direction)
             }
-            val heldSlot = if (side) mob.inventorySelectLeft else mob.inventorySelectRight
+            val heldSlot =
+                if (side) mob.inventorySelectLeft else mob.inventorySelectRight
             mob.inventories.modify("Container") { inventory ->
                 inventory[heldSlot] = inventory[heldSlot].click(mob)
             }
@@ -99,29 +109,35 @@ class PacketItemUse : PacketAbstract,
                 val face = pane.face
                 var flag = false
                 if (strength < 0.9) {
-                    flag = terrain.type(x, y, z).click(terrain, x, y, z, face,
-                            mob)
+                    flag = terrain.type(x, y, z).click(
+                        terrain, x, y, z, face,
+                        mob
+                    )
                 }
                 if (!flag && strength > 0.0) {
                     launch(world + CoroutineName("Block-Break")) {
                         val weapon = mob.inventories.access(
-                                "Container") { inventory ->
+                            "Container"
+                        ) { inventory ->
                             inventory[heldSlot]
                         }.kind<ItemTypeWeapon>()
-                        delay(((weapon?.hitWait() ?: 500) * 0.05).toLong(),
-                                TimeUnit.MILLISECONDS)
+                        delay((weapon?.hitWait() ?: 500) / 20)
                         mob.inventories.modify("Container") { inventory ->
                             val item = inventory[heldSlot]
                             if (weapon == null || weapon.type == item?.type) {
-                                val (stack, br) = item.click(mob, terrain,
-                                        x, y, z, face)
+                                val (stack, br) = item.click(
+                                    mob, terrain,
+                                    x, y, z, face
+                                )
                                 inventory[heldSlot] = stack
                                 if (br == null || br > 0.0) {
                                     val block = terrain.block(x, y, z)
                                     val type = terrain.type(block)
                                     val data = terrain.data(block)
-                                    type.punch(terrain, x, y, z, data, face,
-                                            mob, stack, br ?: 0.1, strength)
+                                    type.punch(
+                                        terrain, x, y, z, data, face,
+                                        mob, stack, br ?: 0.1, strength
+                                    )
                                 }
                             }
                         }

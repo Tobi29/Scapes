@@ -30,7 +30,7 @@ import org.tobi29.io.view
 import org.tobi29.logging.KLogging
 import org.tobi29.scapes.entity.skin.ServerSkin
 import org.tobi29.scapes.packets.*
-import org.tobi29.scapes.plugins.PluginFile
+import org.tobi29.scapes.plugins.spi.PluginDescription
 import org.tobi29.scapes.server.MessageLevel
 import org.tobi29.scapes.server.extension.event.MessageEvent
 import org.tobi29.scapes.server.extension.event.PlayerJoinEvent
@@ -50,10 +50,13 @@ import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
 import javax.crypto.NoSuchPaddingException
 
-class RemotePlayerConnection(private val worker: ConnectionWorker,
-                             private val channel: PacketBundleChannel,
-                             server: ServerConnection) : PlayerConnection(
-        server) {
+class RemotePlayerConnection(
+    private val worker: ConnectionWorker,
+    private val channel: PacketBundleChannel,
+    server: ServerConnection
+) : PlayerConnection(
+    server
+) {
     // TODO: Port away
     private val sendQueue = ConcurrentLinkedQueue<PacketClient>()
     private val sendQueueSize = AtomicInt()
@@ -75,7 +78,8 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             SecureRandom().nextBytes(challenge)
             try {
                 val key = KeyFactory.getInstance("RSA").generatePublic(
-                        X509EncodedKeySpec(array))
+                    X509EncodedKeySpec(array)
+                )
                 val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
                 cipher.init(Cipher.ENCRYPT_MODE, key)
                 output.put(cipher.doFinal(challenge).view)
@@ -94,7 +98,7 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             }
             val plugins = server.plugins
             output.putInt(plugins.files.size)
-            plugins.files.forEach { sendPluginMetaData(it, output) }
+            plugins.files.forEach { sendPluginMetaData(it.first, output) }
             channel.queueBundle()
 
             if (channel.receive()) {
@@ -103,38 +107,17 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             val challengeReceived = ByteArray(challenge.size)
             input.get(challengeReceived.view)
             nickname = input.getString(1 shl 10)
-            var length = input.getInt()
-            val requests = ArrayList<Int>(length)
-            while (length-- > 0) {
-                requests.add(input.getInt())
-            }
-            val response2 = generateResponse(
-                    challengeReceived contentEquals challenge)
-            if (response2 != null) {
-                output.putBoolean(true)
-                output.putString(response2)
-                channel.queueBundle()
-                throw ConnectionCloseException(response2)
-            }
-            output.putBoolean(false)
-            channel.queueBundle()
-            for (request in requests) {
-                sendPlugin(
-                        plugins.files[request].file()
-                                ?: throw IllegalStateException(
-                                        "Trying to send embedded plugin"),
-                        output)
-            }
-
-            if (channel.receive()) {
-                return
-            }
-            loadingRadius = clamp(input.getInt(), 10,
-                    server.server.maxLoadingRadius())
+            loadingRadius = clamp(
+                input.getInt(), 10,
+                server.server.maxLoadingRadius
+            )
             val buffer = ByteArray(64 * 64 * 4).view
             input.get(buffer)
             skin = ServerSkin(Image(64, 64, buffer))
-            val response = server.addPlayer(this@RemotePlayerConnection)
+
+            val response = generateResponse(
+                challengeReceived contentEquals challenge
+            ) ?: server.addPlayer(this@RemotePlayerConnection)
             if (response != null) {
                 output.putBoolean(true)
                 output.putString(response)
@@ -150,9 +133,12 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             pingWait = System.currentTimeMillis() + 1000
             events.fire(PlayerJoinEvent(this@RemotePlayerConnection))
             events.fire(
-                    MessageEvent(this@RemotePlayerConnection,
-                            MessageLevel.SERVER_INFO,
-                            "Player connected: $id ($nickname) on $channel"))
+                MessageEvent(
+                    this@RemotePlayerConnection,
+                    MessageLevel.SERVER_INFO,
+                    "Player connected: $id ($nickname) on $channel"
+                )
+            )
             while (!connection.shouldClose) {
                 if (connection.shouldClose) {
                     send(PacketDisconnect(registry, "Server closed", 5.0))
@@ -172,7 +158,8 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                         // internal use
                         if (packet !is PacketDisconnectSelf) {
                             channel.outputStream.putShort(
-                                    packet.type.id.toShort())
+                                packet.type.id.toShort()
+                            )
                         }
                         packet.sendClient(this, channel.outputStream)
                         if (channel.bundleSize() > 1 shl 10 shl 4) {
@@ -186,22 +173,28 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
                         when (channel.process()) {
                             PacketBundleChannel.FetchResult.CLOSED -> {
                                 events.fire(
-                                        MessageEvent(
-                                                this@RemotePlayerConnection,
-                                                MessageLevel.SERVER_INFO,
-                                                "Player disconnected: $nickname"))
+                                    MessageEvent(
+                                        this@RemotePlayerConnection,
+                                        MessageLevel.SERVER_INFO,
+                                        "Player disconnected: $nickname"
+                                    )
+                                )
                                 return
                             }
                             PacketBundleChannel.FetchResult.YIELD -> break@loop
                             PacketBundleChannel.FetchResult.BUNDLE -> {
                                 while (channel.inputStream.hasRemaining()) {
-                                    val packet = PacketAbstract.make(registry,
-                                            channel.inputStream.getShort().toInt()).createServer()
+                                    val packet = PacketAbstract.make(
+                                        registry,
+                                        channel.inputStream.getShort().toInt()
+                                    ).createServer()
                                     packet.parseServer(
-                                            this@RemotePlayerConnection,
-                                            channel.inputStream)
+                                        this@RemotePlayerConnection,
+                                        channel.inputStream
+                                    )
                                     packet.runServer(
-                                            this@RemotePlayerConnection)
+                                        this@RemotePlayerConnection
+                                    )
                                 }
                             }
                         }
@@ -216,19 +209,28 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
             }
         } catch (e: ConnectionCloseException) {
             events.fire(
-                    MessageEvent(this@RemotePlayerConnection,
-                            MessageLevel.SERVER_INFO,
-                            "Disconnecting player: $nickname"))
+                MessageEvent(
+                    this@RemotePlayerConnection,
+                    MessageLevel.SERVER_INFO,
+                    "Disconnecting player: $nickname"
+                )
+            )
         } catch (e: InvalidPacketDataException) {
             events.fire(
-                    MessageEvent(this@RemotePlayerConnection,
-                            MessageLevel.SERVER_INFO,
-                            "Disconnecting player: $nickname"))
+                MessageEvent(
+                    this@RemotePlayerConnection,
+                    MessageLevel.SERVER_INFO,
+                    "Disconnecting player: $nickname"
+                )
+            )
         } catch (e: IOException) {
             events.fire(
-                    MessageEvent(this@RemotePlayerConnection,
-                            MessageLevel.SERVER_INFO,
-                            "Player disconnected: $nickname ($e)"))
+                MessageEvent(
+                    this@RemotePlayerConnection,
+                    MessageLevel.SERVER_INFO,
+                    "Player disconnected: $nickname ($e)"
+                )
+            )
             throw e
         } finally {
             events.fire(PlayerLeaveEvent(this@RemotePlayerConnection))
@@ -259,8 +261,10 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
         }
     }
 
-    override fun disconnect(reason: String,
-                            time: Double) {
+    override fun disconnect(
+        reason: String,
+        time: Double
+    ) {
         removeEntity()
         send(PacketDisconnect(registry, reason, time))
         send(PacketDisconnectSelf(registry, reason))
@@ -270,18 +274,18 @@ class RemotePlayerConnection(private val worker: ConnectionWorker,
         pingHandler(ping)
     }
 
-    private fun sendPluginMetaData(plugin: PluginFile,
-                                   output: WritableByteStream) {
-        val checksum = plugin.checksum()?.array()
-                ?: throw IOException("Server with embedded plugin")
-        output.putString(plugin.id())
-        output.putString(plugin.version().toString())
-        output.putString(plugin.scapesVersion().toString())
-        output.putByteArray(checksum)
+    private fun sendPluginMetaData(
+        plugin: PluginDescription,
+        output: WritableByteStream
+    ) {
+        output.putString(plugin.id)
+        output.putString(plugin.version.toString())
     }
 
-    private fun sendPlugin(path: FilePath,
-                           output: WritableByteStream) {
+    private fun sendPlugin(
+        path: FilePath,
+        output: WritableByteStream
+    ) {
         read(path) { stream ->
             stream.process(1 shl 10 shl 10) {
                 output.putBoolean(false)

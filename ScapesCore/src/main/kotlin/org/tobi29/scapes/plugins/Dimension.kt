@@ -23,5 +23,7 @@ import org.tobi29.scapes.chunk.WorldServer
  * Basic interface dor dimension addons
  */
 interface Dimension : Plugin {
+    val id: String
+
     fun createEnvironment(world: WorldServer): EnvironmentServer
 }

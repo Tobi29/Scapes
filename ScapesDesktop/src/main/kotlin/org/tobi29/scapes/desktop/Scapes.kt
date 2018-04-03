@@ -16,13 +16,13 @@
 
 package org.tobi29.scapes.desktop
 
-import kotlinx.coroutines.experimental.asCoroutineDispatcher
 import kotlinx.coroutines.experimental.runBlocking
 import org.tobi29.application.Application
 import org.tobi29.application.StatusCode
 import org.tobi29.application.executeMain
 import org.tobi29.args.*
 import org.tobi29.chrono.*
+import org.tobi29.coroutines.defaultBackgroundExecutor
 import org.tobi29.io.*
 import org.tobi29.io.classpath.ClasspathPath
 import org.tobi29.io.filesystem.*
@@ -32,9 +32,7 @@ import org.tobi29.io.tag.json.writeJSON
 import org.tobi29.io.tag.mapMut
 import org.tobi29.io.tag.toMutTag
 import org.tobi29.io.tag.toTag
-import org.tobi29.platform.appIDForCache
 import org.tobi29.platform.appIDForData
-import org.tobi29.platform.cacheHome
 import org.tobi29.platform.dataHome
 import org.tobi29.scapes.Debug
 import org.tobi29.scapes.client.DialogProvider
@@ -53,7 +51,6 @@ import org.tobi29.scapes.engine.gui.GuiBasicStyle
 import org.tobi29.scapes.engine.gui.GuiStyle
 import org.tobi29.scapes.engine.sound.DefaultSoundManager
 import org.tobi29.scapes.engine.sound.SoundManager
-import org.tobi29.scapes.plugins.Sandbox
 import org.tobi29.scapes.server.ScapesServerExecutor
 import org.tobi29.scapes.server.ShutdownSafeScapesServerExecutor
 import org.tobi29.scapes.server.format.sqlite.SQLiteSaveStorage
@@ -101,10 +98,6 @@ object Scapes : Application() {
         setOf('c'), setOf("config"), listOf("directory"),
         "Config directory for server"
     )
-    private val nosandboxOption = cli.commandFlag(
-        setOf('n'), setOf("nosandbox"),
-        "Disable sandbox"
-    )
     private val runDirArgument = cli.commandArgument(
         "run-dir", 0..1
     )
@@ -125,7 +118,6 @@ object Scapes : Application() {
                 val home = runDir
                         ?: dataHome.resolve(appIDForData(id, name))
                 System.setProperty("user.dir", home.toAbsolutePath().toString())
-                val cache = cacheHome.resolve(appIDForCache(id, name))
 
                 System.setProperty(
                     "org.sqlite.lib.path",
@@ -146,25 +138,8 @@ object Scapes : Application() {
                         exitProcess(1)
                     }
                 }
-                val taskExecutor =
-                    ForkJoinPool(
-                        ForkJoinPool.getCommonPoolParallelism(),
-                        PermissiveThreadFactory, null, false
-                    )
-                        .asCoroutineDispatcher()
-
-                if (commandLine.getBoolean(nosandboxOption)) {
-                    println("----------------------------------------")
-                    println("Sandbox disabled by command line option!")
-                    println("Do NOT connect to untrusted servers with")
-                    println("this option enabled!")
-                    println("----------------------------------------")
-                } else {
-                    Sandbox.sandbox(listOf(home, cache))
-                }
 
                 val config = home.resolve("ScapesEngine.json")
-                val pluginCache = cache.resolve("plugins")
                 val configMap = readConfig(config).toMutTag()
                 val saves: (ScapesClient) -> SaveStorage = {
                     SQLiteSaveStorage(home.resolve("saves"))
@@ -195,7 +170,7 @@ object Scapes : Application() {
                 }
                 val engine = ScapesEngine(
                     container, defaultGuiStyle,
-                    taskExecutor, configMap
+                    defaultBackgroundExecutor, configMap
                 )
                 engineRef = WeakReference(engine)
 
@@ -203,16 +178,20 @@ object Scapes : Application() {
                 createDirectories(playlistsPath.resolve("day"))
                 createDirectories(playlistsPath.resolve("night"))
                 createDirectories(playlistsPath.resolve("battle"))
-                createDirectories(home.resolve("plugins"))
                 createDirectories(home.resolve("screenshots"))
-                createDirectories(pluginCache)
-                FileCache.check(pluginCache)
 
                 engine.files.registerFileSystem(
                     "Scapes",
                     ClasspathPath(
                         ScapesClient::class.java.classLoader,
                         "assets/scapes/tobi29"
+                    )
+                )
+                engine.files.registerFileSystem(
+                    "ScapesFrontend",
+                    ClasspathPath(
+                        ScapesClient::class.java.classLoader,
+                        "assets/scapes/frontend/tobi29"
                     )
                 )
                 engine.registerComponent(
@@ -238,7 +217,7 @@ object Scapes : Application() {
                         .apply { workers(1) })
                 engine.registerComponent(
                     ScapesClient.COMPONENT,
-                    ScapesClient(engine, home, pluginCache, saves)
+                    ScapesClient(engine, home, saves)
                 )
                 engine.switchState(
                     GameStateStartup(engine) { GameStateMenu(engine) })
@@ -280,23 +259,10 @@ object Scapes : Application() {
                         exitProcess(1)
                     }
                 }
-                val taskExecutor =
-                    ForkJoinPool(
-                        ForkJoinPool.getCommonPoolParallelism(),
-                        PermissiveThreadFactory, null, false
-                    )
-                        .asCoroutineDispatcher()
-
-                if (commandLine.getBoolean(nosandboxOption)) {
-                    println("----------------------------------------")
-                    println("Sandbox disabled by command line option!")
-                    println("----------------------------------------")
-                } else {
-                    Sandbox.sandbox(listOf(home, config))
-                }
 
                 try {
-                    val server = ScapesServerHeadless(taskExecutor, config)
+                    val server =
+                        ScapesServerHeadless(defaultBackgroundExecutor, config)
                     server.run(home)
                 } catch (e: IOException) {
                     e.printStackTrace()

@@ -16,12 +16,12 @@
 
 package org.tobi29.scapes.server.extension
 
+import org.tobi29.io.tag.ReadTagMap
+import org.tobi29.io.tag.toMap
 import org.tobi29.logging.KLogging
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.extension.spi.ServerExtensionProvider
-import org.tobi29.io.tag.ReadTagMap
-import org.tobi29.io.tag.toMap
-import java.util.*
+import org.tobi29.utils.spiLoad
 
 class ServerExtensions(private val server: ScapesServer) {
     private val extensions = ArrayList<ServerExtension>()
@@ -32,17 +32,14 @@ class ServerExtensions(private val server: ScapesServer) {
     }
 
     fun loadExtensions(map: ReadTagMap?) {
-        for (provider in ServiceLoader.load(
-                ServerExtensionProvider::class.java)) {
-            try {
-                val name = provider.name
-                val extension = provider.create(server, map?.get(name)?.toMap())
-                if (extension != null) {
-                    logger.info { "Loaded extension: $name" }
-                    extensions.add(extension)
-                }
-            } catch (e: ServiceConfigurationError) {
-                logger.warn { "Unable to load extension: $e" }
+        spiLoad(spiLoad<ServerExtensionProvider>()) { e ->
+            logger.warn { "Unable to load extension: $e" }
+        }.forEach { provider ->
+            val name = provider.name
+            val extension = provider.create(server, map?.get(name)?.toMap())
+            if (extension != null) {
+                logger.info { "Loaded extension: $name" }
+                extensions.add(extension)
             }
         }
     }

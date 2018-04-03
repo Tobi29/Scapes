@@ -68,7 +68,7 @@ class PacketChat : PacketAbstract, PacketBoth {
             throw InvalidPacketDataException("Invalid chat text length!")
         }
         if (text[0] == '/') {
-            player.server.server.commandRegistry()[text.substring(
+            player.server.server.commandRegistry[text.substring(
                     1), player].execute().forEach { output ->
                 player.events.fire(
                         MessageEvent(player, MessageLevel.FEEDBACK_ERROR,

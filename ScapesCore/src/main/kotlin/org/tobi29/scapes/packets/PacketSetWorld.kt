@@ -15,24 +15,23 @@
  */
 package org.tobi29.scapes.packets
 
+import org.tobi29.graphics.Cam
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.WritableByteStream
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.binary.readBinary
+import org.tobi29.io.tag.binary.writeBinary
 import org.tobi29.scapes.block.Registries
 import org.tobi29.scapes.chunk.EnvironmentClient
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteClient
 import org.tobi29.scapes.client.connection.ClientConnection
-import org.tobi29.graphics.Cam
-import org.tobi29.io.ReadableByteStream
-import org.tobi29.io.WritableByteStream
-import org.tobi29.io.tag.binary.readBinary
-import org.tobi29.io.tag.binary.writeBinary
 import org.tobi29.scapes.entity.server.MobPlayerServer
 import org.tobi29.scapes.server.connection.PlayerConnection
-import org.tobi29.io.tag.TagMap
 import org.tobi29.uuid.Uuid
 
-class PacketSetWorld : PacketAbstract,
-        PacketClient {
+class PacketSetWorld : PacketAbstract, PacketClient {
     private lateinit var tag: TagMap
     private var seed = 0L
     private lateinit var uuid: Uuid
@@ -40,22 +39,29 @@ class PacketSetWorld : PacketAbstract,
 
     constructor(type: PacketType) : super(type)
 
-    constructor(type: PacketType,
-                world: WorldServer,
-                player: MobPlayerServer) : super(type) {
+    constructor(
+        type: PacketType,
+        world: WorldServer,
+        player: MobPlayerServer
+    ) : super(type) {
         tag = TagMap { player.write(this) }
         seed = world.seed
         uuid = player.uuid
         environment = world.environment.type.id
     }
 
-    constructor(registry: Registries,
-                world: WorldServer,
-                player: MobPlayerServer) : this(
-            Packet.make(registry, "core.packet.SetWorld"), world, player)
+    constructor(
+        registry: Registries,
+        world: WorldServer,
+        player: MobPlayerServer
+    ) : this(
+        Packet.make(registry, "core.packet.SetWorld"), world, player
+    )
 
-    override fun sendClient(player: PlayerConnection,
-                            stream: WritableByteStream) {
+    override fun sendClient(
+        player: PlayerConnection,
+        stream: WritableByteStream
+    ) {
         tag.writeBinary(stream)
         stream.putLong(seed)
         stream.putLong(uuid.mostSignificantBits)
@@ -63,8 +69,10 @@ class PacketSetWorld : PacketAbstract,
         stream.putInt(environment)
     }
 
-    override fun parseClient(client: ClientConnection,
-                             stream: ReadableByteStream) {
+    override fun parseClient(
+        client: ClientConnection,
+        stream: ReadableByteStream
+    ) {
         tag = readBinary(stream)
         seed = stream.getLong()
         uuid = Uuid(stream.getLong(), stream.getLong())
@@ -73,12 +81,16 @@ class PacketSetWorld : PacketAbstract,
 
     override fun runClient(client: ClientConnection) {
         client.changeWorld(
-                WorldClient(client,
-                        Cam(0.01f, client.loadingDistance.toFloat()),
-                        seed, {
-                    TerrainInfiniteClient(it,
-                            client.loadingDistance shr 4, 512,
-                            client.game.engine.taskExecutor, it.air)
-                }, { EnvironmentClient.make(it, environment) }, tag, uuid))
+            WorldClient(client, client.game.config,
+                Cam(0.01f, client.loadingDistance.toFloat()),
+                seed, {
+                    TerrainInfiniteClient(
+                        it,
+                        client.loadingDistance shr 4, 512,
+                        client.game.engine.taskExecutor, it.air
+                    )
+                }, { EnvironmentClient.make(it, environment) }, tag, uuid
+            )
+        )
     }
 }

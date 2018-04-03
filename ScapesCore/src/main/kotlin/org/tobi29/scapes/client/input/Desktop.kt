@@ -18,9 +18,15 @@ package org.tobi29.scapes.client.input
 
 import kotlinx.coroutines.experimental.CoroutineName
 import kotlinx.coroutines.experimental.launch
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.io.tag.mapMut
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toTag
 import org.tobi29.logging.KLogging
+import org.tobi29.math.vector.Vector2d
+import org.tobi29.math.vector.times
 import org.tobi29.scapes.Debug
-import org.tobi29.scapes.client.ScapesClient
+import org.tobi29.scapes.client.Screenshots
 import org.tobi29.scapes.client.gui.GuiControlsDefault
 import org.tobi29.scapes.client.states.GameStateGameMP
 import org.tobi29.scapes.engine.GameState
@@ -29,23 +35,16 @@ import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiController
 import org.tobi29.scapes.engine.gui.GuiControllerMouse
 import org.tobi29.scapes.engine.input.*
-import org.tobi29.math.vector.Vector2d
-import org.tobi29.math.vector.times
-import org.tobi29.utils.EventDispatcher
-import org.tobi29.graphics.encodePNG
-import org.tobi29.io.IOException
-import org.tobi29.io.filesystem.write
-import org.tobi29.utils.listenAlive
 import org.tobi29.scapes.entity.client.MobPlayerClientMain
-import org.tobi29.io.tag.MutableTagMap
-import org.tobi29.io.tag.mapMut
-import org.tobi29.io.tag.toDouble
-import org.tobi29.io.tag.toTag
+import org.tobi29.utils.EventDispatcher
+import org.tobi29.utils.listenAlive
 import kotlin.collections.set
 
-class InputModeKeyboard(engine: ScapesEngine,
-                        val controller: ControllerDesktop,
-                        configMap: MutableTagMap) : InputModeScapes {
+class InputModeKeyboard(
+    engine: ScapesEngine,
+    val controller: ControllerDesktop,
+    configMap: MutableTagMap
+) : InputModeScapes {
     val events: EventDispatcher
     private val tagMap: MutableTagMap
     private val guiController: GuiControllerMouse
@@ -68,22 +67,30 @@ class InputModeKeyboard(engine: ScapesEngine,
         val miscScrollTag = miscTag.mapMut("Scroll")
         val scrollSensitivity = miscScrollTag["Sensitivity"]?.toDouble() ?: 0.0
 
-        guiController = GuiControllerMouse(engine, controller,
-                scrollSensitivity)
+        guiController = GuiControllerMouse(
+            engine, controller,
+            scrollSensitivity
+        )
 
         val movementTag = tagMap.mapMut("Movement")
         walkForward = ControllerKeyReference.valueOf(
-                movementTag["Forward"].toString())
+            movementTag["Forward"].toString()
+        )
         walkBackward = ControllerKeyReference.valueOf(
-                movementTag["Backward"].toString())
+            movementTag["Backward"].toString()
+        )
         walkLeft = ControllerKeyReference.valueOf(
-                movementTag["Left"].toString())
+            movementTag["Left"].toString()
+        )
         walkRight = ControllerKeyReference.valueOf(
-                movementTag["Right"].toString())
+            movementTag["Right"].toString()
+        )
         walkSprint = ControllerKeyReference.valueOf(
-                movementTag["Sprint"].toString())
+            movementTag["Sprint"].toString()
+        )
         jump = ControllerKeyReference.valueOf(
-                movementTag["Jump"].toString())
+            movementTag["Jump"].toString()
+        )
 
         val cameraTag = tagMap.mapMut("Camera")
         val cameraSensitivity = cameraTag["Sensitivity"]?.toDouble() ?: 0.0
@@ -91,27 +98,35 @@ class InputModeKeyboard(engine: ScapesEngine,
         val actionTag = tagMap.mapMut("Action")
         left = ControllerKeyReference.valueOf(actionTag["Left"].toString())
         right = ControllerKeyReference.valueOf(
-                actionTag["Right"].toString())
+            actionTag["Right"].toString()
+        )
 
         val menuTag = tagMap.mapMut("Menu")
         val inventory = ControllerKeyReference.valueOf(
-                menuTag["Inventory"].toString())
+            menuTag["Inventory"].toString()
+        )
         val menu = ControllerKeyReference.valueOf(menuTag["Menu"].toString())
         val chat = ControllerKeyReference.valueOf(menuTag["Chat"].toString())
 
         val hotbarTag = tagMap.mapMut("Hotbar")
         val hotbarAddRight = ControllerKeyReference.valueOf(
-                hotbarTag["AddRight"].toString())
+            hotbarTag["AddRight"].toString()
+        )
         val hotbarSubtractRight = ControllerKeyReference.valueOf(
-                hotbarTag["SubtractRight"].toString())
+            hotbarTag["SubtractRight"].toString()
+        )
         val hotbarAddLeft = ControllerKeyReference.valueOf(
-                hotbarTag["AddLeft"].toString())
+            hotbarTag["AddLeft"].toString()
+        )
         val hotbarSubtractLeft = ControllerKeyReference.valueOf(
-                hotbarTag["SubtractLeft"].toString())
+            hotbarTag["SubtractLeft"].toString()
+        )
         val hotbarAdd = ControllerKeyReference.valueOf(
-                hotbarTag["Add"].toString())
+            hotbarTag["Add"].toString()
+        )
         val hotbarSubtract = ControllerKeyReference.valueOf(
-                hotbarTag["Subtract"].toString())
+            hotbarTag["Subtract"].toString()
+        )
         val hotbarRight = Array(10) {
             ControllerKeyReference.valueOf(hotbarTag["${it}Right"].toString())
         }
@@ -124,101 +139,112 @@ class InputModeKeyboard(engine: ScapesEngine,
 
         events = EventDispatcher(engine.events) {
             listen<ControllerMouse.DeltaEvent>(
-                    { it.state.controller == controller }) { event ->
+                { it.state.controller == controller }) { event ->
                 val dir = event.delta * cameraSensitivity
                 events.fire(MobPlayerClientMain.InputDirectionEvent(dir))
             }
-            val references = arrayOf(menu, inventory, chat, hotbarAddRight,
-                    hotbarSubtractRight, hotbarAddLeft, hotbarSubtractLeft,
-                    hotbarAdd, hotbarSubtract, *hotbarRight, *hotbarLeft,
-                    *hotbar)
+            val references = arrayOf(
+                menu, inventory, chat, hotbarAddRight,
+                hotbarSubtractRight, hotbarAddLeft, hotbarSubtractLeft,
+                hotbarAdd, hotbarSubtract, *hotbarRight, *hotbarLeft,
+                *hotbar
+            )
             listenAlive<ControllerButtons.PressEvent>(
-                    {
-                        it.state.controller == controller
-                                && it.action == ControllerButtons.Action.PRESS
-                    }) { event ->
-                val pressed = ControllerKeyReference.isPressed(event.key,
-                        controller, *references)
+                {
+                    it.state.controller == controller
+                            && it.action == ControllerButtons.Action.PRESS
+                }) { event ->
+                val pressed = ControllerKeyReference.isPressed(
+                    event.key,
+                    controller, *references
+                )
                 when (pressed) {
                     menu -> {
                         if (MobPlayerClientMain.MenuOpenEvent().apply {
-                            events.fire(this)
-                        }.success) {
+                                events.fire(this)
+                            }.success) {
                             event.muted = true
                             return@listenAlive
                         }
                     }
                     inventory -> {
                         if (MobPlayerClientMain.MenuInventoryEvent().apply {
-                            events.fire(this)
-                        }.success) {
+                                events.fire(this)
+                            }.success) {
                             event.muted = true
                             return@listenAlive
                         }
                     }
                     chat -> {
                         if (MobPlayerClientMain.MenuChatEvent().apply {
-                            events.fire(this)
-                        }.success) {
+                                events.fire(this)
+                            }.success) {
                             event.muted = true
                             return@listenAlive
                         }
                     }
                     hotbarAddRight -> {
                         if (MobPlayerClientMain.HotbarChangeRightEvent(
-                                1).apply {
-                            events.fire(this)
-                        }.success) {
+                                1
+                            ).apply {
+                                events.fire(this)
+                            }.success) {
                             event.muted = true
                             return@listenAlive
                         }
                     }
                     hotbarSubtractRight -> {
                         if (MobPlayerClientMain.HotbarChangeRightEvent(
-                                -1).apply {
-                            events.fire(this)
-                        }.success) {
+                                -1
+                            ).apply {
+                                events.fire(this)
+                            }.success) {
                             event.muted = true
                             return@listenAlive
                         }
                     }
                     hotbarAddLeft -> {
                         if (MobPlayerClientMain.HotbarChangeLeftEvent(1).apply {
-                            events.fire(this)
-                        }.success) {
+                                events.fire(this)
+                            }.success) {
                             event.muted = true
                             return@listenAlive
                         }
                     }
                     hotbarSubtractLeft -> {
                         if (MobPlayerClientMain.HotbarChangeLeftEvent(
-                                -1).apply {
-                            events.fire(this)
-                        }.success) {
+                                -1
+                            ).apply {
+                                events.fire(this)
+                            }.success) {
                             event.muted = true
                             return@listenAlive
                         }
                     }
                     hotbarAdd -> {
                         if (MobPlayerClientMain.HotbarChangeRightEvent(
-                                1).apply {
-                            events.fire(this)
-                        }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
-                                1).apply {
-                            events.fire(this)
-                        }.success) {
+                                1
+                            ).apply {
+                                events.fire(this)
+                            }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
+                                1
+                            ).apply {
+                                events.fire(this)
+                            }.success) {
                             event.muted = true
                             return@listenAlive
                         }
                     }
                     hotbarSubtract -> {
                         if (MobPlayerClientMain.HotbarChangeRightEvent(
-                                -1).apply {
-                            events.fire(this)
-                        }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
-                                -1).apply {
-                            events.fire(this)
-                        }.success) {
+                                -1
+                            ).apply {
+                                events.fire(this)
+                            }.success or MobPlayerClientMain.HotbarChangeLeftEvent(
+                                -1
+                            ).apply {
+                                events.fire(this)
+                            }.success) {
                             event.muted = true
                             return@listenAlive
                         }
@@ -228,30 +254,34 @@ class InputModeKeyboard(engine: ScapesEngine,
                             when (pressed) {
                                 hotbarRight[i] -> {
                                     if (MobPlayerClientMain.HotbarSetRightEvent(
-                                            i).apply {
-                                        events.fire(this)
-                                    }.success) {
+                                            i
+                                        ).apply {
+                                            events.fire(this)
+                                        }.success) {
                                         event.muted = true
                                         return@listenAlive
                                     }
                                 }
                                 hotbarLeft[i] -> {
                                     if (MobPlayerClientMain.HotbarSetLeftEvent(
-                                            i).apply {
-                                        events.fire(this)
-                                    }.success) {
+                                            i
+                                        ).apply {
+                                            events.fire(this)
+                                        }.success) {
                                         event.muted = true
                                         return@listenAlive
                                     }
                                 }
                                 hotbar[i] -> {
                                     if (MobPlayerClientMain.HotbarSetRightEvent(
-                                            i).apply {
-                                        events.fire(this)
-                                    }.success or MobPlayerClientMain.HotbarSetLeftEvent(
-                                            i).apply {
-                                        events.fire(this)
-                                    }.success) {
+                                            i
+                                        ).apply {
+                                            events.fire(this)
+                                        }.success or MobPlayerClientMain.HotbarSetLeftEvent(
+                                            i
+                                        ).apply {
+                                            events.fire(this)
+                                        }.success) {
                                         event.muted = true
                                         return@listenAlive
                                     }
@@ -269,18 +299,16 @@ class InputModeKeyboard(engine: ScapesEngine,
                     }
                 }
                 if (event.key == ControllerKey.KEY_F2) {
-                    engine.graphics.requestScreenshot { image ->
-                        launch(engine.taskExecutor + CoroutineName(
-                                "Write-Screenshot")) {
-                            val scapes = engine[ScapesClient.COMPONENT]
-                            val path = scapes.home.resolve(
-                                    "screenshots").resolve(
-                                    "${System.currentTimeMillis()}.png")
-                            try {
-                                write(path) { encodePNG(image, it, 9, false) }
-                            } catch (e: IOException) {
-                                logger.error { "Error saving screenshot: $e" }
-                            }
+                    engine.graphics.dispatch { gl ->
+                        val image = gl.getFrontBuffer(
+                            0, 0, gl.contentWidth, gl.contentHeight
+                        )
+                        launch(
+                            engine.taskExecutor + CoroutineName(
+                                "Write-Screenshot"
+                            )
+                        ) {
+                            engine[Screenshots.COMPONENT].saveScreenshot(image)
                         }
                     }
                     event.muted = true
@@ -289,16 +317,19 @@ class InputModeKeyboard(engine: ScapesEngine,
                 if (event.key == ControllerKey.KEY_F3) {
                     val shift = controller.isDown(ControllerKey.KEY_SHIFT_LEFT)
                     val control = controller.isDown(
-                            ControllerKey.KEY_CONTROL_LEFT)
+                        ControllerKey.KEY_CONTROL_LEFT
+                    )
                     if (shift && control) {
                         throw DebugCrashException()
                     } else if (Debug.enabled()) {
                         if (shift) {
                             engine.profiler.visible = !engine.profiler.visible
                         } else if (control) {
-                            engine.performance.visible = !engine.performance.visible
+                            engine.performance.visible =
+                                    !engine.performance.visible
                         } else {
-                            engine.debugValues.visible = !engine.debugValues.visible
+                            engine.debugValues.visible =
+                                    !engine.debugValues.visible
                         }
                         event.muted = true
                         return@listenAlive
@@ -340,27 +371,48 @@ class InputModeKeyboard(engine: ScapesEngine,
         val hotbarTag = tagMap.mapMut("Hotbar")
         check("AddRight", ControllerKey.SCROLL_DOWN, hotbarTag)
         check("SubtractRight", ControllerKey.SCROLL_UP, hotbarTag)
-        check("AddLeft",
-                ControllerKeyReference(ControllerKey.SCROLL_DOWN,
-                        ControllerKey.KEY_CONTROL_LEFT), hotbarTag)
-        check("SubtractLeft",
-                ControllerKeyReference(ControllerKey.SCROLL_UP,
-                        ControllerKey.KEY_CONTROL_LEFT), hotbarTag)
-        check("Add",
-                ControllerKeyReference(ControllerKey.SCROLL_DOWN,
-                        ControllerKey.KEY_ALT_LEFT), hotbarTag)
-        check("Subtract",
-                ControllerKeyReference(ControllerKey.SCROLL_UP,
-                        ControllerKey.KEY_ALT_LEFT), hotbarTag)
+        check(
+            "AddLeft",
+            ControllerKeyReference(
+                ControllerKey.SCROLL_DOWN,
+                ControllerKey.KEY_CONTROL_LEFT
+            ), hotbarTag
+        )
+        check(
+            "SubtractLeft",
+            ControllerKeyReference(
+                ControllerKey.SCROLL_UP,
+                ControllerKey.KEY_CONTROL_LEFT
+            ), hotbarTag
+        )
+        check(
+            "Add",
+            ControllerKeyReference(
+                ControllerKey.SCROLL_DOWN,
+                ControllerKey.KEY_ALT_LEFT
+            ), hotbarTag
+        )
+        check(
+            "Subtract",
+            ControllerKeyReference(
+                ControllerKey.SCROLL_UP,
+                ControllerKey.KEY_ALT_LEFT
+            ), hotbarTag
+        )
         for (i in 0..9) {
             val key = numberKey(
-                    (i + 1) % 10)
+                (i + 1) % 10
+            )
             check("${i}Right", key, hotbarTag)
-            check("${i}Left",
-                    ControllerKeyReference(key, ControllerKey.KEY_CONTROL_LEFT),
-                    hotbarTag)
-            check("$i", ControllerKeyReference(key, ControllerKey.KEY_ALT_LEFT),
-                    hotbarTag)
+            check(
+                "${i}Left",
+                ControllerKeyReference(key, ControllerKey.KEY_CONTROL_LEFT),
+                hotbarTag
+            )
+            check(
+                "$i", ControllerKeyReference(key, ControllerKey.KEY_ALT_LEFT),
+                hotbarTag
+            )
         }
 
         val miscTag = tagMap.mapMut("Misc")
@@ -369,25 +421,31 @@ class InputModeKeyboard(engine: ScapesEngine,
         check("Sensitivity", 1.0, miscScrollTag)
     }
 
-    private fun check(id: String,
-                      def: ControllerKey,
-                      tagMap: MutableTagMap) {
+    private fun check(
+        id: String,
+        def: ControllerKey,
+        tagMap: MutableTagMap
+    ) {
         if (!tagMap.containsKey(id)) {
             tagMap[id] = def.toString().toTag()
         }
     }
 
-    private fun check(id: String,
-                      def: ControllerKeyReference,
-                      tagMap: MutableTagMap) {
+    private fun check(
+        id: String,
+        def: ControllerKeyReference,
+        tagMap: MutableTagMap
+    ) {
         if (!tagMap.containsKey(id)) {
             tagMap[id] = def.toString().toTag()
         }
     }
 
-    private fun check(id: String,
-                      def: Double,
-                      tagMap: MutableTagMap) {
+    private fun check(
+        id: String,
+        def: Double,
+        tagMap: MutableTagMap
+    ) {
         if (!tagMap.containsKey(id)) {
             tagMap[id] = def.toTag()
         }
@@ -407,11 +465,11 @@ class InputModeKeyboard(engine: ScapesEngine,
         return controller.lastActive
     }
 
-    override fun createControlsGUI(state: GameState,
-                                   prev: Gui): Gui {
-        return GuiControlsDefault(state, prev,
-                state.engine[ScapesClient.COMPONENT], tagMap, controller,
-                prev.style)
+    override fun createControlsGUI(
+        state: GameState,
+        prev: Gui
+    ): Gui {
+        return GuiControlsDefault(state, prev, tagMap, controller, prev.style)
     }
 
     override fun walk(): Vector2d {
@@ -462,8 +520,10 @@ class InputModeKeyboard(engine: ScapesEngine,
 
     companion object : KLogging() {
         private fun numberKey(i: Int) = ControllerKey.valueOf(
-                "KEY_$i") ?: throw IllegalArgumentException(
-                "Invalid number key: $i")
+            "KEY_$i"
+        ) ?: throw IllegalArgumentException(
+            "Invalid number key: $i"
+        )
     }
 
     private class DebugCrashException : Exception("Debug crash report")

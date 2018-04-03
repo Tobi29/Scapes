@@ -17,82 +17,118 @@
 package org.tobi29.scapes.server.format.sql
 
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.runBlocking
+import org.tobi29.io.*
+import org.tobi29.io.filesystem.FilePath
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.io.tag.TagMap
+import org.tobi29.io.tag.binary.readBinary
+import org.tobi29.io.tag.binary.writeBinary
+import org.tobi29.io.tag.toMutTag
+import org.tobi29.io.tag.toTag
 import org.tobi29.logging.KLogging
+import org.tobi29.math.threadLocalRandom
 import org.tobi29.scapes.chunk.EnvironmentServer
 import org.tobi29.scapes.chunk.WorldServer
 import org.tobi29.scapes.chunk.terrain.infinite.TerrainInfiniteServer
-import org.tobi29.math.threadLocalRandom
-import org.tobi29.sql.*
-import org.tobi29.io.*
-import org.tobi29.io.filesystem.FilePath
-import org.tobi29.io.filesystem.isNotHidden
-import org.tobi29.io.filesystem.isRegularFile
-import org.tobi29.io.filesystem.listRecursive
-import org.tobi29.io.tag.binary.readBinary
-import org.tobi29.io.tag.binary.writeBinary
-import org.tobi29.scapes.plugins.PluginFile
 import org.tobi29.scapes.plugins.Plugins
+import org.tobi29.scapes.plugins.spi.PluginReference
+import org.tobi29.scapes.plugins.spi.refer
+import org.tobi29.scapes.plugins.spi.supports
 import org.tobi29.scapes.server.ScapesServer
 import org.tobi29.scapes.server.format.PlayerData
 import org.tobi29.scapes.server.format.WorldFormat
-import org.tobi29.io.tag.MutableTagMap
-import org.tobi29.io.tag.TagMap
-import org.tobi29.io.tag.toMutTag
-import org.tobi29.io.tag.toTag
+import org.tobi29.sql.*
+import org.tobi29.utils.VersionException
+import org.tobi29.utils.versionParse
 
-open class SQLWorldFormat(protected val path: FilePath,
-                          database: SQLDatabase,
-                          private val useForeignKeys: Boolean = true) : WorldFormat {
+class SQLWorldFormat(
+    private val path: FilePath,
+    database: SQLDatabase,
+    private val useForeignKeys: Boolean = true
+) : WorldFormat {
     override val plugins: Plugins
     override val playerData: PlayerData
     override val seed: Long
-    protected val idStorage: MutableTagMap
+    private val idStorage: MutableTagMap
 
     // MetaData
-    protected val getMetaData = database.compileQuery("MetaData",
-            arrayOf("Value"), "Name")
-    protected val replaceMetaData = database.compileReplace("MetaData", "Name",
-            "Value")
+    private val getMetaData = database.compileQuery(
+        "MetaData", arrayOf("Value"), "Name"
+    )
+    private val replaceMetaData = database.compileReplace(
+        "MetaData", "Name", "Value"
+    )
+
+    // Plugins
+    private val getPlugins = database.compileQuery(
+        "Plugins", arrayOf("ID", "Version"), *emptyArray<String>()
+    )
+    private val replacePlugins = database.compileReplace(
+        "Plugins", "ID", "Version"
+    )
 
     // Data
-    protected val getData = database.compileQuery("Data", arrayOf("Value"),
-            "Name")
-    protected val replaceData = database.compileReplace("Data", "Name", "Value")
+    private val getData = database.compileQuery(
+        "Data", arrayOf("Value"), "Name"
+    )
+    private val replaceData = database.compileReplace(
+        "Data", "Name", "Value"
+    )
 
     // Worlds
-    protected val getWorldData = database.compileQuery("Worlds",
-            arrayOf("Data"), "World")
-    protected val setWorldData = database.compileUpdate("Worlds",
-            arrayOf("World"), "Data")
-    protected val insertWorld = database.compileInsert("Worlds", "World")
-    protected val deleteWorld = database.compileDelete("Worlds", "World")
+    private val getWorldData = database.compileQuery(
+        "Worlds",
+        arrayOf("Data"), "World"
+    )
+    private val setWorldData = database.compileUpdate(
+        "Worlds",
+        arrayOf("World"), "Data"
+    )
+    private val insertWorld = database.compileInsert(
+        "Worlds", "World"
+    )
+    private val deleteWorld = database.compileDelete(
+        "Worlds", "World"
+    )
 
     // Chunks
-    protected val getChunk = database.compileQuery("Chunks", arrayOf("Data"),
-            "World", "X", "Y")
-    protected val replaceChunk = database.compileReplace("Chunks", "World", "X",
-            "Y", "Data")
-    protected val deleteWorldChunks = database.compileDelete("Chunks", "World")
+    private val getChunk = database.compileQuery(
+        "Chunks", arrayOf("Data"), "World", "X", "Y"
+    )
+    private val replaceChunk = database.compileReplace(
+        "Chunks", "World", "X", "Y", "Data"
+    )
+    private val deleteWorldChunks = database.compileDelete(
+        "Chunks", "World"
+    )
 
     // Players
-    protected val getPlayer = database.compileQuery("Players",
-            arrayOf("World", "Permissions", "Entity"), "ID")
-    protected val insertPlayer = database.compileInsert("Players",
-            "ID", "Permissions")
-    protected val replacePlayer = database.compileReplace("Players", "ID",
-            "World", "Permissions", "Entity")
-    protected val deletePlayer = database.compileDelete("Players", "ID")
-    protected val checkPlayer = database.compileQuery("Players",
-            arrayOf("1"), "ID")
-    protected val setWorldPlayers = database.compileUpdate("Players",
-            arrayOf("World"), "World")
+    private val getPlayer = database.compileQuery(
+        "Players", arrayOf("World", "Permissions", "Entity"), "ID"
+    )
+    private val insertPlayer = database.compileInsert(
+        "Players", "ID", "Permissions"
+    )
+    private val replacePlayer = database.compileReplace(
+        "Players", "ID", "World", "Permissions", "Entity"
+    )
+    private val deletePlayer = database.compileDelete(
+        "Players", "ID"
+    )
+    private val checkPlayer = database.compileQuery(
+        "Players", arrayOf("1"), "ID"
+    )
+    private val setWorldPlayers = database.compileUpdate(
+        "Players", arrayOf("World"), "World"
+    )
 
     private val stream = MemoryViewStreamDefault()
 
     init {
-        playerData = SQLPlayerData(getPlayer, insertPlayer, replacePlayer,
-                deletePlayer, checkPlayer)
+        playerData = SQLPlayerData(
+            getPlayer, insertPlayer, replacePlayer,
+            deletePlayer, checkPlayer
+        )
         checkDatabase(database)
         var rows = getMetaData("Seed")
         if (!rows.isEmpty()) {
@@ -119,24 +155,38 @@ open class SQLWorldFormat(protected val path: FilePath,
         } else {
             TagMap()
         }.toMutTag()
-        plugins = runBlocking { createPlugins() }
+        plugins = createPlugins()
     }
 
-    open suspend protected fun createPlugins(): Plugins {
-        return Plugins(pluginFiles(), idStorage)
+    private fun createPlugins(): Plugins {
+        return Plugins(plugins().map { reference ->
+            Plugins.available().asSequence()
+                .filter { it.first.supports(reference) }
+                .maxBy { it.first.version }
+                    ?: throw IOException("Missing plugin required by save: $reference")
+        }, idStorage)
     }
 
-    @Synchronized override fun registerWorld(server: ScapesServer,
-                                             environmentSupplier: Function1<WorldServer, EnvironmentServer>,
-                                             name: String,
-                                             seed: Long): WorldServer {
-        val format = SQLTerrainInfiniteFormat(getChunk.supply(name),
-                replaceChunk.supply(name))
-        val world = WorldServer(this, name, seed, server.connection,
-                server.taskExecutor + Job(server.taskExecutor[Job]), {
-            TerrainInfiniteServer(it, 512, format, it.environment.generator(),
-                    arrayOf(it.environment.populator()), it.air)
-        }, environmentSupplier)
+    @Synchronized
+    override fun registerWorld(
+        server: ScapesServer,
+        environmentSupplier: Function1<WorldServer, EnvironmentServer>,
+        name: String,
+        seed: Long
+    ): WorldServer {
+        val format = SQLTerrainInfiniteFormat(
+            getChunk.supply(name),
+            replaceChunk.supply(name)
+        )
+        val world = WorldServer(
+            this, name, seed, server.connection,
+            server.taskExecutor + Job(server.taskExecutor[Job]), {
+                TerrainInfiniteServer(
+                    it, 512, format, it.environment.generator(),
+                    arrayOf(it.environment.populator()), it.air
+                )
+            }, environmentSupplier
+        )
         val rows = getWorldData(name)
         if (!rows.isEmpty()) {
             val row = rows[0]
@@ -150,7 +200,8 @@ open class SQLWorldFormat(protected val path: FilePath,
         return world
     }
 
-    @Synchronized override fun removeWorld(world: WorldServer) {
+    @Synchronized
+    override fun removeWorld(world: WorldServer) {
         try {
             world.toTag().writeBinary(stream, 1)
             stream.flip()
@@ -163,7 +214,8 @@ open class SQLWorldFormat(protected val path: FilePath,
         }
     }
 
-    @Synchronized override fun deleteWorld(name: String): Boolean {
+    @Synchronized
+    override fun deleteWorld(name: String): Boolean {
         try {
             deleteWorld.invoke(name)
             if (!useForeignKeys) {
@@ -177,8 +229,8 @@ open class SQLWorldFormat(protected val path: FilePath,
         return true
     }
 
-    @Synchronized override fun dispose() {
-        plugins.dispose()
+    @Synchronized
+    override fun dispose() {
         idStorage.toTag().writeBinary(stream, 1.toByte())
         stream.flip()
         val array = ByteArray(stream.remaining())
@@ -187,51 +239,81 @@ open class SQLWorldFormat(protected val path: FilePath,
         replaceData(arrayOf("IDs", array))
     }
 
-    open protected suspend fun pluginFiles(): List<PluginFile> {
-        val path = this.path.resolve("plugins")
-        val files = listRecursive(path) {
-            filter { isRegularFile(it) }
-                    .filter { isNotHidden(it) }.toList()
+    private fun plugins(): List<PluginReference> =
+        getPlugins().map {
+            val id = it[0].toString()
+            val version = try {
+                versionParse(it[1].toString())
+            } catch (e: VersionException) {
+                throw IOException(e)
+            }
+            PluginReference(id, version)
         }
-        val plugins = ArrayList<PluginFile>(files.size)
-        for (file in files) {
-            plugins.add(PluginFile.loadFile(file))
-        }
-        return plugins
-    }
 
     companion object : KLogging() {
         fun checkDatabase(database: SQLDatabase) {
-            database.createTable("Data", arrayOf("Name"),
-                    SQLColumn("Name", SQLType.VARCHAR, "255"),
-                    SQLColumn("Value", SQLType.LONGBLOB))
-            database.createTable("MetaData", arrayOf("Name"),
-                    SQLColumn("Name", SQLType.VARCHAR, "255"),
-                    SQLColumn("Value", SQLType.VARCHAR, "255"))
-            database.createTable("Worlds", arrayOf("World"),
-                    SQLColumn("World", SQLType.VARCHAR, "255"),
-                    SQLColumn("Data", SQLType.LONGBLOB))
-            database.createTable("Players", arrayOf("ID"),
-                    SQLColumn("ID", SQLType.CHAR, "40"),
-                    SQLColumn("World", SQLType.VARCHAR, "255",
-                            SQLForeignKey("Worlds", "World",
-                                    SQLReferentialAction.SET_NULL)),
-                    SQLColumn("Permissions", SQLType.INT, notNull = true),
-                    SQLColumn("Entity", SQLType.LONGBLOB))
-            database.createTable("Chunks", arrayOf("World", "X", "Y"),
-                    SQLColumn("World", SQLType.VARCHAR, "255",
-                            SQLForeignKey("Worlds", "World",
-                                    SQLReferentialAction.CASCADE)),
-                    SQLColumn("X", SQLType.INT),
-                    SQLColumn("Y", SQLType.INT),
-                    SQLColumn("Data", SQLType.LONGBLOB, notNull = true))
+            database.createTable(
+                "Data", arrayOf("Name"),
+                SQLColumn("Name", SQLType.VARCHAR, "255"),
+                SQLColumn("Value", SQLType.LONGBLOB)
+            )
+            database.createTable(
+                "MetaData", arrayOf("Name"),
+                SQLColumn("Name", SQLType.VARCHAR, "255"),
+                SQLColumn("Value", SQLType.VARCHAR, "255")
+            )
+            database.createTable(
+                "Plugins", arrayOf("ID", "Version"),
+                SQLColumn("ID", SQLType.VARCHAR, "255"),
+                SQLColumn("Version", SQLType.VARCHAR, "255")
+            )
+            database.createTable(
+                "Worlds", arrayOf("World"),
+                SQLColumn("World", SQLType.VARCHAR, "255"),
+                SQLColumn("Data", SQLType.LONGBLOB)
+            )
+            database.createTable(
+                "Players", arrayOf("ID"),
+                SQLColumn("ID", SQLType.CHAR, "40"),
+                SQLColumn(
+                    "World", SQLType.VARCHAR, "255",
+                    SQLForeignKey(
+                        "Worlds", "World",
+                        SQLReferentialAction.SET_NULL
+                    )
+                ),
+                SQLColumn("Permissions", SQLType.INT, notNull = true),
+                SQLColumn("Entity", SQLType.LONGBLOB)
+            )
+            database.createTable(
+                "Chunks", arrayOf("World", "X", "Y"),
+                SQLColumn(
+                    "World", SQLType.VARCHAR, "255",
+                    SQLForeignKey(
+                        "Worlds", "World",
+                        SQLReferentialAction.CASCADE
+                    )
+                ),
+                SQLColumn("X", SQLType.INT),
+                SQLColumn("Y", SQLType.INT),
+                SQLColumn("Data", SQLType.LONGBLOB, notNull = true)
+            )
         }
 
-        fun initDatabase(database: SQLDatabase,
-                         seed: Long) {
+        fun initDatabase(
+            database: SQLDatabase,
+            seed: Long,
+            plugins: List<PluginReference> = Plugins.available().map { it.first.refer() }
+        ) {
             checkDatabase(database)
             database.compileReplace("MetaData", "Name", "Value")(
-                    arrayOf("Seed", seed))
+                arrayOf("Seed", seed)
+            )
+            database.compileReplace("Plugins", "ID", "Version")(
+                *plugins.map {
+                    arrayOf(it.id, it.version.toString())
+                }.toTypedArray()
+            )
         }
     }
 }

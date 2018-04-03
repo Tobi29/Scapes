@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.tobi29.scapes.client.gui
 
 import org.tobi29.io.tag.MutableTagMap
 import org.tobi29.io.tag.mapMut
-import org.tobi29.scapes.client.ScapesClient
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.Gui
 import org.tobi29.scapes.engine.gui.GuiStyle
@@ -26,7 +25,6 @@ import org.tobi29.scapes.engine.input.ControllerJoystick
 
 class GuiControlsGamepad(state: GameState,
                          previous: Gui,
-                         game: ScapesClient,
                          tagMap: MutableTagMap,
                          controller: ControllerJoystick,
                          style: GuiStyle) : GuiControls(state, previous,

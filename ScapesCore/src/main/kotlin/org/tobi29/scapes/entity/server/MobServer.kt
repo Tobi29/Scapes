@@ -20,8 +20,7 @@ import org.tobi29.io.tag.TagMap
 import org.tobi29.io.tag.toMap
 import org.tobi29.math.AABB3
 import org.tobi29.math.add
-import org.tobi29.math.vector.MutableVector3d
-import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.*
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.block.BlockType
 import org.tobi29.scapes.chunk.WorldServer
@@ -35,13 +34,16 @@ import org.tobi29.utils.Pool
 import org.tobi29.utils.forAllObjects
 import kotlin.collections.set
 
-abstract class MobServer(type: EntityType<*, *>,
-                         world: WorldServer,
-                         pos: Vector3d,
-                         speed: Vector3d,
-                         protected val collision: AABB3) : EntityAbstractServer(
-        type, world, pos),
-        Mob {
+abstract class MobServer(
+    type: EntityType<*, *>,
+    world: WorldServer,
+    pos: Vector3d,
+    speed: Vector3d,
+    protected val collision: AABB3
+) : EntityAbstractServer(
+    type, world, pos
+),
+    Mob {
     protected val speed: MutableVector3d
     protected val rot = MutableVector3d()
     protected val positionSender: MobPositionSenderServer
@@ -108,11 +110,15 @@ abstract class MobServer(type: EntityType<*, *>,
         positionSender.sendRotation(uuid, this.rot.now(), true)
     }
 
-    open fun push(x: Double,
-                  y: Double,
-                  z: Double) {
+    open fun push(
+        x: Double,
+        y: Double,
+        z: Double
+    ) {
         assert { world.checkThread() || !world.hasEntity(this) }
-        speed.addX(x).addY(y).addZ(z)
+        speed.addX(x)
+        speed.addY(y)
+        speed.addZ(z)
         positionSender.sendSpeed(uuid, speed.now(), true)
     }
 
@@ -125,37 +131,51 @@ abstract class MobServer(type: EntityType<*, *>,
     }
 
     fun updatePosition() {
-        positionSender.submitUpdate(uuid, pos.now(), speed.now(), rot.now(),
-                physicsState.isOnGround, physicsState.slidingWall,
-                physicsState.isInWater, isSwimming, true)
+        positionSender.submitUpdate(
+            uuid, pos.now(), speed.now(), rot.now(),
+            physicsState.isOnGround, physicsState.slidingWall,
+            physicsState.isInWater, isSwimming, true
+        )
     }
 
     open fun move(delta: Double) {
-        if (!world.terrain.isBlockTicking(pos.x.floorToInt(),
-                pos.y.floorToInt(), pos.z.floorToInt())) {
+        if (!world.terrain.isBlockTicking(
+                pos.x.floorToInt(),
+                pos.y.floorToInt(), pos.z.floorToInt()
+            )) {
             return
         }
-        EntityPhysics.updateVelocity(delta, speed, world.gravity,
-                gravitationMultiplier, airFriction, groundFriction,
-                waterFriction, wallFriction, physicsState)
+        EntityPhysics.updateVelocity(
+            delta, speed, world.gravity,
+            gravitationMultiplier, airFriction, groundFriction,
+            waterFriction, wallFriction, physicsState
+        )
         val aabb = currentAABB()
         val aabbs = AABBS.get()
-        EntityPhysics.collisions(delta, speed, world.terrain, aabb,
-                stepHeight, aabbs)
-        EntityPhysics.move(delta, pos, speed, aabb, stepHeight,
-                physicsState, aabbs)
+        EntityPhysics.collisions(
+            delta, speed, world.terrain, aabb,
+            stepHeight, aabbs
+        )
+        EntityPhysics.move(
+            delta, pos, speed, aabb, stepHeight,
+            physicsState, aabbs
+        )
         if (isOnGround) {
             speed.setZ(speed.z / (1.0 + 4.0 * delta))
         }
         EntityPhysics.collide(delta, aabb, aabbs, physicsState) {
             it.collision.inside(this, delta)
         }
-        isHeadInWater = world.terrain.type(pos.x.floorToInt(),
-                pos.y.floorToInt(),
-                (pos.z + 0.7).floorToInt()).isLiquid
-        positionSender.submitUpdate(uuid, pos.now(), speed.now(), rot.now(),
-                physicsState.isOnGround, physicsState.slidingWall,
-                physicsState.isInWater, physicsState.isSwimming)
+        isHeadInWater = world.terrain.type(
+            pos.x.floorToInt(),
+            pos.y.floorToInt(),
+            (pos.z + 0.7).floorToInt()
+        ).isLiquid
+        positionSender.submitUpdate(
+            uuid, pos.now(), speed.now(), rot.now(),
+            physicsState.isOnGround, physicsState.slidingWall,
+            physicsState.isInWater, physicsState.isSwimming
+        )
         aabbs.reset()
         aabbs.forAllObjects { it.collision = BlockType.STANDARD_COLLISION }
     }

@@ -17,15 +17,14 @@
 package org.tobi29.scapes.client.connection
 
 import kotlinx.coroutines.experimental.CoroutineName
-import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.yield
 import org.tobi29.coroutines.Timer
+import org.tobi29.coroutines.delayNanos
 import org.tobi29.coroutines.loop
 import org.tobi29.io.IOException
 import org.tobi29.logging.KLogging
 import org.tobi29.scapes.client.states.GameStateGameMP
-import org.tobi29.scapes.client.states.GameStateServerDisconnect
 import org.tobi29.scapes.entity.skin.ClientSkinStorage
 import org.tobi29.scapes.packets.PacketAbstract
 import org.tobi29.scapes.packets.PacketPingClient
@@ -33,17 +32,17 @@ import org.tobi29.scapes.packets.PacketServer
 import org.tobi29.scapes.plugins.Plugins
 import org.tobi29.server.*
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.TimeUnit
 
 class RemoteClientConnection(
-        private val worker: ConnectionWorker,
-        game: GameStateGameMP,
-        private val address: RemoteAddress,
-        private val channel: PacketBundleChannel,
-        private val rateChannel: SSLChannel,
-        plugins: Plugins,
-        loadingDistance: Int,
-        skinStorage: ClientSkinStorage
+    private val worker: ConnectionWorker,
+    game: GameStateGameMP,
+    private val address: RemoteAddress,
+    private val channel: PacketBundleChannel,
+    private val rateChannel: SSLChannel,
+    plugins: Plugins,
+    loadingDistance: Int,
+    skinStorage: ClientSkinStorage,
+    private val onError: (String, RemoteAddress?, Double?) -> Unit
 ) : ClientConnection(game, plugins, loadingDistance, skinStorage) {
     // TODO: Port away
     private val sendQueue = ConcurrentLinkedQueue<PacketServer>()
@@ -53,17 +52,21 @@ class RemoteClientConnection(
 
     override suspend fun start() {
         launch(game.engine.taskExecutor + CoroutineName("Connection-Rate")) {
-            Timer().apply { init() }.loop(Timer.toDiff(1.0),
-                    { delay(it, TimeUnit.NANOSECONDS) }) {
-                if (isClosed) return@loop false
+            Timer().apply { init() }
+                .loop(Timer.toDiff(1.0), { delayNanos(it) }) {
+                    if (isClosed) return@loop false
 
-                send(PacketPingClient(plugins.registry,
-                        System.currentTimeMillis()))
-                downloadDebug.setValue(rateChannel.inputRate / 128.0)
-                uploadDebug.setValue(rateChannel.outputRate / 128.0)
+                    send(
+                        PacketPingClient(
+                            plugins.registry,
+                            System.currentTimeMillis()
+                        )
+                    )
+                    downloadDebug.setValue(rateChannel.inputRate / 128.0)
+                    uploadDebug.setValue(rateChannel.outputRate / 128.0)
 
-                true
-            }
+                    true
+                }
         }
     }
 
@@ -95,17 +98,22 @@ class RemoteClientConnection(
                             val bundle = channel.inputStream
                             while (bundle.hasRemaining()) {
                                 val packet = PacketAbstract.make(
-                                        plugins.registry,
-                                        bundle.getShort().toInt()).createClient()
+                                    plugins.registry,
+                                    bundle.getShort().toInt()
+                                ).createClient()
                                 val pos = bundle.position()
                                 packet.parseClient(
-                                        this@RemoteClientConnection,
-                                        bundle)
+                                    this@RemoteClientConnection,
+                                    bundle
+                                )
                                 val size = bundle.position() - pos
-                                profilerReceived.packet(packet,
-                                        size.toLong())
+                                profilerReceived.packet(
+                                    packet,
+                                    size.toLong()
+                                )
                                 packet.runClient(
-                                        this@RemoteClientConnection)
+                                    this@RemoteClientConnection
+                                )
                             }
                         }
                     }
@@ -116,9 +124,7 @@ class RemoteClientConnection(
             logger.info { "Closed client connection: $e" }
         } catch (e: IOException) {
             logger.info { "Lost connection: $e" }
-            game.engine.switchState(
-                    GameStateServerDisconnect(e.message ?: "",
-                            game.engine))
+            onError(e.message ?: e::class.java.simpleName, address, null)
         } finally {
             isClosed = true
         }

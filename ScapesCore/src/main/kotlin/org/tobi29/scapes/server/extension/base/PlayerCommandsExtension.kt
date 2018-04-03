@@ -31,7 +31,7 @@ import org.tobi29.stdex.wildcard
 class PlayerCommandsExtension(server: ScapesServer) : ServerExtension(server) {
 
     override fun init() {
-        val group = server.commandRegistry().group("players")
+        val group = server.commandRegistry.group("players")
         val connection = server.connection
 
         group.register("list", 9) {

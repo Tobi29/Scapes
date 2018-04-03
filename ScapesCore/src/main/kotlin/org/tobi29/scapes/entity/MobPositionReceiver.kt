@@ -16,30 +16,36 @@
 
 package org.tobi29.scapes.entity
 
-import org.tobi29.math.vector.MutableVector3d
-import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.*
 
-class MobPositionReceiver(pos: Vector3d,
-                          private val positionListener: (Vector3d) -> Unit,
-                          private val speedListener: (Vector3d) -> Unit,
-                          private val rotationListener: (Vector3d) -> Unit,
-                          private val stateListener: (Boolean, Boolean, Boolean, Boolean) -> Unit) {
+class MobPositionReceiver(
+    pos: Vector3d,
+    private val positionListener: (Vector3d) -> Unit,
+    private val speedListener: (Vector3d) -> Unit,
+    private val rotationListener: (Vector3d) -> Unit,
+    private val stateListener: (Boolean, Boolean, Boolean, Boolean) -> Unit
+) {
     private val sentPosRelative: MutableVector3d
 
     init {
         sentPosRelative = MutableVector3d(pos)
     }
 
-    constructor(positionListener: (Vector3d) -> Unit,
-                speedListener: (Vector3d) -> Unit,
-                rotationListener: (Vector3d) -> Unit,
-                stateListener: (Boolean, Boolean, Boolean, Boolean) -> Unit
-    ) : this(Vector3d.ZERO, positionListener, speedListener, rotationListener,
-            stateListener)
+    constructor(
+        positionListener: (Vector3d) -> Unit,
+        speedListener: (Vector3d) -> Unit,
+        rotationListener: (Vector3d) -> Unit,
+        stateListener: (Boolean, Boolean, Boolean, Boolean) -> Unit
+    ) : this(
+        Vector3d.ZERO, positionListener, speedListener, rotationListener,
+        stateListener
+    )
 
-    fun receiveMoveRelative(x: Byte,
-                            y: Byte,
-                            z: Byte) {
+    fun receiveMoveRelative(
+        x: Byte,
+        y: Byte,
+        z: Byte
+    ) {
         val xx = x / 500.0
         val yy = y / 500.0
         val zz = z / 500.0
@@ -49,31 +55,39 @@ class MobPositionReceiver(pos: Vector3d,
         positionListener(sentPosRelative.now())
     }
 
-    fun receiveMoveAbsolute(x: Double,
-                            y: Double,
-                            z: Double) {
+    fun receiveMoveAbsolute(
+        x: Double,
+        y: Double,
+        z: Double
+    ) {
         sentPosRelative.setX(x)
         sentPosRelative.setY(y)
         sentPosRelative.setZ(z)
         positionListener(sentPosRelative.now())
     }
 
-    fun receiveRotation(xRot: Double,
-                        yRot: Double,
-                        zRot: Double) {
+    fun receiveRotation(
+        xRot: Double,
+        yRot: Double,
+        zRot: Double
+    ) {
         rotationListener(Vector3d(xRot, yRot, zRot))
     }
 
-    fun receiveSpeed(xSpeed: Double,
-                     ySpeed: Double,
-                     zSpeed: Double) {
+    fun receiveSpeed(
+        xSpeed: Double,
+        ySpeed: Double,
+        zSpeed: Double
+    ) {
         speedListener(Vector3d(xSpeed, ySpeed, zSpeed))
     }
 
-    fun receiveState(ground: Boolean,
-                     slidingWall: Boolean,
-                     inWater: Boolean,
-                     swimming: Boolean) {
+    fun receiveState(
+        ground: Boolean,
+        slidingWall: Boolean,
+        inWater: Boolean,
+        swimming: Boolean
+    ) {
         stateListener(ground, slidingWall, inWater, swimming)
     }
 }

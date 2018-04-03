@@ -1,0 +1,69 @@
+/*
+ * Copyright 2012-2018 Tobi29
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply from: "$rootDir/resources/scapesenginemodulekotlinjvm.gradle"
+apply plugin: "scapes-engine-application"
+apply plugin: "scapes-engine-application-linux"
+apply plugin: "scapes-engine-application-macosx"
+apply plugin: "scapes-engine-application-windows"
+
+version = "0.0.0"
+
+application {
+    name = "Scapes"
+    fullName = "Scapes"
+    version = project.version
+    company = "Tobi29"
+    url = "https://github.com/Tobi29/Scapes"
+    copyright = "© 2012-2016 Tobi29"
+    uuid = "1861B0A8-3269-41D8-AD55-4A7DC0DF7190"
+    mainClass = "org.tobi29.scapes.desktop.Scapes"
+    category = ApplicationType.GAME
+}
+
+dependencies {
+    compile project(":ScapesDesktop")
+
+    runtime project(":VanillaBasics")
+
+    runtime rootProject.ext.scapesEngineNIOFileSystem
+    runtime rootProject.ext.scapesEngineMBeansCPUReader
+    runtime rootProject.ext.scapesEngineCodecOGG
+    runtime rootProject.ext.scapesEngineCodecMP3
+    runtime rootProject.ext.scapesEngineCodecWAV
+    runtime rootProject.ext.log4jAPI
+    runtime rootProject.ext.log4jCore
+    runtime rootProject.ext.log4jSLF4J
+    Closure natives = { module ->
+        nativesLinux32 "$module:natives-linux"
+        nativesLinux64 "$module:natives-linux"
+        nativesMacOSX "$module:natives-macos"
+        nativesWindows32 "$module:natives-windows"
+        nativesWindows64 "$module:natives-windows"
+    }
+    natives rootProject.ext.lwjgl
+    natives rootProject.ext.lwjglGLFW
+    natives rootProject.ext.lwjglOpenAL
+    natives rootProject.ext.lwjglOpenGL
+    natives rootProject.ext.lwjglOpenGLES
+    natives rootProject.ext.lwjglSTB
+    natives rootProject.ext.lwjglTinyFD
+    nativesLinux32 rootProject.ext.sqliteJDBC
+    nativesLinux64 rootProject.ext.sqliteJDBC
+    nativesMacOSX rootProject.ext.sqliteJDBC
+    nativesWindows32 rootProject.ext.sqliteJDBC
+    nativesWindows64 rootProject.ext.sqliteJDBC
+}

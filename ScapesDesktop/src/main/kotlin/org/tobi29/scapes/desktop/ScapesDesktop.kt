@@ -16,50 +16,61 @@
 
 package org.tobi29.scapes.desktop
 
+import kotlinx.coroutines.experimental.launch
+import org.tobi29.io.ReadableByteStream
+import org.tobi29.io.filesystem.FilePath
 import org.tobi29.scapes.client.DialogProvider
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.ContainerGLFW
 import org.tobi29.scapes.engine.backends.lwjgl3.glfw.PlatformDialogs
-import org.tobi29.io.ReadableByteStream
-import org.tobi29.io.filesystem.FilePath
 
 internal class DialogProviderDesktop(
-        private val container: ContainerGLFW?
+    private val container: ContainerGLFW?
 ) : DialogProvider {
     override fun openMusicDialog(result: (String, ReadableByteStream) -> Unit) {
         container?.let { container ->
-            container.exec {
-                PlatformDialogs.openFileDialog(container,
-                        arrayOf("*.mp3" to "MP3 Audio",
-                                "*.ogg" to "OGG Audio",
-                                "*.wav" to "WAV Audio"), true, result)
+            launch(container) {
+                PlatformDialogs.openFileDialog(
+                    container,
+                    arrayOf(
+                        "*.mp3" to "MP3 Audio",
+                        "*.ogg" to "OGG Audio",
+                        "*.wav" to "WAV Audio"
+                    ), true, result
+                )
             }
         }
     }
 
     override fun openPluginDialog(result: (String, ReadableByteStream) -> Unit) {
         container?.let { container ->
-            container.exec {
-                PlatformDialogs.openFileDialog(container,
-                        arrayOf("*.jar" to "Jar Archive"), true,
-                        result)
+            launch(container) {
+                PlatformDialogs.openFileDialog(
+                    container,
+                    arrayOf("*.jar" to "Jar Archive"), true,
+                    result
+                )
             }
         }
     }
 
     override fun openSkinDialog(result: (String, ReadableByteStream) -> Unit) {
         container?.let { container ->
-            container.exec {
-                PlatformDialogs.openFileDialog(container,
-                        arrayOf("*.png" to "PNG Picture"), false, result)
+            launch(container) {
+                PlatformDialogs.openFileDialog(
+                    container,
+                    arrayOf("*.png" to "PNG Picture"), false, result
+                )
             }
         }
     }
 
     override fun saveScreenshotDialog(result: (FilePath) -> Unit) {
         container?.let { container ->
-            container.exec {
-                PlatformDialogs.saveFileDialog(container,
-                        arrayOf("*.png" to "PNG Picture"))?.let {
+            launch(container) {
+                PlatformDialogs.saveFileDialog(
+                    container,
+                    arrayOf("*.png" to "PNG Picture")
+                )?.let {
                     result(it)
                 }
             }

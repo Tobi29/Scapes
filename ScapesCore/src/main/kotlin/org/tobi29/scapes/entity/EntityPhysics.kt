@@ -17,8 +17,7 @@
 package org.tobi29.scapes.entity
 
 import org.tobi29.math.*
-import org.tobi29.math.vector.MutableVector3d
-import org.tobi29.math.vector.Vector3d
+import org.tobi29.math.vector.*
 import org.tobi29.scapes.block.AABBElement
 import org.tobi29.scapes.chunk.terrain.Terrain
 import org.tobi29.scapes.chunk.terrain.collisions

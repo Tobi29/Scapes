@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.io.tag.MutableTagMap
+import org.tobi29.io.tag.toDouble
+import org.tobi29.io.tag.toTag
 import org.tobi29.scapes.client.input.InputManagerScapes
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 import org.tobi29.scapes.engine.input.ControllerButtons
 import org.tobi29.scapes.engine.input.ControllerJoystick
-import org.tobi29.io.tag.MutableTagMap
-import org.tobi29.io.tag.toDouble
-import org.tobi29.io.tag.toTag
 import org.tobi29.stdex.math.cbrt
 import kotlin.collections.set
 import kotlin.math.roundToInt
@@ -77,7 +77,14 @@ abstract class GuiControls(state: GameState,
                             controller: ControllerButtons): GuiComponentControlsButton {
         return row(scrollPane) {
             it.selectable = true
-            GuiComponentControlsButton(it, 18, name, id, tagMap, controller)
+            GuiComponentControlsButton(
+                it,
+                18,
+                name,
+                id,
+                tagMap,
+                controller
+            )
         }
     }
 
@@ -87,7 +94,14 @@ abstract class GuiControls(state: GameState,
                           controller: ControllerJoystick): GuiComponentControlsAxis {
         return row(scrollPane) {
             it.selectable = true
-            GuiComponentControlsAxis(it, 18, name, id, tagMap, controller)
+            GuiComponentControlsAxis(
+                it,
+                18,
+                name,
+                id,
+                tagMap,
+                controller
+            )
         }
     }
 
