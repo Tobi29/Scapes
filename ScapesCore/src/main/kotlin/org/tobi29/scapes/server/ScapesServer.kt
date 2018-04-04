@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,10 @@ import org.tobi29.stdex.ConcurrentHashMap
 import org.tobi29.stdex.ConcurrentHashSet
 import org.tobi29.stdex.assert
 import org.tobi29.stdex.atomic.AtomicReference
-import org.tobi29.utils.ComponentRegistered
 import org.tobi29.utils.ComponentTypeRegisteredPermission
 import org.tobi29.utils.EventDispatcher
 import org.tobi29.utils.sleepNanos
+import java.lang.IllegalStateException
 import java.security.AccessController
 import java.security.PrivilegedAction
 import kotlin.coroutines.experimental.CoroutineContext
@@ -235,15 +235,13 @@ private class DummyScapesServerExecutor : ScapesServerExecutor {
     override fun onServerStop(server: ScapesServer) {}
 }
 
-object ShutdownSafeScapesServerExecutor : ScapesServerExecutor,
-    ComponentRegistered {
+object ShutdownSafeScapesServerExecutor : ScapesServerExecutor {
     private val servers = ConcurrentHashSet<ScapesServer>()
-    private var refCount = 0
     private var shutdownHook: Thread? = null
 
     @Synchronized
-    override fun init() {
-        if (refCount++ == 0) {
+    override fun onServerStart(server: ScapesServer) {
+        if (servers.isEmpty()) {
             shutdownHook = Thread {
                 while (servers.isNotEmpty()) {
                     servers.forEach { it.scheduleStop(ScapesServer.ShutdownReason.STOP) }
@@ -254,26 +252,23 @@ object ShutdownSafeScapesServerExecutor : ScapesServerExecutor,
                 Runtime.getRuntime().addShutdownHook(shutdownHook)
             })
         }
-    }
-
-    @Synchronized
-    override fun dispose() {
-        if (--refCount == 0) {
-            shutdownHook?.let {
-                AccessController.doPrivileged(PrivilegedAction {
-                    Runtime.getRuntime().removeShutdownHook(it)
-                })
-                shutdownHook = null
-            }
-        }
-    }
-
-    override fun onServerStart(server: ScapesServer) {
         servers.add(server)
     }
 
+    @Synchronized
     override fun onServerStop(server: ScapesServer) {
         servers.remove(server)
+        if (servers.isEmpty()) {
+            shutdownHook?.let {
+                try {
+                    AccessController.doPrivileged(PrivilegedAction {
+                        Runtime.getRuntime().removeShutdownHook(it)
+                    })
+                } catch (e: IllegalStateException) {
+                }
+                shutdownHook = null
+            }
+        }
     }
 }
 
