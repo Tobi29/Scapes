@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.tobi29.scapes.server.format.sqlite
 import kotlinx.coroutines.experimental.runBlocking
 import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteDataSource
-import org.tobi29.graphics.decodePNG
-import org.tobi29.graphics.encodePNG
+import org.tobi29.graphics.decodePng
+import org.tobi29.graphics.encodePng
 import org.tobi29.io.IOException
 import org.tobi29.io.filesystem.*
 import org.tobi29.scapes.plugins.spi.PluginReference
@@ -52,7 +52,7 @@ class SQLiteWorldSource(
         images.elements.indices.forEach {
             val image = images.elements[it]
             write(path.resolve("Panorama$it.png")) {
-                encodePNG(image, it, 9, false)
+                encodePng(image, it, 9, false)
             }
         }
     }
@@ -61,7 +61,7 @@ class SQLiteWorldSource(
         return newPanorama {
             val background = path.resolve("Panorama$it.png")
             if (exists(background)) {
-                read(background) { runBlocking { decodePNG(it) } }
+                read(background) { runBlocking { decodePng(it) } }
             } else {
                 return null
             }

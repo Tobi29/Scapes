@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -374,7 +374,7 @@ class SceneScapesVoxelWorld(
                 player.speed(),
                 pitch.toFloat(), yaw.toFloat(), tilt.toFloat()
             )
-            cam.setPerspective(gl.aspectRatio().toFloat(), fov)
+            cam.setPerspective(gl.aspectRatio.toFloat(), fov)
             engine.sounds.setListener(
                 cam.position.now(), player.rot(),
                 player.speed()
@@ -472,7 +472,7 @@ class SceneScapesVoxelWorld(
             )
             gl.clearDepth()
             render(0.0)
-            gl.screenShotFBOColor(0, 0, fbo.width(), fbo.height())
+            gl.getFBOColorBuffer(0, 0, fbo.width(), fbo.height())
         }
         world.game.setHudVisible(true)
         return panorama
@@ -501,7 +501,7 @@ class SceneScapesVoxelWorld(
                     matrix.identity()
                     matrix.modelViewProjection().perspective(
                         cam.fov,
-                        gl.aspectRatio().toFloat(), cam.near, cam.far
+                        gl.aspectRatio.toFloat(), cam.near, cam.far
                     )
                     matrix.modelViewProjection().camera(cam)
                     matrix.modelView().camera(cam)
@@ -536,7 +536,7 @@ class SceneScapesVoxelWorld(
                 matrix.identity()
                 matrix.modelViewProjection().perspective(
                     cam.fov,
-                    gl.aspectRatio().toFloat(), cam.near, cam.far
+                    gl.aspectRatio.toFloat(), cam.near, cam.far
                 )
                 matrix.modelViewProjection().camera(cam)
                 matrix.modelView().camera(cam)

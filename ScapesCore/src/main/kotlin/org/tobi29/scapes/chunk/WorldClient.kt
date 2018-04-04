@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.tobi29.scapes.connection.PlayConnection
 import org.tobi29.scapes.engine.graphics.BlendingMode
 import org.tobi29.scapes.engine.graphics.GL
 import org.tobi29.scapes.engine.graphics.loadShader
+import org.tobi29.scapes.engine.graphics.space
 import org.tobi29.scapes.engine.shader.BooleanExpression
 import org.tobi29.scapes.engine.shader.IntegerExpression
 import org.tobi29.scapes.entity.client.EntityClient
@@ -245,7 +246,7 @@ class WorldClient(
         val particles = scene.particles().addToPipeline(gl, width, height, cam)
 
         terrain.renderer.lodDistance =
-                clamp(gl.space() * 96.0, 32.0, 96.0).roundToInt()
+                clamp(gl.space * 96.0, 32.0, 96.0).roundToInt()
 
         return {
             val sTerrain1 = shaderTerrain1.getAsync()

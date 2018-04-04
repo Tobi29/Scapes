@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.tobi29.scapes.server.format
 
-import org.tobi29.graphics.Image
+import org.tobi29.graphics.Bitmap
 import org.tobi29.scapes.plugins.spi.PluginReference
 import org.tobi29.scapes.server.ScapesServer
 
@@ -32,19 +32,20 @@ interface WorldSource : AutoCloseable {
     override fun close()
 
     class Panorama(
-        image0: Image,
-        image1: Image,
-        image2: Image,
-        image3: Image,
-        image4: Image,
-        image5: Image
+        image0: Bitmap<*, *>,
+        image1: Bitmap<*, *>,
+        image2: Bitmap<*, *>,
+        image3: Bitmap<*, *>,
+        image4: Bitmap<*, *>,
+        image5: Bitmap<*, *>
     ) {
         val elements = listOf(image0, image1, image2, image3, image4, image5)
     }
 }
 
-inline fun newPanorama(initializer: (Int) -> Image): WorldSource.Panorama =
-    WorldSource.Panorama(
-        initializer(0), initializer(1), initializer(2), initializer(3),
-        initializer(4), initializer(5)
-    )
+inline fun newPanorama(
+    initializer: (Int) -> Bitmap<*, *>
+): WorldSource.Panorama = WorldSource.Panorama(
+    initializer(0), initializer(1), initializer(2),
+    initializer(3), initializer(4), initializer(5)
+)

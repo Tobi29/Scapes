@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
     }
 
     override fun appendToPipeline(gl: GL): suspend () -> (Double) -> Unit {
-        val space = gl.contentSpace() / 8.0
+        val space = gl.contentSpace / 8.0
         val blurSamples = (space * 8.0).roundToInt() + 8
         val width = gl.contentWidth / 8
         val height = gl.contentHeight / 8
@@ -102,7 +102,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                 if (save != null) {
                     changeBackground(save)
                 }
-                cam.setPerspective(gl.aspectRatio().toFloat(), 90.0f)
+                cam.setPerspective(gl.aspectRatio.toFloat(), 90.0f)
                 cam.setView(0.0f, yaw, 0.0f)
                 gl.matrixStack.push { matrix ->
                     gl.enableCulling()
@@ -110,7 +110,7 @@ open class SceneMenu(engine: ScapesEngine) : Scene(engine) {
                     gl.setBlending(BlendingMode.NORMAL)
                     matrix.identity()
                     matrix.modelViewProjection().perspective(cam.fov,
-                            gl.aspectRatio().toFloat(), cam.near, cam.far)
+                            gl.aspectRatio.toFloat(), cam.near, cam.far)
                     matrix.modelViewProjection().camera(cam)
                     matrix.modelView().camera(cam)
                     for (i in 0..5) {
