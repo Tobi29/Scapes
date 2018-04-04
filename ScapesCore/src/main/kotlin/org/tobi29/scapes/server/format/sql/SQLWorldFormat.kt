@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,16 +155,18 @@ class SQLWorldFormat(
         } else {
             TagMap()
         }.toMutTag()
-        plugins = createPlugins()
-    }
-
-    private fun createPlugins(): Plugins {
-        return Plugins(plugins().map { reference ->
+        val resolvedPlugins = plugins().map { reference ->
             Plugins.available().asSequence()
                 .filter { it.first.supports(reference) }
                 .maxBy { it.first.version }
                     ?: throw IOException("Missing plugin required by save: $reference")
-        }, idStorage)
+        }
+        plugins = Plugins(resolvedPlugins, idStorage)
+        replacePlugins(
+            *resolvedPlugins.map { (plugin, _) ->
+                arrayOf(plugin.id, "${plugin.version}")
+            }.toTypedArray()
+        )
     }
 
     @Synchronized
