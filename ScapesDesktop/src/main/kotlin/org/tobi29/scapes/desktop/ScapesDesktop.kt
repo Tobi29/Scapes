@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,18 +36,6 @@ internal class DialogProviderDesktop(
                         "*.ogg" to "OGG Audio",
                         "*.wav" to "WAV Audio"
                     ), true, result
-                )
-            }
-        }
-    }
-
-    override fun openPluginDialog(result: (String, ReadableByteStream) -> Unit) {
-        container?.let { container ->
-            launch(container) {
-                PlatformDialogs.openFileDialog(
-                    container,
-                    arrayOf("*.jar" to "Jar Archive"), true,
-                    result
                 )
             }
         }
