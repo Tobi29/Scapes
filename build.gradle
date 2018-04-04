@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ ext {
     log4jVersion = "2.8.1"
     jnaVersion = "4.4.0"
     sqliteJDBCVersion = "3.21.0.1"
-    scapesEngineVersion = "4036cee723"
+    scapesEngineVersion = "f4c9168624"
 
     slf4jSimple = "org.slf4j:slf4j-simple:$slf4jVersion"
     lwjgl = "org.lwjgl:lwjgl:$lwjglVersion"
