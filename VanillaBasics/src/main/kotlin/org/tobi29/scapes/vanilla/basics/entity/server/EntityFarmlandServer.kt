@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ class EntityFarmlandServer(type: EntityType<*, *>,
     private var nutrientB = 0.0
     private var nutrientC = 0.0
     private var time = 0.0
-    private var stage = 0.toByte()
+    private var stage = 0
     private var cropType: CropType? = null
     private var updateBlock = false
 
@@ -58,7 +58,7 @@ class EntityFarmlandServer(type: EntityType<*, *>,
         map["NutrientB"]?.toDouble()?.let { nutrientB = it }
         map["NutrientC"]?.toDouble()?.let { nutrientC = it }
         map["Time"]?.toDouble()?.let { time = it }
-        map["Stage"]?.toByte()?.let { stage = it }
+        map["Stage"]?.toInt()?.let { stage = it }
         if (map.containsKey("CropType")) {
             map["CropType"]?.toInt()?.let { cropType = CropType[registry, it] }
             updateBlock = true
@@ -69,7 +69,7 @@ class EntityFarmlandServer(type: EntityType<*, *>,
 
     override fun update(delta: Double) {
         growth(delta)
-        if (updateBlock) {
+        if (updateBlock && stage > 0) {
             val plugin = world.plugins.plugin<VanillaBasics>()
             val materials = plugin.materials
             val cropType = this.cropType
@@ -81,7 +81,6 @@ class EntityFarmlandServer(type: EntityType<*, *>,
                             materials.air, 0)
                 }
             } else {
-                val stage = this.stage.toInt()
                 world.terrain.modify(pos.x.floorToInt(), pos.y.floorToInt(),
                         pos.z.floorToInt() + 1) { handler ->
                     handler.typeData(pos.x.floorToInt(), pos.y.floorToInt(),
