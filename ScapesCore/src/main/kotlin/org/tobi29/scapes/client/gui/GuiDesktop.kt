@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,50 +16,60 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.math.vector.Vector2d
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.math.vector.Vector2d
 import kotlin.math.min
 
-open class GuiDesktop(val state: GameState,
-                      style: GuiStyle) : GuiScaled(style) {
-    protected fun row(pane: GuiContainerRow): GuiComponentGroupSlab {
-        return pane.addVert(11.0, 0.0, -1.0, 40.0, ::GuiComponentGroupSlab)
-    }
+open class GuiDesktop(
+    val state: GameState,
+    style: GuiStyle
+) : GuiScaled(style) {
+    protected fun row(pane: GuiContainerRow): GuiComponentGroupSlab =
+        pane.addVert(11.0, 0.0, -1.0, 40.0) { GuiComponentGroupSlab(it) }
 
-    protected fun <T : GuiComponent> row(pane: GuiContainerRow,
-                                         component: (GuiLayoutDataFlow) -> T): T {
-        return pane.addVert(16.0, 5.0, -1.0, 30.0, component)
-    }
+    protected fun <T : GuiComponent> row(
+        pane: GuiContainerRow,
+        priority: Long = 0L,
+        component: (GuiLayoutDataFlow) -> T
+    ): T = pane.addVert(16.0, 5.0, -1.0, 30.0, priority, component)
 
-    protected fun <T : GuiComponent> rowCenter(pane: GuiContainerRow,
-                                               component: (GuiLayoutDataFlow) -> T): T {
-        return pane.addVert(112.0, 5.0, 176.0, 30.0, component)
-    }
+    protected fun <T : GuiComponent> rowCenter(
+        pane: GuiContainerRow,
+        priority: Long = 0L,
+        component: (GuiLayoutDataFlow) -> T
+    ): T = pane.addVert(112.0, 5.0, 176.0, 30.0, priority, component)
 
-    protected fun button(parent: GuiLayoutData,
-                         text: String): GuiComponentTextButton {
-        return button(parent, 18, text)
-    }
+    protected fun button(
+        parent: GuiLayoutData,
+        text: String
+    ): GuiComponentTextButton =
+        button(parent, 18, text)
 
-    protected fun button(parent: GuiLayoutData,
-                         textSize: Int,
-                         text: String): GuiComponentTextButton {
+    protected fun button(
+        parent: GuiLayoutData,
+        textSize: Int,
+        text: String
+    ): GuiComponentTextButton {
         parent.selectable = true
         return GuiComponentTextButton(parent, textSize, text)
     }
 
-    protected fun slider(parent: GuiLayoutData,
-                         text: String,
-                         value: Double): GuiComponentSlider {
+    protected fun slider(
+        parent: GuiLayoutData,
+        text: String,
+        value: Double
+    ): GuiComponentSlider {
         parent.selectable = true
         return GuiComponentSlider(parent, 18, text, value)
     }
 
-    protected fun slider(parent: GuiLayoutData,
-                         text: String,
-                         value: Double,
-                         filter: (String, Double) -> String): GuiComponentSlider {
+    protected fun slider(
+        parent: GuiLayoutData,
+        text: String,
+        value: Double,
+        filter: (String, Double) -> String
+    ): GuiComponentSlider {
         parent.selectable = true
         return GuiComponentSlider(parent, 18, text, value, filter)
     }
@@ -75,43 +85,50 @@ open class GuiScaled(style: GuiStyle) : Gui(style) {
     }
 }
 
-fun row(pane: GuiContainerRow): GuiComponentGroupSlab {
-    return pane.addVert(11.0, 0.0, -1.0, 40.0, ::GuiComponentGroupSlab)
-}
+fun row(pane: GuiContainerRow): GuiComponentGroupSlab =
+    pane.addVert(11.0, 0.0, -1.0, 40.0) { GuiComponentGroupSlab(it) }
 
-fun <T : GuiComponent> row(pane: GuiContainerRow,
-                           component: (GuiLayoutDataFlow) -> T): T {
-    return pane.addVert(16.0, 5.0, -1.0, 30.0, component)
-}
+fun <T : GuiComponent> row(
+    pane: GuiContainerRow,
+    priority: Long = 0L,
+    component: (GuiLayoutDataFlow) -> T
+): T = pane.addVert(16.0, 5.0, -1.0, 30.0, priority, component)
 
-fun <T : GuiComponent> rowCenter(pane: GuiContainerRow,
-                                 component: (GuiLayoutDataFlow) -> T): T {
-    return pane.addVert(112.0, 5.0, 176.0, 30.0, component)
-}
+fun <T : GuiComponent> rowCenter(
+    pane: GuiContainerRow,
+    priority: Long = 0L,
+    component: (GuiLayoutDataFlow) -> T
+): T = pane.addVert(112.0, 5.0, 176.0, 30.0, priority, component)
 
-fun button(parent: GuiLayoutData,
-           text: String): GuiComponentTextButton {
-    return button(parent, 18, text)
-}
+fun button(
+    parent: GuiLayoutData,
+    text: String
+): GuiComponentTextButton = button(parent, 18, text)
 
-fun button(parent: GuiLayoutData,
-           textSize: Int,
-           text: String): GuiComponentTextButton {
+fun button(
+    parent: GuiLayoutData,
+    textSize: Int,
+    text: String
+): GuiComponentTextButton {
     parent.selectable = true
     return GuiComponentTextButton(parent, textSize, text)
 }
 
-fun slider(parent: GuiLayoutData,
-           text: String,
-           value: Double): GuiComponentSlider {
+fun slider(
+    parent: GuiLayoutData,
+    text: String,
+    value: Double
+): GuiComponentSlider {
     parent.selectable = true
     return GuiComponentSlider(parent, 18, text, value)
 }
 
-fun slider(parent: GuiLayoutData,
-           text: String,
-           value: Double,
-           filter: (String, Double) -> String): GuiComponentSlider {
+fun slider(
+    parent: GuiLayoutData,
+    text: String,
+    value: Double,
+    filter: (String, Double) -> String
+): GuiComponentSlider {
     parent.selectable = true
     return GuiComponentSlider(parent, 18, text, value, filter)
 }

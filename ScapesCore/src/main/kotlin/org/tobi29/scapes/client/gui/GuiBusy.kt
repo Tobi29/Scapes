@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,26 +22,29 @@ import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentTextButton
 import org.tobi29.scapes.engine.gui.GuiStyle
 
-open class GuiBusy(state: GameState,
-                   style: GuiStyle) : GuiDesktop(state,
-        style) {
+open class GuiBusy(
+    state: GameState,
+    style: GuiStyle
+) : GuiDesktop(state, style) {
     private val busy: org.tobi29.scapes.engine.gui.GuiComponentBusy
     private val label: GuiComponentTextButton
 
     init {
         spacer()
-        val pane = addHori(0.0, 0.0, 300.0, -1.0, ::GuiComponentGroup)
+        val pane = addHori(0.0, 0.0, 300.0, -1.0) { GuiComponentGroup(it) }
         spacer()
         pane.spacer()
-        busy = pane.addVert(0.0, 10.0, 32.0, 32.0, ::GuiComponentBusy)
+        busy = pane.addVert(0.0, 10.0, 32.0, 32.0) { GuiComponentBusy(it) }
         label = row(pane) { button(it, "Loading...") }
         pane.spacer()
     }
 
-    fun setColor(r: Float,
-                 g: Float,
-                 b: Float,
-                 a: Float) {
+    fun setColor(
+        r: Float,
+        g: Float,
+        b: Float,
+        a: Float
+    ) {
         busy.setColor(r, g, b, a)
     }
 

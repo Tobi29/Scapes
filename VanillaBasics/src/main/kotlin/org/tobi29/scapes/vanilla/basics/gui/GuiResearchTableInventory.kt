@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,18 @@ import org.tobi29.scapes.vanilla.basics.entity.client.EntityResearchTableClient
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 import org.tobi29.scapes.vanilla.basics.packet.PacketResearch
 
-class GuiResearchTableInventory(container: EntityResearchTableClient,
-                                player: MobPlayerClientMainVB,
-                                style: GuiStyle) : GuiContainerInventory<EntityResearchTableClient>(
-        "Research Table", player, container, style) {
+class GuiResearchTableInventory(
+    container: EntityResearchTableClient,
+    player: MobPlayerClientMainVB,
+    style: GuiStyle
+) : GuiContainerInventory<EntityResearchTableClient>(
+    "Research Table", player, container, style
+) {
     init {
         topPane.spacer()
-        val bar = topPane.addVert(0.0, 0.0, -1.0, 120.0,
-                ::GuiComponentGroupSlab)
+        val bar = topPane.addVert(0.0, 0.0, -1.0, 120.0) {
+            GuiComponentGroupSlab(it)
+        }
         bar.spacer()
         bar.addHori(5.0, 5.0, 30.0, 30.0) {
             buttonContainer(it, "Container", 0)

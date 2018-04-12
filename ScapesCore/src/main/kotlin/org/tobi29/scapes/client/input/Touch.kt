@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,10 @@ import org.tobi29.scapes.entity.client.MobPlayerClientMain
 import org.tobi29.stdex.math.toDeg
 import org.tobi29.utils.EventDispatcher
 
-class InputModeTouch(private val engine: ScapesEngine,
-                     private val controller: ControllerTouch) : InputModeScapes {
+class InputModeTouch(
+    private val engine: ScapesEngine,
+    private val controller: ControllerTouch
+) : InputModeScapes {
     val events: EventDispatcher
     private val guiController = GuiControllerTouch(engine, controller)
     private val direction = MutableVector2d()
@@ -62,48 +64,77 @@ class InputModeTouch(private val engine: ScapesEngine,
         return controller.lastActive
     }
 
-    override fun createControlsGUI(state: GameState,
-                                   prev: Gui): Gui {
-        return GuiMessage(state, prev, "Oi!", "No haxing pls >:V",
-                prev.style)
+    override fun createControlsGUI(
+        state: GameState,
+        prev: Gui
+    ): Gui {
+        return GuiMessage(
+            state, prev, "Oi!", "No haxing pls >:V",
+            prev.style
+        )
     }
 
-    override fun createInGameGUI(gui: Gui,
-                                 world: WorldClient) {
-        val swipe = gui.add(0.0, 0.0, -1.0, -1.0, ::GuiComponentPane)
+    override fun createInGameGUI(
+        gui: Gui,
+        world: WorldClient
+    ) {
+        val swipe = gui.add(0.0, 0.0, -1.0, -1.0) {
+            GuiComponentPane(it)
+        }
         val size = 70
         val gap = 5
-        val buttonsColumn = gui.addHori(0.0, 0.0,
-                80.0, -1.0, ::GuiComponentGroup)
-        val buttonsRow = buttonsColumn.addVert(0.0, 0.0,
-                -1.0, 40.0, ::GuiComponentGroupSlab)
-        val menu = buttonsRow.addHori(5.0, 5.0, -1.0, -1.0,
-                ::GuiComponentButton)
-        val inventory = buttonsRow.addHori(5.0, 5.0, -1.0, -1.0,
-                ::GuiComponentButton)
+        val buttonsColumn = gui.addHori(0.0, 0.0, 80.0, -1.0) {
+            GuiComponentGroup(it)
+        }
+        val buttonsRow = buttonsColumn.addVert(0.0, 0.0, -1.0, 40.0) {
+            GuiComponentGroupSlab(it)
+        }
+        val menu = buttonsRow.addHori(5.0, 5.0, -1.0, -1.0) {
+            GuiComponentButton(it)
+        }
+        val inventory = buttonsRow.addHori(5.0, 5.0, -1.0, -1.0) {
+            GuiComponentButton(it)
+        }
         gui.spacer()
-        val padColumn = gui.addHori(0.0, 0.0,
-                (size * 3 + (gap shl 1)).toDouble(), -1.0,
-                ::GuiComponentGroup)
+        val padColumn =
+            gui.addHori(0.0, 0.0, (size * 3 + (gap shl 1)).toDouble(), -1.0) {
+                GuiComponentGroup(it)
+            }
         padColumn.spacer()
-        val pad = padColumn.addVert(0.0, 0.0, -1.0,
-                ((size shl 1) + gap).toDouble(), ::GuiComponentGroup)
-        val padTop = pad.addVert(0.0, 0.0, -1.0, -1.0, ::GuiComponentGroupSlab)
-        val padBottom = pad.addVert(0.0, 0.0, -1.0, -1.0,
-                ::GuiComponentGroupSlab)
-        padTop.addHori(5.0, 5.0, -1.0, -1.0, ::GuiComponentGroup)
-        val padUp = padTop.addHori(5.0, 5.0, -1.0, -1.0, ::GuiComponentButton)
-        padTop.addHori(5.0, 5.0, -1.0, -1.0, ::GuiComponentGroup)
-        val padLeft = padBottom.addHori(5.0, 5.0, -1.0, -1.0,
-                ::GuiComponentButton)
-        val padDown = padBottom.addHori(5.0, 5.0, -1.0, -1.0,
-                ::GuiComponentButton)
-        val padRight = padBottom.addHori(5.0, 5.0, -1.0, -1.0,
-                ::GuiComponentButton)
+        val pad =
+            padColumn.addVert(0.0, 0.0, -1.0, ((size shl 1) + gap).toDouble()) {
+                GuiComponentGroup(it)
+            }
+        val padTop = pad.addVert(0.0, 0.0, -1.0, -1.0) {
+            GuiComponentGroupSlab(it)
+        }
+        val padBottom = pad.addVert(0.0, 0.0, -1.0, -1.0) {
+            GuiComponentGroupSlab(it)
+        }
+        padTop.addHori(5.0, 5.0, -1.0, -1.0) {
+            GuiComponentGroup(it)
+        }
+        val padUp = padTop.addHori(5.0, 5.0, -1.0, -1.0) {
+            GuiComponentButton(it)
+        }
+        padTop.addHori(5.0, 5.0, -1.0, -1.0) {
+            GuiComponentGroup(it)
+        }
+        val padLeft = padBottom.addHori(5.0, 5.0, -1.0, -1.0) {
+            GuiComponentButton(it)
+        }
+        val padDown = padBottom.addHori(5.0, 5.0, -1.0, -1.0) {
+            GuiComponentButton(it)
+        }
+        val padRight = padBottom.addHori(5.0, 5.0, -1.0, -1.0) {
+            GuiComponentButton(it)
+        }
 
         swipe.on(GuiEvent.DRAG_LEFT, { event ->
-            val dir = Vector2d(event.relativeX / event.size.x * 960.0,
-                    event.relativeY / event.size.y * 540.0)
+            val dir = Vector2d(
+                event.relativeX / event.size.x * 960.0,
+                event.relativeY / event.size.y * 540.0
+            )
             engine.events.fire(MobPlayerClientMain.InputDirectionEvent(dir))
         })
         swipe.on(GuiEvent.PRESS_LEFT) { event ->
@@ -120,27 +151,36 @@ class InputModeTouch(private val engine: ScapesEngine,
             val y = 1.0 - event.y / event.size.y * 2.0
             val cam = world.scene.cam()
             matrix1.identity()
-            matrix1.perspective(cam.fov,
-                    (event.size.x / event.size.y).toFloat(), cam.near, cam.far)
+            matrix1.perspective(
+                cam.fov,
+                (event.size.x / event.size.y).toFloat(), cam.near, cam.far
+            )
             matrix1.rotateAccurate((-cam.tilt).toDouble(), 0.0f, 0.0f, 1.0f)
-            matrix1.rotateAccurate((-cam.pitch - 90.0f).toDouble(), 1.0f, 0.0f,
-                    0.0f)
-            matrix1.rotateAccurate((-cam.yaw + 90.0f).toDouble(), 0.0f, 0.0f,
-                    1.0f)
+            matrix1.rotateAccurate(
+                (-cam.pitch - 90.0f).toDouble(), 1.0f, 0.0f,
+                0.0f
+            )
+            matrix1.rotateAccurate(
+                (-cam.yaw + 90.0f).toDouble(), 0.0f, 0.0f,
+                1.0f
+            )
             matrix1.invert(matrix1, matrix2)
             val pos = matrix2.multiply(Vector3d(x, y, 1.0))
-            val rotX = direction(pos.xy.length(),
-                    pos.z).toDeg() - cam.pitch.toDouble()
+            val rotX = direction(
+                pos.xy.length(),
+                pos.z
+            ).toDeg() - cam.pitch.toDouble()
             val rotY = angleDiff(cam.yaw.toDouble(), pos.xy.direction().toDeg())
             direction.setXY(rotX, rotY)
             val swipeStart = swipeStart
             if (swipeStart != null) {
                 if (!leftHand && !rightHand &&
-                        System.currentTimeMillis() - lastTouch >= 250) {
+                    System.currentTimeMillis() - lastTouch >= 250) {
                     leftHand = true
                 }
                 if (swipeStart.distance(
-                                Vector2d(event.x, event.y)) > 10.0) {
+                        Vector2d(event.x, event.y)
+                    ) > 10.0) {
                     this.swipeStart = null
                 }
             }

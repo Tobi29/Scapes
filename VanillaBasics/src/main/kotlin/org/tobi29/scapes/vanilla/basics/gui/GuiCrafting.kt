@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,11 @@ import org.tobi29.scapes.vanilla.basics.material.CraftingRecipe
 import org.tobi29.scapes.vanilla.basics.material.CraftingRecipeType
 import org.tobi29.scapes.vanilla.basics.packet.PacketCrafting
 
-class GuiCrafting(private val table: Boolean,
-                  player: MobPlayerClientMainVB,
-                  style: GuiStyle) : GuiInventory(
-        "Crafting" + if (table) " Table" else "", player, style) {
+class GuiCrafting(
+    private val table: Boolean,
+    player: MobPlayerClientMainVB,
+    style: GuiStyle
+) : GuiInventory(if (table) "Crafting Table" else "Crafting", player, style) {
     private val scrollPaneTypes: GuiComponentScrollPaneViewport
     private val scrollPaneRecipes: GuiComponentScrollPaneViewport
     private var elements = emptyList<Element>()
@@ -44,8 +45,9 @@ class GuiCrafting(private val table: Boolean,
     private var updateJob: Job? = null
 
     init {
-        val columns = topPane.addVert(11.0, 0.0, -1.0, -1.0,
-                ::GuiComponentGroupSlab)
+        val columns = topPane.addVert(11.0, 0.0, -1.0, -1.0) {
+            GuiComponentGroupSlab(it)
+        }
         scrollPaneTypes = columns.addHori(5.0, 5.0, -0.3, -1.0) {
             GuiComponentScrollPane(it, 20)
         }.viewport
@@ -68,7 +70,8 @@ class GuiCrafting(private val table: Boolean,
                     if (currentType == null) {
                         currentType = recipeType
                     }
-                    scrollPaneTypes.addVert(0.0, 0.0, -1.0, 20.0
+                    scrollPaneTypes.addVert(
+                        0.0, 0.0, -1.0, 20.0
                     ) { ElementType(it, recipeType, true) }
                 } else {
                     tableOnly.add(recipeType)
@@ -76,8 +79,9 @@ class GuiCrafting(private val table: Boolean,
             }
         }
         if (!tableOnly.isEmpty()) {
-            val separator = scrollPaneTypes.addVert(0.0, 0.0, -1.0, 30.0,
-                    ::GuiComponentGroup)
+            val separator = scrollPaneTypes.addVert(0.0, 0.0, -1.0, 30.0) {
+                GuiComponentGroup(it)
+            }
             separator.add(5.0, 9.0, -1.0, 12.0) {
                 GuiComponentText(it, "Table only:")
             }
@@ -89,11 +93,9 @@ class GuiCrafting(private val table: Boolean,
         }
     }
 
-    override fun init() = updateVisible()
-
     override fun updateVisible() {
         synchronized(this) {
-            dispose()
+            updateJob?.cancel()
             if (!isVisible) return@synchronized
             updateJob = launch(engine.taskExecutor) {
                 Timer().apply { init() }.loopUntilCancel(Timer.toDiff(1.0)) {
@@ -121,10 +123,13 @@ class GuiCrafting(private val table: Boolean,
         }
     }
 
-    private inner class ElementType(parent: GuiLayoutData,
-                                    recipeType: CraftingRecipeType,
-                                    enabled: Boolean) : GuiComponentGroupSlab(
-            parent) {
+    private inner class ElementType(
+        parent: GuiLayoutData,
+        recipeType: CraftingRecipeType,
+        enabled: Boolean
+    ) : GuiComponentGroupSlab(
+        parent
+    ) {
         init {
             val label = addHori(5.0, 2.0, -1.0, -1.0) {
                 button(it, 12, recipeType.name())
@@ -139,9 +144,12 @@ class GuiCrafting(private val table: Boolean,
         }
     }
 
-    private inner class Element(parent: GuiLayoutData,
-                                recipe: CraftingRecipe) : GuiComponentGroupSlab(
-            parent) {
+    private inner class Element(
+        parent: GuiLayoutData,
+        recipe: CraftingRecipe
+    ) : GuiComponentGroupSlab(
+        parent
+    ) {
         init {
             val result = addHori(5.0, 5.0, 30.0, 30.0) {
                 it.selectable = true
@@ -160,7 +168,7 @@ class GuiCrafting(private val table: Boolean,
             }
             recipe.requirements.forEach { requirement ->
                 addHori(5.0, 5.0, 25.0, 25.0) {
-                    GuiComponentIngredientButton(it) {
+                    GuiComponentRequirementButton(it) {
                         requirement.example(example)
                     }
                 }
@@ -168,15 +176,16 @@ class GuiCrafting(private val table: Boolean,
 
             result.on(GuiEvent.CLICK_LEFT) {
                 player.connection().send(
-                        PacketCrafting(player.registry, recipe.id))
+                    PacketCrafting(player.registry, recipe.id)
+                )
             }
         }
     }
 }
 
 sealed private class GuiComponentCraftingButton(
-        parent: GuiLayoutData,
-        item: () -> Item?
+    parent: GuiLayoutData,
+    item: () -> Item?
 ) : GuiComponentButton(parent) {
     val item = addSubHori(0.0, 0.0, -1.0, -1.0) {
         GuiComponentItem(it, item)
@@ -184,8 +193,8 @@ sealed private class GuiComponentCraftingButton(
 }
 
 private class GuiComponentIngredientButton(
-        parent: GuiLayoutData,
-        item: () -> Item?
+    parent: GuiLayoutData,
+    item: () -> Item?
 ) : GuiComponentCraftingButton(parent, item) {
     override fun tooltip(p: GuiContainerRow): (() -> Unit)? {
         val text = p.addVert(15.0, 15.0, -1.0, 16.0) {
@@ -200,8 +209,8 @@ private class GuiComponentIngredientButton(
 }
 
 private class GuiComponentRequirementButton(
-        parent: GuiLayoutData,
-        item: () -> Item?
+    parent: GuiLayoutData,
+    item: () -> Item?
 ) : GuiComponentCraftingButton(parent, item) {
     override fun tooltip(p: GuiContainerRow): (() -> Unit)? {
         val text = p.addVert(15.0, 15.0, -1.0, 16.0) {
@@ -216,8 +225,8 @@ private class GuiComponentRequirementButton(
 }
 
 private class GuiComponentResultButton(
-        parent: GuiLayoutData,
-        item: Item?
+    parent: GuiLayoutData,
+    item: Item?
 ) : GuiComponentCraftingButton(parent, { item }) {
     override fun tooltip(p: GuiContainerRow): (() -> Unit)? {
         val text = p.addVert(15.0, 15.0, -1.0, 16.0) {

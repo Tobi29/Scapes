@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,16 @@ import org.tobi29.logging.KLogging
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 
-class GuiCredits(state: GameState,
-                 previous: Gui,
-                 style: GuiStyle) : GuiDesktop(
-        state, style) {
+class GuiCredits(
+    state: GameState,
+    previous: Gui,
+    style: GuiStyle
+) : GuiDesktop(
+    state, style
+) {
 
     init {
-        addHori(0.0, 0.0, 120.0, -1.0, ::GuiComponentGroup)
+        addHori(0.0, 0.0, 120.0, -1.0) { GuiComponentGroup(it) }
         val credits = addHori(0.0, 0.0, -1.0, 18.0) {
             GuiComponentCredits(
                 it
@@ -43,7 +46,7 @@ class GuiCredits(state: GameState,
                 "Failed to load credits"
             }
         }
-        val pane = addHori(0.0, 0.0, 96.0, -1.0, ::GuiComponentVisiblePane)
+        val pane = addHori(0.0, 0.0, 96.0, -1.0) { GuiComponentVisiblePane(it) }
         val back = pane.addVert(13.0, 64.0, -1.0, 30.0) {
             button(it, "Back")
         }
@@ -55,8 +58,10 @@ class GuiCredits(state: GameState,
         back.on(GuiEvent.CLICK_LEFT) { fireAction(GuiAction.BACK) }
 
         engine.sounds.stop("music")
-        engine.sounds.playMusic("ScapesFrontend:sound/Credits.ogg",
-                "music.Credits", true, 1.0, 1.0)
+        engine.sounds.playMusic(
+            "ScapesFrontend:sound/Credits.ogg",
+            "music.Credits", true, 1.0, 1.0
+        )
     }
 
     companion object : KLogging()

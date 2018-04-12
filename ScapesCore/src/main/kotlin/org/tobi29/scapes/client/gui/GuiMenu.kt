@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,50 +16,60 @@
 
 package org.tobi29.scapes.client.gui
 
+import org.tobi29.math.vector.Vector2d
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
-import org.tobi29.math.vector.Vector2d
 
-open class GuiMenu(state: GameState,
-                   title: String,
-                   style: GuiStyle) : GuiDesktop(state, style) {
+open class GuiMenu(
+    state: GameState,
+    title: String,
+    style: GuiStyle
+) : GuiDesktop(state, style) {
     protected val view: GuiComponentVisiblePane
     protected val pane: GuiComponentScrollPaneViewport
     protected val controls: GuiComponentGroup
 
     fun <T : GuiComponent> addControl(child: (GuiLayoutDataFlow) -> T) =
-            addControl(50, child)
+        addControl(50, child)
 
-    fun <T : GuiComponent> addControl(priority: Int,
-                                      child: (GuiLayoutDataFlow) -> T): T {
+    fun <T : GuiComponent> addControl(
+        priority: Int,
+        child: (GuiLayoutDataFlow) -> T
+    ): T {
         if (priority < 0 || priority > 100) {
             throw IllegalArgumentException("Priority out of bounds: $priority")
         }
-        return controls.addVert(5.0, 5.0, 5.0, 5.0, -1.0, 30.0,
-                Long.MIN_VALUE + priority, child)
+        return controls.addVert(
+            5.0, 5.0, 5.0, 5.0, -1.0, 30.0,
+            Long.MIN_VALUE + priority, child
+        )
     }
 
     init {
         spacer()
-        view = addHori(0.0, 0.0, 400.0, -1.0, ::GuiComponentVisiblePane)
+        view = addHori(0.0, 0.0, 400.0, -1.0) { GuiComponentVisiblePane(it) }
         spacer()
         view.addVert(16.0, 14.0, -1.0, 32.0) {
             GuiComponentText(it, title)
         }
-        view.addVert(24.0, 6.0, -1.0, 2.0, ::GuiComponentSeparator)
+        view.addVert(24.0, 6.0, -1.0, 2.0) { GuiComponentSeparator(it) }
         pane = view.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0) {
             GuiComponentScrollPaneHidden(it, 40)
         }.viewport
-        view.addVert(24.0, 6.0, 24.0, 6.0, -1.0, 2.0, Long.MIN_VALUE + 400,
-                ::GuiComponentSeparator)
-        controls = view.addVert(0.0, 0.0, 0.0, 0.0, -1.0, -1.0,
-                Long.MIN_VALUE + 200) {
+        view.addVert(
+            24.0, 6.0, 24.0, 6.0, -1.0, 2.0, Long.MIN_VALUE + 400,
+            ::GuiComponentSeparator
+        )
+        controls = view.addVert(
+            0.0, 0.0, 0.0, 0.0, -1.0, -1.0,
+            Long.MIN_VALUE + 200
+        ) {
             GuiComponentMenuControls(it)
         }
     }
 
     private inner class GuiComponentMenuControls(
-            parent: GuiLayoutData
+        parent: GuiLayoutData
     ) : GuiComponentGroup(parent) {
         init {
             parent.preferredSize = { size, maxSize ->
@@ -69,14 +79,20 @@ open class GuiMenu(state: GameState,
             }
         }
 
-        override fun newLayoutManager(components: Collection<GuiComponent>,
-                                      size: Vector2d): GuiLayoutManager {
+        override fun newLayoutManager(
+            components: Collection<GuiComponent>,
+            size: Vector2d
+        ): GuiLayoutManager {
             return if (compactControls()) {
-                GuiLayoutManagerHorizontal(Vector2d(24.0, 0.0),
-                        Vector2d(size.x - 48.0, 40.0), components)
+                GuiLayoutManagerHorizontal(
+                    Vector2d(24.0, 0.0),
+                    Vector2d(size.x - 48.0, 40.0), components
+                )
             } else {
-                GuiLayoutManagerVertical(Vector2d(56.0, 0.0),
-                        Vector2d(size.x - 112.0, size.y), components)
+                GuiLayoutManagerVertical(
+                    Vector2d(56.0, 0.0),
+                    Vector2d(size.x - 112.0, size.y), components
+                )
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ class GuiLoading(style: GuiStyle) : GuiScaled(style) {
 
     init {
         spacer()
-        val pane = addHori(0.0, 0.0, 300.0, -1.0, ::GuiComponentGroup)
+        val pane = addHori(0.0, 0.0, 300.0, -1.0) { GuiComponentGroup(it) }
         spacer()
         pane.spacer()
         pane.addVert(0.0, 10.0, -1.0, 16.0) {
@@ -36,8 +36,7 @@ class GuiLoading(style: GuiStyle) : GuiScaled(style) {
         pane.spacer()
     }
 
-    fun setProgress(status: String,
-                    value: Double) {
+    fun setProgress(status: String, value: Double) {
         setLabel(status)
         progressValue = value
     }

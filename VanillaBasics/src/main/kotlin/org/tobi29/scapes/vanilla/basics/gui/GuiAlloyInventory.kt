@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,16 +28,24 @@ import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 import org.tobi29.scapes.vanilla.basics.util.type
 import kotlin.math.roundToInt
 
-class GuiAlloyInventory(container: EntityAlloyClient,
-                        player: MobPlayerClientMainVB,
-                        style: GuiStyle) : GuiContainerInventory<EntityAlloyClient>(
-        "Alloy Mold", player, container, style) {
+class GuiAlloyInventory(
+    container: EntityAlloyClient,
+    player: MobPlayerClientMainVB,
+    style: GuiStyle
+) : GuiContainerInventory<EntityAlloyClient>(
+    "Alloy Mold", player, container, style
+) {
     private val infoText: GuiComponentText
 
     init {
         topPane.spacer()
-        val bar = topPane.addVert(32.0, 0.0, -1.0, 80.0, ::GuiComponentGroupSlab)
-        bar.addHori(0.0, 0.0, 40.0, -1.0, ::GuiComponentGroup).apply {
+        val bar =
+            topPane.addVert(32.0, 0.0, -1.0, 80.0) {
+                GuiComponentGroupSlab(it)
+            }
+        bar.addHori(0.0, 0.0, 40.0, -1.0) {
+            GuiComponentGroup(it)
+        }.apply {
             addVert(5.0, 5.0, 30.0, 30.0) {
                 buttonContainer(it, "Container", 0)
             }
@@ -52,9 +60,11 @@ class GuiAlloyInventory(container: EntityAlloyClient,
         updateInfoText()
     }
 
-    override fun renderOverlay(gl: GL,
-                               shader: Shader,
-                               pixelSize: Vector2d) {
+    override fun renderOverlay(
+        gl: GL,
+        shader: Shader,
+        pixelSize: Vector2d
+    ) {
         super.renderOverlay(gl, shader, pixelSize)
         updateInfoText()
     }
@@ -63,11 +73,15 @@ class GuiAlloyInventory(container: EntityAlloyClient,
         val text = StringBuilder(64)
         val alloy = container.alloy
         if (alloy.isNotEmpty()) {
-            text.append("Metal: ").append(alloy.type(
-                    container.world.plugins.plugin<VanillaBasics>()).name)
+            text.append("Metal: ").append(
+                alloy.type(
+                    container.world.plugins.plugin<VanillaBasics>()
+                ).name
+            )
             alloy.forEach {
                 text.append('\n').append(it.key.name).append(" - ").append(
-                        (it.value * 100.0).roundToInt() / 100.0)
+                    (it.value * 100.0).roundToInt() / 100.0
+                )
             }
         } else {
             text.append("Insert molten metal on top\nslot, extract below.")

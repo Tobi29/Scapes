@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,38 +28,47 @@ import org.tobi29.scapes.vanilla.basics.entity.client.EntityForgeClient
 import org.tobi29.scapes.vanilla.basics.entity.client.MobPlayerClientMainVB
 import org.tobi29.stdex.math.floorToInt
 
-class GuiForgeInventory(container: EntityForgeClient,
-                        player: MobPlayerClientMainVB,
-                        style: GuiStyle) : GuiContainerInventory<EntityForgeClient>(
-        "Forge", player, container, style) {
+class GuiForgeInventory(
+    container: EntityForgeClient,
+    player: MobPlayerClientMainVB,
+    style: GuiStyle
+) : GuiContainerInventory<EntityForgeClient>(
+    "Forge", player, container, style
+) {
     private val temperatureText: GuiComponentText
     private var updateJob: Job? = null
 
     init {
         topPane.spacer()
-        val bar1 = topPane.addVert(32.0, 0.0, -1.0, 40.0,
-                ::GuiComponentGroupSlab)
+        val bar1 = topPane.addVert(32.0, 0.0, -1.0, 40.0) {
+            GuiComponentGroupSlab(it)
+        }
         bar1.addHori(5.0, 5.0, 30.0, 30.0) {
             buttonContainer(it, "Container", 4)
         }
-        bar1.addHori(0.0, 0.0, 80.0, -1.0, ::GuiComponentGroup)
+        bar1.addHori(0.0, 0.0, 80.0, -1.0) {
+            GuiComponentGroup(it)
+        }
         bar1.addHori(5.0, 5.0, 30.0, 30.0) {
             buttonContainer(it, "Container", 8)
         }
-        val bar2 = topPane.addVert(32.0, 0.0, -1.0, 40.0,
-                ::GuiComponentGroupSlab)
+        val bar2 = topPane.addVert(32.0, 0.0, -1.0, 40.0) {
+            GuiComponentGroupSlab(it)
+        }
         for (i in 5..7) {
             bar2.addHori(5.0, 5.0, 30.0, 30.0) {
                 buttonContainer(it, "Container", i)
             }
         }
-        val bar3 = topPane.addVert(32.0, 0.0, -1.0, 40.0,
-                ::GuiComponentGroupSlab)
+        val bar3 = topPane.addVert(32.0, 0.0, -1.0, 40.0) {
+            GuiComponentGroupSlab(it)
+        }
         temperatureText = bar3.addHori(10.0, 10.0, 100.0, 16.0) {
             GuiComponentText(it, "")
         }
-        val bar4 = topPane.addVert(32.0, 0.0, -1.0, 40.0,
-                ::GuiComponentGroupSlab)
+        val bar4 = topPane.addVert(32.0, 0.0, -1.0, 40.0) {
+            GuiComponentGroupSlab(it)
+        }
         for (i in 0..3) {
             bar4.addHori(5.0, 5.0, 30.0, 30.0) {
                 buttonContainer(it, "Container", i)
@@ -69,11 +78,9 @@ class GuiForgeInventory(container: EntityForgeClient,
         updateTemperatureText()
     }
 
-    override fun init() = updateVisible()
-
     override fun updateVisible() {
         synchronized(this) {
-            dispose()
+            updateJob?.cancel()
             if (!isVisible) return@synchronized
             updateJob = launch(engine.taskExecutor) {
                 Timer().apply { init() }.loopUntilCancel(Timer.toDiff(60.0)) {

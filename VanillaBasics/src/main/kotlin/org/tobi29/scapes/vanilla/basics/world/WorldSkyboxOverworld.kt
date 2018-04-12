@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.tobi29.math.threadLocalRandom
 import org.tobi29.math.vector.*
 import org.tobi29.scapes.chunk.WorldClient
 import org.tobi29.scapes.chunk.WorldSkybox
-import org.tobi29.scapes.engine.graphics.loadShader
 import org.tobi29.scapes.engine.graphics.*
 import org.tobi29.scapes.engine.gui.GuiComponentGroup
 import org.tobi29.scapes.engine.gui.GuiComponentGroupSlab
@@ -314,19 +313,16 @@ class WorldSkyboxOverworld(
         )
         val player = world.player
         if (player is MobPlayerClientMainVB) {
-            val hud = player.game.hud.addHori(
-                0.0, 0.0, -1.0, -1.0,
-                ::GuiComponentGroup
-            )
+            val hud = player.game.hud.addHori(0.0, 0.0, -1.0, -1.0) {
+                GuiComponentGroup(it)
+            }
             hud.spacer()
-            val hudSlab = hud.addVert(
-                0.0, 0.0, -1.0, 76.0,
-                ::GuiComponentGroupSlab
-            )
-            val hudBar = hudSlab.addHori(
-                0.0, 0.0, 408.0, -1.0,
-                ::GuiComponentGroup
-            )
+            val hudSlab = hud.addVert(0.0, 0.0, -1.0, 76.0) {
+                GuiComponentGroupSlab(it)
+            }
+            val hudBar = hudSlab.addHori(0.0, 0.0, 408.0, -1.0) {
+                GuiComponentGroup(it)
+            }
             hudBar.addVert(4.0, 4.0, 400.0, 20.0) {
                 GuiComponentCondition(it, player)
             }

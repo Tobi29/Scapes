@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,14 @@ import org.tobi29.scapes.client.states.scenes.SceneMenu
 import org.tobi29.scapes.engine.GameState
 import org.tobi29.scapes.engine.gui.*
 
-class GuiMainMenu(state: GameState,
-                  scene: SceneMenu,
-                  style: GuiStyle) : GuiDesktop(state, style) {
+class GuiMainMenu(
+    state: GameState,
+    scene: SceneMenu,
+    style: GuiStyle
+) : GuiDesktop(state, style) {
     init {
-        val pane = addHori(0.0, 0.0, 150.0, -1.0, ::GuiComponentVisiblePane)
+        val pane =
+            addHori(0.0, 0.0, 150.0, -1.0) { GuiComponentVisiblePane(it) }
         pane.addVert(0.0, 10.0, 5.0, 20.0, 144.0, 80.0) {
             GuiComponentLogo(it, 80, 18)
         }
@@ -51,30 +54,39 @@ class GuiMainMenu(state: GameState,
             button(it, "Quit")
         }
         spacer()
-        val versionColumn = addHori(0.0, 0.0, 70.0, -1.0, ::GuiComponentGroup)
+        val versionColumn =
+            addHori(0.0, 0.0, 70.0, -1.0) { GuiComponentGroup(it) }
         versionColumn.spacer()
         val version = versionColumn.addVert(5.0, 5.0, -1.0, 12.0) {
             GuiComponentFlowText(it, "v$VERSION")
         }
 
         singlePlayer.on(GuiEvent.CLICK_LEFT) { event ->
-            state.engine.guiStack.swap(this,
-                    GuiSaveSelect(state, this, scene, style))
+            state.engine.guiStack.swap(
+                this,
+                GuiSaveSelect(state, this, scene, style)
+            )
         }
         multiPlayer.on(GuiEvent.CLICK_LEFT) { event ->
-            state.engine.guiStack.add("10-Menu",
-                    GuiServerSelect(state, this, scene, style))
+            state.engine.guiStack.add(
+                "10-Menu",
+                GuiServerSelect(state, this, scene, style)
+            )
         }
         options.on(GuiEvent.CLICK_LEFT) { event ->
             state.engine.guiStack.add("10-Menu", GuiOptions(state, this, style))
         }
         playlists.on(GuiEvent.CLICK_LEFT) { event ->
-            state.engine.guiStack.add("10-Menu",
-                    GuiPlaylists(state, this, style))
+            state.engine.guiStack.add(
+                "10-Menu",
+                GuiPlaylists(state, this, style)
+            )
         }
         screenshots.on(GuiEvent.CLICK_LEFT) { event ->
-            state.engine.guiStack.add("10-Menu",
-                    GuiScreenshots(state, this, style))
+            state.engine.guiStack.add(
+                "10-Menu",
+                GuiScreenshots(state, this, style)
+            )
         }
         quit.on(GuiEvent.CLICK_LEFT) { event -> state.engine.container.stop() }
         version.on(GuiEvent.CLICK_LEFT) { event ->

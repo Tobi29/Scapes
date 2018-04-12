@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,9 @@ class GuiWidgetConnectionProfiler(
 ) : GuiWidgetDebugValues(parent) {
     private var updateJob: Job? = null
 
-    override fun init() = updateVisible()
-
     override fun updateVisible() {
         synchronized(this) {
-            dispose()
+            updateJob?.cancel()
             if (!isVisible) return@synchronized
             updateJob = launch(engine.taskExecutor) {
                 Timer().apply { init() }.loopUntilCancel(Timer.toDiff(4.0)) {
@@ -43,12 +41,6 @@ class GuiWidgetConnectionProfiler(
                     }
                 }
             }
-        }
-    }
-
-    override fun dispose() {
-        synchronized(this) {
-            updateJob?.cancel()
         }
     }
 }

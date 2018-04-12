@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 Tobi29
+ * Copyright 2012-2018 Tobi29
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,19 +26,24 @@ import org.tobi29.scapes.vanilla.basics.packet.PacketAnvil
 import org.tobi29.scapes.vanilla.basics.util.Alloy
 import org.tobi29.scapes.vanilla.basics.util.createTool
 
-class GuiAnvilInventory(container: EntityAnvilClient,
-                        player: MobPlayerClientMainVB,
-                        style: GuiStyle) : GuiContainerInventory<EntityAnvilClient>(
-        "Anvil", player, container, style) {
-
+class GuiAnvilInventory(
+    container: EntityAnvilClient,
+    player: MobPlayerClientMainVB,
+    style: GuiStyle
+) : GuiContainerInventory<EntityAnvilClient>(
+    "Anvil", player, container, style
+) {
     init {
         val plugin = player.connection().plugins.plugin<VanillaBasics>()
         val materials = plugin.materials
         topPane.spacer()
-        val bar = topPane.addVert(0.0, 0.0, -1.0, 120.0,
-                ::GuiComponentGroupSlab)
+        val bar = topPane.addVert(0.0, 0.0, -1.0, 120.0) {
+            GuiComponentGroupSlab(it)
+        }
         bar.spacer()
-        val items = bar.addHori(0.0, 0.0, 40.0, -1.0, ::GuiComponentGroup)
+        val items = bar.addHori(0.0, 0.0, 40.0, -1.0) {
+            GuiComponentGroup(it)
+        }
         items.addVert(5.0, 5.0, 30.0, 30.0) {
             buttonContainer(it, "Container", 0)
         }
@@ -46,11 +51,15 @@ class GuiAnvilInventory(container: EntityAnvilClient,
         items.addVert(5.0, 5.0, 30.0, 30.0) {
             buttonContainer(it, "Container", 1)
         }
-        val actions1 = bar.addHori(0.0, 0.0, 40.0, -1.0, ::GuiComponentGroup)
+        val actions1 = bar.addHori(0.0, 0.0, 40.0, -1.0) {
+            GuiComponentGroup(it)
+        }
         actions1.addVert(5.0, 5.0, 30.0, 30.0) {
             buttonAction(it, 0)
         }
-        val actions2 = bar.addHori(0.0, 0.0, 40.0, -1.0, ::GuiComponentGroup)
+        val actions2 = bar.addHori(0.0, 0.0, 40.0, -1.0) {
+            GuiComponentGroup(it)
+        }
         actions2.addVert(5.0, 5.0, 30.0, 30.0) {
             buttonAction(it, 1)
         }
@@ -60,7 +69,9 @@ class GuiAnvilInventory(container: EntityAnvilClient,
         actions2.addVert(5.0, 5.0, 30.0, 30.0) {
             buttonAction(it, 3)
         }
-        val actions3 = bar.addHori(0.0, 0.0, 40.0, -1.0, ::GuiComponentGroup)
+        val actions3 = bar.addHori(0.0, 0.0, 40.0, -1.0) {
+            GuiComponentGroup(it)
+        }
         actions3.addVert(5.0, 5.0, 30.0, 30.0) {
             buttonAction(it, 4)
         }
@@ -70,7 +81,9 @@ class GuiAnvilInventory(container: EntityAnvilClient,
         actions3.addVert(5.0, 5.0, 30.0, 30.0) {
             buttonAction(it, 6)
         }
-        val actions4 = bar.addHori(0.0, 0.0, 40.0, -1.0, ::GuiComponentGroup)
+        val actions4 = bar.addHori(0.0, 0.0, 40.0, -1.0) {
+            GuiComponentGroup(it)
+        }
         actions4.addVert(5.0, 5.0, 30.0, 30.0) {
             buttonAction(it, 7)
         }
@@ -78,11 +91,16 @@ class GuiAnvilInventory(container: EntityAnvilClient,
         topPane.spacer()
     }
 
-    private fun buttonAction(parent: GuiLayoutData,
-                             i: Int): GuiComponentItemButton {
+    private fun buttonAction(
+        parent: GuiLayoutData,
+        i: Int
+    ): GuiComponentItemButton {
         val plugin = player.world.plugins.plugin<VanillaBasics>()
-        val alloy = Alloy(mapOf(
-                (plugin.metalType("Iron") ?: plugin.crapMetal) to 1.0))
+        val alloy = Alloy(
+            mapOf(
+                (plugin.metalType("Iron") ?: plugin.crapMetal) to 1.0
+            )
+        )
         val item = createTool(plugin, i, alloy).copy(data = 1)
         val button = GuiComponentItemButton(parent, item)
         button.on(GuiEvent.CLICK_LEFT) {
